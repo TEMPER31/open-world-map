@@ -1,0 +1,6 @@
+# Hourly data is deploy output only (built by the data job). Never commit it.
+site/data/live/
+# local build of the GRIB decoder
+.wgrib2/
+node_modules/
+__pycache__/

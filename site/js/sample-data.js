@@ -1,7 +1,7 @@
 // SAMPLE DATA. Everything in this module is synthetic, generated in the browser from the
 // same formulas as the v3 design mockup. Nothing here is a real observation or forecast.
-// Phase 2 replaces it with hourly frames built by the data pipeline; the frame shape
-// below ({nx, ny, u, v, fields}) is what the renderer expects from either source.
+// Since Phase 2 it is only used when no live data is available (local preview without a
+// data build, or a first deployment before the data job has run); the UI labels it.
 
 import { HOURS, SAMPLE_GRID_DEG } from './config.js';
 
@@ -95,19 +95,14 @@ export function frame(t) {
       fields.pres[k] = m.pres(lon, lat);
     }
   }
-  const fr = { t, nx: NX, ny: NY, deg: SAMPLE_GRID_DEG, u, v, fields };
+  // Same shape as live frames (see data-core.js): wind u/v in m/s, speed in km/h.
+  const grid = { nx: NX, ny: NY, deg: SAMPLE_GRID_DEG, lon0: -180, lat0: 90 };
+  const ms = a => a.map(x => x / 3.6);
+  const fr = { t, f: t, grids: { wind: { grid, u: ms(u), v: ms(v), data: fields.wind } } };
+  for (const k of ['temp', 'rain', 'aq', 'cloud', 'pres']) fr.grids[k] = { grid, data: fields[k] };
   cache.set(t, fr);
   if (cache.size > 8) cache.delete(cache.keys().next().value);
   return fr;
-}
-
-// Bilinear sample of a grid (lon wraps; lat clamps). Grid origin is (-180, 90).
-export function sample(fr, arr, lon, lat) {
-  const x = ((((lon + 180) % 360) + 360) % 360) / fr.deg;
-  const y = Math.max(0, Math.min(fr.ny - 1.001, (90 - lat) / fr.deg));
-  const i0 = Math.floor(x), j0 = Math.floor(y), i1 = (i0 + 1) % fr.nx, fx = x - i0, fy = y - j0;
-  const a = arr[j0 * fr.nx + i0], b = arr[j0 * fr.nx + i1], c = arr[(j0 + 1) * fr.nx + i0], d = arr[(j0 + 1) * fr.nx + i1];
-  return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
 }
 
 // Values at one point for every hour (detail panel charts). Sample only.
