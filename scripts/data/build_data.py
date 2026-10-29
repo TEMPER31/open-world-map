@@ -246,14 +246,21 @@ def fetch_aws(run, f):
     return out
 
 
-def decode(wgrib2, src, tmp, keys, nx, ny, deg):
+# Grid-alignment test nodes: on the 0.5 deg grid, with strong gradients nearby, so a shifted
+# or flipped grid would show up as large errors. Raw GFS values here go into the run report.
+ALIGN_POINTS = [("Tokyo Bay", 35.5, 139.5), ("Chile coast", -33.5, -71.5), ("Springfield", 40.0, -89.5)]
+
+
+def decode(wgrib2, src, tmp, keys, nx, ny, deg, raw_points=None):
     """Decode instantaneous messages for `keys` onto a nx x ny grid (rows N->S).
     wgrib2 -lola samples the nearest grid point; at multiples of 0.25 deg these are exact
-    GFS points (decimation, no interpolation)."""
+    GFS points (decimation, no interpolation). If raw_points is a dict, it is filled with
+    wgrib2's own value at each ALIGN_POINTS node: {name: {key: value}}."""
     dst = tmp / "out.bin"
     match = "|".join(f":{g}:{lvl}:{INSTANT}:" for key, g, lvl, _ in VARS if key in keys)
+    lon_args = [a for _, la, lo in ALIGN_POINTS for a in ("-lon", str(lo), str(la))] if raw_points is not None else []
     inv = subprocess.run(
-        [wgrib2, str(src), "-match", match, "-no_header",
+        [wgrib2, str(src), "-match", match, "-no_header", "-s", *lon_args,
          "-lola", f"180:{nx}:{deg}", f"-90:{ny}:{deg}", str(dst), "bin"],
         capture_output=True, text=True, check=True).stdout.splitlines()
     data = array.array("f")
@@ -267,6 +274,10 @@ def decode(wgrib2, src, tmp, keys, nx, ny, deg):
             if key in keys and f":{g}:{lvl}:" in line and key not in out:
                 rec = data[k * n:(k + 1) * n]
                 out[key] = [conv(x) for j in range(ny) for x in rec[(ny - 1 - j) * nx:(ny - j) * nx]]  # S->N to N->S
+                if raw_points is not None:
+                    vals = re.findall(r"lon=([-0-9.]+),lat=([-0-9.]+),val=([-0-9.eE+]+)", line)
+                    for (name, _, _), (_, _, val) in zip(ALIGN_POINTS, vals):
+                        raw_points.setdefault(name, {})[key] = round(conv(float(val)), 3)
     missing = [k for k in keys if k not in out]
     if missing:
         raise RuntimeError(f"decode: missing {missing} (inventory: {inv})")
@@ -290,12 +301,15 @@ def build_gfs(args, out, generated, report):
                 (gdir / k).mkdir(parents=True, exist_ok=True)
             frames, sizes, spot = [], {k: [] for k in ("wind", "temp", "rain", "cloud", "pres")}, {}
             series = []
+            align = []   # raw GFS values at ALIGN_POINTS, every hour (for the alignment test)
             with tempfile.TemporaryDirectory() as td:
                 for f in HOURS:
                     grib = fetch_nomads(run, f) if source == "nomads" else fetch_aws(run, f)
                     src = Path(td) / "in.grb2"
                     src.write_bytes(grib)
-                    fld = decode(wgrib2, src, Path(td), ("temp", "rain", "cloud", "pres"), NX, NY, DEG)
+                    raw = {}
+                    fld = decode(wgrib2, src, Path(td), ("temp", "rain", "cloud", "pres"), NX, NY, DEG, raw)
+                    align.append({"f": f, "points": raw})
                     fld.update(decode(wgrib2, src, Path(td), ("u", "v"), WNX, WNY, WDEG))
                     valid = run + dt.timedelta(hours=f)
                     fr = write_gfs_frame(gdir, f, fld, run, valid, generated, sizes)
@@ -309,6 +323,7 @@ def build_gfs(args, out, generated, report):
             report["gfs_seconds"] = round(time.time() - t0, 1)
             report["gfs_sizes"] = {k: {"min": min(v), "max": max(v), "mean": round(sum(v) / len(v))} for k, v in sizes.items()}
             report["gfs_spot"] = spot
+            report["align_points"] = {"nodes": [{"name": n, "lat": la, "lon": lo} for n, la, lo in ALIGN_POINTS], "hours": align}
             return {"run": iso(run), "source": source, "filter": NOMADS_FILTER_SCRIPT if source == "nomads" else None,
                     "credit": GFS_CREDIT, "license": GFS_LICENSE, "stale": False, "frames": frames, "series": series_meta,
                     "grid": {"nx": NX, "ny": NY, "deg": DEG, "lon0": -180, "lat0": 90,

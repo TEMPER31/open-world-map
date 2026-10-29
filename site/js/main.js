@@ -329,6 +329,8 @@ async function boot() {
   field.add(px0);
   map.addLayer(wind, 'omt-road-minor'); // above the field, below roads, borders and labels
   window.owmWind = wind;
+  // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
+  window.owmTest = { meta, getGrid, sample, reading, state: S };
 
   // One request in flight at a time; while scrubbing, the newest wanted state is drawn next.
   let busy = false, wanted = false;
