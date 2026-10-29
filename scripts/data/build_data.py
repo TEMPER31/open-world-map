@@ -47,9 +47,10 @@ NX, NY, DEG = 720, 361, 0.5         # scalar grid: lon -180..179.5, lat 90..-90
 # over the ~150 KB budget. (earth.nullschool draws wind from 1 deg GFS.)
 WNX, WNY, WDEG = 480, 241, 0.75
 SERIES_DEG, SERIES_STEP = 3, 3     # place-panel chart: 3 deg, every 3 h (2 deg measured 402 KB)
-AQ_DEG = 5
-AQ_LATS = [85 - i * AQ_DEG for i in range(35)]        # 85 .. -85
-AQ_LONS = [-180 + i * AQ_DEG for i in range(72)]      # -180 .. 175
+AQ_DEG = 4                          # 90 x 43 = 3,870 locations; x2 refreshes = 7,740 calls/day
+AQ_LATS = [84 - i * AQ_DEG for i in range(43)]        # 84 .. -84
+AQ_LONS = [-180 + i * AQ_DEG for i in range(90)]      # -180 .. 176
+AQ_FORMAT = "rg16-v2"               # bump when the AQ file format changes (forces a refetch)
 AQ_BATCH = 100                      # locations per request
 AQ_MAX_PER_MIN = 500                # stay under Open-Meteo's 600/minute
 AQ_REFRESH_HOURS = 11               # CAMS updates every 12 h
@@ -60,16 +61,22 @@ AQ_CREDIT = "CAMS (Copernicus Atmosphere Monitoring Service) via Open-Meteo.com"
 AQ_LICENSE = "CC BY 4.0"
 
 INSTANT = r"(anl|[0-9]+ hour fcst)"
-# key, GRIB short name, level, conversion to display units
+RUN_TOTAL = r"0-[0-9]+ (hour|day) acc fcst"   # APCP accumulated since the run started
+# key, GRIB short name, level, conversion to display units, which time-range message to use
 VARS = [
-    ("u", "UGRD", "10 m above ground", lambda x: x),                 # m/s, towards east
-    ("v", "VGRD", "10 m above ground", lambda x: x),                 # m/s, towards north
-    ("temp", "TMP", "2 m above ground", lambda x: x - 273.15),       # K -> degC
-    ("rain", "PRATE", "surface", lambda x: x * 3600.0),              # kg m-2 s-1 -> mm/h
-    ("cloud", "TCDC", "entire atmosphere", lambda x: x),             # %
-    ("pres", "PRMSL", "mean sea level", lambda x: x / 100.0),        # Pa -> hPa
+    ("u", "UGRD", "10 m above ground", lambda x: x, INSTANT),                 # m/s, towards east
+    ("v", "VGRD", "10 m above ground", lambda x: x, INSTANT),                 # m/s, towards north
+    ("temp", "TMP", "2 m above ground", lambda x: x - 273.15, INSTANT),       # K -> degC
+    # Precipitation is the amount that fell in the hour before the valid time (mm = mean
+    # mm/h), from the running APCP total: APCP(0-f) - APCP(0-(f-1)). GFS's own "ave"/"acc"
+    # windows reset every 6 h (checked against the .idx files); the running total does not.
+    # The instantaneous PRATE is used only at f000, which has no accumulation yet.
+    ("apcp", "APCP", "surface", lambda x: x, RUN_TOTAL),                       # kg m-2 = mm
+    ("prate", "PRATE", "surface", lambda x: x * 3600.0, INSTANT),             # kg m-2 s-1 -> mm/h
+    ("cloud", "TCDC", "entire atmosphere", lambda x: x, INSTANT),             # %
+    ("pres", "PRMSL", "mean sea level", lambda x: x / 100.0, INSTANT),        # Pa -> hPa
 ]
-MATCH = "|".join(f":{g}:{lvl}:{INSTANT}:" for _, g, lvl, _ in VARS)
+MATCH = "|".join(f":{g}:{lvl}:{tr}:" for _, g, lvl, _, tr in VARS)
 
 STATS = {"http_requests": 0, "http_bytes": 0, "aq_locations": 0, "aq_requests": 0, "aq_429": 0,
          "spot_locations": 0}
@@ -159,6 +166,14 @@ def q_linear(vals, lo, hi, nodata=None):
     return bytes(0 if x is None else min(255, max(1, 1 + int((x - lo) * k + 0.5))) for x in vals)
 
 
+def rows16(vals, offset, step, nx, ny, nodata=False):
+    """16-bit values in an RGB PNG: R = high byte, G = low byte, B = 0.
+    value = offset + step * (R * 256 + G); with nodata=True, 65535 means no data."""
+    top = 65534 if nodata else 65535
+    q = [65535 if x is None else min(top, max(0, int(round((x - offset) / step)))) for x in vals]
+    return [bytes(b for i in range(j * nx, (j + 1) * nx) for b in (q[i] >> 8, q[i] & 255, 0)) for j in range(ny)]
+
+
 def q_log_rain(vals):
     """0 = below 0.01 mm/h; b in 1..255 means 10 ** ((b - 1) * 0.02 - 2) mm/h."""
     out = bytearray(len(vals))
@@ -201,7 +216,7 @@ def fetch_nomads(run, f):
     global NOMADS_FILTER_SCRIPT
     d, c, folder, stem = cycle_paths(run)
     q = {"dir": f"/{folder}", "file": f"{stem}.f{f:03d}"}
-    for _, g, lvl, _ in VARS:
+    for _, g, lvl, _, _ in VARS:
         q[f"var_{g}"] = "on"
         q["lev_" + lvl.replace(" ", "_")] = "on"
     scripts = [NOMADS_FILTER_SCRIPT] if NOMADS_FILTER_SCRIPT else ["filter_gfs_0p25.pl", "filter_gfs_0p25_1hr.pl"]
@@ -249,6 +264,29 @@ def fetch_aws(run, f):
 # Grid-alignment test nodes: on the 0.5 deg grid, with strong gradients nearby, so a shifted
 # or flipped grid would show up as large errors. Raw GFS values here go into the run report.
 ALIGN_POINTS = [("Tokyo Bay", 35.5, 139.5), ("Chile coast", -33.5, -71.5), ("Springfield", 40.0, -89.5)]
+# Accuracy-check cities: raw GFS 0.25 deg values, bilinear from the four surrounding native
+# grid points, are recorded every hour so the page can be compared with NOAA's own numbers.
+CITY_POINTS = [("Springfield IL", 39.80, -89.64), ("Miami", 25.76, -80.19), ("Denver", 39.74, -104.99),
+               ("London", 51.51, -0.13), ("Delhi", 28.61, 77.21)]
+
+
+def city_corners():
+    """[(lat, lon)] of the 4 native 0.25 deg nodes around each city, plus bilinear weights."""
+    pts, wts = [], []
+    for _, la, lo in CITY_POINTS:
+        la0, lo0 = math.floor(la / 0.25) * 0.25, math.floor(lo / 0.25) * 0.25
+        fy, fx = (la - la0) / 0.25, (lo - lo0) / 0.25
+        pts += [(la0, lo0), (la0, lo0 + 0.25), (la0 + 0.25, lo0), (la0 + 0.25, lo0 + 0.25)]
+        wts.append(((1 - fx) * (1 - fy), fx * (1 - fy), (1 - fx) * fy, fx * fy))
+    return pts, wts
+
+
+CORNERS, CORNER_W = city_corners()
+
+
+def city_values(vals):
+    """Bilinear city values from the 4 corner values per city (in CORNERS order)."""
+    return {name: sum(w * vals[4 * c + k] for k, w in enumerate(CORNER_W[c])) for c, (name, _, _) in enumerate(CITY_POINTS)}
 
 
 def decode(wgrib2, src, tmp, keys, nx, ny, deg, raw_points=None):
@@ -257,8 +295,9 @@ def decode(wgrib2, src, tmp, keys, nx, ny, deg, raw_points=None):
     GFS points (decimation, no interpolation). If raw_points is a dict, it is filled with
     wgrib2's own value at each ALIGN_POINTS node: {name: {key: value}}."""
     dst = tmp / "out.bin"
-    match = "|".join(f":{g}:{lvl}:{INSTANT}:" for key, g, lvl, _ in VARS if key in keys)
-    lon_args = [a for _, la, lo in ALIGN_POINTS for a in ("-lon", str(lo), str(la))] if raw_points is not None else []
+    match = "|".join(f":{g}:{lvl}:{tr}:" for key, g, lvl, _, tr in VARS if key in keys)
+    probes = [(la, lo) for _, la, lo in ALIGN_POINTS] + CORNERS if raw_points is not None else []
+    lon_args = [a for la, lo in probes for a in ("-lon", str(lo), str(la))]
     inv = subprocess.run(
         [wgrib2, str(src), "-match", match, "-no_header", "-s", *lon_args,
          "-lola", f"180:{nx}:{deg}", f"-90:{ny}:{deg}", str(dst), "bin"],
@@ -270,18 +309,78 @@ def decode(wgrib2, src, tmp, keys, nx, ny, deg, raw_points=None):
     n = nx * ny
     out = {}
     for k, line in enumerate(inv):
-        for key, g, lvl, conv in VARS:
+        for key, g, lvl, conv, _ in VARS:
             if key in keys and f":{g}:{lvl}:" in line and key not in out:
                 rec = data[k * n:(k + 1) * n]
                 out[key] = [conv(x) for j in range(ny) for x in rec[(ny - 1 - j) * nx:(ny - j) * nx]]  # S->N to N->S
                 if raw_points is not None:
-                    vals = re.findall(r"lon=([-0-9.]+),lat=([-0-9.]+),val=([-0-9.eE+]+)", line)
-                    for (name, _, _), (_, _, val) in zip(ALIGN_POINTS, vals):
-                        raw_points.setdefault(name, {})[key] = round(conv(float(val)), 3)
+                    vals = [conv(float(v)) for v in re.findall(r"val=([-0-9.eE+]+)", line)]
+                    for (name, _, _), val in zip(ALIGN_POINTS, vals):
+                        raw_points.setdefault(name, {})[key] = round(val, 3)
+                    for name, val in city_values(vals[len(ALIGN_POINTS):]).items():
+                        raw_points.setdefault("__city__", {}).setdefault(name, {})[key] = round(val, 3)
     missing = [k for k in keys if k not in out]
     if missing:
         raise RuntimeError(f"decode: missing {missing} (inventory: {inv})")
     return out
+
+
+FULL_NX, FULL_NY = 1440, 721        # native GFS 0.25 deg grid: lon 0..359.75, lat 90..-90
+
+
+def decode_smooth(wgrib2, src, tmp, keys, raw_points=None):
+    """Decode `keys` at full 0.25 deg resolution and reduce to the 0.5 deg grid with a 3x3 tent
+    filter ([1,2,1] x [1,2,1] / 16) centred on each 0.5 deg node. Used for patchy fields (cloud
+    cover, precipitation), where taking every second point aliases badly: at Denver, 18Z
+    29 Oct f004 cloud cover was 8 % at 0.25 deg but 47 % at the decimated 0.5 deg node."""
+    dst = tmp / "full.bin"
+    match = "|".join(f":{g}:{lvl}:{tr}:" for key, g, lvl, _, tr in VARS if key in keys)
+    lon_args = [a for _, la, lo in ALIGN_POINTS for a in ("-lon", str(lo), str(la))] if raw_points is not None else []
+    # default row order is south -> north (wgrib2's -lon needs it); rows are flipped below
+    inv = subprocess.run([wgrib2, str(src), "-match", match, "-s", *lon_args,
+                          "-no_header", "-bin", str(dst)], capture_output=True, text=True, check=True).stdout.splitlines()
+    data = array.array("f")
+    data.frombytes(dst.read_bytes())
+    if sys.byteorder != "little":
+        data.byteswap()
+    n, half, out = FULL_NX * FULL_NY, FULL_NX // 2, {}
+    for k, line in enumerate(inv):
+        for key, g, lvl, conv, _ in VARS:
+            if key not in keys or f":{g}:{lvl}:" not in line or key in out:
+                continue
+            rec = data[k * n:(k + 1) * n]
+            hrows = {}
+
+            def hrow(J):  # J counts from the north; horizontal tent at every second column from lon -180
+                J = min(FULL_NY - 1, max(0, J))
+                if J not in hrows:
+                    S = FULL_NY - 1 - J
+                    row = rec[S * FULL_NX:(S + 1) * FULL_NX]
+                    row = row[half:] + row[:half]
+                    hrows[J] = [(row[c - 1] + 2 * row[c] + row[c + 1 - FULL_NX]) * 0.25 for c in range(0, FULL_NX, 2)]
+                return hrows[J]
+            grid = []
+            for j in range(NY):
+                a, b, c = hrow(2 * j - 1), hrow(2 * j), hrow(2 * j + 1)
+                grid.extend(conv((x + 2 * y + z) * 0.25) for x, y, z in zip(a, b, c))
+                hrows.pop(2 * j - 1, None)
+            out[key] = grid
+            if raw_points is not None:
+                vals = re.findall(r"lon=([-0-9.]+),lat=([-0-9.]+),val=([-0-9.eE+]+)", line)
+                for (name, _, _), (_, _, val) in zip(ALIGN_POINTS, vals):
+                    raw_points.setdefault(name, {})[key + "_raw"] = round(conv(float(val)), 3)
+                # raw 0.25 deg values at the city corners (rows stored south -> north)
+                cv = [conv(rec[int(round((la + 90) / 0.25)) * FULL_NX + int(round((lo % 360) / 0.25)) % FULL_NX]) for la, lo in CORNERS]
+                for name, val in city_values(cv).items():
+                    raw_points.setdefault("__city__", {}).setdefault(name, {})[key] = round(val, 4)
+    missing = [k for k in keys if k not in out]
+    if missing:
+        raise RuntimeError(f"decode_smooth: missing {missing} (inventory: {inv})")
+    return out
+
+
+def node_value(grid, lat, lon):
+    return grid[int(round((90 - lat) / DEG)) * NX + int(round((lon + 180) / DEG)) % NX]
 
 
 def build_gfs(args, out, generated, report):
@@ -302,15 +401,42 @@ def build_gfs(args, out, generated, report):
             frames, sizes, spot = [], {k: [] for k in ("wind", "temp", "rain", "cloud", "pres")}, {}
             series = []
             align = []   # raw GFS values at ALIGN_POINTS, every hour (for the alignment test)
+            prev_total = None   # running APCP total of the previous hour (0.5 deg, smoothed)
+            prev_city_total, city_raw = {}, []
             with tempfile.TemporaryDirectory() as td:
                 for f in HOURS:
                     grib = fetch_nomads(run, f) if source == "nomads" else fetch_aws(run, f)
                     src = Path(td) / "in.grb2"
                     src.write_bytes(grib)
                     raw = {}
-                    fld = decode(wgrib2, src, Path(td), ("temp", "rain", "cloud", "pres"), NX, NY, DEG, raw)
+                    fld = decode(wgrib2, src, Path(td), ("temp", "pres"), NX, NY, DEG, raw)
+                    fld.update(decode_smooth(wgrib2, src, Path(td), ("cloud", "apcp" if f else "prate"), raw))
+                    if f == 0:
+                        fld["rain"] = fld.pop("prate")
+                    else:
+                        total = fld.pop("apcp")
+                        prev = prev_total or [0.0] * len(total)
+                        fld["rain"] = [max(0.0, a - b) for a, b in zip(total, prev)]
+                        prev_total = total
+                    # alignment reference for the smoothed fields = the pipeline's own node value
+                    for name, la, lo in ALIGN_POINTS:
+                        raw.setdefault(name, {})["cloud"] = round(node_value(fld["cloud"], la, lo), 3)
+                        raw[name]["rain"] = round(node_value(fld["rain"], la, lo), 3)
+                        raw[name].pop("apcp_raw", None)
                     align.append({"f": f, "points": raw})
-                    fld.update(decode(wgrib2, src, Path(td), ("u", "v"), WNX, WNY, WDEG))
+                    fld.update(decode(wgrib2, src, Path(td), ("u", "v"), WNX, WNY, WDEG, raw))
+                    city = raw.pop("__city__", {})
+                    for name, c in city.items():
+                        if "apcp" in c:
+                            total_c = c.pop("apcp")
+                            c["rain"] = round(max(0.0, total_c - prev_city_total.get(name, 0.0)), 4)
+                            prev_city_total[name] = total_c
+                        elif "prate" in c:
+                            c["rain"] = c.pop("prate")
+                        if "u" in c:
+                            c["wind_kmh"] = round(math.hypot(c["u"], c["v"]) * 3.6, 2)
+                            c["wind_from_deg"] = round((math.degrees(math.atan2(-c["u"], -c["v"])) + 360) % 360, 1)
+                    city_raw.append({"f": f, "cities": city})
                     valid = run + dt.timedelta(hours=f)
                     fr = write_gfs_frame(gdir, f, fld, run, valid, generated, sizes)
                     frames.append(fr)
@@ -324,6 +450,7 @@ def build_gfs(args, out, generated, report):
             report["gfs_sizes"] = {k: {"min": min(v), "max": max(v), "mean": round(sum(v) / len(v))} for k, v in sizes.items()}
             report["gfs_spot"] = spot
             report["align_points"] = {"nodes": [{"name": n, "lat": la, "lon": lo} for n, la, lo in ALIGN_POINTS], "hours": align}
+            report["city_raw"] = {"cities": [{"name": n, "lat": la, "lon": lo} for n, la, lo in CITY_POINTS], "hours": city_raw}
             return {"run": iso(run), "source": source, "filter": NOMADS_FILTER_SCRIPT if source == "nomads" else None,
                     "credit": GFS_CREDIT, "license": GFS_LICENSE, "stale": False, "frames": frames, "series": series_meta,
                     "grid": {"nx": NX, "ny": NY, "deg": DEG, "lon0": -180, "lat0": 90,
@@ -350,15 +477,24 @@ def write_gfs_frame(gdir, f, fld, run, valid, generated, sizes):
     m = {**base, "field": "wind", "units": "m/s", "encoding": "uv8", "u": [umin, umax], "v": [vmin, vmax]}
     put(gdir / "wind" / name, png(WNX, WNY, 3, rows, m, 1), sizes["wind"])
     meta["wind"] = {"u": [umin, umax], "v": [vmin, vmax]}
-    for key, units in (("temp", "°C"), ("pres", "hPa"), ("cloud", "%")):
+    # Temperature and pressure: 16-bit (R = high, G = low byte). Steps chosen by measured PNG
+    # size on real frames to stay within ~150 KB/hour: 0.2 degC (142 KB; 0.1 degC was 184 KB)
+    # and 0.1 hPa (142 KB). 8-bit over the global range was ~0.43 degC / ~0.4 hPa per step.
+    for key, units, step in (("temp", "°C", 0.2), ("pres", "hPa", 0.1)):
         vals = fld[key]
-        lo, hi = (0.0, 100.0) if key == "cloud" else (math.floor(min(vals)), math.ceil(max(vals)))
-        qb = q_linear(vals, lo, hi)
-        m = {**base, "field": key, "units": units, "encoding": "linear8", "range": [lo, hi]}
-        put(gdir / key / name, png(NX, NY, 1, [qb[j * NX:(j + 1) * NX] for j in range(NY)], m, 0 if key == "cloud" else 1), sizes[key])
-        meta[key] = {"range": [lo, hi]}
+        lo = math.floor(min(vals))
+        m = {**base, "field": key, "units": units, "encoding": "rg16", "offset": lo, "step": step}
+        put(gdir / key / name, png(NX, NY, 3, rows16(vals, lo, step, NX, NY), m, 1), sizes[key])
+        meta[key] = {"offset": lo, "step": step}
+    # Cloud cover in whole percent (byte = %). Area-averaged values compressed to ~157 KB/hour
+    # at 0.39 % steps; whole percent measured 125 KB and is ample precision for cloud cover.
+    qb = bytes(min(100, max(0, int(round(x)))) for x in fld["cloud"])
+    m = {**base, "field": "cloud", "units": "%", "encoding": "linear8", "range": [0.0, 255.0]}
+    put(gdir / "cloud" / name, png(NX, NY, 1, [qb[j * NX:(j + 1) * NX] for j in range(NY)], m, 0), sizes["cloud"])
+    meta["cloud"] = {"range": [0.0, 255.0]}
     qb = q_log_rain(fld["rain"])
-    m = {**base, "field": "rain", "units": "mm/h", "encoding": "log8", "log10_offset": -2, "log10_scale": 0.02}
+    m = {**base, "field": "rain", "units": "mm/h", "encoding": "log8", "log10_offset": -2, "log10_scale": 0.02,
+         "note": "mm that fell in the hour before valid_utc (f000: instantaneous rate)"}
     put(gdir / "rain" / name, png(NX, NY, 1, [qb[j * NX:(j + 1) * NX] for j in range(NY)], m, 0), sizes["rain"])
     return {"f": f, "valid_utc": iso(valid), **meta}
 
@@ -458,17 +594,17 @@ def build_aq(args, out, generated, report, gfs_run):
         pm10 = [v[1] if v else None for v in vals]
         aqi = [v[2] if v else None for v in vals]
         nonnull.append(sum(x is not None for x in pm25) / len(pm25))
-        hi25 = max([x for x in pm25 if x is not None] or [1.0])
-        hi10 = max([x for x in pm10 if x is not None] or [1.0])
-        q25, q10, qa = q_linear(pm25, 0, hi25, 0), q_linear(pm10, 0, hi10, 0), q_linear(aqi, 0, 500, 0)
-        rows = [bytes(c for i in range(j * 72, (j + 1) * 72) for c in (q25[i], q10[i], qa[i])) for j in range(35)]
+        # Exact fixed-step 16-bit values (no per-hour max scaling: one hotspot used to make each
+        # 8-bit step several ug/m3 wide). Three stacked blocks: PM2.5, PM10, US AQI.
+        nx, ny = len(AQ_LONS), len(AQ_LATS)
+        rows = rows16(pm25, 0, 0.1, nx, ny, True) + rows16(pm10, 0, 0.1, nx, ny, True) + rows16(aqi, 0, 1, nx, ny, True)
         valid = dt.datetime.fromtimestamp(t, dt.timezone.utc)
         name = valid.strftime("%Y%m%d%H") + ".png"
-        m = {**base, "valid_utc": iso(valid), "field": "aq", "encoding": "rgb8-nodata0",
-             "pm2_5": [0, hi25], "pm10": [0, hi10], "us_aqi": [0, 500], "units": "µg/m³ (pm), index (us_aqi)"}
-        put(adir / name, png(72, 35, 3, rows, m), sizes)
-        files.append({"valid_utc": iso(valid), "file": name, "pm2_5": [0, round(hi25, 1)],
-                      "pm10": [0, round(hi10, 1)], "us_aqi": [0, 500]})
+        m = {**base, "valid_utc": iso(valid), "field": "aq", "encoding": AQ_FORMAT,
+             "blocks": ["pm2_5", "pm10", "us_aqi"], "step": [0.1, 0.1, 1], "nodata": 65535,
+             "units": "µg/m³ (pm), index (us_aqi)"}
+        put(adir / name, png(nx, ny * 3, 3, rows, m, 1), sizes)
+        files.append({"valid_utc": iso(valid), "file": name})
     cover = round(min(nonnull) * 100, 1) if nonnull else 0
     report["aq_seconds"] = round(time.time() - t0, 1)
     report["aq_sizes"] = {"files": len(sizes), "max": max(sizes) if sizes else 0}
@@ -477,8 +613,9 @@ def build_aq(args, out, generated, report, gfs_run):
            f"({STATS['aq_429']} rate-limited) in {report['aq_seconds']} s; pm2_5 non-null in at least {cover}% "
            f"of {len(points)} grid points for every hour")
     return {"generated_utc": iso(generated), "credit": AQ_CREDIT, "license": AQ_LICENSE, "stale": False,
-            "grid": {"nx": 72, "ny": 35, "deg": AQ_DEG, "lon0": -180, "lat0": 85}, "files": files,
-            "calls": STATS["aq_locations"]}
+            "format": AQ_FORMAT, "encoding": {"blocks": ["pm2_5", "pm10", "us_aqi"], "step": [0.1, 0.1, 1], "nodata": 65535},
+            "grid": {"nx": len(AQ_LONS), "ny": len(AQ_LATS), "deg": AQ_DEG, "lon0": AQ_LONS[0], "lat0": AQ_LATS[0]},
+            "files": files, "calls": STATS["aq_locations"]}
 
 
 def spot_check(report):
@@ -538,6 +675,7 @@ def main():
     ap.add_argument("--prefer-aws", action="store_true", help="try the AWS mirror before NOMADS")
     ap.add_argument("--force-aq", action="store_true")
     ap.add_argument("--skip-aq", action="store_true")
+    ap.add_argument("--aq-cache", type=Path, help="directory that keeps the last air-quality build between runs")
     ap.add_argument("--report", type=Path)
     args = ap.parse_args()
     out = args.out
@@ -565,25 +703,39 @@ def main():
         gfs = {**prev[0], "stale": True, "error": str(e)[:500]}
         notice("GFS stale", f"kept previous run {gfs['run']}: {e}")
 
-    # Air quality: refresh about every 12 h (CAMS cadence), otherwise reuse the deployed files
+    # Air quality: refresh about every 12 h (CAMS cadence), otherwise reuse earlier files: first
+    # a local cache (CI keeps one between pull-request runs), then the deployed site. Files in
+    # an older format are never reused.
+    def age_h(entry):
+        return (generated - dt.datetime.strptime(entry["generated_utc"], "%Y-%m-%dT%H:%M:%SZ")
+                .replace(tzinfo=dt.timezone.utc)).total_seconds() / 3600
+    cached = None
+    if args.aq_cache and (args.aq_cache / "aq.json").exists():
+        cached = json.loads((args.aq_cache / "aq.json").read_text())
     prev_aq = prev_manifest.get("aq")
-    aq_age = None
-    if prev_aq:
-        aq_age = (generated - dt.datetime.strptime(prev_aq["generated_utc"], "%Y-%m-%dT%H:%M:%SZ")
-                  .replace(tzinfo=dt.timezone.utc)).total_seconds() / 3600
+    candidates = [c for c in (cached, prev_aq) if c and c.get("format") == AQ_FORMAT]
+    best = min(candidates, key=age_h) if candidates else None
+    aq_age = age_h(best) if best else None
     aq = None
     gfs_run = dt.datetime.strptime(gfs["run"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc)
     if not args.skip_aq and (args.force_aq or aq_age is None or aq_age >= AQ_REFRESH_HOURS):
         try:
             aq = build_aq(args, out, generated, report, gfs_run)
+            if args.aq_cache:
+                shutil.rmtree(args.aq_cache, ignore_errors=True)
+                shutil.copytree(out / "aq", args.aq_cache / "aq")
+                (args.aq_cache / "aq.json").write_text(json.dumps(aq))
         except Exception as e:  # noqa: BLE001
             notice("Air quality failed", str(e)[:300])
-    if aq is None:
+    if aq is None and best is cached and cached:
+        shutil.copytree(args.aq_cache / "aq", out / "aq", dirs_exist_ok=True)
+        aq = {**cached, "stale": aq_age > 30}
+        notice("Air quality reused", f"cached files from {aq['generated_utc']} ({aq_age:.1f} h old)")
+    elif aq is None and best is prev_aq and prev_aq:
         prev = load_previous(args.previous, out, "aq")
         if prev:
-            age = aq_age if aq_age is not None else 0
-            aq = {**prev[0], "stale": age > 30}
-            notice("Air quality reused", f"previous files from {aq['generated_utc']} ({age:.1f} h old)")
+            aq = {**prev[0], "stale": aq_age > 30}
+            notice("Air quality reused", f"deployed files from {aq['generated_utc']} ({aq_age:.1f} h old)")
     spot_check(report)
 
     # Manifest + rolling history (the daily archive is cut from it)

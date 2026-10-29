@@ -1,47 +1,12 @@
-// Isobars (marching squares) and H/L centres for the pressure field. Runs in the worker.
+// H/L centres for the pressure field (isobars are drawn by the field shader). Runs in the worker.
 
-const STRIDE_DEG = 1; // contour on a 1 deg subset: pressure is smooth and the GeoJSON stays small
+const STRIDE_DEG = 1; // search a 1 deg subset: pressure is smooth at that scale
 
 function subset(grid, data) {
   const s = Math.max(1, Math.round(STRIDE_DEG / grid.deg));
   const nx = Math.floor(grid.nx / s), ny = Math.floor((grid.ny - 1) / s) + 1, out = new Float32Array(nx * ny);
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) out[j * nx + i] = data[j * s * grid.nx + i * s];
   return { g: { nx, ny, deg: grid.deg * s, lon0: grid.lon0, lat0: grid.lat0 }, a: out };
-}
-
-export function isobars(grid, data, interval, majorEvery) {
-  const { g, a } = subset(grid, data), { nx, ny, deg } = g, feats = [];
-  let lo = Infinity, hi = -Infinity;
-  for (const v of a) { if (v < lo) lo = v; if (v > hi) hi = v; }
-  for (let L = Math.ceil(lo / interval) * interval; L <= hi; L += interval) {
-    const segs = [];
-    for (let j = 0; j < ny - 1; j++) {
-      const y0 = g.lat0 - j * deg;
-      if (Math.abs(y0) > 84) continue;
-      for (let i = 0; i < nx; i++) {
-        const i1 = (i + 1) % nx;
-        const v0 = a[j * nx + i], v1 = a[j * nx + i1], v2 = a[(j + 1) * nx + i1], v3 = a[(j + 1) * nx + i];
-        const c = (v0 > L) | (v1 > L) << 1 | (v2 > L) << 2 | (v3 > L) << 3;
-        if (c === 0 || c === 15) continue;
-        const x0 = g.lon0 + i * deg, x1 = x0 + deg, y1 = y0 - deg;
-        const t = (p, q) => (L - p) / (q - p);
-        const top = [x0 + t(v0, v1) * deg, y0], right = [x1, y0 - t(v1, v2) * deg];
-        const bottom = [x0 + t(v3, v2) * deg, y1], left = [x0, y0 - t(v0, v3) * deg];
-        switch (c) {
-          case 1: case 14: segs.push([left, top]); break;
-          case 2: case 13: segs.push([top, right]); break;
-          case 3: case 12: segs.push([left, right]); break;
-          case 4: case 11: segs.push([right, bottom]); break;
-          case 6: case 9: segs.push([top, bottom]); break;
-          case 7: case 8: segs.push([left, bottom]); break;
-          case 5: segs.push([left, top], [right, bottom]); break;
-          case 10: segs.push([top, right], [left, bottom]); break;
-        }
-      }
-    }
-    if (segs.length) feats.push({ type: 'Feature', properties: { major: L % majorEvery === 0, level: L }, geometry: { type: 'MultiLineString', coordinates: segs } });
-  }
-  return { type: 'FeatureCollection', features: feats };
 }
 
 // H / L centres: extrema within +/-9 deg, away from the poles, one plate per centre.

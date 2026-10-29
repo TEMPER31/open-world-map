@@ -210,7 +210,7 @@ Settings are stored in localStorage only; there are no accounts.
 | wind | continuous | Ramp over 0–150 km/h. Particles advect along u/v. |
 | temp | continuous | Diverging at 0 °C (pale cyan #8fd0e0). Range −40 to 48. |
 | rain | continuous-log | Interpolate in log space. **Transparent below 0.1 mm/h.** |
-| aq | banded | Hard steps at the EPA PM2.5 breakpoints 0 / 12.1 / 35.5 / 55.5 / 150.5 / 250.5 µg/m³. Show the category label in the probe and in sheets. |
+| aq | banded | Hard steps at the US EPA PM2.5 breakpoints **revised 6 May 2024**: 0 / 9.1 / 35.5 / 55.5 / 125.5 / 225.5 µg/m³ (previously 0 / 12.1 / 35.5 / 55.5 / 150.5 / 250.5). EPA defines them for 24-hour averages; the map shows hourly values. Show the category label in the probe and in sheets. |
 | cloud | veil | RGBA ramp drawn over a neutral basemap (dark land #1c2229 on ocean #0c1015; light land #cfc8b9 on #e2ded3). No land tint on top. |
 | pres | isobars | Muted fill, plus contours every 4 hPa (major every 20, 1.4 px at 75 % / 0.7 px at 45 %). H and L centre labels sit on a 44×30 plate in mono: L #9ec3ff / H #f1c48a in dark, L #2b4e9a / H #8a4a1e in light. |
 

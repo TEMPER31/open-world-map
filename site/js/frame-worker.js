@@ -1,4 +1,4 @@
-// Module worker: decodes forecast frames and colours fields off the main thread.
+// Module worker: decodes forecast frames and builds field/wind textures off the main thread.
 
 import * as core from './data-core.js';
 
@@ -10,9 +10,9 @@ onmessage = async ({ data: m }) => {
     await ready;
     if (m.type === 'grid') {
       postMessage({ id: m.id, result: await core.grid(m.f, m.field) });
-    } else if (m.type === 'pixels') {
-      const px = await core.pixels(m.f, m.field, m.light);
-      postMessage({ id: m.id, result: px }, [px.buffer]);
+    } else if (m.type === 'fieldtex') {
+      const t = await core.fieldTexture(m.f, m.field);
+      postMessage({ id: m.id, result: t }, [t.rgba.buffer]);
     } else if (m.type === 'windtex') {
       const w = await core.windTexture(m.f);
       postMessage({ id: m.id, result: w }, [w.rgba.buffer]);

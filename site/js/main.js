@@ -2,11 +2,11 @@
 
 import { CREDITS, SAMPLE_GRID_DEG } from './config.js';
 import * as S from './state.js';
-import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory } from './scales.js';
-import { sample } from './colorize.js';
-import { initData, meta, getGrid, getPixels, getPressureOverlays, getWindTexture, getSeries } from './data.js';
+import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024 } from './scales.js';
+import { sample } from './grid.js';
+import { initData, meta, getGrid, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
 import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
-import { FieldLayer } from './field-layer.js';
+import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
 import { initTimeline, relT, fmtUTC } from './timeline.js';
 
@@ -28,7 +28,8 @@ const L = {
   legendMeta: k => {
     const f = FIELDS[k];
     if (!meta.live) return f.mode === 'banded' ? `US EPA bands · sample · ${SAMPLE_GRID_DEG}° grid` : `${f.level} · sample · ${SAMPLE_GRID_DEG}° grid`;
-    if (k === 'aq') return `US EPA bands · CAMS ${meta.aq?.grid?.deg ?? 5}°`;
+    if (k === 'aq') return `US EPA 2024 bands · hourly · CAMS ${meta.aq?.grid?.deg ?? 4}°`;
+    if (k === 'rain') return `past hour · GFS ${meta.gfs.grid.deg}°`;
     return `${f.level} · GFS ${k === 'wind' ? meta.gfs.wind_grid.deg : meta.gfs.grid.deg}°`;
   },
   foot: () => meta.live ? 'Weather: NOAA GFS · Air quality: CAMS via Open-Meteo<br>Basemap OpenFreeMap · OpenStreetMap · Natural Earth'
@@ -51,8 +52,8 @@ function reading(g, k, lo, la) {
   switch (k) {
     case 'wind': return [Math.round(v), 'km/h', `from ${dirFrom(sample(g.grid, g.u, lo, la), sample(g.grid, g.v, lo, la))}`];
     case 'temp': return [Math.round(v), '°C', 'at 2 m'];
-    case 'rain': return v < 0.1 ? ['Dry', '', 'precipitation'] : [v.toFixed(1), 'mm/h', 'precipitation'];
-    case 'aq': return [Math.round(v), 'µg/m³', aqCategory(v)];
+    case 'rain': return v < 0.1 ? ['Dry', '', 'past hour'] : [v.toFixed(1), 'mm/h', 'past hour'];
+    case 'aq': return [v < 10 ? v.toFixed(1) : Math.round(v), 'µg/m³', `${aqCategory(v)} · AQI ${aqi2024(v)}`];
     case 'cloud': return [Math.round(v), '%', 'cloud cover'];
     case 'pres': return [Math.round(v), 'hPa', 'sea level'];
   }
@@ -75,6 +76,7 @@ function buildLayers() {
     <div class="l-hd"><b>Layers</b><span class="l-sum" data-lsum></span><button class="l-min" type="button" data-lmin aria-label="Minimise layers" aria-expanded="true"></button></div>
     <div class="lsec" role="radiogroup" aria-label="Weather field"><div class="kick"><span>Field</span><span>${L.fieldMeta()}</span></div>
       ${ORDER.map(k => `<button class="row" type="button" role="radio" data-field="${k}"><span class="rad"></span><b>${FIELDS[k].label}</b><span class="v">${levelShort(FIELDS[k])}</span></button>`).join('')}
+      <button class="row" type="button" role="radio" data-field="none"><span class="rad"></span><b>None</b><span class="v">map only</span></button>
       <div class="row" data-toggle><b>Wind particles</b><button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
     </div>
     <div class="lsec"><div class="kick"><span>Events</span><span>Phase 5</span></div>
@@ -88,7 +90,7 @@ function buildLayers() {
   $('#lsheet').innerHTML = `
     <div class="ls-hd"><b>Map layers</b><button class="d-x" type="button" data-lyr-close aria-label="Close">×</button></div>
     <div class="grp"><div class="kick"><span>Field</span><span>${meta.live ? 'GFS · CAMS' : 'sample data'}</span></div>
-      <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span>${FIELDS[k].unit}</span></button>`).join('')}</div></div>
+      <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span>${FIELDS[k].unit}</span></button>`).join('')}<button class="ftile" type="button" role="radio" data-field="none"><b>None</b><div class="lg-bar"></div><span>map only</span></button></div></div>
     <div class="grp"><div class="kick"><span>Basemap</span><span></span></div>
       <div class="card"><div class="it">Map<div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div></div></div></div>
     <div class="grp"><div class="card">
@@ -129,7 +131,11 @@ function bindChrome(map) {
   document.addEventListener('click', e => {
     const t = e.target.closest('button, a');
     if (!t) return;
-    if (t.dataset.field) S.set({ field: t.dataset.field });
+    if (t.dataset.field) {
+      // the layer rows/tiles act as radios plus "None"; clicking the active one turns it off
+      const toggle = t.matches('.row, .ftile') && t.dataset.field === S.get('field');
+      S.set({ field: toggle ? 'none' : t.dataset.field });
+    }
     else if (t.dataset.basemap) S.set({ basemap: t.dataset.basemap });
     else if (t.dataset.dens) S.set({ density: +t.dataset.dens });
     else if ('particles' in t.dataset) S.set({ particles: !S.get('particles') });
@@ -155,7 +161,7 @@ function bindChrome(map) {
       el.classList.toggle('on', on && el.classList.contains('row'));
       el.setAttribute('aria-checked', String(on));
     });
-    $$('[data-lsum]').forEach(el => el.textContent = `${FIELDS[s.field].short} · ${meta.live ? 'GFS' : 'sample'}`);
+    $$('[data-lsum]').forEach(el => el.textContent = s.field === 'none' ? 'No layer' : `${FIELDS[s.field].short} · ${meta.live ? 'GFS' : 'sample'}`);
   });
   S.on(['basemap'], s => $$('[data-basemap]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.basemap === s.basemap))));
   S.on(['density'], s => $$('[data-dens]').forEach(el => el.setAttribute('aria-checked', String(+el.dataset.dens === s.density))));
@@ -168,6 +174,11 @@ function bindChrome(map) {
   });
   S.on(['field', 'basemap'], s => {
     const light = s.basemap === 'light', f = FIELDS[s.field];
+    if (!f) {
+      $('#legend').innerHTML = '<div class="lg-h"><span>No layer</span><span>map only</span></div>';
+      $('#mchip').innerHTML = 'No layer';
+      return;
+    }
     $('#legend').innerHTML = legendHTML(s.field, light, L.legendMeta(s.field));
     $('#mchip').innerHTML = `${f.short} ${f.unit}${barHTML(s.field, light)}${rangeText(s.field)}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
   });
@@ -278,7 +289,7 @@ function bindProbe(map) {
       if (!pending) return;
       const { lngLat: { lng, lat }, point } = pending; pending = null;
       const k = S.get('field');
-      if (Math.abs(lat) > 85 || !current?.grids[k]) { probe.hidden = true; return; }
+      if (k === 'none' || Math.abs(lat) > 85 || !current?.grids[k] || current.t !== S.get('t')) { probe.hidden = true; return; }
       const [v, u, d] = reading(current.grids[k], k, lng, lat);
       probe.innerHTML = `<b>${v}${u ? ' ' + u : ''}</b><span>${d}</span><span>·</span><span>${fmtLat(lat).replace(/(\.\d)\d/, '$1')} ${fmtLon(lng).replace(/(\.\d)\d/, '$1')}</span>`;
       probe.style.left = point.x + 'px';
@@ -318,51 +329,60 @@ async function boot() {
   $('[data-range]').textContent = `${meta.hours} h`;
   bindProbe(map);
 
-  const field = new FieldLayer(map);
+  const field = new FieldGL();
   const wind = new WindGL({ count: particleCount() });
   function particleCount() { return Math.round((mobile.matches ? 12000 : 36000) * S.get('density')); }
-
   const light = () => S.get('basemap') === 'light';
-  const first = Promise.all([getPixels(S.get('t'), S.get('field'), light())]);
+
   await new Promise(r => map.once('load', r));
-  const [px0] = await first;
-  field.add(px0);
+  field.addTo(map);
   map.addLayer(wind, 'omt-road-minor'); // above the field, below roads, borders and labels
   window.owmWind = wind;
   // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
-  window.owmTest = { meta, getGrid, sample, reading, state: S };
+  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field };
 
-  // One request in flight at a time; while scrubbing, the newest wanted state is drawn next.
-  let busy = false, wanted = false;
-  async function refresh() {
-    if (busy) { wanted = true; return; }
-    busy = true;
-    do {
-      wanted = false;
-      const t = S.get('t'), k = S.get('field'), lt = light();
-      try {
-        const [px, g, wg, tex, ov] = await Promise.all([
-          getPixels(t, k, lt), getGrid(t, k), k === 'wind' ? null : getGrid(t, 'wind'), getWindTexture(t),
-          k === 'pres' ? getPressureOverlays(t) : null]);
-        field.setPixels(px);
-        current = { t, grids: { [k]: g, wind: k === 'wind' ? g : wg } };
-        field.setOverlays(ov, lt);
-        wind.setWind(tex.rgba, tex.grid, tex.u, tex.v);
-        wind.setColor(lt ? [0.08, 0.09, 0.1, 0.55] : k === 'cloud' ? [1, 0.84, 0.59, 0.7] : [1, 1, 1, 0.75]);
-        $('#legend').classList.toggle('unavailable', !!g.missing);
-      } catch (e) {
-        console.warn('frame failed', e);
-        toast('Could not load this hour of data.');
-      }
-    } while (wanted);
-    busy = false;
-    // prefetch the next hour (fields and wind) so play and stepping stay smooth
-    const n = S.get('t') + 1;
-    if (n <= meta.hours) { getPixels(n, S.get('field'), light()).catch(() => {}); getWindTexture(n).catch(() => {}); }
+  // Each part updates as soon as its own data is ready. One request per part is in flight;
+  // while scrubbing, the newest wanted state runs next. Hidden parts do no work at all.
+  function latest(run) {
+    let busy = false, again = false;
+    return async function go() {
+      if (busy) { again = true; return; }
+      busy = true;
+      try { do { again = false; await run(); } while (again); } catch (e) { console.warn(e); toast('Could not load this hour of data.'); }
+      busy = false;
+    };
   }
+  current = { t: -1, grids: {} };
+  const updateField = latest(async () => {
+    const t = S.get('t'), k = S.get('field');
+    field.setVisible(k !== 'none');
+    if (k === 'none') { field.setOverlays(null, light()); field.setIsobars(null); current = { t, grids: {} }; return; }
+    const tex = await getFieldTexture(t, k);
+    if (S.get('field') !== k) return;
+    field.setData(tex);
+    field.setIsobars(k === 'pres' ? FIELDS.pres : null, light());
+    $('#legend').classList.toggle('unavailable', !!tex.missing);
+    // probe values and pressure overlays follow without holding up the colours
+    const [g, ov] = await Promise.all([getGrid(t, k), k === 'pres' ? getPressureOverlays(t) : null]);
+    if (S.get('field') !== k) return;
+    current = { t, grids: { [k]: g } };
+    field.setOverlays(ov, light());
+    const n = t + 1;
+    if (n <= meta.hours) getFieldTexture(n, k).catch(() => {}); // prefetch the next hour
+  });
+  const updateWind = latest(async () => {
+    if (!S.get('particles')) return;
+    const t = S.get('t'), tex = await getWindTexture(t);
+    wind.setWind(tex.rgba, tex.grid, tex.u, tex.v);
+    if (t + 1 <= meta.hours) getWindTexture(t + 1).catch(() => {});
+  });
+  const windColour = () => wind.setColor(light() ? [0.08, 0.09, 0.1, 0.55] : S.get('field') === 'cloud' ? [1, 0.84, 0.59, 0.7] : [1, 1, 1, 0.75]);
 
   S.on(['basemap'], s => { applyBasemap(map, s.basemap); renderCredits(map); });
-  S.on(['t', 'field', 'basemap'], refresh);
+  S.on(['t', 'field'], updateField);
+  S.on(['field', 'basemap'], s => { if (FIELDS[s.field]) field.setLut(s.field, light()); windColour(); });
+  S.on(['basemap'], () => updateField(), { now: false }); // isobar ink follows the theme
+  S.on(['t', 'particles'], updateWind);
   S.on(['opacity', 'basemap'], s => field.setOpacity(s.opacity * (s.basemap === 'satellite' ? 0.6 : 1)));
   S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
   S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
