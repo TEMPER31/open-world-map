@@ -1,10 +1,10 @@
 // Open World Map: static configuration. No keys or tokens belong in this file (or any other).
 // Every external host listed here is also recorded in docs/sources-register.md.
 
-// Timeline: hourly forecast frames from the run time (Now) to +48 h.
+// Sample-mode timeline length. With live data the timeline runs from now to the run's f048.
 export const HOURS = 48;
 
-// Sample weather grid. Phase 2 replaces this with real model output.
+// Sample weather grid, used only when live data (data/live/) is unavailable.
 export const SAMPLE_GRID_DEG = 1;
 
 // ---- Basemaps -------------------------------------------------------------
@@ -60,5 +60,7 @@ export const CREDITS = {
   vector: '<a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://openmaptiles.org">© OpenMapTiles</a> · Data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   naturalEarth: '<a href="https://www.naturalearthdata.com">Natural Earth</a>',
   sample: '<b>Weather: generated sample data</b>',
+  gfs: 'Weather: <a href="https://www.nco.ncep.noaa.gov/pmb/products/gfs/">NOAA/NCEP GFS</a>',
+  cams: 'Air quality: <a href="https://atmosphere.copernicus.eu/">CAMS</a> via <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0)',
   maplibre: '<a href="https://maplibre.org">MapLibre</a>'
 };

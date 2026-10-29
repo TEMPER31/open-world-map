@@ -20,7 +20,11 @@ Status as of Phase 1 (foundation).
 | **USGS The National Map: Imagery Only** (mostly USDA NAIP) | Satellite basemap, street zoom, contiguous US only | `basemap.nationalmap.gov` | US Government work: public domain. | "Imagery: USGS The National Map (USDA NAIP)" | **Unverified** (host blocked). Alaska, Hawaii and Puerto Rico are not enabled (see below). |
 | **MapLibre GL JS 5.24.0** | Map renderer | `cdn.jsdelivr.net` (pinned, SRI) | BSD-3-Clause | "MapLibre" | SRI hash computed from the npm tarball. CI re-checks it against jsDelivr (`check_site.py --verify-sri`). |
 | **IBM Plex Sans Condensed, IBM Plex Mono** | UI type | none: self-hosted in `site/fonts/` (from `@fontsource` 5.3.0) | SIL OFL 1.1 (licence files alongside) | (not required on the map) | Verified. Self-hosted so visitors' IPs are not sent to a font CDN. |
-| **Weather fields** | All six fields, wind particles | none: generated in the browser | n/a | "**Weather: generated sample data**" | Sample data only in Phase 1. Real sources (GFS, CAMS) arrive in Phase 2. |
+| **NOAA/NCEP GFS 0.25°** | Wind, temperature, precipitation, clouds, pressure (f000–f048 hourly) | `nomads.ncep.noaa.gov` (grib filter, primary), `noaa-gfs-bdp-pds.s3.amazonaws.com` (AWS Open Data mirror, fallback); fetched by the data job only, never by visitors | U.S. Government work: public domain / no restrictions. NOAA asks for attribution. | "Weather: NOAA/NCEP GFS" | **Terms wording unverified**: noaa.gov, NOMADS and registry.opendata.aws were unreachable from the build environment. The AWS mirror was used and tested; NOMADS is first exercised in the Actions run. Confirm the exact credit line NOAA requests. |
+| **CAMS global** (Copernicus) **via Open-Meteo Air Quality API** | Air quality: PM2.5 (shown), PM10, US AQI | `air-quality-api.open-meteo.com` (data job only) | Open-Meteo data CC BY 4.0; free tier for non-commercial use (< 10,000 calls/day, 5,000/hour, 600/minute per the brief). Copernicus data licence asks for a "Generated using Copernicus Atmosphere Monitoring Service information" statement. | "Air quality: CAMS via Open-Meteo.com (CC BY 4.0)" | **Unverified from the build environment** (host blocked): exact attribution wording, whether multi-location requests count one call per location (assumed: the job counts locations), and global `pm2_5` coverage. The Actions run reports measured counts and coverage. |
+| **ECMWF IFS 0.25° via Open-Meteo Forecast API** | Spot check only (3 cities, once per run); not shown on the map | `api.open-meteo.com` (data job only) | CC BY 4.0 (Open-Meteo) | n/a (not displayed) | 3 calls per run. |
+| **wgrib2 v3.8.0** (NOAA-EMC) | GRIB2 decoding in the data job | built from `github.com/NOAA-EMC/wgrib2`, pinned tag + commit | Public domain (U.S. Government work) | n/a | Verified: builds from the pinned commit and decodes GFS template 5.3. |
+| **Sample weather** (fallback) | Shown only when no live data exists | none: generated in the browser | n/a | "Weather: generated sample data" | Labelled everywhere when active. |
 
 ## EOX licence: owner decision needed
 
@@ -77,6 +81,6 @@ visual check.
 
 ## Planned (later phases, not yet used)
 
-GFS 0.25° (NOAA), CAMS PM2.5 (Copernicus), USGS earthquakes, NASA FIRMS fires, GDACS/JTWC
+USGS earthquakes, NASA FIRMS fires, GDACS/JTWC
 cyclones, street-level photos (provider and terms to be confirmed). Each gets a row above,
 with its licence checked, before it ships.

@@ -1,10 +1,11 @@
-// Timeline: Now -> +48 h in 1 h steps (one frame per hour). Scrub by clicking or
-// dragging the track, or with arrow keys; play advances one hour every 350 ms and loops.
+// Timeline: Now -> the end of the forecast run in 1 h steps (one frame per hour). Scrub by
+// clicking or dragging the track, or with arrow keys; play advances one hour every 350 ms
+// and loops.
 
-import { HOURS } from './config.js';
 import * as S from './state.js';
 
 const STEP_MS = 350;
+let HOURS = 48;
 const pct = t => (t / HOURS * 100).toFixed(3) + '%';
 
 export const relT = t => t === 0 ? 'Now' : '+' + (t % 24 === 0 ? t / 24 + ' d' : t + ' h');
@@ -15,9 +16,11 @@ export function fmtUTC(ms, { weekday = true } = {}) {
   return `${day} · ${String(d.getUTCHours()).padStart(2, '0')}:00 UTC`;
 }
 
-export function initTimeline(base) {
+// base: valid time (ms) of t = 0; hours: last t; zone: label on the track.
+export function initTimeline(base, hours, zone) {
+  HOURS = hours;
   const tracks = document.querySelectorAll('[data-track]');
-  tracks.forEach(el => buildTrack(el, base, el.dataset.track === 'mini'));
+  tracks.forEach(el => buildTrack(el, base, el.dataset.track === 'mini', zone));
   tracks.forEach(bindTrack);
 
   let timer = null;
@@ -46,15 +49,15 @@ export function initTimeline(base) {
   });
 }
 
-function buildTrack(el, base, mini) {
-  let h = `<div class="tl-zone fc" style="left:0;right:0">${mini ? 'FCST' : 'FORECAST · SAMPLE DATA'}</div><div class="tl-axis"></div>`;
+function buildTrack(el, base, mini, zone) {
+  let h = `<div class="tl-zone fc" style="left:0;right:0">${mini ? 'FCST' : zone}</div><div class="tl-axis"></div>`;
   for (let t = 0; t <= HOURS; t += 3) {
     const d = new Date(base + t * 3600e3), midnight = d.getUTCHours() === 0;
     if (mini && !midnight && t % 12) continue;
     h += `<div class="tl-tick${midnight ? ' major' : ''}" style="left:${pct(t)}"></div>`;
   }
   if (!mini) {
-    h += `<div class="tl-lab" style="left:0"><b>Now</b></div><div class="tl-lab end" style="left:100%">+48 h</div>`;
+    h += `<div class="tl-lab" style="left:0"><b>Now</b></div><div class="tl-lab end" style="left:100%">+${HOURS} h</div>`;
     for (let t = 1; t < HOURS; t++) {
       const d = new Date(base + t * 3600e3);
       if (d.getUTCHours() !== 0 || t < 4 || t > HOURS - 5) continue;

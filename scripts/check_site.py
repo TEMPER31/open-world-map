@@ -10,6 +10,7 @@ Checks:
      integrity= and crossorigin= attributes (and, with --verify-sri, the hash matches).
   3. No keyed or unclear-terms map providers are referenced from site/.
   4. Every local src/href in site/*.html exists, and every JSON / GeoJSON file parses.
+  5. No hourly data files are committed (site/data/live/ is deploy output only).
 """
 import base64
 import hashlib
@@ -105,7 +106,7 @@ def check_html(errors, verify_sri):
 
 def check_hosts_and_json(errors):
     for p in SITE.rglob("*"):
-        if not p.is_file() or p.suffix not in TEXT_EXT:
+        if not p.is_file() or p.suffix not in TEXT_EXT or "live" in p.relative_to(SITE).parts:
             continue
         rel = p.relative_to(ROOT).as_posix()
         text = p.read_text(errors="ignore")
@@ -119,12 +120,20 @@ def check_hosts_and_json(errors):
                 errors.append(f"{rel}: invalid JSON: {e}")
 
 
+def check_no_live_data(errors):
+    for p in tracked_files():
+        rel = p.relative_to(ROOT).as_posix()
+        if rel.startswith("site/data/live/"):
+            errors.append(f"{rel}: hourly data must not be committed (deploy output only)")
+
+
 def main():
     verify = "--verify-sri" in sys.argv
     errors = []
     check_secrets(errors)
     check_html(errors, verify)
     check_hosts_and_json(errors)
+    check_no_live_data(errors)
     for e in errors:
         print("ERROR", e)
     print(f"{len(errors)} problem(s) found." if errors else "All checks passed.")
