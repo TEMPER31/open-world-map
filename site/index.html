@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Open World Map</title>
+<meta name="description" content="A free, open-source world map of weather, natural events and street-level imagery. No accounts, no ads. Watching places, not people.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#07090c">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/ibm-plex-sans-condensed-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css" integrity="sha384-uTttxo/aOKbdE5RlD/SPzSDoDmNvGlUYPjONi2MN/b7c9HPSvW07OIuyP7uL6jxK" crossorigin="anonymous">
+<link rel="stylesheet" href="css/app.css">
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js" integrity="sha384-5+cfbwT0iiub6VsQAdn6yz16nr6sDiQoHx6tm4O8OVYXHYOxcffFmCJBL0dgdvGp" crossorigin="anonymous" defer></script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<div class="app" id="app">
+  <div id="map" class="map" role="region" aria-label="World map"></div>
+  <div class="probe glass" id="probe" hidden></div>
+
+  <!-- Desktop chrome -->
+  <header class="panel topbar">
+    <a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a>
+    <button class="search" type="button" data-soon="Search" aria-label="Search (coming soon)"><span>Search places, events, datasets</span><kbd>⌘K</kbd></button>
+    <div class="tb-right">
+      <span class="sample-badge" title="Every weather value on this map is generated sample data">Sample data</span>
+      <span class="mono" data-updated>Updated --:-- UTC</span>
+      <div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div>
+      <span class="tb-sep"></span>
+      <button class="tb-link" type="button" data-open="data">Data</button>
+      <a class="tb-link" href="https://github.com/TEMPER31/open-world-map" rel="noopener">GitHub</a>
+      <button class="tb-link" type="button" data-open="settings">Settings</button>
+    </div>
+  </header>
+
+  <aside class="panel layers" id="layers" aria-label="Layers"></aside>
+  <div class="legend glass" id="legend" aria-live="polite"></div>
+  <aside class="detail glass lift" id="detail" aria-label="Details" hidden></aside>
+
+  <div class="timeline glass lift">
+    <div class="tl-ctrl">
+      <button class="play" type="button" data-play aria-label="Play"></button>
+      <div><div class="tl-now" data-rel>Now</div><div class="mono tl-date" data-abs></div></div>
+    </div>
+    <div class="tl-track" data-track="full"></div>
+    <div class="tl-side"><span class="chip" title="Playback speed">1×</span><span class="chip" title="Step">1 h step</span><span class="chip" title="Range">48 h</span><span class="chip on" title="Times are shown in UTC">UTC</span></div>
+  </div>
+
+  <div class="zoom glass" role="group" aria-label="Zoom">
+    <button type="button" data-zoom="1" aria-label="Zoom in">+</button>
+    <button type="button" data-zoom="-1" aria-label="Zoom out">−</button>
+  </div>
+  <div class="scale" id="scale" aria-hidden="true"><span></span><i></i></div>
+
+  <!-- Mobile chrome (shown below 1024 px) -->
+  <div class="m-top">
+    <button class="m-search glass" type="button" data-soon="Search">Search places, events</button>
+    <button class="m-btn glass" type="button" data-lyr aria-expanded="false" aria-controls="lsheet">LYR</button>
+  </div>
+  <div class="m-field glass" id="mchip"></div>
+  <div class="m-scrub glass">
+    <button class="play" type="button" data-play aria-label="Play"></button>
+    <div class="m-track" data-track="mini"></div>
+    <div class="m-time mono"><b data-rel>Now</b><span data-abs-short></span></div>
+  </div>
+  <section class="sheet lsheet" id="lsheet" aria-label="Map layers" hidden></section>
+  <nav class="tabs" aria-label="Sections">
+    <button type="button" class="on" data-tab="map"><i></i>Map</button>
+    <button type="button" data-soon="Events"><i></i>Events</button>
+    <button type="button" data-open="data"><i></i>Data</button>
+    <button type="button" data-open="settings"><i></i>Settings</button>
+  </nav>
+
+  <!-- Shared -->
+  <section class="pop panel" id="pop-data" aria-label="Data" hidden>
+    <div class="pop-hd"><b>Data</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
+    <p>Downloads aren't available yet. The weather on this map is <b>generated sample data</b> for testing the design, not real observations or forecasts.</p>
+    <p>When real data arrives, every layer will be free to download, with no key and no account.</p>
+    <p><a href="https://github.com/TEMPER31/open-world-map/blob/main/docs/sources-register.md" rel="noopener">Sources and licences →</a></p>
+  </section>
+  <section class="pop panel" id="pop-settings" aria-label="Settings" hidden>
+    <div class="pop-hd"><b>Settings</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
+    <div class="it"><label for="set-opacity">Field opacity</label><input id="set-opacity" type="range" min="30" max="100" step="5"></div>
+    <div class="it">Wind particles<div class="seg" role="radiogroup" aria-label="Particle density" data-density></div></div>
+    <p class="note">Wind particles start off if your device asks for reduced motion. Settings are stored on this device only.</p>
+    <p class="note"><a href="https://github.com/TEMPER31/open-world-map" rel="noopener">Source code · MIT</a></p>
+  </section>
+  <footer class="credits" id="credits"></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">Open World Map needs JavaScript and WebGL to draw the map.</p></noscript>
+</div>
+</body>
+</html>
