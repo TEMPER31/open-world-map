@@ -1,5 +1,7 @@
 # Open World Map
 
+**Live site: <https://temper31.github.io/open-world-map/>**
+
 A free, open-source, non-commercial world map: weather fields with moving wind, street-level
 photos and natural events, all on one shared 48-hour timeline. It has no accounts, no ads and
 no paywall.
