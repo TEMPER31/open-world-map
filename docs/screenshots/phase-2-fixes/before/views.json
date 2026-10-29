@@ -1,0 +1,56 @@
+[
+ {
+  "view": "wind-atlantic",
+  "legend": "Wind speed · km/h10 m · GFS 0.75°",
+  "probe": "46 km/hfrom NW·45.3°N 23.1°W",
+  "stale": null,
+  "updated": "Updated 22:41 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "temperature",
+  "legend": "Temperature · °C2 m · GFS 0.5°",
+  "probe": "9 °Cat 2 m·37.6°N 29.6°E",
+  "stale": null,
+  "updated": "Updated 22:41 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "precipitation",
+  "legend": "Precipitation · mm/hsurface · GFS 0.5°",
+  "probe": "Dryprecipitation·28.4°N 0.3°W",
+  "stale": null,
+  "updated": "Updated 22:41 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "clouds",
+  "legend": "Clouds · %total cover · GFS 0.5°",
+  "probe": "92 %cloud cover·28.4°N 59.6°E",
+  "stale": null,
+  "updated": "Updated 22:41 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "pressure",
+  "legend": "Pressure · hPamean sea level · GFS 0.5°",
+  "probe": "1021 hPasea level·42.2°N 9.6°E",
+  "stale": null,
+  "updated": "Updated 22:41 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "air-quality",
+  "legend": "Air quality · µg/m³US EPA bands · CAMS 5°",
+  "probe": "4 µg/m³Good·33.1°N 99.6°E",
+  "stale": null,
+  "updated": "Updated 22:41 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ }
+]
