@@ -23,8 +23,8 @@ times on the AWS Open Data mirror (`noaa-gfs-bdp-pds`) for 15 cycles, 26 to 29 O
 The cron runs at **cycle + 4 h 17 m** (`17 4,10,16,22 * * *`). Each run also logs the
 publish times of the cycle it used, as a run annotation and in `manifest.json` → `history[].publish`.
 The job takes the newest cycle whose **f048** index exists, so an early or delayed run never
-picks a half-published cycle. NOMADS timing was not measurable from the build environment
-(the host is blocked there); the Actions run records it when NOMADS is the source.
+picks a half-published cycle. The first Actions run (18Z 29 Oct, NOMADS) recorded f000 at
+**+3 h 34 m** and f048 at **+3 h 46 m** on NOMADS, the same as on the AWS mirror.
 
 ## Sources and fetching
 
@@ -46,6 +46,16 @@ picks a half-published cycle. NOMADS timing was not measurable from the build en
 Only instantaneous GRIB messages are used (`anl` or `N hour fcst`). The 0–N hour averages and
 accumulations are skipped, so each frame is a snapshot at its valid time.
 
+### First Actions run (PR #3, 29 Oct 2026, GFS 18Z via NOMADS)
+
+| Measure | Value |
+|---|---|
+| Total job time (build data) | **509 s** (GFS 135 s; air quality 373 s, mostly the ≤ 500/min throttle) |
+| Downloaded | 362 MB in 81 HTTP requests (49 NOMADS filter requests, 26 Open-Meteo AQ, 3 spot-check, rest HEAD/manifest) |
+| Open-Meteo | **2,520 AQ locations** in 26 requests + 3 forecast locations, **0 rate-limited** |
+| PM2.5 coverage | non-null at **100 %** of the 2,520 grid points for every hour |
+| Output | 26.6 MB per cycle |
+
 ## Output (`site/data/live/`)
 
 | File | Grid | Encoding |
@@ -66,16 +76,17 @@ keywords. The same values are in `manifest.json`.
 Grids are **decimated, not interpolated**: 0.5° keeps every second GFS 0.25° point and 0.75°
 every third (wgrib2 `-lola`; this build has no smoothing or interpolation library).
 
-### Measured sizes (12Z 29 Oct 2026, per forecast hour)
+### Measured sizes (18Z 29 Oct 2026 Actions run, per forecast hour; KB = 1,024 bytes)
 
 | Field | Grid | Mean | Max |
 |---|---|---|---|
-| wind (U+V) | 0.75° | 141 KB | 146 KB |
+| wind (U+V) | 0.75° | 139 KB | 148 KB |
 | temperature | 0.5° | 89 KB | 93 KB |
-| precipitation | 0.5° | 96 KB | 103 KB |
-| clouds | 0.5° | 128 KB | 130 KB |
+| precipitation | 0.5° | 97 KB | 102 KB |
+| clouds | 0.5° | 129 KB | 134 KB |
 | pressure | 0.5° | 65 KB | 68 KB |
-| air quality | 5° | < 1 KB | |
+| air quality | 5° | ≤ 5 KB | |
+| series (place chart, loaded on click) | 3°, 3-hourly | 190 KB | |
 
 All fields are under the ~150 KB budget. Wind started at 0.5° as specified and measured
 **265–306 KB** per hour there (8-bit U and V carry a lot of fine detail), so it moved to 0.75°.
@@ -103,6 +114,21 @@ direction. Checks:
 * The probe there reads "from W".
 * Synthetic uniform fields move particles east for +U, north for +V and west for −U
   (browser test).
+
+## Spot check (f000 of 18Z 29 Oct vs ECMWF IFS 0.25° via Open-Meteo)
+
+| City | GFS (this pipeline) | ECMWF IFS | Difference |
+|---|---|---|---|
+| London | 13.2 °C, 9.5 km/h from 114° | 12.7 °C, 6.3 km/h from 103° | +0.5 °C, +3.2 km/h, 11° |
+| New York | 18.2 °C, 14.4 km/h from 225° | 19.4 °C, 11.5 km/h from 221° | −1.2 °C, +2.9 km/h, 4° |
+| Tokyo | 15.1 °C, 5.2 km/h from 249° | 10.8 °C, 3.9 km/h from 292° | +4.3 °C, +1.3 km/h, 43° |
+
+London and New York agree within about 1 °C and 3 km/h. For Tokyo I checked the raw GFS
+0.25° value at the nearest grid point: **15.5 °C**. So the pipeline reproduces GFS faithfully,
+and the 4.3 °C gap is a real GFS/ECMWF disagreement. It's 03:00 local time on the coast of
+Tokyo Bay, where neighbouring GFS points range from 9 °C (inland) to 21 °C (over the sea).
+Comparing against a second model shows the models differ, not which is right. A comparison
+with station observations is a later improvement.
 
 ## Daily archive
 
