@@ -1,6 +1,12 @@
-name: Check and deploy to GitHub Pages
+name: Data and deploy
 
+# Every deploy rebuilds the data, so a code-only deploy never publishes the site without it.
 on:
+  schedule:
+    # GFS cycles 00/06/12/18 UTC. Measured on the AWS mirror (Oct 2026, 15 cycles): f000 lands
+    # 3 h 32 m to 3 h 49 m after the cycle, f048 3 h 45 m to 4 h 01 m. Run at cycle + 4 h 17 m;
+    # the job also picks the newest cycle whose f048 exists, so an early run is harmless.
+    - cron: '17 4,10,16,22 * * *'
   push:
     branches: [main]
   pull_request:
@@ -10,8 +16,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  group: data-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
 jobs:
   check:
@@ -20,14 +29,55 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Site checks (no keys, pinned SRI-verified CDN files, local links, JSON)
+      - name: Site checks (no keys, pinned SRI-verified CDN files, local links, JSON, no hourly data committed)
         run: python3 scripts/check_site.py --verify-sri
-      - name: Syntax-check JavaScript modules
-        run: for f in site/js/*.js; do cp "$f" "$RUNNER_TEMP/check.mjs" && node --check "$RUNNER_TEMP/check.mjs" || exit 1; done
+      - name: Syntax-check JavaScript modules and data scripts
+        run: |
+          for f in site/js/*.js scripts/data/*.mjs; do cp "$f" "$RUNNER_TEMP/check.mjs" && node --check "$RUNNER_TEMP/check.mjs" || exit 1; done
+          python3 -m py_compile scripts/*.py scripts/data/*.py
+
+  data:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Restore wgrib2 build
+        id: wgrib2
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .wgrib2
+          key: wgrib2-v3.8.0-986287cc-${{ runner.os }}-${{ runner.arch }}
+      - name: Build wgrib2 v3.8.0 (pinned)
+        if: steps.wgrib2.outputs.cache-hit != 'true'
+        run: scripts/data/build_wgrib2.sh .wgrib2
+      - name: Save wgrib2 build
+        if: steps.wgrib2.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .wgrib2
+          key: wgrib2-v3.8.0-986287cc-${{ runner.os }}-${{ runner.arch }}
+      - name: Build data (GFS via NOMADS, AWS fallback; CAMS via Open-Meteo)
+        env:
+          WGRIB2: .wgrib2/bin/wgrib2
+        run: |
+          # On pull requests, always fetch air quality so the run proves the whole pipeline.
+          extra=""; [ "${{ github.event_name }}" = "pull_request" ] && extra="--force-aq"
+          python3 scripts/data/build_data.py --out site/data/live --previous "$PAGES_URL/data/live" \
+            --report run-report.json $extra
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: |
+            site
+            run-report.json
+          retention-days: 2
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: check
+    needs: data
     runs-on: ubuntu-latest
     # Job-level permissions replace the workflow-level block, so contents: read must be
     # repeated here or checkout of a private repo fails with "Repository not found".
@@ -39,12 +89,72 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          persist-credentials: false
+          name: site
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  archive:
+    # One small summary per day (after the 18Z cycle). Hourly files are never committed.
+    if: github.event_name == 'schedule' && github.ref == 'refs/heads/main'
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: built
+      - name: Commit daily summary
+        run: |
+          f=$(python3 scripts/data/archive_day.py built/site/data/live/manifest.json data/archive)
+          [ -z "$f" ] && { echo "Not the 18Z cycle; nothing to archive."; exit 0; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$f"
+          git commit -m "Data archive: $(basename "$f" .json)" && git push
+
+  verify:
+    # Pull requests: screenshot the site with the freshly built real data and commit only
+    # the screenshots and the run report (no data files) to the PR branch for review.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: data
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: built
+      - name: Install Playwright 1.63.0 + Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Screenshots
+        run: |
+          (cd built/site && python3 -m http.server 8123 --bind 127.0.0.1 &) ; sleep 2
+          node scripts/data/screenshots.mjs http://127.0.0.1:8123/ docs/screenshots/phase-2
+          cp built/run-report.json docs/screenshots/phase-2/run-report.json
+          python3 - <<'EOF'
+          import json
+          for v in json.load(open("docs/screenshots/phase-2/views.json")):
+              print(f"::notice title=View {v['view']}::legend={v['legend']} | probe={v['probe']} | stale={v['stale']} | sample labels visible={v['sampleLabelsVisible']} | errors={len(v['errors'])}")
+          EOF
+      - name: Commit screenshots and run report to the PR branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots/phase-2
+          git commit -m "CI: screenshots and run report from real data" || exit 0
+          git push

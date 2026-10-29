@@ -52,6 +52,7 @@ export function lut(k, light) {
   return luts[key] = {
     rgba,
     index(v) {
+      if (v !== v) return -1; // NaN: no data
       if (below != null && v < below) return -1;
       const x = banded ? v : tf(v);
       const i = Math.round((x - a) / (b - a) * (LUT_N - 1));
