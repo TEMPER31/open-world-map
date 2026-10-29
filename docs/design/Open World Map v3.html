@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Open World Map — Design reference v3</title>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script>
+// Open World Map — field colour scales (source of truth for legend + renderer).
+// stops: [value, cssColor, (label)] ascending. stopsLight: optional override for light theme.
+// mode: continuous | continuous-log | banded | veil | isobars
+window.OWM_ORDER = ['wind', 'temp', 'rain', 'aq', 'cloud', 'pres'];
+window.OWM_FIELDS = {
+  wind: {
+    label: 'Wind speed', short: 'Wind', unit: 'km/h', level: '10 m', source: 'GFS 0.25°',
+    mode: 'continuous', particles: true,
+    render: 'Continuous colour field. Animated particles follow the u/v vectors and can be overlaid on any field.',
+    stops: [[0,'#24304f'],[8,'#2a5a86'],[16,'#2b8a96'],[26,'#3aa57a'],[36,'#8cc256'],[48,'#e3c54e'],[62,'#e98b3b'],[80,'#d44a45'],[105,'#9c3a7e'],[150,'#5e2a6e']],
+    stopsLight: [[0,'#d7e4ea'],[8,'#b3d2dd'],[16,'#93c7c4'],[26,'#a6d1a2'],[36,'#d3dd93'],[48,'#f0cd7d'],[62,'#efa06b'],[80,'#e06b57'],[105,'#c24f7a'],[150,'#8a3f78']],
+    ticks: [0, 20, 40, 60, 80, 100, '150+']
+  },
+  temp: {
+    label: 'Temperature', short: 'Temp', unit: '°C', level: '2 m', source: 'GFS 0.25°',
+    mode: 'continuous',
+    render: 'Continuous, diverging at 0 °C (pale cyan). Cold side is purple to blue, warm side yellow to deep red.',
+    stops: [[-40,'#2a1846'],[-30,'#4b2a87'],[-20,'#2f4fa8'],[-10,'#3487c7'],[0,'#8fd0e0'],[5,'#cde8c4'],[10,'#d9e48a'],[18,'#efcf5e'],[25,'#ee9a46'],[32,'#d9563c'],[40,'#9e2433'],[48,'#5e1427']],
+    ticks: [-40, -20, 0, 10, 20, 30, 48]
+  },
+  rain: {
+    label: 'Precipitation', short: 'Rain', unit: 'mm/h', level: 'surface', source: 'GFS 0.25°',
+    mode: 'continuous-log', transparentBelow: 0.1,
+    render: 'Log scale. Below 0.1 mm/h the layer is transparent so the basemap shows (dry = no colour).',
+    stops: [[0.1,'#5d8fd6'],[0.5,'#3f6fd0'],[1,'#2f9fb8'],[2,'#3bb36b'],[4,'#c9d34a'],[8,'#eea23b'],[16,'#df4a3a'],[32,'#b53389'],[64,'#f2c6ec']],
+    ticks: [0.1, 0.5, 1, 2, 4, 8, 16, '64']
+  },
+  aq: {
+    label: 'Air quality', short: 'Air', unit: 'µg/m³', level: 'PM2.5', source: 'CAMS',
+    mode: 'banded',
+    render: 'Stepped bands at US EPA PM2.5 breakpoints, with no blending between bands. The probe and place sheet show the category name.',
+    stops: [[0,'#3fae6a','Good'],[12.1,'#d9c94a','Moderate'],[35.5,'#e8913a','Sensitive groups'],[55.5,'#d4483f','Unhealthy'],[150.5,'#8e3a8f','Very unhealthy'],[250.5,'#6b1f3a','Hazardous']]
+  },
+  cloud: {
+    label: 'Clouds', short: 'Clouds', unit: '%', level: 'total cover', source: 'GFS 0.25°',
+    mode: 'veil',
+    render: 'Veil over a neutral land/ocean basemap: white in dark theme, slate in light theme. Opacity scales with cover.',
+    stops: [[0,'rgba(255,255,255,0)'],[30,'rgba(220,226,232,0.22)'],[60,'rgba(232,236,240,0.58)'],[100,'rgba(248,249,250,0.92)']],
+    stopsLight: [[0,'rgba(40,48,58,0)'],[30,'rgba(60,70,82,0.16)'],[60,'rgba(60,70,82,0.40)'],[100,'rgba(50,58,68,0.68)']],
+    ticks: [0, 25, 50, 75, 100]
+  },
+  pres: {
+    label: 'Pressure', short: 'Pressure', unit: 'hPa', level: 'mean sea level', source: 'GFS 0.25°',
+    mode: 'isobars', interval: 4, majorEvery: 20,
+    render: 'Muted fill plus isobars every 4 hPa (bold every 20). H and L centres are labelled with their value.',
+    stops: [[950,'#2a3570'],[975,'#34578f'],[995,'#4a7990'],[1010,'#55666b'],[1020,'#7c7152'],[1032,'#97653f'],[1045,'#7f3b2c']],
+    ticks: [950, 975, 1000, 1013, 1030, 1045]
+  }
+};
+
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#1a1c1f;font-family:'IBM Plex Sans Condensed',sans-serif;color:#ede8dd}
+a{color:#dcb672}a:hover{color:#ede8dd}
+.page-hd{padding:48px 56px 8px;max-width:1200px}
+.page-hd h1{font:700 30px/1.1 'IBM Plex Sans Condensed';margin:0 0 10px;text-transform:uppercase;letter-spacing:.01em}
+.page-hd p{font:15px/1.55 'IBM Plex Sans Condensed';color:#a09d95;margin:0;text-wrap:pretty;max-width:900px}
+.sec{padding:40px 56px 24px}
+.sec-h{display:flex;align-items:baseline;gap:14px;margin:0 0 22px;padding-bottom:12px;border-bottom:1px solid rgba(237,232,221,.14)}
+.sec-h b{font:700 15px 'IBM Plex Sans Condensed';text-transform:uppercase;letter-spacing:.06em}
+.sec-h span{font:12px 'IBM Plex Mono';color:#a09d95}
+.row2{display:grid;grid-template-columns:repeat(2,1280px);gap:48px}
+.row3{display:grid;grid-template-columns:repeat(3,620px);gap:40px}
+.row4{display:grid;grid-template-columns:repeat(4,410px);gap:40px 36px}
+.cap{font:500 11px 'IBM Plex Mono';color:#a09d95;margin:0 0 10px;text-transform:uppercase;letter-spacing:.06em}
+.cap b{color:#ede8dd;font-weight:600;margin-right:8px}
+
+/* tokens */
+.frame{--bg:#07090c;--panel:rgba(12,15,19,.94);--glass:rgba(13,16,21,.58);--ink:#ede8dd;--mute:#a09d95;--faint:#85827b;--line:rgba(237,232,221,.12);--line2:rgba(237,232,221,.24);--hover:rgba(237,232,221,.06);--accent:#dcb672;--accentInk:#1c1508;--fire:#ff5a1f;--storm:#8a7cff;--photo:#2fd27a;--sans:'IBM Plex Sans Condensed',sans-serif;--mono:'IBM Plex Mono',monospace}
+.frame.lt{--bg:#ebe8e0;--panel:#f7f5ef;--glass:rgba(247,245,239,.7);--ink:#15171a;--mute:#55585d;--faint:#6f7276;--line:rgba(21,23,26,.14);--line2:rgba(21,23,26,.3);--hover:rgba(21,23,26,.05);--accent:#d23f1c;--accentInk:#fff}
+.frame{position:relative;overflow:hidden;font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:13px;line-height:1.35;-webkit-font-smoothing:antialiased}
+.frame.desk{width:1280px;height:800px;box-shadow:0 30px 80px -30px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)}
+.mono{font-family:var(--mono);font-feature-settings:"tnum"}
+.map{position:absolute;inset:0}
+.map canvas,.map svg{position:absolute;left:0;top:0}
+.panel{position:absolute;background:var(--panel);border:1px solid var(--line);z-index:5}
+.glass{background:var(--glass);border:1px solid var(--line2);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.frame:not(.lt) .glass.lift{box-shadow:0 18px 50px -12px rgba(0,0,0,.55)}
+.kick{font:600 10px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border:1px solid var(--line2);border-radius:2px;font:500 11px var(--mono);color:var(--ink);white-space:nowrap;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:34px;padding:0 14px;border-radius:2px;font:500 12.5px var(--sans);border:1px solid var(--line2);color:var(--ink);background:transparent;cursor:pointer}
+.btn.pri{background:var(--accent);color:var(--accentInk);border-color:var(--accent)}
+kbd{font:500 10.5px var(--mono);padding:2px 6px;border:1px solid var(--line2);border-radius:3px;color:var(--mute)}
+
+/* topbar */
+.topbar{left:0;right:0;top:0;height:48px;border-width:0 0 1px;display:flex;align-items:center;gap:18px;padding:0 12px 0 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;text-transform:uppercase;white-space:nowrap}
+.logo{width:20px;height:20px;border-radius:50%;background:var(--accent);position:relative;flex:none}
+.logo:before{content:"";position:absolute;inset:0 5px;border:1.5px solid var(--accentInk);border-radius:50%}
+.logo:after{content:"";position:absolute;left:0;right:0;top:50%;border-top:1.5px solid var(--accentInk)}
+.search{flex:0 1 420px;display:flex;align-items:center;gap:10px;height:32px;padding:0 8px 0 12px;border:1px solid var(--line);border-radius:2px;color:var(--mute);background:var(--hover)}
+.search span{flex:1}
+.search:before{content:"";width:10px;height:10px;border:1.5px solid var(--mute);border-radius:50%;flex:none}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:16px;color:var(--mute);font-size:12.5px;white-space:nowrap}
+.tb-right .mono{color:var(--ink);font-size:12px}
+.live{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.live i{width:7px;height:7px;border-radius:50%;background:#45d483;box-shadow:0 0 0 3px rgba(69,212,131,.2)}
+.tb-sep{width:1px;height:20px;background:var(--line)}
+
+/* layers rail */
+.layers{left:0;top:48px;bottom:0;width:260px;border-width:0 1px 0 0;padding:14px 0 10px;display:flex;flex-direction:column;gap:14px}
+.l-hd{display:flex;align-items:center;gap:8px;padding:0 10px 0 16px;height:28px;margin-top:-6px}
+.l-hd b{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.02em}
+.l-sum{display:none;font:11px var(--mono);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.l-min{margin-left:auto;width:26px;height:26px;border:1px solid var(--line);background:transparent;position:relative;cursor:pointer;flex:none}
+.l-min:after{content:"";position:absolute;left:8px;right:8px;top:12px;border-top:1.5px solid var(--ink)}
+.l-min:hover{background:var(--hover)}
+.layers.min{padding:8px 0;gap:0;bottom:auto;border-width:0 1px 1px 0}
+.layers.min .l-hd{margin:0}
+.layers.min .lsec,.layers.min .lfoot{display:none}
+.layers.min .l-sum{display:inline}
+.layers.min .l-min:before{content:"";position:absolute;top:6px;bottom:6px;left:12px;border-left:1.5px solid var(--ink)}
+.lsec{display:grid;gap:1px;padding:0 8px}
+.lsec .kick{padding:0 8px 6px;display:flex;justify-content:space-between}
+.lsec .kick span:last-child{color:var(--mute);font-weight:500}
+.row{display:flex;align-items:center;gap:10px;height:30px;padding:0 8px;color:var(--mute)}
+.row[data-field]{cursor:pointer}
+.row[data-field]:hover{background:var(--hover)}
+.row b{font-weight:500;color:var(--ink)}
+.row .v{margin-left:auto;font:11px var(--mono);color:var(--mute)}
+.row.on,.row.on:hover{background:var(--ink);color:var(--bg)}
+.row.on b,.row.on .v{color:var(--bg)}
+.rad{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--line2);flex:none}
+.row.on .rad{border:4px solid var(--bg);background:var(--accent)}
+.sw{width:10px;height:10px;flex:none}
+.tg{margin-left:auto;width:26px;height:15px;border-radius:1px;background:var(--line2);position:relative;flex:none;cursor:pointer}
+.tg:after{content:"";position:absolute;left:2px;top:2px;width:11px;height:11px;border-radius:1px;background:var(--bg)}
+.tg.on{background:var(--accent)}.tg.on:after{left:13px;background:var(--accentInk)}
+.lfoot{margin:auto 16px 0;padding-top:10px;border-top:1px solid var(--line);font:10.5px/1.5 var(--mono);color:var(--mute)}
+
+/* legend */
+.legend{left:292px;bottom:108px;width:320px;padding:9px 12px 8px}
+.lg-h{display:flex;justify-content:space-between;gap:12px;font:500 11px var(--mono);margin-bottom:6px;white-space:nowrap}
+.lg-h span:last-child{color:var(--mute)}
+.lg-bar{height:8px;display:flex;box-shadow:inset 0 0 0 1px var(--line)}
+.lg-bar i{flex:1}
+.lg-t{position:relative;height:14px;margin-top:4px;font:10px var(--mono);color:var(--mute)}
+.lg-t span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.lg-t span:first-child{transform:none}.lg-t span:last-child{transform:translateX(-100%)}
+.lg-t.band{display:flex;position:static}
+.lg-t.band span{position:static;transform:none;flex:1}
+.lg-cats{display:flex;margin-top:2px;font:9.5px var(--mono);color:var(--mute)}
+.lg-cats span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:3px}
+
+/* timeline */
+.timeline{left:276px;right:16px;bottom:16px;height:76px;display:flex;align-items:stretch;z-index:5;position:absolute}
+.tl-ctrl{display:flex;align-items:center;gap:12px;padding:0 18px;border-right:1px solid var(--line);width:236px;flex:none}
+.play{width:36px;height:36px;border-radius:2px;background:var(--accent);border:0;position:relative;flex:none;cursor:pointer}
+.play:after{content:"";position:absolute;left:14px;top:11px;border-left:11px solid var(--accentInk);border-top:7px solid transparent;border-bottom:7px solid transparent}
+.tl-now{font-weight:600;font-size:14px}
+.tl-date{font-size:11px;color:var(--mute);margin-top:2px}
+.tl-track{flex:1;position:relative;margin:0 22px}
+.tl-side{display:flex;align-items:center;gap:8px;padding:0 16px;border-left:1px solid var(--line)}
+.tl-zone{position:absolute;top:12px;height:30px;display:flex;align-items:flex-start;padding:3px 6px;font:600 9px var(--mono);letter-spacing:.1em;color:var(--faint)}
+.tl-zone.fc{background:repeating-linear-gradient(135deg,var(--hover) 0 4px,transparent 4px 8px);border-left:1px dashed var(--line2)}
+.tl-bars{position:absolute;left:0;right:0;top:12px;height:30px;display:flex;align-items:flex-end;gap:2px}
+.tl-bars i{flex:1;background:var(--line2);opacity:.8}
+.tl-axis{position:absolute;left:0;right:0;top:42px;height:1px;background:var(--line2)}
+.tl-lab{position:absolute;top:49px;transform:translateX(-50%);font:10.5px var(--mono);color:var(--mute);white-space:nowrap}
+.tl-lab b{color:var(--ink);font-weight:600}
+.tl-tick{position:absolute;top:42px;width:1px;height:5px;background:var(--line2)}
+.tl-head{position:absolute;top:6px;bottom:22px;width:2px;background:var(--accent);transform:translateX(-1px)}
+.tl-head:before{content:"";position:absolute;left:-5px;top:-4px;width:12px;height:12px;background:var(--accent);transform:rotate(45deg)}
+.tl-zone.lc{background:repeating-linear-gradient(135deg,var(--hover) 0 2px,transparent 2px 10px);border-left:1px dotted var(--line2)}
+.tl-track,.m-track{cursor:pointer}
+.play.on:after{left:12px;top:11px;width:4px;height:14px;border:0;background:var(--accentInk);box-shadow:8px 0 0 var(--accentInk)}
+.tl-ev{position:absolute;top:2px;width:7px;height:7px;border-radius:50%;transform:translateX(-50%);border:1.5px solid var(--ink)}
+
+/* detail */
+.detail{right:16px;top:64px;bottom:108px;width:348px;display:flex;flex-direction:column;overflow:hidden;position:absolute;z-index:5}
+.d-hd{padding:14px 18px 12px;border-bottom:1px solid var(--line);position:relative}
+.d-x{position:absolute;right:14px;top:14px;width:26px;height:26px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--mute);font-size:14px;cursor:pointer}
+.d-title{font-size:26px;font-weight:700;letter-spacing:-.01em;margin:8px 0 4px}
+.d-sub{color:var(--mute);font-size:12.5px;display:flex;gap:8px;align-items:center}
+.cat{font:600 10.5px var(--mono);padding:2px 6px;background:var(--accent);color:var(--accentInk)}
+.stats{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.stat{padding:9px 18px}
+.stat:nth-child(odd){border-right:1px solid var(--line)}
+.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}
+.stat .l{font-size:11px;color:var(--mute)}
+.stat .n{font:500 20px/1.15 var(--mono);margin-top:3px;letter-spacing:-.02em}
+.stat .n small{font-size:11px;color:var(--mute);margin-left:3px;letter-spacing:0}
+.d-sec{padding:10px 18px;border-bottom:1px solid var(--line)}
+.d-sec .kick{display:flex;justify-content:space-between;margin-bottom:8px}
+.d-sec .kick span:last-child{color:var(--mute);font-weight:500}
+.alert{padding:10px 12px;border-radius:2px;background:color-mix(in oklab,var(--accent) 16%,transparent);border:1px solid color-mix(in oklab,var(--accent) 45%,transparent);font-size:12.5px}
+.alert b{display:block;font-weight:600}
+.alert span{color:var(--mute)}
+.tbl{width:100%;border-collapse:collapse;font:11.5px var(--mono)}
+.tbl td,.tbl th{padding:5px 0;border-bottom:1px solid var(--line);text-align:left;font-weight:400}
+.tbl th{color:var(--mute);font-size:10.5px}
+.tbl td:last-child,.tbl th:last-child{text-align:right}
+.d-ft{margin-top:auto;padding:12px 18px 14px;display:flex;flex-direction:column;gap:10px}
+.src{font:10.5px var(--mono);color:var(--mute)}
+.d-btns{display:flex;gap:8px}.d-btns .btn{flex:1}
+
+/* probe + labels */
+.probe{position:absolute;z-index:4;transform:translate(14px,-50%);display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:2px;font:11.5px var(--mono);white-space:nowrap}
+.probe b{font-weight:600;font-size:13px}
+.probe span{color:var(--mute)}
+.probe-dot{position:absolute;z-index:4;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.maplab{position:absolute;z-index:3;font:600 10px var(--mono);letter-spacing:.06em;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.85);transform:translate(12px,-50%);white-space:nowrap;pointer-events:none}
+.lt .maplab{color:var(--ink);text-shadow:0 0 3px #f7f5ef,0 0 3px #f7f5ef}
+@keyframes pulse{0%{r:8;opacity:.9}100%{r:26;opacity:0}}
+.pulse{animation:pulse 2s ease-out infinite}
+
+/* search */
+.scrim{position:absolute;inset:0;z-index:6;background:rgba(4,6,8,.55)}
+.lt .scrim{background:rgba(235,232,224,.62)}
+.palette{z-index:7;left:50%;top:92px;width:660px;transform:translateX(-50%);padding:0 0 8px;border-color:var(--line2);box-shadow:0 24px 60px -10px rgba(0,0,0,.6)}
+.lt .palette{border-color:var(--ink);box-shadow:8px 8px 0 rgba(21,23,26,.12)}
+.p-in{display:flex;align-items:center;gap:12px;height:58px;padding:0 18px;border-bottom:1px solid var(--line);font-size:19px}
+.p-in:before{content:"";width:13px;height:13px;border:2px solid var(--mute);border-radius:50%;flex:none}
+.caret{display:inline-block;width:2px;height:22px;background:var(--accent);vertical-align:middle;margin-left:1px}
+.p-in kbd{margin-left:auto}
+.p-chips{display:flex;gap:6px;padding:10px 18px;overflow:hidden}
+.p-grp{padding:6px 8px 2px}
+.p-grp .kick{padding:6px 10px}
+.p-row{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;padding:8px 10px}
+.p-row.sel{background:var(--ink);color:var(--bg)}
+.p-row.sel .p-m,.p-row.sel .p-r{color:color-mix(in oklab,var(--bg) 72%,var(--ink))}
+.p-ic{width:34px;height:34px;border:1px solid var(--line2);display:grid;place-items:center;font:600 10px var(--mono);color:var(--mute)}
+.p-row.sel .p-ic{border-color:var(--bg);color:var(--bg)}
+.p-t{font-weight:500;font-size:13.5px}
+.p-t em{font-style:normal;color:var(--accent)}
+.p-m{font:11px var(--mono);color:var(--mute);margin-top:2px}
+.p-r{font:11.5px var(--mono);color:var(--mute);text-align:right}
+.p-ft{display:flex;gap:16px;padding:10px 18px 2px;border-top:1px solid var(--line);margin-top:6px;font:10.5px var(--mono);color:var(--mute)}
+
+/* street */
+.leaflet-container{background:var(--bg)!important;font-family:var(--mono)!important}
+.frame:not(.lt) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.78) contrast(1.05) saturate(.25)}
+.lt .leaflet-tile-pane{filter:grayscale(1) contrast(.92) brightness(1.04) sepia(.12)}
+.leaflet-control-attribution{font:10px var(--mono)!important;background:var(--panel)!important;color:var(--mute)!important}
+.leaflet-control-attribution a{color:var(--ink)!important}
+.viewer{right:16px;top:64px;bottom:16px;width:430px;display:flex;flex-direction:column;position:absolute;z-index:5}
+.ph{margin:14px 14px 0;aspect-ratio:4/3;position:relative;overflow:hidden;background:repeating-linear-gradient(135deg,var(--hover) 0 10px,transparent 10px 20px);border:1px solid var(--line);display:grid;place-items:center}
+.ph-l{font:11px var(--mono);color:var(--mute);text-align:center;line-height:1.6}
+.ph-nav{position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;background:var(--panel);border:1px solid var(--line2);display:grid;place-items:center;font-size:16px}
+.ph-cnt,.ph-cmp{position:absolute;bottom:10px;white-space:nowrap;font:11px var(--mono);padding:4px 8px;background:var(--panel);border:1px solid var(--line)}
+.ph-cnt{left:10px}.ph-cmp{right:10px}
+.strip{display:flex;gap:6px;padding:10px 14px 4px}
+.strip i{flex:1;aspect-ratio:4/3;background:var(--hover);border:1px solid var(--line)}
+.strip i.on{outline:2px solid var(--photo);outline-offset:1px}
+.meta{display:grid;grid-template-columns:110px 1fr;margin:8px 18px 0;font-size:12.5px}
+.meta div{padding:7px 0;border-bottom:1px solid var(--line)}
+.meta div:nth-child(odd){color:var(--mute)}
+.meta div:nth-child(even){font-family:var(--mono);font-size:11.5px}
+.ctx{left:292px;top:64px;padding:10px 14px;display:flex;gap:18px;align-items:center;position:absolute;z-index:5}
+.ctx .kv{display:flex;flex-direction:column;gap:2px}
+.ctx .kv span{font-size:10.5px;color:var(--mute)}
+.ctx .kv b{font:500 13px var(--mono)}
+.gdot{width:9px;height:9px;border-radius:50%;background:var(--photo);display:inline-block;box-shadow:0 0 0 2px rgba(47,210,122,.25);flex:none}
+.zoom{right:462px;bottom:16px;display:flex;flex-direction:column;position:absolute;z-index:5}
+.zoom i{width:36px;height:36px;display:grid;place-items:center;font-style:normal;font-size:18px;border-bottom:1px solid var(--line)}
+.zoom i:last-child{border:0}
+
+/* field reference */
+.ref{width:620px;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+.ref-map{position:relative;height:330px}
+.ref-spec{padding:16px 18px 18px;border-top:1px solid var(--line);display:grid;gap:12px}
+.ref-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.ref-hd b{font-size:20px;font-weight:700}
+.ref-hd span{font:11.5px var(--mono);color:var(--mute)}
+.ref-spec p{margin:0;font-size:13px;color:var(--mute);text-wrap:pretty}
+.ref-kv{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.ref-kv div{padding:8px 0 0}
+.ref-kv span{display:block;font-size:10.5px;color:var(--mute)}
+.ref-kv b{font:500 12px var(--mono)}
+
+/* mobile */
+.device{padding:10px;border-radius:60px;background:#0d0e10;box-shadow:0 30px 70px -25px rgba(0,0,0,.7),inset 0 0 0 1.5px #2a2b2e}
+.frame.mob{width:390px;height:844px;border-radius:50px}
+.island{position:absolute;left:50%;top:11px;width:122px;height:35px;margin-left:-61px;background:#000;border-radius:20px;z-index:30}
+.sbar{position:absolute;left:0;right:0;top:0;height:50px;z-index:29;display:flex;justify-content:space-between;align-items:center;padding:4px 34px 0 38px;font:600 15px var(--sans);color:var(--ink)}
+.sbar span:last-child{font:600 12px var(--mono)}
+.m-top{position:absolute;z-index:6;left:12px;right:12px;top:56px;display:flex;gap:8px}
+.m-search{flex:1;height:46px;display:flex;align-items:center;gap:10px;padding:0 14px;border-radius:0;font-size:14.5px;color:var(--mute)}
+.m-search:before{content:"";width:11px;height:11px;border:1.6px solid var(--mute);border-radius:50%}
+.m-btn{width:46px;height:46px;display:grid;place-items:center;font:600 10px var(--mono);color:var(--ink)}
+.m-btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.m-field{position:absolute;z-index:6;left:12px;top:112px;display:flex;align-items:center;gap:8px;padding:6px 10px;font:500 11px var(--mono);white-space:nowrap}
+.m-field .lg-bar{width:84px;height:6px}
+.m-scrub{position:absolute;z-index:7;left:12px;right:12px;top:396px;height:52px;display:flex;align-items:center;gap:10px;padding:0 12px 0 8px}
+.m-track{flex:1;position:relative;height:30px}
+.m-track .tl-axis{top:20px}
+.m-track .tl-head{top:0;bottom:4px}
+.m-track .tl-head:before{top:-3px}
+.m-track .tl-zone{top:0;height:20px;font-size:8px;padding:2px 4px}
+.sheet{position:absolute;z-index:8;left:0;right:0;top:458px;bottom:84px;overflow:hidden;padding:8px 18px 0;border-top:1px solid var(--line2);background:rgba(12,15,19,.84);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.lt .sheet{background:rgba(247,245,239,.9);border-top-color:var(--ink)}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--line2);margin:0 auto 10px}
+.s-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.s-name{font-weight:700;font-size:22px;letter-spacing:-.01em}
+.s-co{font:11px var(--mono);color:var(--mute);margin-top:3px}
+.s-tmp{font:500 38px/1 var(--mono);letter-spacing:-.04em;text-align:right}
+.s-tmp small{display:block;font:12px var(--sans);letter-spacing:0;color:var(--mute);margin-top:4px}
+.s-stats{display:grid;grid-template-columns:repeat(3,1fr);margin:14px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.s-stats div{padding:10px 0 10px 10px;border-left:1px solid var(--line)}
+.s-stats div:first-child{border:0;padding-left:0}
+.s-stats span{display:block;font-size:11px;color:var(--mute)}
+.s-stats b{display:block;font:500 15px var(--mono);margin-top:3px}
+.s-stats em{font-style:normal;font-size:11px;color:var(--mute)}
+.chart{margin-top:8px;height:60px;position:relative}
+.s-near{display:flex;align-items:center;gap:10px;margin-top:4px;font-size:13px;min-height:44px}
+.s-near span{color:var(--mute);font:11px var(--mono);margin-left:auto}
+.ring{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);flex:none}
+.tabs{position:absolute;z-index:20;left:0;right:0;bottom:0;height:84px;display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px 0;border-top:1px solid var(--line);background:var(--panel)}
+.tabs div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;color:var(--mute);height:48px;justify-content:center}
+.tabs div i{width:22px;height:2px;background:transparent}
+.tabs div.on{color:var(--ink);font-weight:600}
+.tabs div.on i{background:var(--accent)}
+.tabs:after{content:"";position:absolute;left:50%;bottom:8px;width:134px;height:5px;margin-left:-67px;border-radius:3px;background:var(--ink)}
+.scr{position:absolute;inset:50px 0 84px;overflow:hidden;padding:8px 16px 0}
+.scr h2{font-size:28px;font-weight:700;text-transform:uppercase;margin:10px 4px 4px;letter-spacing:0}
+.lead{font-size:12.5px;color:var(--mute);margin:0 4px 12px;text-wrap:pretty}
+.grp{margin-bottom:11px}
+.grp>.kick{padding:0 4px 7px;display:flex;justify-content:space-between}
+.grp>.kick span:last-child{color:var(--mute);font-weight:500}
+.card{border:1px solid var(--line2);background:var(--hover)}
+.lt .card{background:var(--panel)}
+.it{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-top:1px solid var(--line);font-size:14px}
+.it:first-child{border:0}
+.it .r{margin-left:auto;color:var(--mute);font:12px var(--mono);display:flex;align-items:center;gap:6px}
+.seg{margin-left:auto;display:flex;border:1px solid var(--line2);overflow:hidden}
+.seg span{padding:6px 9px;font:500 11.5px var(--mono);color:var(--mute);border-left:1px solid var(--line2);cursor:pointer}
+.seg span:first-child{border:0}
+.seg span.on{background:var(--ink);color:var(--bg)}
+.sl{margin-left:auto;width:120px;height:4px;background:var(--line2);position:relative}
+.sl:before{content:"";position:absolute;left:0;top:0;bottom:0;width:62%;background:var(--accent)}
+.sl:after{content:"";position:absolute;left:62%;top:50%;width:10px;height:18px;margin:-9px 0 0 -5px;background:var(--ink)}
+.fmts{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap}
+.arr{color:var(--faint);font-size:16px}
+/* mobile layers sheet */
+.lsheet{position:absolute;z-index:8;left:0;right:0;top:316px;bottom:84px;padding:8px 16px 0;border-top:1px solid var(--line2);background:rgba(12,15,19,.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.lt .lsheet{background:rgba(247,245,239,.94);border-top-color:var(--ink)}
+.ls-hd{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.ls-hd b{font-size:18px;font-weight:700;text-transform:uppercase}
+.xbtn{width:36px;height:36px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--mute);font-size:16px}
+.ftiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.ftile{height:72px;border:1px solid var(--line2);padding:9px 10px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;background:var(--hover)}
+.ftile .lg-bar{height:5px}
+.ftile b{font-size:14px;font-weight:600}
+.ftile span{font:10.5px var(--mono);color:var(--mute)}
+.ftile.on{border:1.5px solid var(--accent);background:color-mix(in oklab,var(--accent) 12%,transparent)}
+.evchips{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap}
+/* events list */
+.chips-row{display:flex;gap:6px;margin:0 0 10px;overflow:hidden}
+.chips-row .chip{height:32px;padding:0 11px}
+.ev{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;min-height:62px;padding:8px 2px;border-top:1px solid var(--line)}
+.ev:first-child{border:0}
+.ev b{display:block;font-size:14.5px;font-weight:600}
+.ev .m{font:11px var(--mono);color:var(--mute);margin-top:3px}
+.ev .t{font:11px var(--mono);color:var(--mute);text-align:right}
+.ev .t.hot{color:var(--accent)}
+.ico{width:16px;height:16px;justify-self:center}
+.ico.cy{border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in oklab,var(--accent) 25%,transparent)}
+.ico.eq{border-radius:50%;border:2px solid var(--ink)}
+.ico.fi{background:var(--fire);width:12px;height:12px}
+.ico.st{background:var(--storm);transform:rotate(45deg);width:11px;height:11px}
+.sortbar{display:flex;justify-content:space-between;align-items:center;font:11px var(--mono);color:var(--mute);padding:0 2px 6px}
+/* mobile event detail */
+.m-back{position:absolute;z-index:9;top:56px;left:12px;right:12px;display:flex;justify-content:space-between}
+.m-back span{height:44px;min-width:44px;padding:0 14px;display:grid;place-items:center;font:500 13px var(--sans)}
+.esheet{position:absolute;z-index:8;left:0;right:0;top:300px;bottom:84px;padding:14px 18px 0;border-top:1px solid var(--line2);background:rgba(12,15,19,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);overflow:hidden}
+.lt .esheet{background:rgba(247,245,239,.94);border-top-color:var(--ink)}
+.esheet .stats{margin:12px -18px 0;border-top:1px solid var(--line)}
+.esheet .d-title{font-size:26px;margin:6px 0 4px}
+/* mobile street */
+.mph{position:absolute;left:0;right:0;top:0;height:330px;background:repeating-linear-gradient(135deg,var(--hover) 0 10px,transparent 10px 20px);border-bottom:1px solid var(--line);display:grid;place-items:center}
+.mstreet{position:absolute;left:0;right:0;top:330px;bottom:84px;padding:12px 18px 0;overflow:hidden}
+.mstreet .meta{margin:6px 0 0}
+.minimap{position:relative;height:118px;margin-top:12px;border:1px solid var(--line2);overflow:hidden}
+.code{font:11.5px/1.6 var(--mono);padding:10px 14px;color:var(--ink);white-space:pre;overflow:hidden}
+.code i{font-style:normal;color:var(--mute)}
+.code em{font-style:normal;color:var(--accent)}
+.m-sin{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.m-sin .m-search{background:var(--hover);border:1px solid var(--line2);color:var(--ink);font-size:16px}
+.m-sin>span{font-size:14px;color:var(--accent);white-space:nowrap}
+.mp-row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;min-height:58px;padding:6px 2px;border-top:1px solid var(--line)}
+.mp-row .p-t{font-size:14.5px}
+</style>
+</head>
+<body>
+
+<div class="page-hd">
+  <h1>Open World Map · Design reference v3</h1>
+  <p>Direction 2a, ready for hand-off. Everything opens in dark, and the "Dark mode" chip in any top bar (or Settings → Appearance) switches every screen to light. The field rows in the desktop Layers rail and the tiles in the mobile Layers sheet switch that screen's map between all six fields. The Layers rail can be minimised. Country geometry is real (Natural Earth); every field, event and name is synthetic sample data. Press play on any timeline (or click the track) to run −24 h → +7 days. All screens share one clock.</p>
+</div>
+<div id="root"></div>
+
+<script>
+const ORDER=window.OWM_ORDER,FIELDS=window.OWM_FIELDS;
+const STATE={dark:true,field:{d1:'wind',d2:'wind',m1:'wind',m2:'temp',m5:'wind'}};
+const TPL={};
+TPL.top=()=>`<div class="panel topbar"><div class="brand"><span class="logo"></span>Open World Map</div><div class="search"><span>Search places, events, datasets</span><kbd>⌘K</kbd></div><div class="tb-right"><span class="live"><i></i>Live</span><span class="mono">Wed 28 Oct · 14:00 UTC</span><span class="chip" data-thm>Dark mode</span><span class="tb-sep"></span><span>Data</span><span>API</span><span>GitHub</span><span>Settings</span></div></div>`;
+TPL.layers=(photos)=>`<div class="panel layers"><div class="l-hd"><b>Layers</b><span class="l-sum" data-lsum>${photos?'Photos':'Wind'} · 3 events</span><button class="l-min" data-lmin title="Minimize"></button></div>
+<div class="lsec"><div class="kick"><span>Field</span><span data-lsrc>GFS 0.25°</span></div>
+${ORDER.map(k=>`<div class="row" data-field="${k}"><span class="rad"></span><b>${FIELDS[k].label}</b><span class="v">${FIELDS[k].level==='mean sea level'?'MSL':FIELDS[k].level==='total cover'?'total':FIELDS[k].level}</span></div>`).join('')}
+<div class="row"><b>Wind particles</b><span class="tg ${photos?'':'on'}" data-ptg></span></div></div>
+<div class="lsec"><div class="kick"><span>Events</span><span>24 h</span></div>
+<div class="row"><span class="sw" style="border:2px solid currentColor;border-radius:50%"></span><b>Earthquakes M2.5+</b><span class="v">37</span><span class="tg on" style="margin-left:8px"></span></div>
+<div class="row"><span class="sw" style="background:var(--fire)"></span><b>Wildfires</b><span class="v">4,812</span><span class="tg on" style="margin-left:8px"></span></div>
+<div class="row"><span class="sw" style="background:var(--accent);border-radius:50%"></span><b>Tropical cyclones</b><span class="v">2</span><span class="tg on" style="margin-left:8px"></span></div>
+<div class="row"><span class="sw" style="background:var(--storm)"></span><b>Severe storms</b><span class="v">11</span><span class="tg" style="margin-left:8px"></span></div></div>
+<div class="lsec"><div class="kick"><span>Imagery</span><span></span></div>
+<div class="row ${photos?'on':''}"><span class="gdot"></span><b>Street photos</b><span class="v">11.2M</span><span class="tg ${photos?'on':''}" style="margin-left:8px"></span></div></div>
+<div class="lfoot">GFS · CAMS · USGS · NASA FIRMS · GDACS · street photos CC BY-SA</div></div>`;
+TPL.timeline=()=>`<div class="timeline glass lift"><div class="tl-ctrl"><button class="play"></button><div><div class="tl-now">Now</div><div class="mono tl-date">Wed 28 Oct · 14:00 UTC</div></div></div><div class="tl-track" data-tl></div><div class="tl-side"><span class="chip">1×</span><span class="chip">3 h step</span><span class="chip">7 d</span><span class="chip on">UTC</span></div></div>`;
+TPL.detail=()=>`<div class="detail glass lift"><div class="d-hd"><div class="d-x">×</div><div class="kick">Tropical cyclone · West Pacific</div><div class="d-title">Typhoon Kalani</div><div class="d-sub"><span class="cat">CAT 3</span>Intensifying · 18.0°N 132.0°E</div></div>
+<div class="stats"><div class="stat"><div class="l">Sustained wind</div><div class="n">185<small>km/h</small></div></div><div class="stat"><div class="l">Gusts</div><div class="n">230<small>km/h</small></div></div><div class="stat"><div class="l">Central pressure</div><div class="n">954<small>hPa</small></div></div><div class="stat"><div class="l">Motion</div><div class="n">WNW 18<small>km/h</small></div></div></div>
+<div class="d-sec"><div class="kick"><span>Intensity · 48 h</span><span>km/h</span></div><svg data-spark width="310" height="48"></svg></div>
+<div class="d-sec"><div class="alert"><b data-landfall>Landfall forecast in ~31 h</b><span>Northern Luzon, Philippines · 165–195 km/h</span></div></div>
+<div class="d-sec"><div class="kick"><span>Forecast track</span><span>JTWC #22</span></div><table class="tbl"><tr><th>T</th><th>Position</th><th>Wind</th><th>Cat</th></tr><tr><td>+24h</td><td>18.9°N 127.9°E</td><td>205</td><td>4</td></tr><tr><td>+36h</td><td>18.3°N 123.2°E</td><td>190</td><td>3</td></tr><tr><td>+48h</td><td>18.2°N 121.0°E</td><td>140</td><td>2</td></tr></table></div>
+<div class="d-ft"><div class="d-btns"><span class="btn pri">Follow on timeline</span><span class="btn">GeoJSON ↓</span></div><div class="src">Updated 14:00 UTC · JTWC, GDACS · CC BY 4.0</div></div></div>`;
+TPL.d1=()=>`<div class="frame desk" data-scr="d1" data-screen-label="D1 Live map"><div class="map" data-view="world" data-events="1" data-probe="-34,41"></div><div class="probe glass" data-probetxt></div>${TPL.top()}${TPL.layers()}<div class="panel legend glass" data-legend></div>${TPL.detail()}${TPL.timeline()}</div>`;
+TPL.d2=()=>`<div class="frame desk" data-scr="d2" data-screen-label="D2 Search"><div class="map" data-view="world" data-events="1"></div>${TPL.top()}${TPL.layers()}${TPL.timeline()}<div class="scrim"></div>
+<div class="panel palette"><div class="p-in"><span>lis<span class="caret"></span></span><kbd>esc</kbd></div>
+<div class="p-chips"><span class="chip on">All</span><span class="chip">Places</span><span class="chip">Events</span><span class="chip">Datasets</span><span class="chip">Coordinates</span></div>
+<div class="p-grp"><div class="kick">Places</div>
+<div class="p-row sel"><div class="p-ic">PT</div><div><div class="p-t"><em>Lis</em>bon, Portugal</div><div class="p-m">38.72°N 9.14°W · 14:00 local</div></div><div class="p-r">19° · 22 km/h NW<br>PM2.5 9 · Good</div></div>
+<div class="p-row"><div class="p-ic">GB</div><div><div class="p-t"><em>Lis</em>burn, Northern Ireland</div><div class="p-m">54.51°N 6.04°W · 14:00 local</div></div><div class="p-r">11° · 31 km/h SW<br>PM2.5 5 · Good</div></div>
+<div class="p-row"><div class="p-ic">US</div><div><div class="p-t"><em>Lis</em>le, Illinois</div><div class="p-m">41.80°N 88.07°W · 09:00 local</div></div><div class="p-r">7° · 14 km/h N<br>PM2.5 14 · Moderate</div></div></div>
+<div class="p-grp"><div class="kick">Live events nearby</div>
+<div class="p-row"><div class="p-ic" style="border-radius:50%">M3</div><div><div class="p-t">M3.1 earthquake · 62 km WSW of <em>Lis</em>bon</div><div class="p-m">Depth 14 km · USGS · 3 h ago</div></div><div class="p-r">Open →</div></div></div>
+<div class="p-grp"><div class="kick">Datasets</div>
+<div class="p-row"><div class="p-ic">NC</div><div><div class="p-t">Wind 10 m: crop to <em>Lis</em>bon region</div><div class="p-m">GFS 0.25° · 48 h · NetCDF, GRIB2, CSV</div></div><div class="p-r">4.2 MB ↓</div></div></div>
+<div class="p-ft"><span>↑↓ navigate</span><span>↵ fly to</span><span>⇧↵ open data</span><span style="margin-left:auto">Tip: paste coordinates like 38.7, −9.1</span></div></div></div>`;
+TPL.d3=()=>`<div class="frame desk" data-scr="d3" data-screen-label="D3 Street level"><div class="map" data-view="street" data-center="38.7225,-9.1395" data-zoom="15"></div>${TPL.top()}${TPL.layers(true)}
+<div class="ctx glass"><div class="kv"><span>Here now</span><b>19° · 22 km/h NW</b></div><div class="kv"><span>Air quality</span><b>PM2.5 9 · Good</b></div><div class="kv"><span>Photos in view</span><b>2,341</b></div><div class="kv"><span>Captured</span><b>Any time ▾</b></div></div>
+<div class="zoom glass"><i>+</i><i>−</i></div>
+<div class="viewer glass lift"><div class="ph"><div class="ph-l">STREET PHOTO<br>2048 × 1536 · 360° pano</div><div class="ph-nav" style="left:10px">‹</div><div class="ph-nav" style="right:10px">›</div><div class="ph-cnt">12 / 148 in sequence</div><div class="ph-cmp">Heading 214° SW</div></div>
+<div class="strip"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+<div style="padding:10px 18px 0"><div class="kick">Avenida da Liberdade · Lisbon</div></div>
+<div class="meta"><div>Captured</div><div>14 Oct 2026 · 10:42</div><div>Location</div><div>38.7190°N 9.1440°W</div><div>Camera</div><div>360° · 1.4 m height</div><div>Contributor</div><div>@ruafotos</div><div>License</div><div>CC BY-SA 4.0</div></div>
+<div class="d-ft"><div class="d-btns"><span class="btn pri">Open full screen</span><span class="btn">Original ↓</span></div><div class="src">Faces and plates blurred · Report an issue</div></div></div></div>`;
+TPL.ref=(k)=>`<div class="frame ref" data-scr="ref-${k}" data-field="${k}" data-screen-label="Field ${FIELDS[k].label}"><div class="ref-map"><div class="map" data-view="world" data-static="1"></div></div><div class="ref-spec"><div class="ref-hd"><b>${FIELDS[k].label}</b><span>${FIELDS[k].level} · ${FIELDS[k].unit} · ${FIELDS[k].source}</span></div><div data-legend></div><p>${FIELDS[k].render}</p><div class="ref-kv"><div><span>Render mode</span><b>${FIELDS[k].mode}</b></div><div><span>Probe readout</span><b data-probeex>—</b></div><div><span>Particles</span><b>${k==='wind'?'on by default':'optional overlay'}</b></div></div></div></div>`;
+TPL.sbar=()=>`<div class="island"></div><div class="sbar"><span>9:41</span><span>5G · 100</span></div>`;
+TPL.tabs=(on)=>`<div class="tabs">${['Map','Events','Data','Settings'].map(t=>`<div class="${t===on?'on':''}"><i></i>${t}</div>`).join('')}</div>`;
+TPL.mtop=(lyr)=>`<div class="m-top"><div class="m-search glass">Search places, events</div><div class="m-btn glass ${lyr?'on':''}">LYR</div></div>`;
+TPL.mscrub=()=>`<div class="m-scrub glass"><button class="play"></button><div class="m-track" data-tl="mini"></div><div class="mono" style="font-size:11px;text-align:right;line-height:1.3"><b style="color:var(--ink)" data-mnow>Now</b><br><span style="color:var(--mute)" data-mdate>Wed 14:00</span></div></div>`;
+TPL.m1=()=>`<div class="frame mob" data-scr="m1" data-screen-label="M1 Map + place">${TPL.sbar()}<div class="map" data-view="europe" data-pin="-9.14,38.72"></div>${TPL.mtop()}<div class="m-field glass" data-mchip></div>${TPL.mscrub()}
+<div class="sheet"><div class="grab"></div><div class="s-hd"><div><div class="s-name">Lisbon, Portugal</div><div class="s-co">38.72°N 9.14°W · 14:00 WET</div></div><div class="s-tmp">19°<small>Partly cloudy</small></div></div>
+<div class="s-stats"><div><span>Wind</span><b>22 <em>NW</em></b><em>gusts 38</em></div><div><span>Air quality</span><b>9</b><em>Good · PM2.5</em></div><div><span>Rain 24 h</span><b>0.2</b><em>mm</em></div></div>
+<div class="chart" data-chart></div><div class="s-near"><span class="ring"></span>M3.1 earthquake offshore<span>62 km WSW · 3 h</span></div></div>${TPL.tabs('Map')}</div>`;
+TPL.m2=()=>`<div class="frame mob" data-scr="m2" data-screen-label="M2 Layers">${TPL.sbar()}<div class="map" data-view="europe" data-pin="-9.14,38.72"></div>${TPL.mtop(true)}<div class="m-field glass" data-mchip></div>
+<div class="lsheet"><div class="ls-hd"><b>Map layers</b><span class="xbtn">×</span></div>
+<div class="grp"><div class="kick"><span>Field</span><span>tap to switch</span></div><div class="ftiles">${ORDER.map(k=>`<div class="ftile" data-field="${k}"><b>${FIELDS[k].short}</b><div data-minibar="${k}"></div><span>${FIELDS[k].unit}</span></div>`).join('')}</div></div>
+<div class="grp"><div class="card"><div class="it">Wind particles<span class="tg on" data-ptg></span></div><div class="it" style="border-bottom:0">Events<span class="r">3 of 4</span></div><div class="evchips"><span class="chip on">Quakes</span><span class="chip on">Fires</span><span class="chip on">Cyclones</span><span class="chip">Storms</span></div><div class="it"><span class="gdot"></span>Street photos<span class="tg"></span></div></div></div></div>${TPL.tabs('Map')}</div>`;
+TPL.m3=()=>`<div class="frame mob" data-scr="m3" data-screen-label="M3 Search">${TPL.sbar()}<div class="scr" style="padding-top:12px"><div class="m-sin"><div class="m-search">lis<span class="caret" style="height:18px"></span></div><span>Cancel</span></div>
+<div class="chips-row"><span class="chip on">All</span><span class="chip">Places</span><span class="chip">Events</span><span class="chip">Datasets</span></div>
+<div class="grp"><div class="kick"><span>Places</span><span></span></div>
+<div class="mp-row"><div class="p-ic">PT</div><div><div class="p-t"><em>Lis</em>bon, Portugal</div><div class="p-m">38.72°N 9.14°W</div></div><div class="p-r">19°<br>22 km/h</div></div>
+<div class="mp-row"><div class="p-ic">GB</div><div><div class="p-t"><em>Lis</em>burn, N. Ireland</div><div class="p-m">54.51°N 6.04°W</div></div><div class="p-r">11°<br>31 km/h</div></div>
+<div class="mp-row"><div class="p-ic">US</div><div><div class="p-t"><em>Lis</em>le, Illinois</div><div class="p-m">41.80°N 88.07°W</div></div><div class="p-r">7°<br>14 km/h</div></div></div>
+<div class="grp"><div class="kick"><span>Live events nearby</span><span></span></div>
+<div class="mp-row"><div class="p-ic" style="border-radius:50%">M3</div><div><div class="p-t">M3.1 earthquake</div><div class="p-m">62 km WSW of Lisbon · 3 h</div></div><div class="p-r">›</div></div></div>
+<div class="grp"><div class="kick"><span>Datasets</span><span></span></div>
+<div class="mp-row"><div class="p-ic">NC</div><div><div class="p-t">Wind 10 m · <em>Lis</em>bon crop</div><div class="p-m">GFS 0.25° · NetCDF, CSV</div></div><div class="p-r">4.2 MB</div></div></div>
+<div class="grp"><div class="kick"><span>Recent</span><span>on this device</span></div>
+<div class="mp-row"><div class="p-ic">↺</div><div><div class="p-t">Typhoon Kalani</div><div class="p-m">Event · West Pacific</div></div><div class="p-r">›</div></div></div></div>${TPL.tabs('Map')}</div>`;
+TPL.m4=()=>`<div class="frame mob" data-scr="m4" data-screen-label="M4 Events">${TPL.sbar()}<div class="scr"><h2>Events</h2><p class="lead">Live worldwide · last 24 h · 4,862 events</p>
+<div class="chips-row"><span class="chip on">All</span><span class="chip">Cyclones 2</span><span class="chip">Quakes 37</span><span class="chip">Fires 4.8k</span><span class="chip">Storms 11</span></div>
+<div class="sortbar"><span>Sorted by severity</span><span>Near me ▾</span></div>
+<div>
+<div class="ev"><span class="ico cy"></span><div><b>Typhoon Kalani</b><div class="m">Cat 3 · 185 km/h · West Pacific</div></div><div class="t hot">Landfall<br>~31 h</div></div>
+<div class="ev"><span class="ico eq"></span><div><b>M5.8 earthquake</b><div class="m">112 km E of Sendai, JP · 24 km deep</div></div><div class="t">2 h</div></div>
+<div class="ev"><span class="ico cy"></span><div><b>Tropical Cyclone Amara</b><div class="m">Cat 1 · 130 km/h · S. Indian Ocean</div></div><div class="t">6 h</div></div>
+<div class="ev"><span class="ico eq"></span><div><b>M5.4 earthquake</b><div class="m">Vanuatu · 35 km deep</div></div><div class="t">5 h</div></div>
+<div class="ev"><span class="ico fi"></span><div><b>Fire cluster · 1,204 hotspots</b><div class="m">Mato Grosso, Brazil · VIIRS</div></div><div class="t">24 h</div></div>
+<div class="ev"><span class="ico st"></span><div><b>Severe storm</b><div class="m">North Atlantic · gusts 110 km/h</div></div><div class="t">9 h</div></div>
+<div class="ev"><span class="ico fi"></span><div><b>Fire cluster · 318 hotspots</b><div class="m">Northern Territory, AU · VIIRS</div></div><div class="t">24 h</div></div>
+<div class="ev"><span class="ico eq"></span><div><b>M5.2 earthquake</b><div class="m">Northern Sumatra, ID · 41 km deep</div></div><div class="t">11 h</div></div>
+</div></div>${TPL.tabs('Events')}</div>`;
+TPL.m5=()=>`<div class="frame mob" data-scr="m5" data-screen-label="M5 Event detail">${TPL.sbar()}<div class="map" data-view="wpac" data-events="1"></div><div class="m-back"><span class="glass">‹ Events</span><span class="glass">Share</span></div>
+<div class="esheet"><div class="kick">Tropical cyclone · West Pacific</div><div class="d-title">Typhoon Kalani</div><div class="d-sub"><span class="cat">CAT 3</span>Intensifying · 18.0°N 132.0°E</div>
+<div class="stats"><div class="stat"><div class="l">Sustained wind</div><div class="n">185<small>km/h</small></div></div><div class="stat"><div class="l">Gusts</div><div class="n">230<small>km/h</small></div></div><div class="stat"><div class="l">Pressure</div><div class="n">954<small>hPa</small></div></div><div class="stat"><div class="l">Motion</div><div class="n">WNW 18<small>km/h</small></div></div></div>
+<div style="margin:12px 0"><div class="alert"><b data-landfall>Landfall forecast in ~31 h</b><span>Northern Luzon, Philippines · 165–195 km/h</span></div></div>
+<table class="tbl"><tr><th>T</th><th>Position</th><th>Wind</th><th>Cat</th></tr><tr><td>+24h</td><td>18.9°N 127.9°E</td><td>205</td><td>4</td></tr><tr><td>+48h</td><td>18.2°N 121.0°E</td><td>140</td><td>2</td></tr></table>
+<div class="d-btns" style="margin-top:12px"><span class="btn pri" style="height:44px">Follow on timeline</span><span class="btn" style="height:44px;flex:0 0 112px">GeoJSON ↓</span></div></div>${TPL.tabs('Events')}</div>`;
+TPL.m6=()=>`<div class="frame mob" data-scr="m6" data-screen-label="M6 Street photo">${TPL.sbar()}<div class="mph"><div class="ph-l">STREET PHOTO<br>360° pano · drag to look</div><div class="ph-nav" style="left:12px;width:44px;height:44px;margin-top:-22px">‹</div><div class="ph-nav" style="right:12px;width:44px;height:44px;margin-top:-22px">›</div><div class="ph-cnt">12 / 148</div><div class="ph-cmp">214° SW</div></div>
+<div class="m-back"><span class="glass">‹ Map</span><span class="glass">Full screen</span></div>
+<div class="mstreet"><div class="kick">Avenida da Liberdade · Lisbon</div>
+<div class="meta"><div>Captured</div><div>14 Oct 2026 · 10:42</div><div>Location</div><div>38.7190°N 9.1440°W</div><div>Contributor</div><div>@ruafotos</div><div>License</div><div>CC BY-SA 4.0</div></div>
+<div class="minimap"><div class="map" data-view="street" data-center="38.7192,-9.1442" data-zoom="16" data-mini="1"></div></div>
+<div class="d-btns" style="margin-top:12px"><span class="btn" style="height:44px">Here now: 19° · PM2.5 9</span><span class="btn" style="height:44px;flex:0 0 110px">Original ↓</span></div></div>${TPL.tabs('Map')}</div>`;
+TPL.m7=()=>`<div class="frame mob" data-scr="m7" data-screen-label="M7 Data">${TPL.sbar()}<div class="scr"><h2>Open data</h2><p class="lead">Every layer is free to download. No key, no account.</p>
+<div class="grp"><div class="kick"><span>Export this view</span><span>~18 MB</span></div><div class="card"><div class="it">Region<span class="r">24°W–16°E · 30–58°N</span></div><div class="it">Time<span class="r">−24 h → +24 h · 3 h</span></div><div class="it" style="border-bottom:0">Layers<span class="r">2 selected</span></div><div class="fmts"><span class="chip on">Wind</span><span class="chip on">Temp</span><span class="chip">Rain</span><span class="chip">PM2.5</span><span class="chip">Clouds</span><span class="chip">Pressure</span></div><div class="it">Format<div class="seg"><span class="on">NetCDF</span><span>GeoTIFF</span><span>CSV</span></div></div><div style="padding:10px 14px 12px"><span class="btn pri" style="width:100%;height:44px">Download</span></div></div></div>
+<div class="grp"><div class="kick"><span>Datasets</span><span>updated hourly</span></div><div class="card"><div class="it">Weather fields<span class="r">GFS 0.25°<span class="arr">›</span></span></div><div class="it">Air quality<span class="r">CAMS<span class="arr">›</span></span></div><div class="it">Events feed<span class="r">GeoJSON<span class="arr">›</span></span></div></div></div>
+<div class="grp"><div class="kick"><span>API</span><span>docs ›</span></div><div class="card"><div class="code"><em>GET</em> /v1/point<i>?lat=38.72&amp;lon=-9.14</i>
+<i>    &amp;fields=</i>wind,temp,pm25<i>&amp;hours=48</i></div></div></div></div>${TPL.tabs('Data')}</div>`;
+TPL.m8=()=>`<div class="frame mob" data-scr="m8" data-screen-label="M8 Settings">${TPL.sbar()}<div class="scr"><h2>Settings</h2><p class="lead">No account needed. Your settings are stored on this device only.</p>
+<div class="grp"><div class="kick">Units</div><div class="card"><div class="it">Measurements<div class="seg"><span class="on">Metric</span><span>Imperial</span></div></div><div class="it">Wind speed<div class="seg"><span class="on">km/h</span><span>m/s</span><span>kn</span><span>mph</span></div></div><div class="it">Time<div class="seg"><span class="on">Local</span><span>UTC</span></div></div></div></div>
+<div class="grp"><div class="kick">Map</div><div class="card"><div class="it">Appearance<div class="seg" data-appear><span data-v="light">Light</span><span data-v="dark">Dark</span><span data-v="auto">Auto</span></div></div><div class="it">Default field<span class="r">Wind<span class="arr">›</span></span></div><div class="it">Particle density<div class="sl"></div></div><div class="it">Reduce motion<span class="tg"></span></div></div></div>
+<div class="grp"><div class="card"><div class="it">Sources and licenses<span class="r">14<span class="arr">›</span></span></div><div class="it">Source code<span class="r">MIT · GitHub<span class="arr">›</span></span></div></div></div></div>${TPL.tabs('Settings')}</div>`;
+
+/* ---------- synthetic data ---------- */
+const D=Math.PI/180;
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let PH=0;
+const VK=[{r:3.2,d:1,pk:58/150,k:[[-24,141,12,110],[-10,136.2,15.6,135],[0,132,18,150],[12,130,18.6,158],[18,129,18.8,165],[24,127.9,18.9,162],[31,124.4,18.5,150],[36,123.2,18.3,120],[48,121,18.2,90],[72,118.5,19.8,55],[96,116.5,21.6,35],[120,114.5,23.4,18],[168,112,26,0]]},
+{r:3,d:-1,pk:30/85,k:[[-24,72,-14,70],[0,68,-17,85],[48,64,-20,100],[96,61,-23,60],[140,58,-26,0],[168,57,-27,0]]},
+{r:8,d:1,pk:32/55,k:[[-24,-46,49,50],[0,-38,52,55],[72,-20,55,58],[168,8,60,40]]},
+{r:9,d:-1,pk:26/50,k:[[-24,-158,-47,50],[0,-150,-48,50],[168,-95,-50,45]]}];
+const VORT=VK.map(v=>({r:v.r,d:v.d,lon:0,lat:0,s:0,p:0}));
+function updateVort(t){VK.forEach((v,i)=>{const k=v.k;let j=0;while(j<k.length-2&&t>k[j+1][0])j++;const a=k[j],b=k[j+1],f=Math.max(0,Math.min(1,(t-a[0])/(b[0]-a[0])));const o=VORT[i];o.lon=a[1]+(b[1]-a[1])*f;o.lat=a[2]+(b[2]-a[2])*f;o.s=a[3]+(b[3]-a[3])*f;o.p=o.s*v.pk})}
+updateVort(0);
+const HIGHS=[[-35,34],[-140,33],[80,-33],[-15,-30],[170,-32],[100,48]];
+const HOT=[[78,27,7,150],[88,24,4,80],[115,33,7,90],[10,16,10,55],[-58,-11,7,55],[24,-9,8,50],[100,18,5,45],[45,25,7,35],[-99,20,3,40],[31,30,3,45]];
+const wdx=(lo,o,la)=>{let dx=lo-o.lon;dx=((dx+540)%360)-180;return dx*Math.cos(la*D)};
+function wind(lon,lat){
+  const φ=lat*D;let u=-24*Math.cos(φ*6)*Math.cos(φ),v=0;
+  u+=14*Math.sin(lon*D*3+lat*.09+PH)+8*Math.sin(lon*D*7-lat*.05+1.3-PH*.7);
+  v+=13*Math.sin(lon*D*3-lat*.07+.7+PH*.8)+9*Math.cos(lon*D*6+lat*.13-PH*.5);
+  const jet=Math.exp(-Math.pow((Math.abs(lat)-47)/8,2));u+=jet*28*(1+.5*Math.sin(lon*D*2));
+  for(const o of VORT){const dx=wdx(lon,o,lat),dy=lat-o.lat,d=Math.hypot(dx,dy)+1e-6;if(d>o.r*6)continue;const q=d/o.r,f=o.s*q*Math.exp((1-q*q)/2);u+=-dy/d*f*o.d;v+=dx/d*f*o.d}
+  return[u,v];
+}
+const F={
+  wind:(lo,la)=>{const[u,v]=wind(lo,la);return Math.hypot(u,v)},
+  temp:(lo,la)=>45*Math.pow(Math.max(0,Math.cos(la*D)),1.2)-18+4*Math.sin(lo*D*3+la*.08+PH*.5)+3*Math.cos(lo*D*7+.4)-(la<-62?14:0)-1.5*(1+Math.tanh(la/5)),
+  rain:(lo,la)=>{let r=0;r+=Math.exp(-Math.pow((la-7)/5,2))*5*Math.max(0,Math.sin(lo*D*11+la*.4-PH*.6)+.8*Math.sin(lo*D*4+1.7)+.2*Math.sin(lo*D*30));
+    r+=Math.exp(-Math.pow((Math.abs(la)-48-6*Math.sin(lo*D*2))/4,2))*4*Math.max(0,Math.sin(lo*D*5+la*.2+.5+PH)+.25);
+    for(const o of VORT){const dx=wdx(lo,o,la),dy=la-o.lat,d=Math.hypot(dx,dy)/o.r;if(d>6)continue;r+=(o.s/150)*42*Math.exp(-d*d/3)*(.55+.45*Math.sin(3*Math.atan2(dy,dx)*o.d+d*2.2))}
+    return r},
+  aq:(lo,la)=>{let v=6+3*Math.sin(lo*D*11+la*.3);for(const[x,y,s,a]of HOT){let dx=lo-x;dx=((dx+540)%360)-180;v+=a*Math.exp(-(dx*dx+(la-y)*(la-y))/(s*s))}return Math.max(0,v)},
+  cloud:(lo,la)=>{let c=40+30*Math.sin(lo*D*4+la*.12+PH)+18*Math.sin(lo*D*9-la*.09+1)+7*Math.sin(lo*D*19+la*.3);c+=35*Math.exp(-Math.pow((la-7)/6,2))-34*Math.exp(-Math.pow((Math.abs(la)-24)/7,2));c+=Math.min(60,F.rain(lo,la)*10);return Math.max(0,Math.min(100,c))},
+  pres:(lo,la)=>{const a=Math.abs(la);let p=1012+11*Math.exp(-Math.pow((a-32)/9,2))-11*Math.exp(-Math.pow((a-62)/9,2))+6*Math.sin(lo*D*3+la*.06+PH)+3*Math.cos(lo*D*6);for(const o of VORT){const dx=wdx(lo,o,la),dy=la-o.lat,d=Math.hypot(dx,dy)/(o.r*1.8);if(d<5)p-=o.p*Math.exp(-d*d)}return p}
+};
+const QUAKES=[[142.4,38.3,5.8],[-72.6,-33.2,4.9],[28.1,38.9,4.4],[121.6,24,4.7],[95.8,3.4,5.2],[-9.9,38.3,3.1],[167.2,-15.5,5.4],[-77.5,-9.8,4.6],[70.9,36.5,4.8],[127.5,-3.2,4.3],[-155.3,19.4,3.9],[26.6,45.7,4.1],[60.1,27.4,4.5]];
+const FIRES=[[146,-17,4,40],[-58,-11,6,80],[24,-9,6,90],[133,-14,5,35],[100,18,3,25],[30,-15,5,40],[-47,-7,4,40],[15,8,7,40]];
+const TRACK_P=[[141,12],[139.5,13.2],[138,14.4],[136.2,15.6],[134,16.9],[132,18]],TRACK_F=[[132,18],[130,18.6],[127.9,18.9],[125.6,18.6],[123.2,18.3],[121,18.2],[118.5,19.8],[116.5,21.6],[114.5,23.4]];
+const dirName=(u,v)=>{const a=(Math.atan2(-u,-v)/D+360)%360;return['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'][Math.round(a/22.5)%16]};
+const aqCat=v=>{const st=FIELDS.aq.stops;let i=0;while(i<st.length-1&&v>=st[i+1][0])i++;return st[i][2]};
+function probeTxt(k,lo,la){const v=F[k](lo,la);switch(k){
+  case'wind':{const[u,w]=wind(lo,la);return[`${Math.round(v)} km/h`,`from ${dirName(u,w)}`]}
+  case'temp':return[`${Math.round(v)} °C`,'at 2 m'];
+  case'rain':return[v<.1?'Dry':`${v.toFixed(1)} mm/h`,'precipitation'];
+  case'aq':return[`${Math.round(v)} µg/m³`,aqCat(v)];
+  case'cloud':return[`${Math.round(v)} %`,'cloud cover'];
+  case'pres':return[`${Math.round(v)} hPa`,'sea level']}}
+
+/* ---------- scales ---------- */
+const parsed={};
+function scale(k,dark){const key=k+(dark?'d':'l');if(parsed[key])return parsed[key];const f=FIELDS[k],raw=(!dark&&f.stopsLight)||f.stops;
+  const st=raw.map(s=>{const c=d3.color(s[1]).rgb();return{v:s[0],c:[c.r,c.g,c.b,Math.round((isNaN(c.opacity)?1:c.opacity)*255)]}});
+  const tf=f.mode==='continuous-log'?(x=>Math.log(Math.max(x,1e-3))):(x=>x);return parsed[key]={f,raw,st,tf}}
+function colorAt(S,v){const{f,st,tf}=S;if(f.transparentBelow!=null&&v<f.transparentBelow)return null;
+  if(f.mode==='banded'){let i=0;while(i<st.length-1&&v>=st[i+1].v)i++;return st[i].c}
+  const x=tf(v);if(x<=tf(st[0].v))return st[0].c;
+  for(let i=0;i<st.length-1;i++){const a=tf(st[i].v),b=tf(st[i+1].v);if(x<=b){const t=(x-a)/(b-a),c0=st[i].c,c1=st[i+1].c;return[c0[0]+(c1[0]-c0[0])*t,c0[1]+(c1[1]-c0[1])*t,c0[2]+(c1[2]-c0[2])*t,c0[3]+(c1[3]-c0[3])*t]}}
+  return st[st.length-1].c}
+function barHTML(k,dark){const S=scale(k,dark),{f,raw,tf}=S;
+  if(f.mode==='banded')return `<div class="lg-bar">${raw.map(s=>`<i style="background:${s[1]}"></i>`).join('')}</div>`;
+  const a=tf(raw[0][0]),b=tf(raw[raw.length-1][0]),p=v=>((tf(v)-a)/(b-a)*100).toFixed(1);
+  return `<div class="lg-bar" style="background:linear-gradient(90deg,${raw.map(s=>`${s[1]} ${p(s[0])}%`).join(',')})"></div>`}
+function legendHTML(k,dark){const S=scale(k,dark),{f,raw,tf}=S;let t;
+  if(f.mode==='banded')t=`<div class="lg-t band">${raw.map(s=>`<span>${s[0]}</span>`).join('')}</div><div class="lg-cats">${raw.map(s=>`<span>${s[2]}</span>`).join('')}</div>`;
+  else{const a=tf(raw[0][0]),b=tf(raw[raw.length-1][0]),p=v=>((tf(parseFloat(v))-a)/(b-a)*100).toFixed(1);t=`<div class="lg-t">${f.ticks.map(x=>`<span style="left:${p(x)}%">${x}</span>`).join('')}</div>`}
+  return `<div class="lg-h"><span>${f.label} · ${f.unit}</span><span>${f.mode==='banded'?'US EPA bands':f.level+' · '+f.source}</span></div>${barHTML(k,dark)}${t}`}
+
+/* ---------- map engine ---------- */
+let ANIM=[],LAND,BORDERS;
+const VIS=new IntersectionObserver(es=>es.forEach(e=>e.target._vis=e.isIntersecting));
+function mkCanvas(el,w,h,dpr){const c=document.createElement('canvas');c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';el.appendChild(c);const x=c.getContext('2d');x.scale(dpr,dpr);return x}
+function drawBase(M){
+  const{ctx,proj,w,h,dark,s,gw,gh,coords}=M,k=M.field,S=scale(k,dark),f=S.f,path=d3.geoPath(proj,ctx),veil=f.mode==='veil';
+  ctx.clearRect(0,0,w,h);ctx.fillStyle=dark?'#07090c':'#ebe8e0';ctx.fillRect(0,0,w,h);
+  ctx.save();ctx.beginPath();path({type:'Sphere'});ctx.clip();
+  if(veil){ctx.fillStyle=dark?'#0c1015':'#e2ded3';ctx.fillRect(0,0,w,h);ctx.beginPath();path(LAND);ctx.fillStyle=dark?'#1c2229':'#cfc8b9';ctx.fill()}
+  const off=document.createElement('canvas');off.width=gw;off.height=gh;const oc=off.getContext('2d'),img=oc.createImageData(gw,gh),vals=new Float64Array(gw*gh),fn=F[k],am=dark?1:.9;
+  for(let i=0;i<gw*gh;i++){const lo=coords[i*2];if(isNaN(lo)){vals[i]=k==='pres'?1013:0;continue}const v=fn(lo,coords[i*2+1]);vals[i]=v;const c=colorAt(S,v);if(!c)continue;img.data[i*4]=c[0];img.data[i*4+1]=c[1];img.data[i*4+2]=c[2];img.data[i*4+3]=c[3]*(veil?1:am)}
+  oc.putImageData(img,0,0);ctx.imageSmoothingEnabled=true;ctx.drawImage(off,0,0,w,h);
+  if(!dark&&!veil){ctx.beginPath();path(d3.geoGraticule10());ctx.strokeStyle='rgba(21,23,26,.1)';ctx.lineWidth=.6;ctx.stroke()}
+  if(!veil){ctx.beginPath();path(LAND);ctx.fillStyle=dark?'rgba(4,6,9,.28)':'rgba(255,255,255,.2)';ctx.fill()}
+  ctx.beginPath();path(LAND);ctx.strokeStyle=dark?'rgba(255,255,255,.5)':'rgba(21,23,26,.6)';ctx.lineWidth=.7;ctx.stroke();
+  ctx.beginPath();path(BORDERS);ctx.strokeStyle=dark?'rgba(255,255,255,.16)':'rgba(21,23,26,.22)';ctx.lineWidth=.5;ctx.stroke();
+  if(f.mode==='isobars'){
+    const cs=d3.contours().size([gw,gh]).thresholds(d3.range(940,1052,f.interval))(Array.from(vals));
+    ctx.save();ctx.scale(s,s);const gp=d3.geoPath(null,ctx);
+    cs.forEach(c=>{const major=c.value%f.majorEvery===0;ctx.beginPath();gp(c);ctx.lineWidth=(major?1.4:.7)/s;ctx.strokeStyle=dark?`rgba(255,255,255,${major?.75:.45})`:`rgba(21,23,26,${major?.75:.4})`;ctx.stroke()});ctx.restore();
+    ctx.font='600 13px "IBM Plex Mono"';ctx.textAlign='center';
+    const lab=(lo,la,t)=>{const p=proj([lo,la]);if(!p||p[0]<0||p[0]>w||p[1]<0||p[1]>h)return;const v=Math.round(F.pres(lo,la));ctx.fillStyle=dark?'rgba(7,9,12,.75)':'rgba(247,245,239,.85)';ctx.fillRect(p[0]-22,p[1]-16,44,30);ctx.fillStyle=t==='L'?(dark?'#9ec3ff':'#2b4e9a'):(dark?'#f1c48a':'#8a4a1e');ctx.fillText(t,p[0],p[1]-3);ctx.font='500 10px "IBM Plex Mono"';ctx.fillText(v,p[0],p[1]+10);ctx.font='600 13px "IBM Plex Mono"'};
+    VORT.forEach(o=>lab(o.lon,o.lat,'L'));HIGHS.forEach(([lo,la])=>lab(lo,la,'H'))}
+  ctx.restore();
+  if(M.view==='world'){ctx.beginPath();path({type:'Sphere'});ctx.strokeStyle=dark?'rgba(255,255,255,.12)':'rgba(21,23,26,.25)';ctx.lineWidth=1;ctx.stroke()}
+}
+function initGeo(el){
+  const frame=el.closest('.frame'),dark=!frame.classList.contains('lt'),w=el.clientWidth,h=el.clientHeight,dpr=Math.min(2,devicePixelRatio||1),view=el.dataset.view;
+  let proj;
+  if(view==='world')proj=el.dataset.static?d3.geoNaturalEarth1().rotate([-70,0]).fitExtent([[6,6],[w-6,h-6]],{type:'Sphere'}):d3.geoNaturalEarth1().rotate([-70,0]).scale(w/5.15).translate([w*.47,h*.47]);
+  else if(view==='wpac')proj=d3.geoMercator().fitExtent([[-30,60],[w+30,300]],{type:'MultiPoint',coordinates:[[114,9],[146,25]]});
+  else proj=d3.geoMercator().fitExtent([[-10,40],[w+10,470]],{type:'MultiPoint',coordinates:[[-24,30],[16,58]]});
+  const ctx=mkCanvas(el,w,h,dpr),s=w>600?4:3,gw=Math.ceil(w/s),gh=Math.ceil(h/s),coords=new Float32Array(gw*gh*2);
+  for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const i=(y*gw+x)*2,px=x*s+s/2,py=y*s+s/2,ll=proj.invert([px,py]);if(!ll||!isFinite(ll[0])){coords[i]=NaN;continue}const b=proj(ll);if(Math.abs(b[0]-px)>1||Math.abs(b[1]-py)>1){coords[i]=NaN;continue}coords[i]=ll[0];coords[i+1]=ll[1]}
+  const M={el,ctx,proj,w,h,dark,s,gw,gh,coords,view,field:frame.dataset.field||'wind',particles:true};el._M=M;if(el.dataset.static){const sp=PH,st=STATE.t;PH=0;updateVort(0);drawBase(M);PH=sp;updateVort(st)}else drawBase(M);
+  if(!el.dataset.static){
+    const pc=mkCanvas(el,w,h,1),R=rng(w+h),N=Math.round(w*h/(view==='world'?1600:1300)),P=[],k=proj.scale()*D*(view==='world'?.018:.0045);
+    const spawn=p=>{for(let i=0;i<6;i++){p.x=R()*w;p.y=R()*h;const ll=proj.invert([p.x,p.y]);if(ll&&isFinite(ll[0])&&Math.abs(proj(ll)[0]-p.x)<1)break}p.a=0;p.m=40+R()*90};
+    for(let i=0;i<N;i++){const p={};spawn(p);p.a=R()*p.m;P.push(p)}
+    el._vis=false;VIS.observe(el);
+    ANIM.push({el,f:()=>{if(M.dirty){M.dirty=false;drawBase(M);placeStorms(M)}pc.globalCompositeOperation='destination-in';pc.fillStyle=M.particles?'rgba(0,0,0,.9)':'rgba(0,0,0,0)';pc.fillRect(0,0,w,h);pc.globalCompositeOperation='source-over';if(!M.particles)return;pc.beginPath();
+      for(const p of P){const ll=proj.invert([p.x,p.y]);if(!ll||!isFinite(ll[0])||++p.a>p.m){spawn(p);continue}const[u,v]=wind(ll[0],ll[1]);const nx=p.x+u*k,ny=p.y-v*k;pc.moveTo(p.x,p.y);pc.lineTo(nx,ny);p.x=nx;p.y=ny;if(nx<0||ny<0||nx>w||ny>h)spawn(p)}
+      pc.strokeStyle=dark?(M.field==='cloud'?'rgba(255,215,150,.7)':'rgba(255,255,255,.75)'):'rgba(21,23,26,.55)';pc.lineWidth=.9;pc.stroke()}});
+  }
+  const svg=d3.select(el).append('svg').attr('width',w).attr('height',h);
+  const ink=dark?'#fff':'#15171a',halo=dark?'rgba(0,0,0,.55)':'rgba(255,255,255,.8)',acc=dark?'#dcb672':'#d23f1c';
+  if(el.dataset.events){
+    const fr=rng(7);FIRES.forEach(([lo,la,sp,n])=>{for(let i=0;i<n;i++){const a=fr()*6.28,r=Math.sqrt(fr())*sp,p=proj([lo+Math.cos(a)*r,la+Math.sin(a)*r*.7]);if(p)svg.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',1.4+fr()*1.2).attr('fill','#ff5a1f').attr('stroke',halo).attr('stroke-width',.6)}});
+    QUAKES.forEach(([lo,la,m])=>{const p=proj([lo,la]);if(!p)return;const r=2+(m-3)*2.4;svg.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',r).attr('fill','none').attr('stroke',halo).attr('stroke-width',3.5);svg.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',r).attr('fill','none').attr('stroke',ink).attr('stroke-width',1.5)});
+    const line=d3.line().curve(d3.curveCatmullRom).x(d=>proj(d)[0]).y(d=>proj(d)[1]);
+    const cone=TRACK_F.map((d,i)=>[d[0],d[1]+i*.55]).concat(TRACK_F.map((d,i)=>[d[0],d[1]-i*.55]).reverse());
+    svg.append('path').attr('d',d3.line().curve(d3.curveCatmullRomClosed)(cone.map(proj))).attr('fill',dark?'rgba(255,255,255,.13)':'rgba(21,23,26,.1)').attr('stroke',ink).attr('stroke-opacity',.35).attr('stroke-width',.8);
+    svg.append('path').attr('d',line(TRACK_P)).attr('fill','none').attr('stroke',ink).attr('stroke-width',1.8);
+    svg.append('path').attr('d',line(TRACK_F)).attr('fill','none').attr('stroke',ink).attr('stroke-width',1.6).attr('stroke-dasharray','4 4');
+    TRACK_F.slice(1).forEach(d=>{const p=proj(d);svg.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',2.5).attr('fill',dark?'#07090c':'#f7f5ef').attr('stroke',ink).attr('stroke-width',1.2)});
+    M.storms=[];const storm=(vi,big)=>{const g=svg.append('g');if(big)g.append('circle').attr('class','pulse').attr('r',8).attr('fill','none').attr('stroke',acc).attr('stroke-width',2);g.append('circle').attr('r',big?8:5.5).attr('fill',acc).attr('stroke',halo).attr('stroke-width',2);const l=document.createElement('div');l.className='maplab';el.appendChild(l);M.storms.push({vi,g,l,big,name:vi===0?'KALANI':'AMARA'})};
+    storm(0,true);storm(1,false);placeStorms(M);
+    if(view==='wpac'){const p=proj([121.4,17.6]);const l=document.createElement('div');l.className='maplab';l.style.left=p[0]-70+'px';l.style.top=p[1]+18+'px';l.textContent='LANDFALL ~31 H';el.appendChild(l)}
+  }
+  if(el.dataset.probe){const[lo,la]=el.dataset.probe.split(',').map(Number),p=proj([lo,la]);M.probe=[lo,la];
+    el.insertAdjacentHTML('beforeend',`<div class="probe-dot" style="left:${p[0]}px;top:${p[1]}px"></div>`);const pt=frame.querySelector('[data-probetxt]');pt.style.left=p[0]+'px';pt.style.top=p[1]+'px'}
+  if(el.dataset.pin){const[lo,la]=el.dataset.pin.split(',').map(Number),p=proj([lo,la]);
+    svg.append('circle').attr('class','pulse').attr('cx',p[0]).attr('cy',p[1]).attr('r',8).attr('fill','none').attr('stroke',acc).attr('stroke-width',2);
+    svg.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',7).attr('fill',acc).attr('stroke',dark?'#07090c':'#fff').attr('stroke-width',2.5);
+    const q=proj([-9.9,38.3]);svg.append('circle').attr('cx',q[0]-6).attr('cy',q[1]+4).attr('r',4).attr('fill','none').attr('stroke',ink).attr('stroke-width',1.5);
+    const l=document.createElement('div');l.className='maplab';l.style.left=p[0]+'px';l.style.top=p[1]-14+'px';l.textContent='LISBON';el.appendChild(l)}
+  updateFrameText(frame);
+}
+function initStreet(el){
+  const dark=!el.closest('.frame').classList.contains('lt'),mini=!!el.dataset.mini,c=el.dataset.center.split(',').map(Number);
+  const m=L.map(el,{zoomControl:false,scrollWheelZoom:false,dragging:!mini,attributionControl:true}).setView(c,+el.dataset.zoom);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(m);
+  const lines=[[[38.7158,-9.1414],[38.7205,-9.1452],[38.7253,-9.1500]],[[38.7139,-9.1394],[38.7080,-9.1365]],[[38.7166,-9.1360],[38.7280,-9.1350],[38.7360,-9.1345]],[[38.7346,-9.1450],[38.7450,-9.1465]],[[38.7253,-9.1500],[38.7346,-9.1450]],[[38.7070,-9.1500],[38.7062,-9.1400],[38.7080,-9.1330]],[[38.7139,-9.1394],[38.7158,-9.1414]]];
+  const G='#2fd27a';
+  lines.forEach(ln=>{L.polyline(ln,{color:G,weight:3,opacity:.55}).addTo(m);for(let i=0;i<ln.length-1;i++){const[a,b]=[ln[i],ln[i+1]],n=Math.max(2,Math.round(Math.hypot(a[0]-b[0],a[1]-b[1])/.00045));for(let j=0;j<n;j++){const t=j/n;L.circleMarker([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],{radius:3.2,color:dark?'#07090c':'#fff',weight:1,fillColor:G,fillOpacity:1}).addTo(m)}}});
+  L.marker([38.7190,-9.1440],{icon:L.divIcon({className:'',iconSize:[60,60],iconAnchor:[30,30],html:`<svg width="60" height="60" viewBox="0 0 60 60"><path d="M30 30 L8 52 A31 31 0 0 0 30 61 Z" transform="rotate(-10 30 30)" fill="${G}" fill-opacity=".35"/><circle cx="30" cy="30" r="8" fill="${G}" stroke="${dark?'#07090c':'#fff'}" stroke-width="3"/></svg>`})}).addTo(m);
+}
+
+/* ---------- field switching ---------- */
+const catOf=s=>s>=160?'CAT 4':s>=140?'CAT 3':s>=120?'CAT 2':s>=95?'CAT 1':s>=60?'TS':'TD';
+function placeStorms(M){(M.storms||[]).forEach(s=>{const o=VORT[s.vi],p=M.proj([o.lon,o.lat]),vis=p&&o.s>20&&p[0]>-20&&p[0]<M.w+20&&p[1]>-20&&p[1]<M.h+20;s.g.style('display',vis?null:'none');s.l.style.display=vis?'':'none';if(!vis)return;s.g.attr('transform','translate('+p[0]+','+p[1]+')');s.l.style.left=p[0]+(s.big?4:0)+'px';s.l.style.top=p[1]+'px';s.l.textContent=s.name+' · '+catOf(o.s)})}
+function updateFrameText(frame){
+  const k=frame.dataset.field;if(!k)return;const f=FIELDS[k],dark=!frame.classList.contains('lt');
+  frame.querySelectorAll('[data-field]').forEach(r=>{if(r!==frame)r.classList.toggle('on',r.dataset.field===k)});
+  frame.querySelectorAll('[data-legend]').forEach(l=>l.innerHTML=legendHTML(k,dark));
+  frame.querySelectorAll('[data-lsum]').forEach(l=>l.textContent=`${f.short} · 3 events`);
+  frame.querySelectorAll('[data-lsrc]').forEach(l=>l.textContent=f.source);
+  frame.querySelectorAll('[data-mchip]').forEach(c=>c.innerHTML=`${f.short} ${f.unit}${barHTML(k,dark)}${f.mode==='banded'?'US EPA':(f.ticks[0]+'–'+f.ticks[f.ticks.length-1])}`);
+  const map=frame.querySelector('.map[data-probe]'),pt=frame.querySelector('[data-probetxt]');
+  if(map&&pt&&map._M){const[a,b]=probeTxt(k,...map._M.probe);pt.innerHTML=`<b>${a}</b><span>${b}</span><span>·</span><span>${map._M.probe[1]}°N ${-map._M.probe[0]}°W</span>`}
+  frame.querySelectorAll('[data-probeex]').forEach(e=>{const[a,b]=probeTxt(k,-34,41);e.textContent=`${a} · ${b}`});
+}
+function setField(frame,k){frame.dataset.field=k;STATE.field[frame.dataset.scr]=k;frame.querySelectorAll('.map').forEach(m=>{if(m._M){m._M.field=k;drawBase(m._M)}});updateFrameText(frame)}
+
+function buildTimelines(root){
+  root.querySelectorAll('[data-tl]').forEach((el,ix)=>{
+    const mini=el.dataset.tl==='mini',R=rng(11+ix);let h='';
+    const P=t=>((t-TL.min)/(TL.max-TL.min)*100).toFixed(2);
+    if(!mini){h+='<div class="tl-bars">'+Array.from({length:64},(_,i)=>{const t=-24+i*3;return `<i style="height:${(18+R()*55+(t>-12&&t<-3?28:0))*(t<0?1:t<120?.55:.35)}%"></i>`}).join('')+'</div>';
+      h+=`<div class="tl-zone" style="left:0;width:${P(0)}%">OBS</div><div class="tl-zone fc" style="left:${P(0)}%;width:${P(120)-P(0)}%">FORECAST</div><div class="tl-zone fc lc" style="left:${P(120)}%;right:0">LOWER CONFIDENCE</div>`;
+      for(let t=-24;t<=168;t+=24){const d=new Date(BASE+t*3600e3),lab=t===0?'<b>Now</b>':d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',timeZone:'UTC'}).replace(',','');h+=`<div class="tl-lab" style="left:${P(t)}%">${lab}</div>`}
+      for(let t=-24;t<=168;t+=12)h+=`<div class="tl-tick" style="left:${P(t)}%;height:${t%24?3:6}px"></div>`;
+      h+=`<div class="tl-axis"></div><div class="tl-ev" style="left:${P(-10)}%;background:var(--accent);border-color:var(--accent)"></div><div class="tl-ev" style="left:${P(-3)}%"></div><div class="tl-ev" style="left:${P(31)}%;background:var(--accent);border-color:var(--accent)"></div>`;
+    }else{h+=`<div class="tl-zone fc" style="left:${P(0)}%;right:0">FCST</div><div class="tl-axis"></div>`;for(let t=-24;t<=168;t+=24)h+=`<div class="tl-tick" style="top:20px;left:${P(t)}%"></div>`}
+    h+='<div class="tl-head"></div>';el.innerHTML=h});
+  root.querySelectorAll('[data-spark]').forEach(svg=>{
+    const dark=!svg.closest('.frame').classList.contains('lt'),w=310,hh=48,d=[120,128,135,142,150,158,165,172,178,185,192,198,205,203,196,190,175,140].map((v,i)=>[i/17*w,hh-6-(v-100)/115*(hh-12)]);
+    const ln=d3.line().curve(d3.curveMonotoneX),ink=dark?'#ede8dd':'#15171a',acc=dark?'#dcb672':'#d23f1c';
+    svg.innerHTML=`<line x1="${w/2}" x2="${w/2}" y1="0" y2="${hh}" stroke="${acc}" stroke-width="1.5"/><path d="${ln(d.slice(0,10))}" fill="none" stroke="${ink}" stroke-width="1.8"/><path d="${ln(d.slice(9))}" fill="none" stroke="${ink}" stroke-width="1.6" stroke-dasharray="3 3"/><circle cx="${d[9][0]}" cy="${d[9][1]}" r="3.5" fill="${acc}"/><text x="${w/2+6}" y="11" font-family="IBM Plex Mono" font-size="10" fill="${acc}">185 now</text><text x="${w-2}" y="${hh-2}" text-anchor="end" font-family="IBM Plex Mono" font-size="10" fill="${ink}" opacity=".6">peak 205 at +18h</text>`});
+  root.querySelectorAll('[data-chart]').forEach(el=>{
+    const dark=!el.closest('.frame').classList.contains('lt'),w=354,h=60,ink=dark?'#ede8dd':'#15171a',mu=dark?'#a09d95':'#55585d',acc=dark?'#dcb672':'#d23f1c',n=64;
+    const T=Array.from({length:n+1},(_,i)=>{const hr=(14+i*3-24+48)%24;return 15.5+5*Math.sin((hr-9)/24*2*Math.PI)-Math.min(3,i/20)+(i>40&&i<52?-2:0)});
+    const W=Array.from({length:n+1},(_,i)=>14+10*Math.abs(Math.sin(i/6))+(i>36&&i<48?14:0));
+    const x=i=>i/n*w,y=t=>8+(22-t)/(22-8)*(h-30),nx=x(8);
+    const bars=W.map((v,i)=>`<rect x="${x(i)-1.4}" y="${h-14-v/40*16}" width="2.8" height="${v/40*16}" fill="${mu}" opacity=".45"/>`).join('');
+    const days=Array.from({length:9},(_,d)=>`<line x1="${x(d*8)}" x2="${x(d*8)}" y1="${h-14}" y2="${h-11}" stroke="${mu}"/>`).join('');
+    el.innerHTML=`<svg width="${w}" height="${h}">${bars}${days}<rect x="${x(48)}" y="0" width="${w-x(48)}" height="${h-14}" fill="${mu}" opacity=".07"/><path d="${d3.line().curve(d3.curveMonotoneX)(T.map((t,i)=>[x(i),y(t)]))}" fill="none" stroke="${ink}" stroke-width="1.6"/><line x1="${nx}" x2="${nx}" y1="0" y2="${h-12}" stroke="${acc}" stroke-width="1.5"/><circle cx="${nx}" cy="${y(T[8])}" r="3.5" fill="${acc}"/><text x="0" y="${h-1}" font-family="IBM Plex Mono" font-size="9.5" fill="${mu}">−24h</text><text x="${nx}" y="${h-1}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="${ink}">Now</text><text x="${w}" y="${h-1}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="${mu}">+7 d</text><text x="${w}" y="9" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="${mu}">— temp · ▮ wind · 7-day</text></svg>`});
+  root.querySelectorAll('[data-minibar]').forEach(e=>e.innerHTML=barHTML(e.dataset.minibar,!e.closest('.frame').classList.contains('lt')));
+}
+
+/* ---------- time ---------- */
+const TL={min:-24,max:168,step:3},BASE=Date.UTC(2026,9,28,14);
+let playing=false,timer=null;STATE.t=0;
+const fmtT=t=>{const d=new Date(BASE+t*3600e3);return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'}).replace(',','')+' · '+String(d.getUTCHours()).padStart(2,'0')+':00 UTC'};
+const relT=t=>t===0?'Now':(t>0?'+':'−')+(Math.abs(t)%24===0?Math.abs(t)/24+' d':Math.abs(t)+' h');
+function setTime(t){STATE.t=t;PH=t*.045;updateVort(t);const pct=((t-TL.min)/(TL.max-TL.min)*100)+'%';
+  document.querySelectorAll('.tl-head').forEach(e=>e.style.left=pct);
+  document.querySelectorAll('.tl-now,[data-mnow]').forEach(e=>e.textContent=t===0?'Now':relT(t)+(t>120?' · low conf.':''));
+  document.querySelectorAll('.tl-date').forEach(e=>e.textContent=fmtT(t));
+  document.querySelectorAll('[data-mdate]').forEach(e=>e.textContent=fmtT(t).replace(' UTC','').replace(/ \d+ \w+ ·/,''));
+  document.querySelectorAll('.live').forEach(e=>e.style.opacity=t===0?1:.35);
+  document.querySelectorAll('[data-landfall]').forEach(e=>e.textContent=t<31?`Landfall forecast in ~${31-t} h`:t<35?'Making landfall now':`Made landfall ${t-31} h ago`);
+  document.querySelectorAll('.map').forEach(m=>{if(m._M&&!m.dataset.static)m._M.dirty=true});
+  document.querySelectorAll('.frame').forEach(updateFrameText)}
+function setPlaying(p){playing=p;clearInterval(timer);document.querySelectorAll('.play').forEach(b=>b.classList.toggle('on',p));if(p)timer=setInterval(()=>{let t=STATE.t+TL.step;if(t>TL.max)t=TL.min;setTime(t)},350)}
+function bindTime(root){
+  root.querySelectorAll('.play').forEach(b=>b.onclick=()=>setPlaying(!playing));
+  root.querySelectorAll('.tl-track,.m-track').forEach(tr=>tr.onclick=e=>{const r=tr.getBoundingClientRect(),f=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));setTime(Math.round((TL.min+f*(TL.max-TL.min))/TL.step)*TL.step)});
+  setPlaying(playing);setTime(STATE.t)}
+
+/* ---------- page ---------- */
+const topoP=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r=>r.json()).then(t=>{LAND=topojson.feature(t,t.objects.land);BORDERS=topojson.mesh(t,t.objects.countries,(a,b)=>a!==b)});
+function cap(n,t){return `<div class="cap"><b>${n}</b>${t}</div>`}
+function render(){
+  const root=document.getElementById('root'),lt=STATE.dark?'':' lt';
+  const fx=h=>h.replace(/class="frame /g,'class="frame'+lt+' ');
+  const phone=(id,t,h)=>`<div>${cap(id,t)}<div class="device">${fx(h)}</div></div>`;
+  root.innerHTML=fx(`<section class="sec"><div class="sec-h"><b>Desktop</b><span>1280 × 800 · D1–D3</span></div><div class="row2">
+  <div>${cap('D1','Live map · dashboard + event detail')}${TPL.d1()}</div><div>${cap('D2','Search palette (⌘K)')}${TPL.d2()}</div><div>${cap('D3','Street level + photo viewer')}${TPL.d3()}</div></div></section>
+  <section class="sec"><div class="sec-h"><b>Field reference</b><span>6 fields · scales in owm-scales.js</span></div><div class="row3">${ORDER.map(TPL.ref).join('')}</div></section>`)+
+  `<section class="sec"><div class="sec-h"><b>Mobile</b><span>390 × 844 · M1–M8</span></div><div class="row4">
+  ${phone('M1','Map + place sheet',TPL.m1())}${phone('M2','Layers sheet · field switcher',TPL.m2())}${phone('M3','Search',TPL.m3())}${phone('M4','Events · browse',TPL.m4())}
+  ${phone('M5','Event detail',TPL.m5())}${phone('M6','Street photo',TPL.m6())}${phone('M7','Open data',TPL.m7())}${phone('M8','Settings',TPL.m8())}</div></section>`;
+  root.querySelectorAll('.frame[data-scr]').forEach(fr=>{const k=STATE.field[fr.dataset.scr];if(k)fr.dataset.field=k});
+  root.querySelectorAll('[data-thm]').forEach(c=>{c.textContent=STATE.dark?'Dark mode':'Light mode';c.onclick=()=>{STATE.dark=!STATE.dark;render()}});
+  root.querySelectorAll('[data-appear] span').forEach(s=>{s.classList.toggle('on',(s.dataset.v==='dark')===STATE.dark&&s.dataset.v!=='auto');s.onclick=()=>{const d=s.dataset.v!=='light';if(d!==STATE.dark){STATE.dark=d;render()}}});
+  root.querySelectorAll('.frame [data-field]:not(.frame)').forEach(r=>r.onclick=()=>{const fr=r.closest('.frame');if(fr.querySelector('.map:not([data-view="street"])'))setField(fr,r.dataset.field)});
+  root.querySelectorAll('[data-ptg]').forEach(t=>t.onclick=()=>{t.classList.toggle('on');t.closest('.frame').querySelectorAll('.map').forEach(m=>{if(m._M)m._M.particles=t.classList.contains('on')})});
+  root.querySelectorAll('[data-lmin]').forEach(b=>b.onclick=()=>{const l=b.closest('.layers');l.classList.toggle('min');b.title=l.classList.contains('min')?'Expand':'Minimize'});
+  buildTimelines(root);
+  root.querySelectorAll('.frame').forEach(updateFrameText);
+  bindTime(root);
+  root.querySelectorAll('.map[data-view="street"]').forEach(initStreet);
+  topoP.then(()=>{const els=[...root.querySelectorAll('.map:not([data-view="street"])')];const step=()=>{const el=els.shift();if(!el)return;if(el.isConnected)initGeo(el);setTimeout(step,20)};step()});
+}
+render();
+let _fr=0;(function loop(){requestAnimationFrame(loop);if(document.hidden||(_fr++&1))return;ANIM=ANIM.filter(a=>a.el.isConnected);ANIM.forEach(a=>{if(a.el._vis)a.f()})})();
+</script>
+</body>
+</html>

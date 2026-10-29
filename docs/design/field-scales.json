@@ -1,0 +1,383 @@
+{
+  "order": [
+    "wind",
+    "temp",
+    "rain",
+    "aq",
+    "cloud",
+    "pres"
+  ],
+  "fields": {
+    "wind": {
+      "label": "Wind speed",
+      "short": "Wind",
+      "unit": "km/h",
+      "level": "10 m",
+      "source": "GFS 0.25°",
+      "mode": "continuous",
+      "particles": true,
+      "render": "Continuous colour field. Animated particles follow the u/v vectors and can be overlaid on any field.",
+      "stops": [
+        [
+          0,
+          "#24304f"
+        ],
+        [
+          8,
+          "#2a5a86"
+        ],
+        [
+          16,
+          "#2b8a96"
+        ],
+        [
+          26,
+          "#3aa57a"
+        ],
+        [
+          36,
+          "#8cc256"
+        ],
+        [
+          48,
+          "#e3c54e"
+        ],
+        [
+          62,
+          "#e98b3b"
+        ],
+        [
+          80,
+          "#d44a45"
+        ],
+        [
+          105,
+          "#9c3a7e"
+        ],
+        [
+          150,
+          "#5e2a6e"
+        ]
+      ],
+      "stopsLight": [
+        [
+          0,
+          "#d7e4ea"
+        ],
+        [
+          8,
+          "#b3d2dd"
+        ],
+        [
+          16,
+          "#93c7c4"
+        ],
+        [
+          26,
+          "#a6d1a2"
+        ],
+        [
+          36,
+          "#d3dd93"
+        ],
+        [
+          48,
+          "#f0cd7d"
+        ],
+        [
+          62,
+          "#efa06b"
+        ],
+        [
+          80,
+          "#e06b57"
+        ],
+        [
+          105,
+          "#c24f7a"
+        ],
+        [
+          150,
+          "#8a3f78"
+        ]
+      ],
+      "ticks": [
+        0,
+        20,
+        40,
+        60,
+        80,
+        100,
+        "150+"
+      ]
+    },
+    "temp": {
+      "label": "Temperature",
+      "short": "Temp",
+      "unit": "°C",
+      "level": "2 m",
+      "source": "GFS 0.25°",
+      "mode": "continuous",
+      "render": "Continuous, diverging at 0 °C (pale cyan). Cold side is purple to blue, warm side yellow to deep red.",
+      "stops": [
+        [
+          -40,
+          "#2a1846"
+        ],
+        [
+          -30,
+          "#4b2a87"
+        ],
+        [
+          -20,
+          "#2f4fa8"
+        ],
+        [
+          -10,
+          "#3487c7"
+        ],
+        [
+          0,
+          "#8fd0e0"
+        ],
+        [
+          5,
+          "#cde8c4"
+        ],
+        [
+          10,
+          "#d9e48a"
+        ],
+        [
+          18,
+          "#efcf5e"
+        ],
+        [
+          25,
+          "#ee9a46"
+        ],
+        [
+          32,
+          "#d9563c"
+        ],
+        [
+          40,
+          "#9e2433"
+        ],
+        [
+          48,
+          "#5e1427"
+        ]
+      ],
+      "ticks": [
+        -40,
+        -20,
+        0,
+        10,
+        20,
+        30,
+        48
+      ]
+    },
+    "rain": {
+      "label": "Precipitation",
+      "short": "Rain",
+      "unit": "mm/h",
+      "level": "surface",
+      "source": "GFS 0.25°",
+      "mode": "continuous-log",
+      "transparentBelow": 0.1,
+      "render": "Log scale. Below 0.1 mm/h the layer is transparent so the basemap shows (dry = no colour).",
+      "stops": [
+        [
+          0.1,
+          "#5d8fd6"
+        ],
+        [
+          0.5,
+          "#3f6fd0"
+        ],
+        [
+          1,
+          "#2f9fb8"
+        ],
+        [
+          2,
+          "#3bb36b"
+        ],
+        [
+          4,
+          "#c9d34a"
+        ],
+        [
+          8,
+          "#eea23b"
+        ],
+        [
+          16,
+          "#df4a3a"
+        ],
+        [
+          32,
+          "#b53389"
+        ],
+        [
+          64,
+          "#f2c6ec"
+        ]
+      ],
+      "ticks": [
+        0.1,
+        0.5,
+        1,
+        2,
+        4,
+        8,
+        16,
+        "64"
+      ]
+    },
+    "aq": {
+      "label": "Air quality",
+      "short": "Air",
+      "unit": "µg/m³",
+      "level": "PM2.5",
+      "source": "CAMS",
+      "mode": "banded",
+      "render": "Stepped bands at US EPA PM2.5 breakpoints, with no blending between bands. The probe and place sheet show the category name.",
+      "stops": [
+        [
+          0,
+          "#3fae6a",
+          "Good"
+        ],
+        [
+          12.1,
+          "#d9c94a",
+          "Moderate"
+        ],
+        [
+          35.5,
+          "#e8913a",
+          "Sensitive groups"
+        ],
+        [
+          55.5,
+          "#d4483f",
+          "Unhealthy"
+        ],
+        [
+          150.5,
+          "#8e3a8f",
+          "Very unhealthy"
+        ],
+        [
+          250.5,
+          "#6b1f3a",
+          "Hazardous"
+        ]
+      ]
+    },
+    "cloud": {
+      "label": "Clouds",
+      "short": "Clouds",
+      "unit": "%",
+      "level": "total cover",
+      "source": "GFS 0.25°",
+      "mode": "veil",
+      "render": "Veil over a neutral land/ocean basemap: white in dark theme, slate in light theme. Opacity scales with cover.",
+      "stops": [
+        [
+          0,
+          "rgba(255,255,255,0)"
+        ],
+        [
+          30,
+          "rgba(220,226,232,0.22)"
+        ],
+        [
+          60,
+          "rgba(232,236,240,0.58)"
+        ],
+        [
+          100,
+          "rgba(248,249,250,0.92)"
+        ]
+      ],
+      "stopsLight": [
+        [
+          0,
+          "rgba(40,48,58,0)"
+        ],
+        [
+          30,
+          "rgba(60,70,82,0.16)"
+        ],
+        [
+          60,
+          "rgba(60,70,82,0.40)"
+        ],
+        [
+          100,
+          "rgba(50,58,68,0.68)"
+        ]
+      ],
+      "ticks": [
+        0,
+        25,
+        50,
+        75,
+        100
+      ]
+    },
+    "pres": {
+      "label": "Pressure",
+      "short": "Pressure",
+      "unit": "hPa",
+      "level": "mean sea level",
+      "source": "GFS 0.25°",
+      "mode": "isobars",
+      "interval": 4,
+      "majorEvery": 20,
+      "render": "Muted fill plus isobars every 4 hPa (bold every 20). H and L centres are labelled with their value.",
+      "stops": [
+        [
+          950,
+          "#2a3570"
+        ],
+        [
+          975,
+          "#34578f"
+        ],
+        [
+          995,
+          "#4a7990"
+        ],
+        [
+          1010,
+          "#55666b"
+        ],
+        [
+          1020,
+          "#7c7152"
+        ],
+        [
+          1032,
+          "#97653f"
+        ],
+        [
+          1045,
+          "#7f3b2c"
+        ]
+      ],
+      "ticks": [
+        950,
+        975,
+        1000,
+        1013,
+        1030,
+        1045
+      ]
+    }
+  }
+}
