@@ -25,7 +25,7 @@
     <a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a>
     <button class="search" type="button" data-soon="Search" aria-label="Search (coming soon)"><span>Search places, events, datasets</span><kbd>⌘K</kbd></button>
     <div class="tb-right">
-      <span class="sample-badge" title="Every weather value on this map is generated sample data">Sample data</span>
+      <span class="sample-badge" data-sample-only title="Every weather value on this map is generated sample data">Sample data</span>
       <span class="mono" data-updated>Updated --:-- UTC</span>
       <div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div>
       <span class="tb-sep"></span>
@@ -35,6 +35,7 @@
     </div>
   </header>
 
+  <div class="stale" id="stale" role="status" hidden></div>
   <aside class="panel layers" id="layers" aria-label="Layers"></aside>
   <div class="legend glass" id="legend" aria-live="polite"></div>
   <aside class="detail glass lift" id="detail" aria-label="Details" hidden></aside>
@@ -45,7 +46,7 @@
       <div><div class="tl-now" data-rel>Now</div><div class="mono tl-date" data-abs></div></div>
     </div>
     <div class="tl-track" data-track="full"></div>
-    <div class="tl-side"><span class="chip" title="Playback speed">1×</span><span class="chip" title="Step">1 h step</span><span class="chip" title="Range">48 h</span><span class="chip on" title="Times are shown in UTC">UTC</span></div>
+    <div class="tl-side"><span class="chip" title="Playback speed">1×</span><span class="chip" title="Step">1 h step</span><span class="chip" title="Range" data-range>48 h</span><span class="chip on" title="Times are shown in UTC">UTC</span></div>
   </div>
 
   <div class="zoom glass" role="group" aria-label="Zoom">
@@ -76,8 +77,14 @@
   <!-- Shared -->
   <section class="pop panel" id="pop-data" aria-label="Data" hidden>
     <div class="pop-hd"><b>Data</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
-    <p>Downloads aren't available yet. The weather on this map is <b>generated sample data</b> for testing the design, not real observations or forecasts.</p>
-    <p>When real data arrives, every layer will be free to download, with no key and no account.</p>
+    <div data-live-only hidden>
+      <p>Weather: <b>NOAA GFS</b> 0.25° forecast, run <b data-run></b>, shown hourly for 48 hours (0.5° grid; wind 0.75°).</p>
+      <p>Air quality: <b>CAMS</b> global forecast via Open-Meteo (CC BY 4.0), updated <b data-aq-run></b>, 5° grid.</p>
+      <p>Downloads of the processed files arrive in a later phase.</p>
+    </div>
+    <div data-sample-only>
+      <p>Live data isn't available, so the weather on this map is <b>generated sample data</b> for testing the design, not real observations or forecasts.</p>
+    </div>
     <p><a href="https://github.com/TEMPER31/open-world-map/blob/main/docs/sources-register.md" rel="noopener">Sources and licences →</a></p>
   </section>
   <section class="pop panel" id="pop-settings" aria-label="Settings" hidden>

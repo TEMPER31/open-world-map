@@ -229,6 +229,8 @@ button.stat:hover { background: var(--hover); }
 input[type=range] { accent-color: var(--accent); width: 140px; }
 
 /* ---- toast ---- */
+.stale { position: absolute; z-index: 7; left: 50%; top: calc(var(--top) + 8px); transform: translateX(-50%); max-width: min(640px, calc(100% - 32px)); padding: 7px 12px; font: 12px/1.4 var(--sans); color: var(--ink); background: color-mix(in oklab, var(--accent) 22%, var(--panel)); border: 1px solid color-mix(in oklab, var(--accent) 60%, transparent); text-align: center; }
+.legend.unavailable::after { content: "No data for this hour"; display: block; margin-top: 4px; font: 10px var(--mono); color: var(--accent); }
 .toast { position: absolute; z-index: 30; left: 50%; top: calc(var(--top) + 14px); transform: translate(-50%, -8px); opacity: 0; pointer-events: none; padding: 8px 12px; background: var(--panel); border: 1px solid var(--line2); font: 12px var(--mono); transition: opacity .15s, transform .15s; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .noscript { position: absolute; inset: 40% 0 auto; text-align: center; color: var(--mute); }
@@ -243,6 +245,7 @@ input[type=range] { accent-color: var(--accent); width: 140px; }
 @media (max-width: 1023px) {
   :root { --tabs: calc(60px + env(safe-area-inset-bottom)); --safe-top: env(safe-area-inset-top); }
   .topbar, .layers, .legend, .timeline, .zoom, .probe { display: none !important; }
+  .stale { top: calc(136px + var(--safe-top)); font-size: 11px; }
   .m-top { display: flex; position: absolute; z-index: 6; left: 12px; right: 12px; top: calc(12px + var(--safe-top)); gap: 8px; }
   .m-search { flex: 1; height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-size: 14.5px; color: var(--mute); text-align: left; }
   .m-search::before { width: 11px; height: 11px; }
