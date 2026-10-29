@@ -3,9 +3,15 @@
 // advected by a fragment shader; trails come from fading the previous frame.
 //
 // Positions are kept in screen space (0..1 across the current view): the map is flat
-// Mercator with no rotation or pitch, so screen -> lon/lat needs only the view's edges.
+// Mercator with no rotation or pitch, so screen -> lon/lat needs only the view's extent,
+// computed from the centre and zoom (viewRect) rather than getBounds(), which clamps at
+// +/-85 deg when the view reaches past the world's edge.
+// Particle SPEED is a visual constant (pixels per frame per m/s, growing gently with zoom);
+// the probe and place panel are the source of truth for wind numbers.
 // Particles are re-seeded after every pan/zoom, which keeps them dense at any zoom.
 // Particles move in the direction the wind blows TOWARDS (GFS U = eastward, V = northward).
+
+import { viewRect } from './grid.js';
 
 const QUAD = new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]);
 
@@ -277,9 +283,7 @@ export class WindGL {
     gl.uniform2f(u.u.u_wind_min, ur[0], vr[0]);
     gl.uniform2f(u.u.u_wind_max, ur[1], vr[1]);
     gl.uniform4f(u.u.u_grid, grid.lon0, grid.lat0, grid.deg, 0);
-    const bnd = this.map.getBounds(), merc = la => Math.log(Math.tan(Math.PI / 4 + la * Math.PI / 360));
-    const yN = merc(bnd.getNorth()), yS = merc(bnd.getSouth());
-    gl.uniform4f(u.u.u_view, bnd.getWest(), bnd.getEast() - bnd.getWest(), yN, yN - yS);
+    gl.uniform4f(u.u.u_view, ...viewRect(this.map));
     // Visual speed: pixels per frame per m/s, growing gently with zoom (as in the design).
     const z = this.map.getZoom(), cssW = this.map.getCanvas().clientWidth, cssH = this.map.getCanvas().clientHeight;
     const k = 0.18 * Math.pow(2, z * 0.15) * this.speed;

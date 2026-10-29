@@ -22,11 +22,12 @@ function parseColor(s) {
   return [m[0], m[1], m[2], Math.round((m[3] ?? 1) * 255)];
 }
 
-const LUT_N = 1024;
+export const LUT_N = 1024;
 const AQ_MAX = 300; // banded domain upper bound; anything above is "Hazardous"
 const luts = {};
 
-// A LUT maps a value to RGBA via lut.index(v); index -1 means transparent.
+// A LUT maps a value to RGBA via lut.index(v) (index -1 means transparent), or to a 0..1
+// position along the LUT via lut.pos(v) (-1 = transparent) for the GPU field layer.
 export function lut(k, light) {
   const key = k + (light ? 'L' : 'D');
   if (luts[key]) return luts[key];
@@ -51,6 +52,15 @@ export function lut(k, light) {
   const below = f.transparentBelow;
   return luts[key] = {
     rgba,
+    banded,
+    tf,
+    domain: [a, b],   // LUT range in transformed units (log for continuous-log fields)
+    pos(v) {
+      if (v !== v || (below != null && v < below)) return -1;
+      const x = banded ? Math.floor(v * 10 + 1e-6) / 10 : tf(v); // EPA truncates PM2.5 to 0.1
+      const p = (x - a) / (b - a);
+      return p < 0 ? 0 : p > 1 ? 1 : p;
+    },
     index(v) {
       if (v !== v) return -1; // NaN: no data
       if (below != null && v < below) return -1;
@@ -61,11 +71,22 @@ export function lut(k, light) {
   };
 }
 
+// US EPA PM2.5 categories (breakpoints revised 6 May 2024; from field-scales.json).
+// EPA truncates concentrations to 0.1 ug/m3 before comparing.
 export function aqCategory(v) {
-  const st = FIELDS.aq.stops;
+  const st = FIELDS.aq.stops, x = Math.floor(v * 10 + 1e-6) / 10;
   let i = 0;
-  while (i < st.length - 1 && v >= st[i + 1][0]) i++;
+  while (i < st.length - 1 && x >= st[i + 1][0]) i++;
   return st[i][2];
+}
+
+// US AQI from a PM2.5 concentration with the 2024 EPA table (piecewise linear).
+const AQI_2024 = [[0, 9.0, 0, 50], [9.1, 35.4, 51, 100], [35.5, 55.4, 101, 150], [55.5, 125.4, 151, 200], [125.5, 225.4, 201, 300], [225.5, 325.4, 301, 500]];
+export function aqi2024(pm) {
+  if (!(pm >= 0)) return NaN;
+  const x = Math.floor(pm * 10 + 1e-6) / 10;
+  for (const [cl, ch, il, ih] of AQI_2024) if (x <= ch) return Math.round((ih - il) / (ch - cl) * (x - cl) + il);
+  return 500;
 }
 
 export function barHTML(k, light) {
