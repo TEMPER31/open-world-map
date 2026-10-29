@@ -3,3 +3,4 @@ site/data/live/
 # local build of the GRIB decoder
 .wgrib2/
 node_modules/
+__pycache__/
