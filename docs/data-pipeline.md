@@ -20,11 +20,30 @@ times on the AWS Open Data mirror (`noaa-gfs-bdp-pds`) for 15 cycles, 26 to 29 O
 | f000 `.idx` | cycle + 3 h 32 m | cycle + 3 h 49 m | + 3 h 33 m |
 | f048 `.idx` | cycle + 3 h 45 m | cycle + 4 h 01 m | + 3 h 46 m |
 
-The cron runs at **cycle + 4 h 17 m** (`17 4,10,16,22 * * *`). Each run also logs the
-publish times of the cycle it used, as a run annotation and in `manifest.json` → `history[].publish`.
-The job takes the newest cycle whose **f048** index exists, so an early or delayed run never
-picks a half-published cycle. The first Actions run (18Z 29 Oct, NOMADS) recorded f000 at
-**+3 h 34 m** and f048 at **+3 h 46 m** on NOMADS, the same as on the AWS mirror.
+### 7-day forecast (from the forecast-7day PR): f168 and the cron
+
+The job now needs **f168**. I measured the same mirror for 16 cycles, 27 to 30 Oct 2026
+(`Last-Modified` of the `.idx` files, minutes after the cycle):
+
+| File | Earliest | Latest | Typical |
+|---|---|---|---|
+| f000 `.idx` | + 211 min (3 h 31 m) | + 229 min (3 h 49 m) | + 213 min |
+| f048 `.idx` | + 225 min (3 h 45 m) | + 241 min (4 h 01 m) | + 227 min |
+| f120 `.idx` | + 243 min (4 h 03 m) | + 261 min (4 h 21 m) | + 246 min |
+| **f168 `.idx`** | **+ 256 min (4 h 16 m)** | **+ 273 min (4 h 33 m)** | **+ 258 min** |
+
+The old schedule (cycle + 4 h 17 m = 257 min) would usually have found f168 missing and fallen
+back to the previous cycle (6 h older data). The cron now runs at **cycle + 4 h 47 m**
+(`47 4,10,16,22 * * *`), 14 min after the latest f168 measured. Each run also logs the publish
+times of the cycle it used, as a run annotation and in `manifest.json` → `history[].publish`.
+The job takes the newest cycle whose **f168** index exists, so an early or delayed run never
+picks a half-published cycle.
+
+Which forecast hours exist was checked against the real `.idx` files (12Z 30 Oct 2026, AWS):
+the 0.25° files are **hourly to f120** (f118, f119, f120 exist; f121, f122 do not) and
+**3-hourly after** (f123, f126, f129 … f165, f168, f171 exist; f124, f125, f166 do not). All six
+variables the job uses are in every file. So a cycle is **137 frames**: f000–f120 (121) plus
+f123–f168 (16).
 
 ## Sources and fetching
 
@@ -47,8 +66,12 @@ picks a half-published cycle. The first Actions run (18Z 29 Oct, NOMADS) recorde
 Messages used per field:
 * **Wind, temperature, pressure, clouds:** the instantaneous messages (`anl` or `N hour fcst`).
   The "N-M hour ave" messages are skipped, so each frame is a snapshot at its valid time.
-* **Precipitation:** the amount that fell **in the hour before the valid time**, from the
-  running total: `APCP(0→f) − APCP(0→f−1)`. GFS's own `ave`/`acc` windows reset every 6 h
+* **Precipitation:** the mean rate over the time **since the previous frame**: the hour before
+  the valid time to f120, then the **3 hours** before it (labelled "past 3 h" on the map). It
+  comes from the running total, `(APCP(0→f) − APCP(0→previous frame)) / hours`, which equals
+  GFS's own 3-hour window there (`APCP 120-123 hour acc` at f123, checked in the `.idx`). The
+  running total's name changes past 4 days (`0-5 day acc` at f120, `0-7 day acc` at f168) and
+  still matches the job's pattern. GFS's own `ave`/`acc` windows reset every 6 h
   (checked against the `.idx` files: `6-7 hour ave` at f007, `42-48 hour ave` at f048); the
   `0-N hour acc` running total does not. Only f000 (no accumulation yet) uses the instantaneous
   `PRATE`. This replaces the earlier instantaneous `PRATE`, which made showers spiky and

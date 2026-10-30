@@ -120,6 +120,60 @@ async function profile(page) {
   check('No page errors (None)', errors.length === 0, errors.slice(0, 3).join(' | '));
   await page.close();
 }
+// 4. 7-day timeline: frames to f168 (hourly to f120, then 3-hourly), step/keys/play move frame
+// to frame, the chart spans the run, rain says "past 3 h" where it applies, and air quality
+// shows where its forecast ends.
+{
+  const { page, errors, reqs } = await open({ field: 'temp', particles: false });
+  const m = await page.evaluate(() => { const M = window.owmTest.meta; return { live: M.live, first: M.first, times: M.times, hours: M.hours, aqEnd: M.aqEnd, base: M.base }; });
+  const lastF = m.first + m.times[m.times.length - 1];
+  const hourly = m.times.filter(t => t + m.first <= 120).length, coarse = m.times.filter(t => t + m.first > 120);
+  check('7-day: frames run to f168, hourly to f120 then every 3 h', m.live && lastF === 168 && coarse.every((t, i) => (i ? t - coarse[i - 1] : t + m.first - 120) === 3),
+    `first f${m.first}, last f${lastF}, ${m.times.length} frames on the timeline (${hourly} hourly + ${coarse.length} three-hourly)`);
+  const t120 = 120 - m.first;
+  const stepped = await page.evaluate(async t120 => {
+    const S = window.owmTest.state, out = {};
+    S.set({ t: t120 }); document.querySelector('.timeline [data-step="1"]').click(); out.button = S.get('t');
+    const tr = document.querySelector('[data-track="full"]'); tr.focus();
+    tr.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })); out.right = S.get('t');
+    tr.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    tr.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true })); out.left = S.get('t');
+    out.chip = document.querySelector('[data-stepsize]').textContent;
+    return out;
+  }, t120);
+  check('Step button and arrow keys move to the next available frame (f120 -> f123 -> f126 -> back to f120)',
+    stepped.button === t120 + 3 && stepped.right === t120 + 6 && stepped.left === t120, JSON.stringify({ ...stepped, t120 }));
+  // scrubbing snaps to a frame
+  const box = await page.$('[data-track="full"]').then(e => e.boundingBox());
+  await page.mouse.click(box.x + box.width * 0.913, box.y + box.height / 2);
+  const scrub = await page.evaluate(() => window.owmTest.state.get('t'));
+  check('Scrubbing in the 3-hourly part snaps to a frame', m.times.includes(scrub), `t=${scrub} (f${scrub + m.first})`);
+  // play crosses into the 3-hourly part one frame per tick
+  const played = await page.evaluate(async t => {
+    const S = window.owmTest.state, seen = [];
+    S.set({ t }); const off = S.on(['t'], s => seen.push(s.t), { now: false }); S.set({ playing: true });
+    await new Promise(r => setTimeout(r, 2300)); S.set({ playing: false });
+    return seen;
+  }, t120 - 3);
+  check('Play moves frame to frame across f120 (same speed per frame)', played.length >= 4 && played.every(t => m.times.includes(t)) && played.slice(0, 4).join() === [t120 - 2, t120 - 1, t120, t120 + 3].join(), played.slice(0, 8).join(', '));
+  // rain label
+  const rain = await page.evaluate(async t => { const S = window.owmTest.state; S.set({ field: 'rain', t }); await new Promise(r => setTimeout(r, 800)); const a = document.querySelector('#legend .lg-h').textContent; S.set({ t: 1 }); await new Promise(r => setTimeout(r, 300)); return [a, document.querySelector('#legend .lg-h').textContent]; }, t120 + 9);
+  check('Rain legend says "past 3 h" after f120 and "past hour" before', /past 3 h/.test(rain[0]) && /past hour/.test(rain[1]), rain.join(' | '));
+  // air quality end state
+  const aqReqBefore = reqs.filter(r => r.startsWith('aq/')).length;
+  const aq = await page.evaluate(async last => { const S = window.owmTest.state; S.set({ field: 'aq', t: last }); await new Promise(r => setTimeout(r, 1500)); const l = document.querySelector('#legend'); return { ended: l.classList.contains('ended'), unavailable: l.classList.contains('unavailable'), msg: l.dataset.msg }; }, m.hours);
+  check('Air quality past its forecast end: legend dimmed with "Air quality forecast ends {date}", no stale data', aq.ended && aq.unavailable && /^Air quality forecast ends /.test(aq.msg) && reqs.filter(r => r.startsWith('aq/')).length === aqReqBefore,
+    `${aq.msg} (AQ files requested at that hour: ${reqs.filter(r => r.startsWith('aq/')).length - aqReqBefore})`);
+  // chart spans the run with day boundaries
+  await page.evaluate(() => window.owmTest.state.set({ field: 'temp', t: 0 }));
+  await page.mouse.click(box.x + 400, box.y - 300);
+  await page.waitForFunction(() => document.querySelector('#detail svg path'), null, { timeout: 20000 }).catch(() => {});
+  const chart = await page.evaluate(() => { const svg = document.querySelector('#detail svg'); return svg ? { days: svg.querySelectorAll('line[stroke="var(--line2)"]').length, end: [...svg.querySelectorAll('text')].pop().textContent, points: (svg.querySelector('path').getAttribute('d').match(/[ML]/g) || []).length } : null; });
+  check('Place-panel chart covers the whole run with day boundaries', chart && chart.days >= 6 && chart.points >= 30, JSON.stringify(chart));
+  check('No page errors (7-day timeline)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+
 await browser.close();
 
 const md = `# Rendering and behaviour tests
