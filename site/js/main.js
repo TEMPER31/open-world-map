@@ -53,7 +53,13 @@ function reading(g, k, lo, la) {
     case 'wind': return [Math.round(v), 'km/h', `from ${dirFrom(sample(g.grid, g.u, lo, la), sample(g.grid, g.v, lo, la))}`];
     case 'temp': return [Math.round(v), '°C', 'at 2 m'];
     case 'rain': return v < 0.1 ? ['Dry', '', 'past hour'] : [v.toFixed(1), 'mm/h', 'past hour'];
-    case 'aq': return [v < 10 ? v.toFixed(1) : Math.round(v), 'µg/m³', `${aqCategory(v)} · AQI ${aqi2024(v)}`];
+    case 'aq': {
+      // Category from the hourly PM2.5 (what the colours show). The AQI number follows EPA's
+      // definition (24-hour mean): Open-Meteo's us_aqi, which the CI check matched to the 2024
+      // table on 24-h means. Without it, the hourly-based value is shown and labelled so.
+      const a = g.aqi ? sample(g.grid, g.aqi, lo, la) : NaN;
+      return [v < 10 ? v.toFixed(1) : Math.round(v), 'µg/m³', `${aqCategory(v)} · ${a === a ? `AQI ${Math.round(a)} (24 h)` : `AQI ${aqi2024(v)} (hourly)`}`];
+    }
     case 'cloud': return [Math.round(v), '%', 'cloud cover'];
     case 'pres': return [Math.round(v), 'hPa', 'sea level'];
   }
@@ -180,6 +186,7 @@ function bindChrome(map) {
       return;
     }
     $('#legend').innerHTML = legendHTML(s.field, light, L.legendMeta(s.field));
+    $('#legend').title = s.field === 'aq' ? 'PM2.5 categories use the US EPA breakpoints revised in May 2024. EPA defines them for 24-hour averages; this map applies them to hourly forecast values.' : '';
     $('#mchip').innerHTML = `${f.short} ${f.unit}${barHTML(s.field, light)}${rangeText(s.field)}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
   });
 }

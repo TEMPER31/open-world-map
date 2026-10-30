@@ -36,15 +36,23 @@ picks a half-published cycle. The first Actions run (18Z 29 Oct, NOMADS) recorde
    with HTTP range requests. Measured locally: 49 hours = 297 requests, **259 MB**, **~150 s**
    including decoding and encoding.
 3. **Air quality: Open-Meteo Air Quality API** (`domains=cams_global`; `pm2_5`, `pm10`,
-   `us_aqi`). The grid is 5°: lat 85° N to 85° S, lon 180° W to 175° E, so **2,520 locations**.
-   They go in batches of 100 per request (26 requests), throttled to ≤ 500 locations per
-   minute. It refreshes when the deployed AQ is ≥ 11 h old (CAMS updates every 12 h), i.e.
-   about **twice a day → ~5,040 location-calls/day**, under the 10,000/day free limit. Each run
-   reports the locations and requests it actually sent, the number of 429s, and the share of
-   grid points with non-null `pm2_5` (the global-coverage check).
+   `us_aqi`). The grid is **4°**: lat 84° N to 84° S, lon 180° W to 176° E, so **3,870 locations**
+   (it was 5° and 2,520 locations until the Phase 2 fixes). They go in batches of 100 per
+   request (39 requests), throttled to ≤ 500 locations per minute. It refreshes when the newest
+   AQ (deployed site, or the CI cache on pull requests) is ≥ 11 h old (CAMS updates every 12 h),
+   i.e. about **twice a day → ~7,740 location-calls/day**, under the 10,000/day free limit. A 3°
+   grid would need ~13,700/day. Each run reports the locations and requests it actually sent,
+   the number of 429s, and the share of grid points with non-null `pm2_5`.
 
-Only instantaneous GRIB messages are used (`anl` or `N hour fcst`). The 0–N hour averages and
-accumulations are skipped, so each frame is a snapshot at its valid time.
+Messages used per field:
+* **Wind, temperature, pressure, clouds:** the instantaneous messages (`anl` or `N hour fcst`).
+  The "N-M hour ave" messages are skipped, so each frame is a snapshot at its valid time.
+* **Precipitation:** the amount that fell **in the hour before the valid time**, from the
+  running total: `APCP(0→f) − APCP(0→f−1)`. GFS's own `ave`/`acc` windows reset every 6 h
+  (checked against the `.idx` files: `6-7 hour ave` at f007, `42-48 hour ave` at f048); the
+  `0-N hour acc` running total does not. Only f000 (no accumulation yet) uses the instantaneous
+  `PRATE`. This replaces the earlier instantaneous `PRATE`, which made showers spiky and
+  scattered. It matches Open-Meteo's definition ("sum of the preceding hour").
 
 ### First Actions run (PR #3, 29 Oct 2026, GFS 18Z via NOMADS)
 
@@ -61,32 +69,50 @@ accumulations are skipped, so each frame is a snapshot at its valid time.
 | File | Grid | Encoding |
 |---|---|---|
 | `gfs/wind/fNNN.png` | 0.75° (480 × 241) | RGB: **R = U, G = V** (m/s, linear between the frame's min/max) |
-| `gfs/temp/fNNN.png` | 0.5° (720 × 361) | grey, linear between the frame's min/max (°C) |
-| `gfs/pres/fNNN.png` | 0.5° | grey, linear between the frame's min/max (hPa) |
-| `gfs/cloud/fNNN.png` | 0.5° | grey, 0–100 % |
-| `gfs/rain/fNNN.png` | 0.5° | grey, log: 0 = below 0.01 mm/h, b → 10^((b−1)·0.02 − 2) mm/h |
+| `gfs/temp/fNNN.png` | 0.5° (720 × 361) | **16-bit**: value = offset + 0.2 °C × (R·256 + G) |
+| `gfs/pres/fNNN.png` | 0.5° | **16-bit**: value = offset + 0.1 hPa × (R·256 + G) |
+| `gfs/cloud/fNNN.png` | 0.5°, area mean | grey, whole percent (byte = %) |
+| `gfs/rain/fNNN.png` | 0.5°, area mean | grey, log: 0 = below 0.01 mm, b → 10^((b−1)·0.02 − 2) mm in the past hour |
 | `gfs/series.png` | 3°, every 3 h | RGB atlas: R = temperature, G = wind km/h (place-panel chart) |
-| `aq/YYYYMMDDHH.png` | 5° (72 × 35) | RGB: R = PM2.5, G = PM10, B = US AQI; 0 = no data |
+| `aq/YYYYMMDDHH.png` | 4° (90 × 43) | three stacked **16-bit** blocks (R·256 + G): PM2.5 and PM10 in 0.1 µg/m³, US AQI in 1; 65535 = no data |
 | `manifest.json` | | run, scale/offset per file, credits, licences, stale flags, history |
 
 Every PNG carries an `owm-meta` tEXt chunk (JSON) with `generated_utc`, `run_utc`,
 `valid_utc`, `source`, `license` and its encoding, plus the standard `Source` and `Copyright`
 keywords. The same values are in `manifest.json`.
 
-Grids are **decimated, not interpolated**: 0.5° keeps every second GFS 0.25° point and 0.75°
-every third (wgrib2 `-lola`; this build has no smoothing or interpolation library).
+How the 0.25° GFS grid becomes the display grid:
+* **Temperature and pressure** (smooth fields) are **decimated**: every second 0.25° point,
+  exact NOAA values at the nodes. The CI grid-alignment test checks the page against wgrib2's
+  raw value at three steep-gradient nodes.
+* **Wind** is decimated to 0.75° (every third point).
+* **Cloud cover and precipitation** (patchy fields) are **area-averaged** with a 3 × 3 tent
+  filter (`[1,2,1]⊗[1,2,1]/16`) centred on each 0.5° node. Decimation aliased badly here: at
+  Denver (18Z 29 Oct, f004) cloud cover was 8 % at 0.25° but 47 % at the decimated 0.5° node.
 
-### Measured sizes (18Z 29 Oct 2026 Actions run, per forecast hour; KB = 1,024 bytes)
+Before the fixes, temperature and pressure were 8-bit, scaled between each frame's global
+min and max (~0.43 °C / ~0.4 hPa per step). Air quality was 8-bit, scaled to each hour's
+**global maximum**, so a single hotspot made every step several µg/m³ wide.
 
-| Field | Grid | Mean | Max |
+### Measured sizes per forecast hour (KB = 1,024 bytes)
+
+| Field | Grid | Phase 2 (8-bit) | Phase 2 fixes |
 |---|---|---|---|
-| wind (U+V) | 0.75° | 139 KB | 148 KB |
-| temperature | 0.5° | 89 KB | 93 KB |
-| precipitation | 0.5° | 97 KB | 102 KB |
-| clouds | 0.5° | 129 KB | 134 KB |
-| pressure | 0.5° | 65 KB | 68 KB |
-| air quality | 5° | ≤ 5 KB | |
-| series (place chart, loaded on click) | 3°, 3-hourly | 190 KB | |
+| wind (U+V) | 0.75° | 139 / 148 KB | unchanged (8-bit; see below) |
+| temperature | 0.5° | 89 / 93 KB | **141 / 144 KB** (16-bit, 0.2 °C) |
+| precipitation | 0.5° | 97 / 102 KB | **105 / 113 KB** (hourly amount, area mean) |
+| clouds | 0.5° | 129 / 134 KB | **~125 KB** (area mean, whole percent) |
+| pressure | 0.5° | 65 / 68 KB | **141 / 144 KB** (16-bit, 0.1 hPa) |
+| air quality | 5° → 4° | ≤ 5 KB | a few KB (16-bit, 4°) |
+| series (place chart, loaded on click) | 3°, 3-hourly | 190 KB | unchanged |
+
+(mean / max; the fixes column was measured locally on the 18Z 29 Oct run, and the CI run
+report has the deployed numbers.) 16-bit steps were picked by measured size: temperature at
+0.1 °C was 184 KB/hour and pressure at 0.05 hPa 185 KB/hour. **Wind stays 8-bit:** 10-bit was
+180 KB/hour and 12-bit 228 KB/hour, and the 8-bit step (~0.3 m/s ≈ ±0.6 km/h) is well inside
+the ±3 km/h tolerance. The real wind error, rounding twice (once in the PNG, again when the
+browser rebuilt the particle texture with a new min/max), is fixed: the particle texture is
+now the PNG's own bytes.
 
 All fields are under the ~150 KB budget. Wind started at 0.5° as specified and measured
 **265–306 KB** per hour there (8-bit U and V carry a lot of fine detail), so it moved to 0.75°.
@@ -95,6 +121,19 @@ field plus wind for the current hour (≈ 230 KB) and prefetches the next hour.
 
 PNG filters were chosen by measurement on real frames: Sub for wind, temperature and pressure,
 None for clouds and rain.
+
+## US air quality index
+
+The map's PM2.5 colours, categories and AQI use the **US EPA breakpoints revised on 6 May 2024**
+(Good 0–9.0, Moderate 9.1–35.4, Sensitive groups 35.5–55.4, Unhealthy 55.5–125.4, Very unhealthy
+125.5–225.4, Hazardous 225.5+; EPA fact sheet:
+https://www.epa.gov/system/files/documents/2024-02/pm-naaqs-air-quality-index-fact-sheet.pdf).
+EPA defines the categories for **24-hour averages**. The map colours and the category name
+use the **hourly** forecast PM2.5 (the legend says so). The **AQI number** shown in the probe
+and place panel is Open-Meteo's `us_aqi`, labelled "(24 h)". The CI accuracy check compared it
+with AQI values computed from Open-Meteo's own PM2.5 and found it matches the **2024 table
+applied to 24-hour means** (total absolute difference 23, against 120 for 2024 hourly and 59
+for the 2012 table on 24-hour means, over 8 points on 30 Oct 2026).
 
 ## Failure handling
 
