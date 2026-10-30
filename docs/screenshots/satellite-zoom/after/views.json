@@ -2,10 +2,10 @@
  {
   "view": "wind-atlantic",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "probe": "5 km/hfrom WNW·45.3°N 23.1°W",
+  "probe": "4 km/hfrom NW·45.3°N 23.1°W",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -15,7 +15,7 @@
   "probe": "12 °Cat 2 m·37.6°N 29.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -25,17 +25,17 @@
   "probe": "54 °Fat 2 m·37.6°N 29.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
  {
   "view": "place-panel",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "probe": "8 %area average·40.4°N 81.3°W",
-  "detail": "× PLACE · GFS FORECAST 39.76°N 84.19°W Now Fri 30 Oct · 21:00 UTC Wind speed 11km/h from NE Temperature 19°C at 2 m Precipitation Dry past hour · area avg Air quality 3.4µg/m³ Good · AQI 38 (24 h) Clouds 27% area average Pressure 1026hPa sea level FORECAST — TEMP · ▮ WIND Now +23 h +45 h NOAA GFS run 18Z 30 Oct · air quality CAMS Fri 30 Oct · 16:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 21:48 UTC",
+  "probe": "21 %area average·40.4°N 81.3°W",
+  "detail": "× PLACE · GFS FORECAST 39.76°N 84.19°W Now Fri 30 Oct · 22:00 UTC Wind speed 9km/h from NE Temperature 16°C at 2 m Precipitation Dry past hour · area avg Air quality 3.8µg/m³ Good · AQI 36 (24 h) Clouds 36% area average Pressure 1026hPa sea level FORECAST — TEMP · ▮ WIND Now +22 h +44 h NOAA GFS run 18Z 30 Oct · air quality CAMS Fri 30 Oct · 16:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 22:03 UTC",
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -45,17 +45,17 @@
   "probe": "Drypast hour · area avg·28.4°N 0.3°W",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
  {
   "view": "clouds",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "probe": "43 %area average·28.4°N 59.6°E",
+  "probe": "13 %area average·28.4°N 59.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -65,17 +65,17 @@
   "probe": "1021 hPasea level·42.2°N 9.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
  {
   "view": "air-quality",
   "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
-  "probe": "1.1 µg/m³Good · AQI 30 (24 h)·33.1°N 99.6°E",
+  "probe": "1.1 µg/m³Good · AQI 28 (24 h)·33.1°N 99.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -85,7 +85,7 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -95,9 +95,181 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
-  "errors": []
+  "errors": [],
+  "naip": [
+   {
+    "bbox": "-9601714,3708725,-9601102,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 59,
+    "w": 512,
+    "rgba": [
+     129,
+     139,
+     104,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3708113,-9601714,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 63,
+    "w": 512,
+    "rgba": [
+     149,
+     156,
+     125,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3708725,-9601714,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 63,
+    "w": 512,
+    "rgba": [
+     142,
+     152,
+     114,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602937,3708725,-9602325,3709336",
+    "status": 200,
+    "type": "image/png",
+    "kb": 262,
+    "w": 512,
+    "rgba": [
+     29,
+     148,
+     112,
+     255
+    ],
+    "teal": true,
+    "saved": "naip-tiles/satellite-brantley-z16-3.png"
+   },
+   {
+    "bbox": "-9601714,3708113,-9601102,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 59,
+    "w": 512,
+    "rgba": [
+     128,
+     138,
+     105,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3709336,-9601102,3709948",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 59,
+    "w": 512,
+    "rgba": [
+     134,
+     142,
+     111,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3709336,-9601714,3709948",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 60,
+    "w": 512,
+    "rgba": [
+     153,
+     158,
+     126,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602937,3708113,-9602325,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 60,
+    "w": 512,
+    "rgba": [
+     128,
+     138,
+     103,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601102,3709336,-9600491,3709948",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 55,
+    "w": 512,
+    "rgba": [
+     111,
+     123,
+     95,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601102,3708725,-9600491,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 60,
+    "w": 512,
+    "rgba": [
+     88,
+     106,
+     80,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602937,3709336,-9602325,3709948",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 57,
+    "w": 512,
+    "rgba": [
+     135,
+     142,
+     106,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601102,3708113,-9600491,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 60,
+    "w": 512,
+    "rgba": [
+     89,
+     107,
+     79,
+     255
+    ],
+    "teal": false
+   }
+  ],
+  "naipFailed": []
  },
  {
   "view": "satellite-brantley-z17",
@@ -105,9 +277,138 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
-  "errors": []
+  "errors": [],
+  "naip": [
+   {
+    "bbox": "-9602019,3708725,-9601714,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 43,
+    "w": 512,
+    "rgba": [
+     160,
+     168,
+     124,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602019,3709030,-9601714,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 51,
+    "w": 512,
+    "rgba": [
+     137,
+     148,
+     109,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708725,-9601408,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 38,
+    "w": 512,
+    "rgba": [
+     144,
+     152,
+     112,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3709030,-9601408,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 50,
+    "w": 512,
+    "rgba": [
+     125,
+     136,
+     100,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708419,-9601408,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 47,
+    "w": 512,
+    "rgba": [
+     151,
+     155,
+     123,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3709030,-9602019,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 53,
+    "w": 512,
+    "rgba": [
+     131,
+     142,
+     109,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602019,3708419,-9601714,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 54,
+    "w": 512,
+    "rgba": [
+     127,
+     138,
+     104,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3708419,-9602019,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 48,
+    "w": 512,
+    "rgba": [
+     173,
+     177,
+     151,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3708725,-9602019,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 51,
+    "w": 512,
+    "rgba": [
+     137,
+     147,
+     114,
+     255
+    ],
+    "teal": false
+   }
+  ],
+  "naipFailed": []
  },
  {
   "view": "satellite-brantley-z18",
@@ -115,9 +416,180 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
-  "errors": []
+  "errors": [],
+  "naip": [
+   {
+    "bbox": "-9602019,3708877,-9601867,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 37,
+    "w": 512,
+    "rgba": [
+     144,
+     154,
+     112,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602019,3709030,-9601867,3709183",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 42,
+    "w": 512,
+    "rgba": [
+     126,
+     139,
+     99,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601867,3708725,-9601714,3708877",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 30,
+    "w": 512,
+    "rgba": [
+     181,
+     185,
+     141,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602172,3709030,-9602019,3709183",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 41,
+    "w": 512,
+    "rgba": [
+     133,
+     143,
+     113,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708877,-9601561,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 25,
+    "w": 512,
+    "rgba": [
+     128,
+     139,
+     102,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708725,-9601561,3708877",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 29,
+    "w": 512,
+    "rgba": [
+     143,
+     152,
+     111,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602019,3708725,-9601867,3708877",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 35,
+    "w": 512,
+    "rgba": [
+     151,
+     161,
+     112,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602172,3708877,-9602019,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 38,
+    "w": 512,
+    "rgba": [
+     164,
+     169,
+     137,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601867,3708877,-9601714,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 33,
+    "w": 512,
+    "rgba": [
+     164,
+     172,
+     131,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601867,3709030,-9601714,3709183",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 39,
+    "w": 512,
+    "rgba": [
+     144,
+     155,
+     113,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3709030,-9601561,3709183",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 39,
+    "w": 512,
+    "rgba": [
+     113,
+     128,
+     91,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602172,3708725,-9602019,3708877",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 40,
+    "w": 512,
+    "rgba": [
+     137,
+     145,
+     119,
+     255
+    ],
+    "teal": false
+   }
+  ],
+  "naipFailed": []
  },
  {
   "view": "satellite-strip-z17",
@@ -125,8 +597,123 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:48 UTC",
+  "updated": "Updated 22:03 UTC",
   "sampleLabelsVisible": 0,
-  "errors": []
+  "errors": [],
+  "naip": [
+   {
+    "bbox": "-9602325,3709030,-9602019,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 53,
+    "w": 512,
+    "rgba": [
+     131,
+     142,
+     109,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602631,3709030,-9602325,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 47,
+    "w": 512,
+    "rgba": [
+     152,
+     158,
+     121,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602937,3709030,-9602631,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 49,
+    "w": 512,
+    "rgba": [
+     117,
+     129,
+     90,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602631,3709336,-9602325,3709642",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 47,
+    "w": 512,
+    "rgba": [
+     139,
+     146,
+     109,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9603242,3709336,-9602937,3709642",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 25,
+    "w": 512,
+    "rgba": [
+     199,
+     172,
+     134,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9603242,3709030,-9602937,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 36,
+    "w": 512,
+    "rgba": [
+     166,
+     152,
+     118,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602325,3709336,-9602019,3709642",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 49,
+    "w": 512,
+    "rgba": [
+     144,
+     151,
+     121,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602937,3709336,-9602631,3709642",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 52,
+    "w": 512,
+    "rgba": [
+     113,
+     122,
+     90,
+     255
+    ],
+    "teal": false
+   }
+  ],
+  "naipFailed": []
  }
 ]

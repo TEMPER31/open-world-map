@@ -1,5 +1,5 @@
 {
- "generated_utc": "2026-10-30T21:48:12Z",
+ "generated_utc": "2026-10-30T22:03:17Z",
  "gfs_publish": {
   "source": "nomads",
   "run": "2026-10-30T18:00:00Z",
@@ -7,7 +7,7 @@
   "f048": "2026-10-30T21:46:19Z"
  },
  "series_kb": 187.3,
- "gfs_seconds": 203.0,
+ "gfs_seconds": 198.9,
  "gfs_sizes": {
   "wind": {
    "min": 137656,
@@ -6142,7 +6142,7 @@
    }
   }
  },
- "seconds_total": 203.6,
+ "seconds_total": 200.0,
  "stats": {
   "http_requests": 55,
   "http_bytes": 392416787,
