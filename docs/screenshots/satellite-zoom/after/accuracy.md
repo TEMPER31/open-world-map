@@ -1,6 +1,6 @@
 # Accuracy check (after)
 
-Generated 2026-10-30T22:24:00.070Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-30T18:00:00.000Z, timeline +0 h = 2026-10-30T22:00:00.000Z (f004); live data: true.
+Generated 2026-10-30T22:36:54.513Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-30T18:00:00.000Z, timeline +0 h = 2026-10-30T22:00:00.000Z (f004); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
@@ -8,7 +8,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 - Page vs raw NOAA GFS 0.25° (grid resolution + encoding): 52 / 5 / 3
 - Page vs the stored grid before encoding (encoding only): 40 / 0 / 0
 - Open-Meteo gfs_global: 39 / 19 / 2
-- Open-Meteo gfs_seamless (uses HRRR over the US): 37 / 21 / 2
+- Open-Meteo gfs_seamless (uses HRRR over the US): 36 / 22 / 2
 - Open-Meteo cams_global at the cities: 5 / 5 / 0
 - NWS gridpoints (sanity check): 21 / 3 / 0
 - Grid alignment at 0.5° nodes: 18 / 0 / 0
@@ -35,11 +35,11 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Dayton OH | +0 h | cloud % | 36 | gfs_global 11 | 25 | ±15 | **FAIL** |
 | Dayton OH | +0 h | pressure hPa | 1026.1 | gfs_global 1026.0 | 0.1 | ±1 | ok |
 | Dayton OH | +0 h | temp °C | 16.2 | gfs_seamless 19.2 | -3.0 | ±1 | **FAIL** |
-| Dayton OH | +0 h | wind km/h | 9.2 | gfs_seamless 6.7 | 2.5 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 43 | gfs_seamless 62 | 19 | ±20 | ok |
+| Dayton OH | +0 h | wind km/h | 9.2 | gfs_seamless 7.7 | 1.5 | ±3 | ok |
+| Dayton OH | +0 h | wind from ° | 43 | gfs_seamless 46 | 3 | ±20 | ok |
 | Dayton OH | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Dayton OH | +0 h | cloud % | 36 | gfs_seamless 0 | 36 | ±15 | **FAIL** |
-| Dayton OH | +0 h | pressure hPa | 1026.1 | gfs_seamless 1025.7 | 0.4 | ±1 | ok |
+| Dayton OH | +0 h | pressure hPa | 1026.1 | gfs_seamless 1024.7 | 1.4 | ±1 | **FAIL** |
 | Dayton OH | +0 h | PM2.5 µg/m³ | 3.8 | cams_global 5.5 | -1.7 | ±3 | ok |
 | Dayton OH | +0 h | temp °C | 16.2 | NWS 19.4 | -3.3 | ±3 | **FAIL** |
 | Dayton OH | +0 h | wind km/h | 9.2 | NWS 9.3 | -0.0 | ±8 | ok |
@@ -88,12 +88,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Miami | +0 h | precip mm/h | 0.15 | gfs_global 0.10 | 0.05 | ±0.3 | ok |
 | Miami | +0 h | cloud % | 10 | gfs_global 28 | -18 | ±15 | **FAIL** |
 | Miami | +0 h | pressure hPa | 1013.3 | gfs_global 1013.3 | -0.0 | ±1 | ok |
-| Miami | +0 h | temp °C | 27.7 | gfs_seamless 26.6 | 1.1 | ±1 | **FAIL** |
-| Miami | +0 h | wind km/h | 16.4 | gfs_seamless 12.0 | 4.4 | ±3 | **FAIL** |
-| Miami | +0 h | wind from ° | 90 | gfs_seamless 80 | 10 | ±20 | ok |
+| Miami | +0 h | temp °C | 27.7 | gfs_seamless 26.9 | 0.8 | ±1 | ok |
+| Miami | +0 h | wind km/h | 16.4 | gfs_seamless 11.3 | 5.1 | ±3 | **FAIL** |
+| Miami | +0 h | wind from ° | 90 | gfs_seamless 93 | 3 | ±20 | ok |
 | Miami | +0 h | precip mm/h | 0.15 | gfs_seamless 0.00 | 0.15 | ±0.3 | ok |
-| Miami | +0 h | cloud % | 10 | gfs_seamless 1 | 9 | ±15 | ok |
-| Miami | +0 h | pressure hPa | 1013.3 | gfs_seamless 1014.3 | -1.0 | ±1 | **FAIL** |
+| Miami | +0 h | cloud % | 10 | gfs_seamless 52 | -42 | ±15 | **FAIL** |
+| Miami | +0 h | pressure hPa | 1013.3 | gfs_seamless 1014.7 | -1.4 | ±1 | **FAIL** |
 | Miami | +0 h | PM2.5 µg/m³ | 7.8 | cams_global 6.2 | 1.6 | ±3 | ok |
 | Miami | +0 h | temp °C | 27.7 | NWS 28.3 | -0.6 | ±3 | ok |
 | Miami | +0 h | wind km/h | 16.4 | NWS 18.5 | -2.1 | ±8 | ok |
@@ -142,12 +142,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Denver | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
 | Denver | +0 h | cloud % | 31 | gfs_global 56 | -25 | ±15 | **FAIL** |
 | Denver | +0 h | pressure hPa | 1010.9 | gfs_global 1007.5 | 3.4 | ±1 | **FAIL** |
-| Denver | +0 h | temp °C | 18.9 | gfs_seamless 18.3 | 0.6 | ±1 | ok |
-| Denver | +0 h | wind km/h | 10.7 | gfs_seamless 12.2 | -1.5 | ±3 | ok |
-| Denver | +0 h | wind from ° | 45 | gfs_seamless 43 | 2 | ±20 | ok |
+| Denver | +0 h | temp °C | 18.9 | gfs_seamless 18.6 | 0.3 | ±1 | ok |
+| Denver | +0 h | wind km/h | 10.7 | gfs_seamless 12.1 | -1.4 | ±3 | ok |
+| Denver | +0 h | wind from ° | 45 | gfs_seamless 32 | 13 | ±20 | ok |
 | Denver | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Denver | +0 h | cloud % | 31 | gfs_seamless 0 | 31 | ±15 | **FAIL** |
-| Denver | +0 h | pressure hPa | 1010.9 | gfs_seamless 1009.3 | 1.6 | ±1 | **FAIL** |
+| Denver | +0 h | pressure hPa | 1010.9 | gfs_seamless 1008.8 | 2.1 | ±1 | **FAIL** |
 | Denver | +0 h | PM2.5 µg/m³ | 5.8 | cams_global 12.7 | -6.9 | ±3 | **FAIL** |
 | Denver | +0 h | temp °C | 18.9 | NWS 18.3 | 0.5 | ±3 | ok |
 | Denver | +0 h | wind km/h | 10.7 | NWS 9.3 | 1.5 | ±8 | ok |
