@@ -61,8 +61,10 @@ export const SATELLITE = [
     // USGS NAIP Plus (USDA NAIP, 0.6 m, plus state high-resolution orthoimagery where USGS has
     // it) is a dynamic ImageServer: each 512 px tile is one exportImage request for the
     // tile's bbox (fewer, larger requests than 256 px; see docs/screenshots/satellite-zoom).
+    // format=jpg, not jpgpng: jpgpng sometimes comes back as a ~270 KB PNG (JPEG is ~60 KB),
+    // and in CI one such PNG had no red on one side of a source-image seam (a teal tile).
     // Keyless, CORS-enabled. The cached layer stays underneath while these load.
-    tiles: () => ['https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPPlus/ImageServer/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=jpgpng&f=image'],
+    tiles: () => ['https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPPlus/ImageServer/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=jpg&f=image'],
     tileSize: 512, maxzoom: 18,
     bounds: [-124.85, 24.4, -66.88, 49.39],
     layer: { minzoom: 15, fadeIn: [15, 15.5] },

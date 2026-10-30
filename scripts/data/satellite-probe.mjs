@@ -242,7 +242,7 @@ report.variants = [];
 {
   const naip = report.services.find(s => s.name === 'USGSNAIPPlus' && s.keyless);
   const tileAt = (z, lon, lat) => { const [x, y] = merc(lon, lat), n = 2 ** z; return [Math.floor((x + HALF) / (2 * HALF) * n), Math.floor((HALF - y) / (2 * HALF) * n)]; };
-  const cases = [['teal-seam', 16, ...tileAt(16, -86.2605, 31.5865)], ['miami-coast', 16, ...tileAt(16, -80.125, 25.79)]];
+  const cases = [['teal-seam', 16, ...tileAt(16, -86.2605, 31.5865)], ['miami-coast', 16, ...tileAt(16, -80.125, 25.79)], ['offshore-20km', 16, ...tileAt(16, -79.93, 25.79)]];
   const fmts = { jpgpng: '&format=jpgpng', 'jpgpng+bands': '&format=jpgpng&bandIds=0,1,2', jpg: '&format=jpg', 'jpg+bands': '&format=jpg&bandIds=0,1,2', png: '&format=png', 'png+bands': '&format=png&bandIds=0,1,2' };
   let n = 0;
   for (const [name, z, x, y] of naip ? cases : []) {
