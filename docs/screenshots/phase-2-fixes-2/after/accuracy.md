@@ -1,6 +1,6 @@
 # Accuracy check (after)
 
-Generated 2026-10-30T01:54:40.610Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-29T18:00:00.000Z, timeline +0 h = 2026-10-30T01:00:00.000Z (f007); live data: true.
+Generated 2026-10-30T02:14:57.368Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-29T18:00:00.000Z, timeline +0 h = 2026-10-30T02:00:00.000Z (f008); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
@@ -8,9 +8,9 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 - Page vs raw NOAA GFS 0.25° (grid resolution + encoding): 47 / 9 / 4
 - Page vs the stored grid before encoding (encoding only): 40 / 0 / 0
 - Open-Meteo gfs_global: 43 / 13 / 4
-- Open-Meteo gfs_seamless (uses HRRR over the US): 39 / 17 / 4
-- Open-Meteo cams_global at the cities: 5 / 5 / 0
-- NWS gridpoints (sanity check): 21 / 3 / 0
+- Open-Meteo gfs_seamless (uses HRRR over the US): 40 / 17 / 3
+- Open-Meteo cams_global at the cities: 4 / 6 / 0
+- NWS gridpoints (sanity check): 20 / 4 / 0
 - Grid alignment at 0.5° nodes: 18 / 0 / 0
 - Air quality at 4° grid nodes vs CAMS: 3 / 0 / 0
 
@@ -18,260 +18,260 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 
 | City | Time | Field | Ours | Reference | Diff | Tol | |
 |---|---|---|---|---|---|---|---|
-| Dayton OH | +0 h | temp °C | 16.8 | GFS 0.25° raw 17.4 | -0.5 | ±0.7 | ok |
-| Dayton OH | +0 h | wind km/h | 12.4 | GFS 0.25° raw 12.5 | -0.1 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 223 | GFS 0.25° raw 222 | 1 | ±20 | ok |
+| Dayton OH | +0 h | temp °C | 16.2 | GFS 0.25° raw 16.8 | -0.6 | ±0.7 | ok |
+| Dayton OH | +0 h | wind km/h | 12.9 | GFS 0.25° raw 12.8 | 0.1 | ±3 | ok |
+| Dayton OH | +0 h | wind from ° | 230 | GFS 0.25° raw 225 | 5 | ±20 | ok |
 | Dayton OH | +0 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +0 h | cloud % | 6 | GFS 0.25° raw 5 | 1 | ±15 | ok |
-| Dayton OH | +0 h | pressure hPa | 1020.4 | GFS 0.25° raw 1020.4 | 0.0 | ±0.5 | ok |
-| Dayton OH | +0 h | temp °C | 16.8 | stored grid 16.8 | 0.0 | ±0.15 | ok |
-| Dayton OH | +0 h | wind km/h | 12.4 | stored grid 12.5 | -0.1 | ±1 | ok |
-| Dayton OH | +0 h | cloud % | 6 | stored grid 6 | -0 | ±1 | ok |
-| Dayton OH | +0 h | pressure hPa | 1020.45 | stored grid 1020.46 | -0.01 | ±0.1 | ok |
-| Dayton OH | +0 h | temp °C | 16.8 | gfs_global 19.5 | -2.7 | ±1 | **FAIL** |
-| Dayton OH | +0 h | wind km/h | 12.4 | gfs_global 11.5 | 0.9 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 223 | gfs_global 221 | 2 | ±20 | ok |
+| Dayton OH | +0 h | cloud % | 2 | GFS 0.25° raw 1 | 1 | ±15 | ok |
+| Dayton OH | +0 h | pressure hPa | 1020.8 | GFS 0.25° raw 1020.5 | 0.2 | ±0.5 | ok |
+| Dayton OH | +0 h | temp °C | 16.2 | stored grid 16.2 | 0.0 | ±0.15 | ok |
+| Dayton OH | +0 h | wind km/h | 12.9 | stored grid 13.0 | -0.1 | ±1 | ok |
+| Dayton OH | +0 h | cloud % | 2 | stored grid 2 | 0 | ±1 | ok |
+| Dayton OH | +0 h | pressure hPa | 1020.75 | stored grid 1020.74 | 0.02 | ±0.1 | ok |
+| Dayton OH | +0 h | temp °C | 16.2 | gfs_global 19.0 | -2.8 | ±1 | **FAIL** |
+| Dayton OH | +0 h | wind km/h | 12.9 | gfs_global 12.5 | 0.4 | ±3 | ok |
+| Dayton OH | +0 h | wind from ° | 230 | gfs_global 224 | 6 | ±20 | ok |
 | Dayton OH | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +0 h | cloud % | 6 | gfs_global 6 | 0 | ±15 | ok |
-| Dayton OH | +0 h | pressure hPa | 1020.4 | gfs_global 1020.5 | -0.1 | ±1 | ok |
-| Dayton OH | +0 h | temp °C | 16.8 | gfs_seamless 17.3 | -0.5 | ±1 | ok |
-| Dayton OH | +0 h | wind km/h | 12.4 | gfs_seamless 10.1 | 2.3 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 223 | gfs_seamless 205 | 18 | ±20 | ok |
+| Dayton OH | +0 h | cloud % | 2 | gfs_global 6 | -4 | ±15 | ok |
+| Dayton OH | +0 h | pressure hPa | 1020.8 | gfs_global 1020.6 | 0.2 | ±1 | ok |
+| Dayton OH | +0 h | temp °C | 16.2 | gfs_seamless 17.0 | -0.8 | ±1 | ok |
+| Dayton OH | +0 h | wind km/h | 12.9 | gfs_seamless 9.5 | 3.4 | ±3 | **FAIL** |
+| Dayton OH | +0 h | wind from ° | 230 | gfs_seamless 218 | 12 | ±20 | ok |
 | Dayton OH | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +0 h | cloud % | 6 | gfs_seamless 0 | 6 | ±15 | ok |
-| Dayton OH | +0 h | pressure hPa | 1020.4 | gfs_seamless 1019.2 | 1.2 | ±1 | **FAIL** |
-| Dayton OH | +0 h | PM2.5 µg/m³ | 13.8 | cams_global 14.1 | -0.3 | ±3 | ok |
-| Dayton OH | +0 h | temp °C | 16.8 | NWS 18.3 | -1.5 | ±3 | ok |
-| Dayton OH | +0 h | wind km/h | 12.4 | NWS 9.3 | 3.2 | ±8 | ok |
-| Dayton OH | +0 h | cloud % | 6 | NWS 22 | -16 | ±30 | ok |
+| Dayton OH | +0 h | cloud % | 2 | gfs_seamless 1 | 1 | ±15 | ok |
+| Dayton OH | +0 h | pressure hPa | 1020.8 | gfs_seamless 1020.4 | 0.4 | ±1 | ok |
+| Dayton OH | +0 h | PM2.5 µg/m³ | 14.0 | cams_global 14.3 | -0.3 | ±3 | ok |
+| Dayton OH | +0 h | temp °C | 16.2 | NWS 17.2 | -1.0 | ±3 | ok |
+| Dayton OH | +0 h | wind km/h | 12.9 | NWS 9.3 | 3.6 | ±8 | ok |
+| Dayton OH | +0 h | cloud % | 2 | NWS 20 | -18 | ±30 | ok |
 | Dayton OH | +0 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
-| Dayton OH | +24 h | temp °C | 12.2 | GFS 0.25° raw 12.8 | -0.6 | ±0.7 | ok |
-| Dayton OH | +24 h | wind km/h | 12.2 | GFS 0.25° raw 11.2 | 1.0 | ±3 | ok |
-| Dayton OH | +24 h | wind from ° | 55 | GFS 0.25° raw 52 | 3 | ±20 | ok |
+| Dayton OH | +24 h | temp °C | 11.9 | GFS 0.25° raw 12.6 | -0.7 | ±0.7 | **FAIL** |
+| Dayton OH | +24 h | wind km/h | 11.9 | GFS 0.25° raw 11.5 | 0.4 | ±3 | ok |
+| Dayton OH | +24 h | wind from ° | 65 | GFS 0.25° raw 63 | 2 | ±20 | ok |
 | Dayton OH | +24 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
 | Dayton OH | +24 h | cloud % | 99 | GFS 0.25° raw 100 | -1 | ±15 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.9 | GFS 0.25° raw 1027.9 | 0.1 | ±0.5 | ok |
-| Dayton OH | +24 h | temp °C | 12.2 | stored grid 12.2 | -0.0 | ±0.15 | ok |
-| Dayton OH | +24 h | wind km/h | 12.2 | stored grid 12.0 | 0.1 | ±1 | ok |
-| Dayton OH | +24 h | cloud % | 99 | stored grid 99 | 0 | ±1 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.94 | stored grid 1027.96 | -0.02 | ±0.1 | ok |
-| Dayton OH | +24 h | temp °C | 12.2 | gfs_global 14.5 | -2.3 | ±1 | **FAIL** |
-| Dayton OH | +24 h | wind km/h | 12.2 | gfs_global 10.0 | 2.2 | ±3 | ok |
-| Dayton OH | +24 h | wind from ° | 55 | gfs_global 52 | 3 | ±20 | ok |
+| Dayton OH | +24 h | pressure hPa | 1028.1 | GFS 0.25° raw 1028.1 | 0.1 | ±0.5 | ok |
+| Dayton OH | +24 h | temp °C | 11.9 | stored grid 11.9 | 0.0 | ±0.15 | ok |
+| Dayton OH | +24 h | wind km/h | 11.9 | stored grid 12.0 | -0.2 | ±1 | ok |
+| Dayton OH | +24 h | cloud % | 99 | stored grid 99 | -0 | ±1 | ok |
+| Dayton OH | +24 h | pressure hPa | 1028.14 | stored grid 1028.14 | 0.01 | ±0.1 | ok |
+| Dayton OH | +24 h | temp °C | 11.9 | gfs_global 14.1 | -2.2 | ±1 | **FAIL** |
+| Dayton OH | +24 h | wind km/h | 11.9 | gfs_global 10.3 | 1.6 | ±3 | ok |
+| Dayton OH | +24 h | wind from ° | 65 | gfs_global 65 | 0 | ±20 | ok |
 | Dayton OH | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +24 h | cloud % | 99 | gfs_global 76 | 23 | ±15 | **FAIL** |
-| Dayton OH | +24 h | pressure hPa | 1027.9 | gfs_global 1028.0 | -0.1 | ±1 | ok |
-| Dayton OH | +24 h | temp °C | 12.2 | gfs_seamless 13.0 | -0.8 | ±1 | ok |
-| Dayton OH | +24 h | wind km/h | 12.2 | gfs_seamless 8.2 | 4.0 | ±3 | **FAIL** |
-| Dayton OH | +24 h | wind from ° | 55 | gfs_seamless 60 | 5 | ±20 | ok |
+| Dayton OH | +24 h | cloud % | 99 | gfs_global 100 | -1 | ±15 | ok |
+| Dayton OH | +24 h | pressure hPa | 1028.1 | gfs_global 1028.2 | -0.1 | ±1 | ok |
+| Dayton OH | +24 h | temp °C | 11.9 | gfs_seamless 11.1 | 0.8 | ±1 | ok |
+| Dayton OH | +24 h | wind km/h | 11.9 | gfs_seamless 7.9 | 4.0 | ±3 | **FAIL** |
+| Dayton OH | +24 h | wind from ° | 65 | gfs_seamless 33 | 32 | ±20 | **FAIL** |
 | Dayton OH | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Dayton OH | +24 h | cloud % | 99 | gfs_seamless 100 | -1 | ±15 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.9 | gfs_seamless 1027.8 | 0.1 | ±1 | ok |
-| Dayton OH | +24 h | PM2.5 µg/m³ | 6.8 | cams_global 7.6 | -0.8 | ±3 | ok |
-| Dayton OH | +24 h | temp °C | 12.2 | NWS 12.8 | -0.6 | ±3 | ok |
-| Dayton OH | +24 h | wind km/h | 12.2 | NWS 7.4 | 4.7 | ±8 | ok |
-| Dayton OH | +24 h | cloud % | 99 | NWS 40 | 59 | ±30 | **FAIL** |
+| Dayton OH | +24 h | pressure hPa | 1028.1 | gfs_seamless 1028.3 | -0.2 | ±1 | ok |
+| Dayton OH | +24 h | PM2.5 µg/m³ | 6.4 | cams_global 7.1 | -0.7 | ±3 | ok |
+| Dayton OH | +24 h | temp °C | 11.9 | NWS 11.7 | 0.2 | ±3 | ok |
+| Dayton OH | +24 h | wind km/h | 11.9 | NWS 7.4 | 4.4 | ±8 | ok |
+| Dayton OH | +24 h | cloud % | 99 | NWS 55 | 44 | ±30 | **FAIL** |
 | Dayton OH | +24 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
-| Miami | +0 h | temp °C | 26.8 | GFS 0.25° raw 27.5 | -0.7 | ±0.7 | **FAIL** |
-| Miami | +0 h | wind km/h | 18.6 | GFS 0.25° raw 21.8 | -3.3 | ±3 | **FAIL** |
-| Miami | +0 h | wind from ° | 29 | GFS 0.25° raw 35 | 6 | ±20 | ok |
-| Miami | +0 h | precip mm/h | 0.01 | GFS 0.25° raw 0.00 | 0.01 | ±0.3 | ok |
-| Miami | +0 h | cloud % | 7 | GFS 0.25° raw 2 | 5 | ±15 | ok |
-| Miami | +0 h | pressure hPa | 1013.7 | GFS 0.25° raw 1013.6 | 0.0 | ±0.5 | ok |
-| Miami | +0 h | temp °C | 26.8 | stored grid 26.7 | 0.0 | ±0.15 | ok |
-| Miami | +0 h | wind km/h | 18.6 | stored grid 18.2 | 0.4 | ±1 | ok |
-| Miami | +0 h | cloud % | 7 | stored grid 7 | -0 | ±1 | ok |
-| Miami | +0 h | pressure hPa | 1013.70 | stored grid 1013.72 | -0.02 | ±0.1 | ok |
-| Miami | +0 h | temp °C | 26.8 | gfs_global 27.4 | -0.6 | ±1 | ok |
-| Miami | +0 h | wind km/h | 18.6 | gfs_global 23.9 | -5.3 | ±3 | **FAIL** |
-| Miami | +0 h | wind from ° | 29 | gfs_global 31 | 2 | ±20 | ok |
-| Miami | +0 h | precip mm/h | 0.01 | gfs_global 0.00 | 0.01 | ±0.3 | ok |
-| Miami | +0 h | cloud % | 7 | gfs_global 0 | 7 | ±15 | ok |
-| Miami | +0 h | pressure hPa | 1013.7 | gfs_global 1013.7 | -0.0 | ±1 | ok |
-| Miami | +0 h | temp °C | 26.8 | gfs_seamless 25.0 | 1.8 | ±1 | **FAIL** |
-| Miami | +0 h | wind km/h | 18.6 | gfs_seamless 9.4 | 9.2 | ±3 | **FAIL** |
-| Miami | +0 h | wind from ° | 29 | gfs_seamless 17 | 12 | ±20 | ok |
-| Miami | +0 h | precip mm/h | 0.01 | gfs_seamless 0.00 | 0.01 | ±0.3 | ok |
-| Miami | +0 h | cloud % | 7 | gfs_seamless 50 | -43 | ±15 | **FAIL** |
-| Miami | +0 h | pressure hPa | 1013.7 | gfs_seamless 1014.4 | -0.7 | ±1 | ok |
-| Miami | +0 h | PM2.5 µg/m³ | 6.7 | cams_global 6.8 | -0.1 | ±3 | ok |
-| Miami | +0 h | temp °C | 26.8 | NWS 27.2 | -0.5 | ±3 | ok |
-| Miami | +0 h | wind km/h | 18.6 | NWS 14.8 | 3.8 | ±8 | ok |
-| Miami | +0 h | cloud % | 7 | NWS 21 | -14 | ±30 | ok |
-| Miami | +0 h | precip mm/h | 0.01 | NWS 0.00 | 0.01 | ±1 | ok |
-| Miami | +24 h | temp °C | 26.5 | GFS 0.25° raw 26.8 | -0.3 | ±0.7 | ok |
-| Miami | +24 h | wind km/h | 20.1 | GFS 0.25° raw 24.9 | -4.9 | ±3 | **FAIL** |
-| Miami | +24 h | wind from ° | 72 | GFS 0.25° raw 72 | 0 | ±20 | ok |
-| Miami | +24 h | precip mm/h | 0.47 | GFS 0.25° raw 0.82 | -0.35 | ±0.3 | **FAIL** |
-| Miami | +24 h | cloud % | 30 | GFS 0.25° raw 35 | -5 | ±15 | ok |
-| Miami | +24 h | pressure hPa | 1015.8 | GFS 0.25° raw 1015.9 | -0.0 | ±0.5 | ok |
-| Miami | +24 h | temp °C | 26.5 | stored grid 26.5 | 0.0 | ±0.15 | ok |
-| Miami | +24 h | wind km/h | 20.1 | stored grid 20.4 | -0.3 | ±1 | ok |
-| Miami | +24 h | cloud % | 30 | stored grid 30 | 0 | ±1 | ok |
-| Miami | +24 h | pressure hPa | 1015.83 | stored grid 1015.83 | -0.00 | ±0.1 | ok |
-| Miami | +24 h | temp °C | 26.5 | gfs_global 26.8 | -0.3 | ±1 | ok |
-| Miami | +24 h | wind km/h | 20.1 | gfs_global 26.4 | -6.3 | ±3 | **FAIL** |
-| Miami | +24 h | wind from ° | 72 | gfs_global 70 | 2 | ±20 | ok |
-| Miami | +24 h | precip mm/h | 0.47 | gfs_global 0.70 | -0.23 | ±0.3 | ok |
-| Miami | +24 h | cloud % | 30 | gfs_global 37 | -7 | ±15 | ok |
-| Miami | +24 h | pressure hPa | 1015.8 | gfs_global 1015.8 | 0.0 | ±1 | ok |
-| Miami | +24 h | temp °C | 26.5 | gfs_seamless 24.5 | 2.0 | ±1 | **FAIL** |
-| Miami | +24 h | wind km/h | 20.1 | gfs_seamless 6.9 | 13.2 | ±3 | **FAIL** |
-| Miami | +24 h | wind from ° | 72 | gfs_seamless 62 | 10 | ±20 | ok |
-| Miami | +24 h | precip mm/h | 0.47 | gfs_seamless 1.10 | -0.63 | ±0.3 | **FAIL** |
-| Miami | +24 h | cloud % | 30 | gfs_seamless 100 | -70 | ±15 | **FAIL** |
-| Miami | +24 h | pressure hPa | 1015.8 | gfs_seamless 1016.1 | -0.3 | ±1 | ok |
-| Miami | +24 h | PM2.5 µg/m³ | 9.0 | cams_global 4.1 | 4.9 | ±3 | **FAIL** |
-| Miami | +24 h | temp °C | 26.5 | NWS 27.2 | -0.8 | ±3 | ok |
-| Miami | +24 h | wind km/h | 20.1 | NWS 20.4 | -0.3 | ±8 | ok |
-| Miami | +24 h | cloud % | 30 | NWS 46 | -16 | ±30 | ok |
-| Miami | +24 h | precip mm/h | 0.47 | NWS 0.04 | 0.43 | ±1 | ok |
-| Denver | +0 h | temp °C | 11.5 | GFS 0.25° raw 15.1 | -3.7 | ±0.7 | **FAIL** |
-| Denver | +0 h | wind km/h | 9.2 | GFS 0.25° raw 9.2 | 0.0 | ±3 | ok |
-| Denver | +0 h | wind from ° | 33 | GFS 0.25° raw 34 | 0 | ±20 | ok |
+| Miami | +0 h | temp °C | 26.7 | GFS 0.25° raw 27.5 | -0.9 | ±0.7 | **FAIL** |
+| Miami | +0 h | wind km/h | 16.8 | GFS 0.25° raw 19.7 | -2.8 | ±3 | ok |
+| Miami | +0 h | wind from ° | 26 | GFS 0.25° raw 27 | 1 | ±20 | ok |
+| Miami | +0 h | precip mm/h | 0.03 | GFS 0.25° raw 0.00 | 0.03 | ±0.3 | ok |
+| Miami | +0 h | cloud % | 9 | GFS 0.25° raw 6 | 3 | ±15 | ok |
+| Miami | +0 h | pressure hPa | 1014.0 | GFS 0.25° raw 1014.0 | 0.0 | ±0.5 | ok |
+| Miami | +0 h | temp °C | 26.7 | stored grid 26.6 | 0.0 | ±0.15 | ok |
+| Miami | +0 h | wind km/h | 16.8 | stored grid 16.7 | 0.2 | ±1 | ok |
+| Miami | +0 h | cloud % | 9 | stored grid 9 | 0 | ±1 | ok |
+| Miami | +0 h | pressure hPa | 1014.01 | stored grid 1014.02 | -0.02 | ±0.1 | ok |
+| Miami | +0 h | temp °C | 26.7 | gfs_global 27.5 | -0.8 | ±1 | ok |
+| Miami | +0 h | wind km/h | 16.8 | gfs_global 20.8 | -4.0 | ±3 | **FAIL** |
+| Miami | +0 h | wind from ° | 26 | gfs_global 23 | 3 | ±20 | ok |
+| Miami | +0 h | precip mm/h | 0.03 | gfs_global 0.00 | 0.03 | ±0.3 | ok |
+| Miami | +0 h | cloud % | 9 | gfs_global 15 | -6 | ±15 | ok |
+| Miami | +0 h | pressure hPa | 1014.0 | gfs_global 1014.0 | 0.0 | ±1 | ok |
+| Miami | +0 h | temp °C | 26.7 | gfs_seamless 25.0 | 1.7 | ±1 | **FAIL** |
+| Miami | +0 h | wind km/h | 16.8 | gfs_seamless 10.1 | 6.7 | ±3 | **FAIL** |
+| Miami | +0 h | wind from ° | 26 | gfs_seamless 336 | 50 | ±20 | **FAIL** |
+| Miami | +0 h | precip mm/h | 0.03 | gfs_seamless 0.00 | 0.03 | ±0.3 | ok |
+| Miami | +0 h | cloud % | 9 | gfs_seamless 96 | -87 | ±15 | **FAIL** |
+| Miami | +0 h | pressure hPa | 1014.0 | gfs_seamless 1014.8 | -0.8 | ±1 | ok |
+| Miami | +0 h | PM2.5 µg/m³ | 7.2 | cams_global 6.4 | 0.8 | ±3 | ok |
+| Miami | +0 h | temp °C | 26.7 | NWS 27.2 | -0.6 | ±3 | ok |
+| Miami | +0 h | wind km/h | 16.8 | NWS 13.0 | 3.9 | ±8 | ok |
+| Miami | +0 h | cloud % | 9 | NWS 27 | -18 | ±30 | ok |
+| Miami | +0 h | precip mm/h | 0.03 | NWS 0.00 | 0.03 | ±1 | ok |
+| Miami | +24 h | temp °C | 26.4 | GFS 0.25° raw 26.7 | -0.3 | ±0.7 | ok |
+| Miami | +24 h | wind km/h | 21.3 | GFS 0.25° raw 26.2 | -4.9 | ±3 | **FAIL** |
+| Miami | +24 h | wind from ° | 75 | GFS 0.25° raw 75 | 0 | ±20 | ok |
+| Miami | +24 h | precip mm/h | 0.55 | GFS 0.25° raw 1.20 | -0.65 | ±0.3 | **FAIL** |
+| Miami | +24 h | cloud % | 18 | GFS 0.25° raw 18 | -0 | ±15 | ok |
+| Miami | +24 h | pressure hPa | 1016.2 | GFS 0.25° raw 1016.3 | -0.0 | ±0.5 | ok |
+| Miami | +24 h | temp °C | 26.4 | stored grid 26.4 | -0.1 | ±0.15 | ok |
+| Miami | +24 h | wind km/h | 21.3 | stored grid 21.5 | -0.2 | ±1 | ok |
+| Miami | +24 h | cloud % | 18 | stored grid 18 | 0 | ±1 | ok |
+| Miami | +24 h | pressure hPa | 1016.23 | stored grid 1016.23 | 0.00 | ±0.1 | ok |
+| Miami | +24 h | temp °C | 26.4 | gfs_global 26.8 | -0.4 | ±1 | ok |
+| Miami | +24 h | wind km/h | 21.3 | gfs_global 26.5 | -5.2 | ±3 | **FAIL** |
+| Miami | +24 h | wind from ° | 75 | gfs_global 75 | 0 | ±20 | ok |
+| Miami | +24 h | precip mm/h | 0.55 | gfs_global 1.00 | -0.45 | ±0.3 | **FAIL** |
+| Miami | +24 h | cloud % | 18 | gfs_global 50 | -32 | ±15 | **FAIL** |
+| Miami | +24 h | pressure hPa | 1016.2 | gfs_global 1016.3 | -0.1 | ±1 | ok |
+| Miami | +24 h | temp °C | 26.4 | gfs_seamless 24.4 | 2.0 | ±1 | **FAIL** |
+| Miami | +24 h | wind km/h | 21.3 | gfs_seamless 7.9 | 13.4 | ±3 | **FAIL** |
+| Miami | +24 h | wind from ° | 75 | gfs_seamless 77 | 2 | ±20 | ok |
+| Miami | +24 h | precip mm/h | 0.55 | gfs_seamless 0.00 | 0.55 | ±0.3 | **FAIL** |
+| Miami | +24 h | cloud % | 18 | gfs_seamless 100 | -82 | ±15 | **FAIL** |
+| Miami | +24 h | pressure hPa | 1016.2 | gfs_seamless 1016.6 | -0.4 | ±1 | ok |
+| Miami | +24 h | PM2.5 µg/m³ | 9.4 | cams_global 4.4 | 5.0 | ±3 | **FAIL** |
+| Miami | +24 h | temp °C | 26.4 | NWS 27.2 | -0.8 | ±3 | ok |
+| Miami | +24 h | wind km/h | 21.3 | NWS 20.4 | 0.9 | ±8 | ok |
+| Miami | +24 h | cloud % | 18 | NWS 48 | -30 | ±30 | **FAIL** |
+| Miami | +24 h | precip mm/h | 0.55 | NWS 0.04 | 0.50 | ±1 | ok |
+| Denver | +0 h | temp °C | 11.0 | GFS 0.25° raw 14.3 | -3.3 | ±0.7 | **FAIL** |
+| Denver | +0 h | wind km/h | 7.6 | GFS 0.25° raw 7.2 | 0.5 | ±3 | ok |
+| Denver | +0 h | wind from ° | 356 | GFS 0.25° raw 357 | — | ±20 | calm |
 | Denver | +0 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +0 h | cloud % | 100 | GFS 0.25° raw 100 | -0 | ±15 | ok |
-| Denver | +0 h | pressure hPa | 1014.8 | GFS 0.25° raw 1014.3 | 0.5 | ±0.5 | **FAIL** |
-| Denver | +0 h | temp °C | 11.5 | stored grid 11.5 | 0.0 | ±0.15 | ok |
-| Denver | +0 h | wind km/h | 9.2 | stored grid 9.5 | -0.3 | ±1 | ok |
-| Denver | +0 h | cloud % | 100 | stored grid 100 | 0 | ±1 | ok |
-| Denver | +0 h | pressure hPa | 1014.84 | stored grid 1014.83 | 0.02 | ±0.1 | ok |
-| Denver | +0 h | temp °C | 11.5 | gfs_global 15.5 | -4.0 | ±1 | **FAIL** |
-| Denver | +0 h | wind km/h | 9.2 | gfs_global 9.1 | 0.1 | ±3 | ok |
-| Denver | +0 h | wind from ° | 33 | gfs_global 34 | 1 | ±20 | ok |
+| Denver | +0 h | cloud % | 92 | GFS 0.25° raw 100 | -7 | ±15 | ok |
+| Denver | +0 h | pressure hPa | 1015.6 | GFS 0.25° raw 1015.1 | 0.5 | ±0.5 | **FAIL** |
+| Denver | +0 h | temp °C | 11.0 | stored grid 11.0 | 0.0 | ±0.15 | ok |
+| Denver | +0 h | wind km/h | 7.6 | stored grid 8.0 | -0.4 | ±1 | ok |
+| Denver | +0 h | cloud % | 92 | stored grid 92 | -0 | ±1 | ok |
+| Denver | +0 h | pressure hPa | 1015.60 | stored grid 1015.63 | -0.02 | ±0.1 | ok |
+| Denver | +0 h | temp °C | 11.0 | gfs_global 14.7 | -3.7 | ±1 | **FAIL** |
+| Denver | +0 h | wind km/h | 7.6 | gfs_global 7.9 | -0.3 | ±3 | ok |
+| Denver | +0 h | wind from ° | 356 | gfs_global 357 | — | ±20 | calm |
 | Denver | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +0 h | cloud % | 100 | gfs_global 12 | 88 | ±15 | **FAIL** |
-| Denver | +0 h | pressure hPa | 1014.8 | gfs_global 1013.4 | 1.4 | ±1 | **FAIL** |
-| Denver | +0 h | temp °C | 11.5 | gfs_seamless 12.2 | -0.7 | ±1 | ok |
-| Denver | +0 h | wind km/h | 9.2 | gfs_seamless 8.3 | 0.9 | ±3 | ok |
-| Denver | +0 h | wind from ° | 33 | gfs_seamless 0 | 33 | ±20 | **FAIL** |
+| Denver | +0 h | cloud % | 92 | gfs_global 100 | -8 | ±15 | ok |
+| Denver | +0 h | pressure hPa | 1015.6 | gfs_global 1014.3 | 1.3 | ±1 | **FAIL** |
+| Denver | +0 h | temp °C | 11.0 | gfs_seamless 10.9 | 0.1 | ±1 | ok |
+| Denver | +0 h | wind km/h | 7.6 | gfs_seamless 8.0 | -0.4 | ±3 | ok |
+| Denver | +0 h | wind from ° | 356 | gfs_seamless 350 | 6 | ±20 | ok |
 | Denver | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +0 h | cloud % | 100 | gfs_seamless 0 | 100 | ±15 | **FAIL** |
-| Denver | +0 h | pressure hPa | 1014.8 | gfs_seamless 1012.4 | 2.4 | ±1 | **FAIL** |
-| Denver | +0 h | PM2.5 µg/m³ | 2.6 | cams_global 10.7 | -8.1 | ±3 | **FAIL** |
-| Denver | +0 h | temp °C | 11.5 | NWS 14.4 | -3.0 | ±3 | ok |
-| Denver | +0 h | wind km/h | 9.2 | NWS 9.3 | -0.1 | ±8 | ok |
-| Denver | +0 h | cloud % | 100 | NWS 24 | 76 | ±30 | **FAIL** |
+| Denver | +0 h | cloud % | 92 | gfs_seamless 6 | 86 | ±15 | **FAIL** |
+| Denver | +0 h | pressure hPa | 1015.6 | gfs_seamless 1012.7 | 2.9 | ±1 | **FAIL** |
+| Denver | +0 h | PM2.5 µg/m³ | 2.8 | cams_global 12.1 | -9.3 | ±3 | **FAIL** |
+| Denver | +0 h | temp °C | 11.0 | NWS 12.2 | -1.2 | ±3 | ok |
+| Denver | +0 h | wind km/h | 7.6 | NWS 7.4 | 0.2 | ±8 | ok |
+| Denver | +0 h | cloud % | 92 | NWS 30 | 62 | ±30 | **FAIL** |
 | Denver | +0 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
-| Denver | +24 h | temp °C | 12.2 | GFS 0.25° raw 15.9 | -3.7 | ±0.7 | **FAIL** |
-| Denver | +24 h | wind km/h | 8.4 | GFS 0.25° raw 8.0 | 0.4 | ±3 | ok |
-| Denver | +24 h | wind from ° | 43 | GFS 0.25° raw 46 | 3 | ±20 | ok |
+| Denver | +24 h | temp °C | 11.1 | GFS 0.25° raw 15.0 | -3.9 | ±0.7 | **FAIL** |
+| Denver | +24 h | wind km/h | 6.1 | GFS 0.25° raw 5.5 | 0.5 | ±3 | ok |
+| Denver | +24 h | wind from ° | 34 | GFS 0.25° raw 36 | — | ±20 | calm |
 | Denver | +24 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +24 h | cloud % | 74 | GFS 0.25° raw 75 | -1 | ±15 | ok |
-| Denver | +24 h | pressure hPa | 1011.7 | GFS 0.25° raw 1011.4 | 0.3 | ±0.5 | ok |
-| Denver | +24 h | temp °C | 12.2 | stored grid 12.2 | 0.0 | ±0.15 | ok |
-| Denver | +24 h | wind km/h | 8.4 | stored grid 8.3 | 0.1 | ±1 | ok |
-| Denver | +24 h | cloud % | 74 | stored grid 74 | -0 | ±1 | ok |
-| Denver | +24 h | pressure hPa | 1011.71 | stored grid 1011.74 | -0.03 | ±0.1 | ok |
-| Denver | +24 h | temp °C | 12.2 | gfs_global 16.4 | -4.2 | ±1 | **FAIL** |
-| Denver | +24 h | wind km/h | 8.4 | gfs_global 8.2 | 0.2 | ±3 | ok |
-| Denver | +24 h | wind from ° | 43 | gfs_global 49 | 6 | ±20 | ok |
+| Denver | +24 h | cloud % | 76 | GFS 0.25° raw 91 | -15 | ±15 | **FAIL** |
+| Denver | +24 h | pressure hPa | 1012.6 | GFS 0.25° raw 1012.4 | 0.3 | ±0.5 | ok |
+| Denver | +24 h | temp °C | 11.1 | stored grid 11.1 | -0.0 | ±0.15 | ok |
+| Denver | +24 h | wind km/h | 6.1 | stored grid 6.4 | -0.3 | ±1 | ok |
+| Denver | +24 h | cloud % | 76 | stored grid 76 | 0 | ±1 | ok |
+| Denver | +24 h | pressure hPa | 1012.61 | stored grid 1012.57 | 0.05 | ±0.1 | ok |
+| Denver | +24 h | temp °C | 11.1 | gfs_global 15.4 | -4.3 | ±1 | **FAIL** |
+| Denver | +24 h | wind km/h | 6.1 | gfs_global 6.4 | -0.3 | ±3 | ok |
+| Denver | +24 h | wind from ° | 34 | gfs_global 38 | — | ±20 | calm |
 | Denver | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +24 h | cloud % | 74 | gfs_global 100 | -26 | ±15 | **FAIL** |
-| Denver | +24 h | pressure hPa | 1011.7 | gfs_global 1009.9 | 1.8 | ±1 | **FAIL** |
-| Denver | +24 h | temp °C | 12.2 | gfs_seamless 14.1 | -1.9 | ±1 | **FAIL** |
-| Denver | +24 h | wind km/h | 8.4 | gfs_seamless 8.4 | 0.0 | ±3 | ok |
-| Denver | +24 h | wind from ° | 43 | gfs_seamless 345 | 58 | ±20 | **FAIL** |
+| Denver | +24 h | cloud % | 76 | gfs_global 81 | -5 | ±15 | ok |
+| Denver | +24 h | pressure hPa | 1012.6 | gfs_global 1011.0 | 1.6 | ±1 | **FAIL** |
+| Denver | +24 h | temp °C | 11.1 | gfs_seamless 11.4 | -0.3 | ±1 | ok |
+| Denver | +24 h | wind km/h | 6.1 | gfs_seamless 7.2 | -1.1 | ±3 | ok |
+| Denver | +24 h | wind from ° | 34 | gfs_seamless 262 | — | ±20 | calm |
 | Denver | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +24 h | cloud % | 74 | gfs_seamless 100 | -26 | ±15 | **FAIL** |
-| Denver | +24 h | pressure hPa | 1011.7 | gfs_seamless 1011.8 | -0.1 | ±1 | ok |
-| Denver | +24 h | PM2.5 µg/m³ | 2.9 | cams_global 14.7 | -11.8 | ±3 | **FAIL** |
-| Denver | +24 h | temp °C | 12.2 | NWS 15.0 | -2.8 | ±3 | ok |
-| Denver | +24 h | wind km/h | 8.4 | NWS 7.4 | 1.0 | ±8 | ok |
-| Denver | +24 h | cloud % | 74 | NWS 23 | 51 | ±30 | **FAIL** |
+| Denver | +24 h | cloud % | 76 | gfs_seamless 92 | -16 | ±15 | **FAIL** |
+| Denver | +24 h | pressure hPa | 1012.6 | gfs_seamless 1011.9 | 0.7 | ±1 | ok |
+| Denver | +24 h | PM2.5 µg/m³ | 3.0 | cams_global 18.0 | -15.0 | ±3 | **FAIL** |
+| Denver | +24 h | temp °C | 11.1 | NWS 12.8 | -1.7 | ±3 | ok |
+| Denver | +24 h | wind km/h | 6.1 | NWS 5.6 | 0.5 | ±8 | ok |
+| Denver | +24 h | cloud % | 76 | NWS 25 | 51 | ±30 | **FAIL** |
 | Denver | +24 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
-| London | +0 h | temp °C | 10.9 | GFS 0.25° raw 11.0 | -0.1 | ±0.7 | ok |
-| London | +0 h | wind km/h | 7.4 | GFS 0.25° raw 5.6 | 1.8 | ±3 | ok |
-| London | +0 h | wind from ° | 107 | GFS 0.25° raw 106 | — | ±20 | calm |
+| London | +0 h | temp °C | 10.7 | GFS 0.25° raw 10.7 | -0.1 | ±0.7 | ok |
+| London | +0 h | wind km/h | 8.2 | GFS 0.25° raw 6.1 | 2.1 | ±3 | ok |
+| London | +0 h | wind from ° | 108 | GFS 0.25° raw 108 | 0 | ±20 | ok |
 | London | +0 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| London | +0 h | cloud % | 14 | GFS 0.25° raw 6 | 8 | ±15 | ok |
-| London | +0 h | pressure hPa | 1028.9 | GFS 0.25° raw 1028.9 | -0.0 | ±0.5 | ok |
-| London | +0 h | temp °C | 10.9 | stored grid 10.9 | -0.0 | ±0.15 | ok |
-| London | +0 h | wind km/h | 7.4 | stored grid 7.1 | 0.3 | ±1 | ok |
-| London | +0 h | cloud % | 14 | stored grid 14 | -0 | ±1 | ok |
-| London | +0 h | pressure hPa | 1028.88 | stored grid 1028.91 | -0.03 | ±0.1 | ok |
-| London | +0 h | temp °C | 10.9 | gfs_global 11.0 | -0.1 | ±1 | ok |
-| London | +0 h | wind km/h | 7.4 | gfs_global 5.7 | 1.7 | ±3 | ok |
-| London | +0 h | wind from ° | 107 | gfs_global 108 | — | ±20 | calm |
+| London | +0 h | cloud % | 32 | GFS 0.25° raw 31 | 1 | ±15 | ok |
+| London | +0 h | pressure hPa | 1028.9 | GFS 0.25° raw 1028.8 | 0.0 | ±0.5 | ok |
+| London | +0 h | temp °C | 10.7 | stored grid 10.6 | 0.0 | ±0.15 | ok |
+| London | +0 h | wind km/h | 8.2 | stored grid 7.9 | 0.2 | ±1 | ok |
+| London | +0 h | cloud % | 32 | stored grid 32 | 0 | ±1 | ok |
+| London | +0 h | pressure hPa | 1028.85 | stored grid 1028.85 | 0.01 | ±0.1 | ok |
+| London | +0 h | temp °C | 10.7 | gfs_global 10.8 | -0.1 | ±1 | ok |
+| London | +0 h | wind km/h | 8.2 | gfs_global 6.0 | 2.2 | ±3 | ok |
+| London | +0 h | wind from ° | 108 | gfs_global 107 | 1 | ±20 | ok |
 | London | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| London | +0 h | cloud % | 14 | gfs_global 8 | 6 | ±15 | ok |
-| London | +0 h | pressure hPa | 1028.9 | gfs_global 1028.9 | -0.0 | ±1 | ok |
-| London | +0 h | temp °C | 10.9 | gfs_seamless 11.0 | -0.1 | ±1 | ok |
-| London | +0 h | wind km/h | 7.4 | gfs_seamless 5.7 | 1.7 | ±3 | ok |
-| London | +0 h | wind from ° | 107 | gfs_seamless 108 | — | ±20 | calm |
+| London | +0 h | cloud % | 32 | gfs_global 8 | 24 | ±15 | **FAIL** |
+| London | +0 h | pressure hPa | 1028.9 | gfs_global 1028.8 | 0.1 | ±1 | ok |
+| London | +0 h | temp °C | 10.7 | gfs_seamless 10.8 | -0.1 | ±1 | ok |
+| London | +0 h | wind km/h | 8.2 | gfs_seamless 6.0 | 2.2 | ±3 | ok |
+| London | +0 h | wind from ° | 108 | gfs_seamless 107 | 1 | ±20 | ok |
 | London | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| London | +0 h | cloud % | 14 | gfs_seamless 8 | 6 | ±15 | ok |
-| London | +0 h | pressure hPa | 1028.9 | gfs_seamless 1028.9 | -0.0 | ±1 | ok |
-| London | +0 h | PM2.5 µg/m³ | 9.0 | cams_global 12.8 | -3.8 | ±3 | **FAIL** |
-| London | +24 h | temp °C | 10.5 | GFS 0.25° raw 10.6 | -0.1 | ±0.7 | ok |
-| London | +24 h | wind km/h | 7.9 | GFS 0.25° raw 6.0 | 1.9 | ±3 | ok |
-| London | +24 h | wind from ° | 79 | GFS 0.25° raw 74 | — | ±20 | calm |
+| London | +0 h | cloud % | 32 | gfs_seamless 8 | 24 | ±15 | **FAIL** |
+| London | +0 h | pressure hPa | 1028.9 | gfs_seamless 1028.8 | 0.1 | ±1 | ok |
+| London | +0 h | PM2.5 µg/m³ | 9.8 | cams_global 12.9 | -3.1 | ±3 | **FAIL** |
+| London | +24 h | temp °C | 10.3 | GFS 0.25° raw 10.4 | -0.1 | ±0.7 | ok |
+| London | +24 h | wind km/h | 8.0 | GFS 0.25° raw 5.9 | 2.1 | ±3 | ok |
+| London | +24 h | wind from ° | 78 | GFS 0.25° raw 74 | 4 | ±20 | ok |
 | London | +24 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| London | +24 h | cloud % | 75 | GFS 0.25° raw 75 | -0 | ±15 | ok |
+| London | +24 h | cloud % | 86 | GFS 0.25° raw 82 | 4 | ±15 | ok |
 | London | +24 h | pressure hPa | 1030.5 | GFS 0.25° raw 1030.5 | 0.0 | ±0.5 | ok |
-| London | +24 h | temp °C | 10.5 | stored grid 10.5 | -0.0 | ±0.15 | ok |
-| London | +24 h | wind km/h | 7.9 | stored grid 8.1 | -0.3 | ±1 | ok |
-| London | +24 h | cloud % | 75 | stored grid 75 | 0 | ±1 | ok |
-| London | +24 h | pressure hPa | 1030.48 | stored grid 1030.48 | 0.00 | ±0.1 | ok |
-| London | +24 h | temp °C | 10.5 | gfs_global 10.7 | -0.2 | ±1 | ok |
-| London | +24 h | wind km/h | 7.9 | gfs_global 5.7 | 2.2 | ±3 | ok |
-| London | +24 h | wind from ° | 79 | gfs_global 72 | — | ±20 | calm |
+| London | +24 h | temp °C | 10.3 | stored grid 10.3 | -0.0 | ±0.15 | ok |
+| London | +24 h | wind km/h | 8.0 | stored grid 7.9 | 0.1 | ±1 | ok |
+| London | +24 h | cloud % | 86 | stored grid 86 | -0 | ±1 | ok |
+| London | +24 h | pressure hPa | 1030.51 | stored grid 1030.49 | 0.02 | ±0.1 | ok |
+| London | +24 h | temp °C | 10.3 | gfs_global 10.5 | -0.2 | ±1 | ok |
+| London | +24 h | wind km/h | 8.0 | gfs_global 5.7 | 2.3 | ±3 | ok |
+| London | +24 h | wind from ° | 78 | gfs_global 72 | 6 | ±20 | ok |
 | London | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| London | +24 h | cloud % | 75 | gfs_global 69 | 6 | ±15 | ok |
-| London | +24 h | pressure hPa | 1030.5 | gfs_global 1030.5 | -0.0 | ±1 | ok |
-| London | +24 h | temp °C | 10.5 | gfs_seamless 10.7 | -0.2 | ±1 | ok |
-| London | +24 h | wind km/h | 7.9 | gfs_seamless 5.7 | 2.2 | ±3 | ok |
-| London | +24 h | wind from ° | 79 | gfs_seamless 72 | — | ±20 | calm |
+| London | +24 h | cloud % | 86 | gfs_global 82 | 4 | ±15 | ok |
+| London | +24 h | pressure hPa | 1030.5 | gfs_global 1030.5 | 0.0 | ±1 | ok |
+| London | +24 h | temp °C | 10.3 | gfs_seamless 10.5 | -0.2 | ±1 | ok |
+| London | +24 h | wind km/h | 8.0 | gfs_seamless 5.7 | 2.3 | ±3 | ok |
+| London | +24 h | wind from ° | 78 | gfs_seamless 72 | 6 | ±20 | ok |
 | London | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| London | +24 h | cloud % | 75 | gfs_seamless 69 | 6 | ±15 | ok |
-| London | +24 h | pressure hPa | 1030.5 | gfs_seamless 1030.5 | -0.0 | ±1 | ok |
-| London | +24 h | PM2.5 µg/m³ | 13.3 | cams_global 15.4 | -2.1 | ±3 | ok |
-| Delhi | +0 h | temp °C | 21.0 | GFS 0.25° raw 21.8 | -0.8 | ±0.7 | **FAIL** |
-| Delhi | +0 h | wind km/h | 6.6 | GFS 0.25° raw 6.5 | 0.1 | ±3 | ok |
-| Delhi | +0 h | wind from ° | 108 | GFS 0.25° raw 107 | — | ±20 | calm |
-| Delhi | +0 h | precip mm/h | 0.21 | GFS 0.25° raw 0.12 | 0.09 | ±0.3 | ok |
-| Delhi | +0 h | cloud % | 96 | GFS 0.25° raw 100 | -4 | ±15 | ok |
-| Delhi | +0 h | pressure hPa | 1016.8 | GFS 0.25° raw 1016.7 | 0.1 | ±0.5 | ok |
-| Delhi | +0 h | temp °C | 21.0 | stored grid 21.0 | -0.0 | ±0.15 | ok |
-| Delhi | +0 h | wind km/h | 6.6 | stored grid 6.8 | -0.2 | ±1 | ok |
-| Delhi | +0 h | cloud % | 96 | stored grid 96 | -0 | ±1 | ok |
-| Delhi | +0 h | pressure hPa | 1016.77 | stored grid 1016.81 | -0.04 | ±0.1 | ok |
-| Delhi | +0 h | temp °C | 21.0 | gfs_global 22.9 | -1.9 | ±1 | **FAIL** |
-| Delhi | +0 h | wind km/h | 6.6 | gfs_global 7.6 | -1.0 | ±3 | ok |
-| Delhi | +0 h | wind from ° | 108 | gfs_global 109 | — | ±20 | calm |
-| Delhi | +0 h | precip mm/h | 0.21 | gfs_global 0.00 | 0.21 | ±0.3 | ok |
-| Delhi | +0 h | cloud % | 96 | gfs_global 100 | -4 | ±15 | ok |
-| Delhi | +0 h | pressure hPa | 1016.8 | gfs_global 1016.8 | -0.0 | ±1 | ok |
-| Delhi | +0 h | temp °C | 21.0 | gfs_seamless 22.9 | -1.9 | ±1 | **FAIL** |
-| Delhi | +0 h | wind km/h | 6.6 | gfs_seamless 7.6 | -1.0 | ±3 | ok |
-| Delhi | +0 h | wind from ° | 108 | gfs_seamless 109 | — | ±20 | calm |
-| Delhi | +0 h | precip mm/h | 0.21 | gfs_seamless 0.00 | 0.21 | ±0.3 | ok |
-| Delhi | +0 h | cloud % | 96 | gfs_seamless 100 | -4 | ±15 | ok |
-| Delhi | +0 h | pressure hPa | 1016.8 | gfs_seamless 1016.8 | -0.0 | ±1 | ok |
-| Delhi | +0 h | PM2.5 µg/m³ | 24.2 | cams_global 25.3 | -1.1 | ±3 | ok |
-| Delhi | +24 h | temp °C | 19.7 | GFS 0.25° raw 20.7 | -0.9 | ±0.7 | **FAIL** |
-| Delhi | +24 h | wind km/h | 0.9 | GFS 0.25° raw 0.9 | 0.0 | ±3 | ok |
-| Delhi | +24 h | wind from ° | 145 | GFS 0.25° raw 86 | — | ±20 | calm |
+| London | +24 h | cloud % | 86 | gfs_seamless 82 | 4 | ±15 | ok |
+| London | +24 h | pressure hPa | 1030.5 | gfs_seamless 1030.5 | 0.0 | ±1 | ok |
+| London | +24 h | PM2.5 µg/m³ | 14.0 | cams_global 15.4 | -1.4 | ±3 | ok |
+| Delhi | +0 h | temp °C | 21.3 | GFS 0.25° raw 21.6 | -0.2 | ±0.7 | ok |
+| Delhi | +0 h | wind km/h | 7.7 | GFS 0.25° raw 5.6 | 2.1 | ±3 | ok |
+| Delhi | +0 h | wind from ° | 108 | GFS 0.25° raw 103 | — | ±20 | calm |
+| Delhi | +0 h | precip mm/h | 0.15 | GFS 0.25° raw 0.14 | 0.01 | ±0.3 | ok |
+| Delhi | +0 h | cloud % | 97 | GFS 0.25° raw 100 | -2 | ±15 | ok |
+| Delhi | +0 h | pressure hPa | 1017.6 | GFS 0.25° raw 1017.6 | -0.0 | ±0.5 | ok |
+| Delhi | +0 h | temp °C | 21.3 | stored grid 21.3 | 0.0 | ±0.15 | ok |
+| Delhi | +0 h | wind km/h | 7.7 | stored grid 7.6 | 0.1 | ±1 | ok |
+| Delhi | +0 h | cloud % | 97 | stored grid 98 | -0 | ±1 | ok |
+| Delhi | +0 h | pressure hPa | 1017.62 | stored grid 1017.64 | -0.02 | ±0.1 | ok |
+| Delhi | +0 h | temp °C | 21.3 | gfs_global 22.4 | -1.1 | ±1 | **FAIL** |
+| Delhi | +0 h | wind km/h | 7.7 | gfs_global 6.6 | 1.1 | ±3 | ok |
+| Delhi | +0 h | wind from ° | 108 | gfs_global 112 | — | ±20 | calm |
+| Delhi | +0 h | precip mm/h | 0.15 | gfs_global 0.20 | -0.05 | ±0.3 | ok |
+| Delhi | +0 h | cloud % | 97 | gfs_global 100 | -3 | ±15 | ok |
+| Delhi | +0 h | pressure hPa | 1017.6 | gfs_global 1017.6 | 0.0 | ±1 | ok |
+| Delhi | +0 h | temp °C | 21.3 | gfs_seamless 22.4 | -1.1 | ±1 | **FAIL** |
+| Delhi | +0 h | wind km/h | 7.7 | gfs_seamless 6.6 | 1.1 | ±3 | ok |
+| Delhi | +0 h | wind from ° | 108 | gfs_seamless 112 | — | ±20 | calm |
+| Delhi | +0 h | precip mm/h | 0.15 | gfs_seamless 0.20 | -0.05 | ±0.3 | ok |
+| Delhi | +0 h | cloud % | 97 | gfs_seamless 100 | -3 | ±15 | ok |
+| Delhi | +0 h | pressure hPa | 1017.6 | gfs_seamless 1017.6 | 0.0 | ±1 | ok |
+| Delhi | +0 h | PM2.5 µg/m³ | 25.3 | cams_global 30.6 | -5.3 | ±3 | **FAIL** |
+| Delhi | +24 h | temp °C | 20.4 | GFS 0.25° raw 21.2 | -0.7 | ±0.7 | **FAIL** |
+| Delhi | +24 h | wind km/h | 1.5 | GFS 0.25° raw 1.1 | 0.4 | ±3 | ok |
+| Delhi | +24 h | wind from ° | 122 | GFS 0.25° raw 81 | — | ±20 | calm |
 | Delhi | +24 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
 | Delhi | +24 h | cloud % | 0 | GFS 0.25° raw 0 | 0 | ±15 | ok |
-| Delhi | +24 h | pressure hPa | 1018.6 | GFS 0.25° raw 1018.5 | 0.1 | ±0.5 | ok |
-| Delhi | +24 h | temp °C | 19.7 | stored grid 19.8 | -0.0 | ±0.15 | ok |
-| Delhi | +24 h | wind km/h | 0.9 | stored grid 1.1 | -0.2 | ±1 | ok |
+| Delhi | +24 h | pressure hPa | 1019.3 | GFS 0.25° raw 1019.3 | 0.1 | ±0.5 | ok |
+| Delhi | +24 h | temp °C | 20.4 | stored grid 20.4 | 0.0 | ±0.15 | ok |
+| Delhi | +24 h | wind km/h | 1.5 | stored grid 1.6 | -0.1 | ±1 | ok |
 | Delhi | +24 h | cloud % | 0 | stored grid 0 | 0 | ±1 | ok |
-| Delhi | +24 h | pressure hPa | 1018.57 | stored grid 1018.56 | 0.01 | ±0.1 | ok |
-| Delhi | +24 h | temp °C | 19.7 | gfs_global 21.5 | -1.8 | ±1 | **FAIL** |
-| Delhi | +24 h | wind km/h | 0.9 | gfs_global 1.6 | -0.7 | ±3 | ok |
-| Delhi | +24 h | wind from ° | 145 | gfs_global 63 | — | ±20 | calm |
+| Delhi | +24 h | pressure hPa | 1019.33 | stored grid 1019.32 | 0.02 | ±0.1 | ok |
+| Delhi | +24 h | temp °C | 20.4 | gfs_global 21.8 | -1.4 | ±1 | **FAIL** |
+| Delhi | +24 h | wind km/h | 1.5 | gfs_global 1.5 | 0.0 | ±3 | ok |
+| Delhi | +24 h | wind from ° | 122 | gfs_global 76 | — | ±20 | calm |
 | Delhi | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
 | Delhi | +24 h | cloud % | 0 | gfs_global 0 | 0 | ±15 | ok |
-| Delhi | +24 h | pressure hPa | 1018.6 | gfs_global 1018.6 | -0.0 | ±1 | ok |
-| Delhi | +24 h | temp °C | 19.7 | gfs_seamless 21.5 | -1.8 | ±1 | **FAIL** |
-| Delhi | +24 h | wind km/h | 0.9 | gfs_seamless 1.6 | -0.7 | ±3 | ok |
-| Delhi | +24 h | wind from ° | 145 | gfs_seamless 63 | — | ±20 | calm |
+| Delhi | +24 h | pressure hPa | 1019.3 | gfs_global 1019.4 | -0.1 | ±1 | ok |
+| Delhi | +24 h | temp °C | 20.4 | gfs_seamless 21.8 | -1.4 | ±1 | **FAIL** |
+| Delhi | +24 h | wind km/h | 1.5 | gfs_seamless 1.5 | 0.0 | ±3 | ok |
+| Delhi | +24 h | wind from ° | 122 | gfs_seamless 76 | — | ±20 | calm |
 | Delhi | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Delhi | +24 h | cloud % | 0 | gfs_seamless 0 | 0 | ±15 | ok |
-| Delhi | +24 h | pressure hPa | 1018.6 | gfs_seamless 1018.6 | -0.0 | ±1 | ok |
-| Delhi | +24 h | PM2.5 µg/m³ | 51.4 | cams_global 41.2 | 10.2 | ±3 | **FAIL** |
+| Delhi | +24 h | pressure hPa | 1019.3 | gfs_seamless 1019.4 | -0.1 | ±1 | ok |
+| Delhi | +24 h | PM2.5 µg/m³ | 53.0 | cams_global 43.7 | 9.3 | ±3 | **FAIL** |
 
 ## Resolution: stored grid vs raw NOAA 0.25° at the cities
 
@@ -279,69 +279,69 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 
 | City | Time | Temp grid | Temp 0.25° | Diff | Wind grid | Wind 0.25° | Diff | Cloud area avg | Cloud 0.25° point |
 |---|---|---|---|---|---|---|---|---|---|
-| Dayton OH | +0 h | 16.80 | 17.36 | -0.56 | 12.5 | 12.5 | -0.0 | 6 | 5 |
-| Dayton OH | +24 h | 12.22 | 12.78 | -0.56 | 12.0 | 11.2 | 0.8 | 99 | 100 |
-| Miami | +0 h | 26.74 | 27.48 | -0.74 | 18.2 | 21.8 | -3.6 | 7 | 2 |
-| Miami | +24 h | 26.45 | 26.75 | -0.30 | 20.4 | 24.9 | -4.6 | 30 | 35 |
-| Denver | +0 h | 11.46 | 15.13 | -3.67 | 9.5 | 9.2 | 0.3 | 100 | 100 |
-| Denver | +24 h | 12.24 | 15.90 | -3.66 | 8.3 | 8.0 | 0.3 | 74 | 75 |
-| London | +0 h | 10.88 | 10.97 | -0.10 | 7.1 | 5.6 | 1.5 | 14 | 6 |
-| London | +24 h | 10.51 | 10.60 | -0.09 | 8.1 | 6.0 | 2.1 | 75 | 75 |
-| Delhi | +0 h | 20.99 | 21.80 | -0.80 | 6.8 | 6.5 | 0.3 | 96 | 100 |
-| Delhi | +24 h | 19.76 | 20.67 | -0.91 | 1.1 | 0.9 | 0.2 | 0 | 0 |
+| Dayton OH | +0 h | 16.21 | 16.80 | -0.59 | 13.0 | 12.8 | 0.2 | 2 | 1 |
+| Dayton OH | +24 h | 11.91 | 12.62 | -0.71 | 12.0 | 11.5 | 0.5 | 99 | 100 |
+| Miami | +0 h | 26.61 | 27.54 | -0.93 | 16.7 | 19.7 | -3.0 | 9 | 6 |
+| Miami | +24 h | 26.45 | 26.67 | -0.22 | 21.5 | 26.2 | -4.7 | 18 | 18 |
+| Denver | +0 h | 10.96 | 14.33 | -3.37 | 8.0 | 7.2 | 0.8 | 92 | 100 |
+| Denver | +24 h | 11.10 | 14.95 | -3.86 | 6.4 | 5.5 | 0.9 | 76 | 91 |
+| London | +0 h | 10.64 | 10.74 | -0.10 | 7.9 | 6.1 | 1.8 | 32 | 31 |
+| London | +24 h | 10.32 | 10.41 | -0.09 | 7.9 | 5.9 | 2.0 | 86 | 82 |
+| Delhi | +0 h | 21.33 | 21.58 | -0.25 | 7.6 | 5.6 | 2.0 | 98 | 100 |
+| Delhi | +24 h | 20.43 | 21.15 | -0.73 | 1.6 | 1.1 | 0.5 | 0 | 0 |
 
 ## Grid alignment (page value at a 0.5° node vs raw GFS 0.25° value at that node)
 
 | Node | Time | Field | Page | Raw GFS | Diff | Tol | |
 |---|---|---|---|---|---|---|---|
-| Tokyo Bay | +0 h | temp | 18.20 | 18.26 | -0.06 | ±0.5 | ok |
-| Tokyo Bay | +0 h | pres | 1017.30 | 1017.31 | -0.01 | ±0.5 | ok |
-| Tokyo Bay | +0 h | cloud | 93.00 | 93.17 | -0.17 | ±1 | ok |
-| Chile coast | +0 h | temp | 12.00 | 11.99 | 0.01 | ±0.5 | ok |
-| Chile coast | +0 h | pres | 1015.40 | 1015.40 | 0.00 | ±0.5 | ok |
-| Chile coast | +0 h | cloud | 8.00 | 8.03 | -0.03 | ±1 | ok |
-| Dayton | +0 h | temp | 17.00 | 16.93 | 0.07 | ±0.5 | ok |
-| Dayton | +0 h | pres | 1020.10 | 1020.08 | 0.02 | ±0.5 | ok |
-| Dayton | +0 h | cloud | 4.00 | 3.72 | 0.28 | ±1 | ok |
-| Tokyo Bay | +24 h | temp | 20.20 | 20.16 | 0.04 | ±0.5 | ok |
-| Tokyo Bay | +24 h | pres | 1011.70 | 1011.71 | -0.01 | ±0.5 | ok |
-| Tokyo Bay | +24 h | cloud | 0.00 | 0.24 | -0.24 | ±1 | ok |
-| Chile coast | +24 h | temp | 13.20 | 13.15 | 0.04 | ±0.5 | ok |
-| Chile coast | +24 h | pres | 1013.80 | 1013.82 | -0.02 | ±0.5 | ok |
+| Tokyo Bay | +0 h | temp | 20.80 | 20.81 | -0.01 | ±0.5 | ok |
+| Tokyo Bay | +0 h | pres | 1015.40 | 1015.39 | 0.01 | ±0.5 | ok |
+| Tokyo Bay | +0 h | cloud | 99.00 | 99.41 | -0.41 | ±1 | ok |
+| Chile coast | +0 h | temp | 11.80 | 11.80 | -0.00 | ±0.5 | ok |
+| Chile coast | +0 h | pres | 1015.00 | 1015.02 | -0.02 | ±0.5 | ok |
+| Chile coast | +0 h | cloud | 8.00 | 7.78 | 0.22 | ±1 | ok |
+| Dayton | +0 h | temp | 16.20 | 16.17 | 0.03 | ±0.5 | ok |
+| Dayton | +0 h | pres | 1020.50 | 1020.46 | 0.04 | ±0.5 | ok |
+| Dayton | +0 h | cloud | 1.00 | 0.64 | 0.36 | ±1 | ok |
+| Tokyo Bay | +24 h | temp | 21.40 | 21.44 | -0.04 | ±0.5 | ok |
+| Tokyo Bay | +24 h | pres | 1011.50 | 1011.46 | 0.04 | ±0.5 | ok |
+| Tokyo Bay | +24 h | cloud | 1.00 | 0.58 | 0.42 | ±1 | ok |
+| Chile coast | +24 h | temp | 13.40 | 13.34 | 0.06 | ±0.5 | ok |
+| Chile coast | +24 h | pres | 1013.60 | 1013.60 | -0.00 | ±0.5 | ok |
 | Chile coast | +24 h | cloud | 100.00 | 100.00 | 0.00 | ±1 | ok |
-| Dayton | +24 h | temp | 11.60 | 11.63 | -0.02 | ±0.5 | ok |
-| Dayton | +24 h | pres | 1028.30 | 1028.35 | -0.05 | ±0.5 | ok |
-| Dayton | +24 h | cloud | 100.00 | 100.00 | 0.00 | ±1 | ok |
+| Dayton | +24 h | temp | 11.80 | 11.75 | 0.05 | ±0.5 | ok |
+| Dayton | +24 h | pres | 1028.40 | 1028.43 | -0.03 | ±0.5 | ok |
+| Dayton | +24 h | cloud | 98.00 | 98.24 | -0.24 | ±1 | ok |
 
 ## Air quality at 4° grid nodes (page vs Open-Meteo cams_global at the node)
 
 | Node | Time | Page PM2.5 | CAMS | Diff | Tol | |
 |---|---|---|---|---|---|---|
-| node 28N 76E (Delhi) | +0 h | 16.80 | 16.80 | -0.00 | ±0.2 | ok |
-| node 52N 0E (London) | +0 h | 10.10 | 10.10 | 0.00 | ±0.2 | ok |
-| node 40N 116E (Beijing) | +0 h | 58.00 | 58.00 | 0.00 | ±0.2 | ok |
+| node 28N 76E (Delhi) | +0 h | 18.20 | 18.20 | 0.00 | ±0.2 | ok |
+| node 52N 0E (London) | +0 h | 11.00 | 11.00 | 0.00 | ±0.2 | ok |
+| node 40N 116E (Beijing) | +0 h | 45.20 | 45.20 | 0.00 | ±0.2 | ok |
 
 ## Which AQI table does Open-Meteo's us_aqi use?
 
-Open-Meteo us_aqi vs AQI computed here from Open-Meteo's own PM2.5 (hourly value, or the mean of the past 24 h) with the 2024 and the previous (2012) EPA tables. **Closest match: 2024 24-h mean** (total absolute difference {"2024 hourly":65,"2024 24-h mean":22,"2012 hourly":97,"2012 24-h mean":61}).
+Open-Meteo us_aqi vs AQI computed here from Open-Meteo's own PM2.5 (hourly value, or the mean of the past 24 h) with the 2024 and the previous (2012) EPA tables. **Closest match: 2024 24-h mean** (total absolute difference {"2024 hourly":78,"2024 24-h mean":17,"2012 hourly":93,"2012 24-h mean":56}).
 
 | Point | PM2.5 now | PM2.5 24-h mean | Open-Meteo us_aqi | 2024 hourly | 2024 24-h | 2012 hourly | 2012 24-h |
 |---|---|---|---|---|---|---|---|
-| Dayton OH | 14.1 | 9.4 | 56 | 60 | 52 | 55 | 39 |
-| Miami | 6.8 | 5.1 | 35 | 38 | 28 | 28 | 21 |
-| Denver | 10.7 | 11.7 | 55 | 54 | 56 | 45 | 49 |
-| London | 12.8 | 17.3 | 66 | 58 | 66 | 52 | 62 |
-| Delhi | 25.3 | 25.8 | 87 | 81 | 82 | 79 | 80 |
-| node 28N 76E (Delhi) | 16.8 | 33.2 | 100 | 65 | 96 | 61 | 95 |
-| node 52N 0E (London) | 10.1 | 10.8 | 53 | 53 | 54 | 42 | 45 |
-| node 40N 116E (Beijing) | 58.0 | 53.4 | 145 | 153 | 145 | 152 | 145 |
+| Dayton OH | 14.3 | 9.7 | 54 | 61 | 52 | 56 | 40 |
+| Miami | 6.4 | 5.2 | 34 | 36 | 29 | 27 | 22 |
+| Denver | 12.1 | 11.9 | 55 | 57 | 56 | 51 | 49 |
+| London | 12.9 | 17.3 | 66 | 58 | 66 | 53 | 62 |
+| Delhi | 30.6 | 24.1 | 82 | 91 | 79 | 90 | 76 |
+| node 28N 76E (Delhi) | 18.2 | 30.8 | 96 | 68 | 91 | 64 | 90 |
+| node 52N 0E (London) | 11.0 | 10.9 | 53 | 55 | 54 | 46 | 45 |
+| node 40N 116E (Beijing) | 45.2 | 53.4 | 145 | 125 | 145 | 125 | 145 |
 
 ## Probe text at +0 h (what a user sees when hovering)
 
 | City | temp | wind | rain | cloud | pres | aq |
 |---|---|---|---|---|---|---|
-| Dayton OH | 17 °Cat 2 m·39.7°N 84.1°W | 12 km/hfrom SW·39.7°N 84.1°W | Drypast hour · area avg·39.7°N 84.1°W | 6 %area average·39.7°N 84.1°W | 1020 hPasea level·39.7°N 84.1°W | 14 µg/m³Moderate · AQI 51 (24 h)·39.7°N 84.1°W |
-| Miami | 27 °Cat 2 m·25.7°N 80.1°W | 19 km/hfrom NNE·25.7°N 80.1°W | Drypast hour · area avg·25.7°N 80.1°W | 7 %area average·25.7°N 80.1°W | 1014 hPasea level·25.7°N 80.1°W | 6.7 µg/m³Good · AQI 39 (24 h)·25.7°N 80.1°W |
-| Denver | 11 °Cat 2 m·39.7°N 104.9°W | 9 km/hfrom NNE·39.7°N 104.9°W | Drypast hour · area avg·39.7°N 104.9°W | 100 %area average·39.7°N 104.9°W | 1015 hPasea level·39.7°N 104.9°W | 2.6 µg/m³Good · AQI 36 (24 h)·39.7°N 104.9°W |
-| London | 11 °Cat 2 m·51.5°N 0.1°W | 7 km/hfrom ESE·51.5°N 0.1°W | Drypast hour · area avg·51.5°N 0.1°W | 14 %area average·51.5°N 0.1°W | 1029 hPasea level·51.5°N 0.1°W | 9.0 µg/m³Good · AQI 50 (24 h)·51.5°N 0.1°W |
-| Delhi | 21 °Cat 2 m·28.6°N 77.2°E | 7 km/hfrom ESE·28.6°N 77.2°E | 0.2 mm/hpast hour · area avg·28.6°N 77.2°E | 96 %area average·28.6°N 77.2°E | 1017 hPasea level·28.6°N 77.2°E | 24 µg/m³Moderate · AQI 101 (24 h)·28.6°N 77.2°E |
+| Dayton OH | 16 °Cat 2 m·39.7°N 84.1°W | 13 km/hfrom SW·39.7°N 84.1°W | Drypast hour · area avg·39.7°N 84.1°W | 2 %area average·39.7°N 84.1°W | 1021 hPasea level·39.7°N 84.1°W | 14 µg/m³Moderate · AQI 52 (24 h)·39.7°N 84.1°W |
+| Miami | 27 °Cat 2 m·25.7°N 80.1°W | 17 km/hfrom NNE·25.7°N 80.1°W | Drypast hour · area avg·25.7°N 80.1°W | 9 %area average·25.7°N 80.1°W | 1014 hPasea level·25.7°N 80.1°W | 7.2 µg/m³Good · AQI 39 (24 h)·25.7°N 80.1°W |
+| Denver | 11 °Cat 2 m·39.7°N 104.9°W | 8 km/hfrom N·39.7°N 104.9°W | Drypast hour · area avg·39.7°N 104.9°W | 92 %area average·39.7°N 104.9°W | 1016 hPasea level·39.7°N 104.9°W | 2.8 µg/m³Good · AQI 38 (24 h)·39.7°N 104.9°W |
+| London | 11 °Cat 2 m·51.5°N 0.1°W | 8 km/hfrom ESE·51.5°N 0.1°W | Drypast hour · area avg·51.5°N 0.1°W | 32 %area average·51.5°N 0.1°W | 1029 hPasea level·51.5°N 0.1°W | 9.8 µg/m³Moderate · AQI 50 (24 h)·51.5°N 0.1°W |
+| Delhi | 21 °Cat 2 m·28.6°N 77.2°E | 8 km/hfrom ESE·28.6°N 77.2°E | 0.1 mm/hpast hour · area avg·28.6°N 77.2°E | 97 %area average·28.6°N 77.2°E | 1018 hPasea level·28.6°N 77.2°E | 25 µg/m³Moderate · AQI 98 (24 h)·28.6°N 77.2°E |
