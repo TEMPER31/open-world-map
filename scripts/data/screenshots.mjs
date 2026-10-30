@@ -17,12 +17,15 @@ const VIEWS = [
   { name: 'clouds', field: 'cloud', hash: '1.6/20/30' },
   { name: 'pressure', field: 'pres', hash: '1.6/35/-20' },
   { name: 'air-quality', field: 'aq', hash: '1.6/25/70' },
-  { name: 'none', field: 'none', hash: '2.6/42/-38', particles: true }
+  { name: 'none', field: 'none', hash: '2.6/42/-38', particles: true },
+  // Satellite past the cached USGS level 16, at Brantley AL (no weather field on top)
+  ...[16, 17, 18].map(z => ({ name: `satellite-brantley-z${z}`, field: 'none', basemap: 'satellite', hash: `${z}/31.585/-86.255`, wait: 6000 }))
 ];
+const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const report = [];
-for (const v of VIEWS) {
+for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     const { readFileSync } = await import('node:fs');
@@ -35,10 +38,10 @@ for (const v of VIEWS) {
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { field: v.field, basemap: 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
+    { field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
   await page.goto(`${site}#map=${v.hash}`);
-  await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 });
-  await page.waitForTimeout(v.particles ? 5000 : 2500);
+  await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
+  await page.waitForTimeout(v.wait || (v.particles ? 5000 : 2500));
   const box = await page.$('#map').then(e => e.boundingBox());
   if (v.click) { // open the place panel at the map centre
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
