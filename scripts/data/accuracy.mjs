@@ -49,7 +49,7 @@ if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk wh
     r.fulfill({ body: rf(`${process.env.OWM_ML_DIR}/${f}`), contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', headers: { 'access-control-allow-origin': '*' } });
   });
 }
-await page.addInitScript(() => localStorage.setItem('owm:prefs:v1', JSON.stringify({ field: 'temp', basemap: 'dark', particles: false, opacity: 1, density: 1 })));
+await page.addInitScript(() => localStorage.setItem('owm:prefs:v1', JSON.stringify({ field: 'temp', basemap: 'dark', particles: false, opacity: 1, density: 1, tempUnit: 'C' })));
 await page.goto(site);
 await page.waitForFunction(() => window.owmTest?.meta && window.owmMap?.loaded(), null, { timeout: 60000 });
 const meta = await page.evaluate(() => ({ live: window.owmTest.meta.live, base: window.owmTest.meta.base, hours: window.owmTest.meta.hours, first: window.owmTest.meta.first, run: window.owmTest.meta.run }));
@@ -173,6 +173,7 @@ function row(city, t, field, our, ref, refName, tol, opts = {}) {
   sum[ok == null ? 'na' : ok ? 'pass' : 'fail']++;
   rows.push(`| ${city} | +${t} h | ${field} | ${fmt(our, opts.d)} | ${refName} ${fmt(ref, opts.d)} | ${diff == null ? '—' : fmt(diff, opts.d)} | ±${tol} | ${ok == null ? (note || 'n/a') : ok ? 'ok' : '**FAIL**'} |`);
 }
+const resRows = [];
 const rawAt = (f, name) => report.city_raw?.hours.find(h => h.f === f)?.cities[name];
 CITIES.forEach((c, i) => times.forEach((t, k) => {
   const o = ours[t][c.name], ts = validS[k];
@@ -186,6 +187,16 @@ CITIES.forEach((c, i) => times.forEach((t, k) => {
     row(c.name, t, 'precip mm/h', o.rain.value, raw.rain, 'GFS 0.25° raw', TOL.rain, { group: 'raw', d: 2 });
     row(c.name, t, 'cloud %', o.cloud.value, raw.cloud, 'GFS 0.25° raw', TOL.cloud, { group: 'raw', d: 0 });
     row(c.name, t, 'pressure hPa', o.pres.value, raw.pres, 'GFS 0.25° raw', 0.5, { group: 'raw' });
+  }
+  const gv = raw?.grid;
+  if (gv) {
+    // Page vs the data job's own grid before PNG encoding (same sampling): what encoding and
+    // decoding add. Tolerances: half a step of each encoding plus float noise.
+    row(c.name, t, 'temp °C', o.temp.value, gv.temp, 'stored grid', 0.15, { group: 'grid' });
+    row(c.name, t, 'wind km/h', o.wind.value, gv.wind_kmh, 'stored grid', 1, { group: 'grid' });
+    row(c.name, t, 'cloud %', o.cloud.value, gv.cloud, 'stored grid', 1, { group: 'grid', d: 0 });
+    row(c.name, t, 'pressure hPa', o.pres.value, gv.pres, 'stored grid', 0.1, { group: 'grid', d: 2 });
+    resRows.push(`| ${c.name} | +${t} h | ${fmt(gv.temp, 2)} | ${fmt(raw.temp, 2)} | ${fmt(gv.temp - raw.temp, 2)} | ${fmt(gv.wind_kmh)} | ${fmt(raw.wind_kmh)} | ${fmt(gv.wind_kmh - raw.wind_kmh)} | ${fmt(gv.cloud, 0)} | ${fmt(raw.cloud, 0)} |`);
   }
   for (const model of ['gfs_global', 'gfs_seamless']) {
     const omW = omAt(i, `wind_speed_10m_${model}`, ts);
@@ -241,13 +252,21 @@ Values are read through the page's own code (\`getGrid\` + \`sample\` + \`readin
 References: Open-Meteo \`gfs_global\` / \`gfs_seamless\` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo \`cams_global\`.
 
 **Summary** (within tolerance / outside / not comparable):
-${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (pipeline fidelity)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs CAMS', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
+${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding)', grid: 'Page vs the stored grid before encoding (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs CAMS', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
 ${refErr.length ? `\nReference errors: ${refErr.join('; ')}\n` : ''}
 ## Point values
 
 | City | Time | Field | Ours | Reference | Diff | Tol | |
 |---|---|---|---|---|---|---|---|
 ${rows.join('\n')}
+
+## Resolution: stored grid vs raw NOAA 0.25° at the cities
+
+The stored grids (temperature 0.5° every second point, wind 0.75° every third point, cloud 0.5° area average), sampled the way the page samples them, against NOAA's 0.25° values. This is the part of "page vs raw" that comes from grid resolution; the rest is encoding (the "stored grid" rows above). See \`docs/data-pipeline.md\` → "Grid resolution".
+
+| City | Time | Temp grid | Temp 0.25° | Diff | Wind grid | Wind 0.25° | Diff | Cloud area avg | Cloud 0.25° point |
+|---|---|---|---|---|---|---|---|---|---|
+${resRows.join('\n') || '| (no stored-grid values in run report) | | | | | | | | | |'}
 
 ## Grid alignment (page value at a 0.5° node vs raw GFS 0.25° value at that node)
 

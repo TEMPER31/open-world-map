@@ -436,6 +436,8 @@ def build_gfs(args, out, generated, report):
                         if "u" in c:
                             c["wind_kmh"] = round(math.hypot(c["u"], c["v"]) * 3.6, 2)
                             c["wind_from_deg"] = round((math.degrees(math.atan2(-c["u"], -c["v"])) + 360) % 360, 1)
+                    for name, c in city.items():
+                        c["grid"] = grid_city(fld, name)
                     city_raw.append({"f": f, "cities": city})
                     valid = run + dt.timedelta(hours=f)
                     fr = write_gfs_frame(gdir, f, fld, run, valid, generated, sizes)
@@ -536,6 +538,24 @@ def write_series(gdir, series, run, generated):
 def put(path, data, sizes):
     path.write_bytes(data)
     sizes.append(len(data))
+
+
+def grid_city(fld, name):
+    """Bilinear value at a CITY_POINTS city from the grids as stored (before PNG encoding), the
+    way the page samples them (wind speed per node, then interpolated). Splits the page-vs-NOAA
+    difference into grid resolution (this vs raw 0.25 deg) and encoding (page vs this)."""
+    _, lat, lon = next(c for c in CITY_POINTS if c[0] == name)
+
+    def s(a, nx, deg):
+        x, y = (lon + 180) / deg, (90 - lat) / deg
+        i0, j0 = int(x), int(y)
+        fx, fy = x - i0, y - j0
+        g = lambda i, j: a[j * nx + i % nx]
+        return (g(i0, j0) * (1 - fx) + g(i0 + 1, j0) * fx) * (1 - fy) + (g(i0, j0 + 1) * (1 - fx) + g(i0 + 1, j0 + 1) * fx) * fy
+    speed = [math.hypot(a, b) * 3.6 for a, b in zip(fld["u"], fld["v"])]
+    return {"temp": round(s(fld["temp"], NX, DEG), 3), "pres": round(s(fld["pres"], NX, DEG), 3),
+            "cloud": round(s(fld["cloud"], NX, DEG), 2), "rain": round(s(fld["rain"], NX, DEG), 4),
+            "wind_kmh": round(s(speed, WNX, WDEG), 2)}
 
 
 SPOT_CITIES = [("London", 51.51, -0.13), ("New York", 40.71, -74.01), ("Tokyo", 35.68, 139.69)]

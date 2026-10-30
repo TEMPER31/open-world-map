@@ -3,6 +3,7 @@
 // Work happens in a module worker when available, otherwise on the main thread.
 
 import * as core from './data-core.js';
+import { loadScales } from './scales.js';
 import { HOURS } from './config.js';
 
 const MANIFEST = 'data/live/manifest.json';
@@ -21,19 +22,22 @@ function call(msg, transfer) {
   });
 }
 
-async function startWorker(manifestUrl) {
-  try {
-    worker = new Worker(new URL('./frame-worker.js', import.meta.url), { type: 'module' });
-  } catch { return false; }
-  const failed = new Promise(res => {
-    worker.onerror = e => { e.preventDefault?.(); res(false); };
-  });
+// The worker is created first and its modules load while the manifest downloads.
+// Handlers are attached at once so a module that fails to load is never missed.
+let failed = null;
+function createWorker() {
+  try { worker = new Worker(new URL('./frame-worker.js', import.meta.url), { type: 'module' }); } catch { worker = null; return; }
+  failed = new Promise(res => { worker.onerror = e => { e.preventDefault?.(); res(false); }; });
   worker.onmessage = ({ data }) => {
     const p = pending.get(data.id);
     pending.delete(data.id);
     if (p) data.error ? p.reject(new Error(data.error)) : p.resolve(data.result);
   };
-  const ok = await Promise.race([call({ type: 'init', manifestUrl }).then(() => true, () => false), failed]);
+}
+
+async function startWorker(manifestUrl, manifest, scales) {
+  if (!worker) return false;
+  const ok = await Promise.race([call({ type: 'init', manifestUrl, manifest, scales }).then(() => true, () => false), failed]);
   if (!ok) { worker.terminate(); worker = null; }
   return ok;
 }
@@ -44,12 +48,14 @@ export let meta = null;
 export async function initData() {
   const now = Date.now();
   let manifest = null, error = null;
+  createWorker();
+  const scalesP = loadScales();
   try {
     const r = await fetch(MANIFEST, { cache: 'no-cache' });
     if (r.ok) manifest = await r.json(); else error = `HTTP ${r.status}`;
   } catch (e) { error = String(e); }
-  const url = manifest ? new URL(MANIFEST, location.href).href : null;
-  if (!(await startWorker(url))) { worker = null; await core.init(url); }
+  const url = manifest ? new URL(MANIFEST, location.href).href : null, scales = await scalesP;
+  if (!(await startWorker(url, manifest, scales))) { worker = null; await core.init(url, manifest, scales); }
 
   if (!manifest) {
     const base = Math.floor(now / 3600e3) * 3600e3;
@@ -75,6 +81,8 @@ const f = t => meta.first + t;
 export const getGrid = (t, field) => worker ? call({ type: 'grid', f: f(t), field }) : core.grid(f(t), field);
 export const getFieldTexture = (t, field) => worker ? call({ type: 'fieldtex', f: f(t), field }) : core.fieldTexture(f(t), field);
 export const getPressureOverlays = t => worker ? call({ type: 'isobars', f: f(t) }) : core.pressureOverlays(f(t));
+// {field: {v, u, w, aqi, missing} | null} at one place (probe and place panel).
+export const getPoint = (t, fields, lon, lat) => worker ? call({ type: 'point', f: f(t), fields, lon, lat }) : core.point(f(t), fields, lon, lat);
 export const getWindTexture = t => worker ? call({ type: 'windtex', f: f(t) }) : core.windTexture(f(t));
 
 // [{t, temp, wind}] over the timeline, for the place chart.
