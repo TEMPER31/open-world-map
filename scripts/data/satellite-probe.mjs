@@ -172,6 +172,29 @@ for (const svc of report.services.filter(s => s.keyless && s.canExport)) {
   const wide = await get(exp(bboxAround(14, 1024, 1024), 1024, 1024).replace('format=png', 'format=jpg'));
   if (imageOk(wide)) writeFileSync(`${out}/${svc.name}-brantley-wide.jpg`, wide.body);
 }
+// Spot check: a teal horizontal strip showed in the NAIP Plus layer at map zoom 16, about
+// 31.588 N, 86.256-86.259 W (CI after screenshot, 30 Oct). Export that strip straight from each
+// service (no MapLibre involved) and identify the source image there, to see whether it is in
+// USGS's imagery or in our rendering.
+report.spot = { lat: 31.588, lon: -86.258, services: [] };
+{
+  const [a, b] = merc(-86.272, 31.5865), [c, d] = merc(-86.244, 31.5895);
+  for (const svc of report.services.filter(s => s.keyless && s.canExport)) {
+    const isImage = svc.type === 'ImageServer', bb = [a, b, c, d].map(v => v.toFixed(2)).join(',');
+    const u = isImage ? `${svc.url}/exportImage?bbox=${bb}&bboxSR=3857&imageSR=3857&size=1400,180&format=png&f=image`
+      : `${svc.url}/export?bbox=${bb}&bboxSR=3857&imageSR=3857&size=1400,180&format=png&transparent=false&f=image`;
+    const r = await get(u);
+    if (imageOk(r)) writeFileSync(`${out}/spot-${svc.name}.png`, r.body);
+    const e = { service: svc.name, status: r.status, saved: imageOk(r) };
+    if (isImage) {
+      const q = encodeURIComponent(JSON.stringify({ x: -86.258, y: 31.588, spatialReference: { wkid: 4326 } }));
+      const id = await json(`${svc.url}/identify?geometry=${q}&geometryType=esriGeometryPoint&returnCatalogItems=true&returnGeometry=false&f=json`);
+      e.value = id.j?.value;
+      e.images = (id.j?.catalogItems?.features || []).map(f => f.attributes).filter(x => x.Category === 1).map(x => `${x.Name} (${x.acquisition_date ? new Date(x.acquisition_date).toISOString().slice(0, 10) : x.Year})`);
+    }
+    report.spot.services.push(e);
+  }
+}
 // cached z16 tile vs each export service over the same tile: colour/date match at the handover
 const cached = report.services.find(s => s.name === 'USGSImageryOnly');
 if (cached?.keyless) {
@@ -259,6 +282,8 @@ const md = [`# Satellite zoom probe`, '', `Generated ${report.generated} by \`sc
   '## Metadata at the point (identify)', '', ...report.services.filter(s => s.identify).map(s => `- **${s.name}** (HTTP ${s.identify.status}${s.identify.error ? `, ${s.identify.error}` : ''}): ${s.identify.items?.length ? '```' + JSON.stringify(s.identify.items).slice(0, 1500) + '```' : 'no items'}`), '',
   '## Source images around the point (5 × 5 identify grid, about 4.8 km across)', '',
   ...report.services.filter(s => s.sheets).map(s => `- **${s.name}**: ${s.sheets.map(x => `${x.name} (${x.date || x.year}, ${x.res ?? '?'} m, ${x.agency || '?'}; ${x.points} of 25 points)`).join('; ') || 'none'}`), '',
+  '## Spot check: teal strip near 31.588 N, 86.258 W', '', 'Export of the strip area (86.272–86.244 W, 31.5865–31.5895 N, 1400×180 px, about 1.9 m/px) straight from each service; images saved as `spot-<service>.png`.', '',
+  ...report.spot.services.map(e => `- **${e.service}**: HTTP ${e.status}${e.saved ? ', saved' : ''}${e.value != null ? `; pixel value at the point: ${e.value}` : ''}${e.images ? `; source images: ${e.images.join(', ') || 'none'}` : ''}`), '',
   '## Full 1280×800 screen in MapLibre (until idle, fresh cache each run)', '', '| Service | Zoom | Request size | Requests | Runs (ms) | Median |', '|---|---|---|---|---|---|',
   ...report.screenTiming.map(t => `| ${t.service} | ${t.z} | ${t.tileSize} px | ${t.requests} | ${t.runsMs.join(', ')} | ${t.medianMs ?? '—'} ms |`), '',
   '## MapLibre 5.24.0 drawing the endpoint as raster tiles ({bbox-epsg-3857}, z17)', '', '| Service | Kind | Idle after | All tiles loaded | Errors |', '|---|---|---|---|---|',

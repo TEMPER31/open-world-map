@@ -19,7 +19,9 @@ const VIEWS = [
   { name: 'air-quality', field: 'aq', hash: '1.6/25/70' },
   { name: 'none', field: 'none', hash: '2.6/42/-38', particles: true },
   // Satellite past the cached USGS level 16, at Brantley AL (no weather field on top)
-  ...[16, 17, 18].map(z => ({ name: `satellite-brantley-z${z}`, field: 'none', basemap: 'satellite', hash: `${z}/31.585/-86.255`, wait: 6000 }))
+  ...[16, 17, 18].map(z => ({ name: `satellite-brantley-z${z}`, field: 'none', basemap: 'satellite', hash: `${z}/31.585/-86.255`, wait: 6000 })),
+  // the teal strip seen in the NAIP Plus layer at z16 (31.588 N, ~86.258 W), centred
+  { name: 'satellite-strip-z17', field: 'none', basemap: 'satellite', hash: '17/31.588/-86.262', wait: 6000 }
 ];
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
