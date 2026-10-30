@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-30T21:28:02.582Z",
+ "generated": "2026-10-30T21:42:17.629Z",
  "point": {
   "name": "Brantley, AL",
   "lat": 31.585,
@@ -55,7 +55,7 @@
     "status": 200,
     "type": "image/jpeg",
     "bytes": 10983,
-    "ms": 115,
+    "ms": 318,
     "acao": "*",
     "cache": "max-age=0,must-revalidate",
     "note": ""
@@ -72,11 +72,11 @@
      "groundM": 1.02,
      "tiles": 24,
      "ok": 0,
-     "totalMs": 256,
+     "totalMs": 1003,
      "medianTileMs": null,
      "maxTileMs": null,
      "kb": 0,
-     "oneExportMs": 441,
+     "oneExportMs": 816,
      "oneExportOk": true,
      "mode": "cached tiles (level 17)"
     },
@@ -85,11 +85,11 @@
      "groundM": 0.51,
      "tiles": 30,
      "ok": 0,
-     "totalMs": 341,
+     "totalMs": 1223,
      "medianTileMs": null,
      "maxTileMs": null,
      "kb": 0,
-     "oneExportMs": 469,
+     "oneExportMs": 847,
      "oneExportOk": true,
      "mode": "cached tiles (level 18)"
     },
@@ -98,11 +98,11 @@
      "groundM": 0.25,
      "tiles": 24,
      "ok": 0,
-     "totalMs": 216,
+     "totalMs": 1012,
      "medianTileMs": null,
      "maxTileMs": null,
      "kb": 0,
-     "oneExportMs": 428,
+     "oneExportMs": 678,
      "oneExportOk": true,
      "mode": "cached tiles (level 19)"
     }
@@ -218,7 +218,7 @@
     "status": 200,
     "type": "image/jpeg",
     "bytes": 12206,
-    "ms": 104,
+    "ms": 298,
     "acao": "*",
     "cache": "max-age=0,must-revalidate",
     "note": ""
@@ -235,11 +235,11 @@
      "groundM": 1.02,
      "tiles": 24,
      "ok": 0,
-     "totalMs": 297,
+     "totalMs": 1021,
      "medianTileMs": null,
      "maxTileMs": null,
      "kb": 0,
-     "oneExportMs": 575,
+     "oneExportMs": 971,
      "oneExportOk": true,
      "mode": "cached tiles (level 17)"
     },
@@ -248,11 +248,11 @@
      "groundM": 0.51,
      "tiles": 30,
      "ok": 0,
-     "totalMs": 314,
+     "totalMs": 1209,
      "medianTileMs": null,
      "maxTileMs": null,
      "kb": 0,
-     "oneExportMs": 499,
+     "oneExportMs": 902,
      "oneExportOk": true,
      "mode": "cached tiles (level 18)"
     },
@@ -261,11 +261,11 @@
      "groundM": 0.25,
      "tiles": 24,
      "ok": 0,
-     "totalMs": 263,
+     "totalMs": 972,
      "medianTileMs": null,
      "maxTileMs": null,
      "kb": 0,
-     "oneExportMs": 526,
+     "oneExportMs": 681,
      "oneExportOk": true,
      "mode": "cached tiles (level 19)"
     }
@@ -389,7 +389,7 @@
     "status": 200,
     "type": "image/jpeg",
     "bytes": 12306,
-    "ms": 219,
+    "ms": 370,
     "acao": "*",
     "cache": "max-age=43200",
     "note": ""
@@ -406,11 +406,11 @@
      "groundM": 1.02,
      "tiles": 24,
      "ok": 24,
-     "totalMs": 1808,
-     "medianTileMs": 379,
-     "maxTileMs": 1099,
+     "totalMs": 4713,
+     "medianTileMs": 520,
+     "maxTileMs": 4117,
      "kb": 379,
-     "oneExportMs": 606,
+     "oneExportMs": 713,
      "oneExportOk": true,
      "mode": "export per tile"
     },
@@ -419,11 +419,11 @@
      "groundM": 0.51,
      "tiles": 30,
      "ok": 30,
-     "totalMs": 1800,
-     "medianTileMs": 306,
-     "maxTileMs": 752,
+     "totalMs": 4249,
+     "medianTileMs": 436,
+     "maxTileMs": 2377,
      "kb": 376,
-     "oneExportMs": 516,
+     "oneExportMs": 638,
      "oneExportOk": true,
      "mode": "export per tile"
     },
@@ -432,11 +432,11 @@
      "groundM": 0.25,
      "tiles": 24,
      "ok": 24,
-     "totalMs": 1040,
-     "medianTileMs": 205,
-     "maxTileMs": 421,
+     "totalMs": 2338,
+     "medianTileMs": 398,
+     "maxTileMs": 1562,
      "kb": 219,
-     "oneExportMs": 347,
+     "oneExportMs": 6048,
      "oneExportOk": true,
      "mode": "export per tile"
     }
@@ -756,7 +756,7 @@
     "status": 200,
     "type": "image/jpeg",
     "bytes": 12301,
-    "ms": 192,
+    "ms": 359,
     "acao": "*",
     "cache": "max-age=43200",
     "note": ""
@@ -773,11 +773,11 @@
      "groundM": 1.02,
      "tiles": 24,
      "ok": 24,
-     "totalMs": 3470,
-     "medianTileMs": 636,
-     "maxTileMs": 1817,
-     "kb": 591,
-     "oneExportMs": 834,
+     "totalMs": 2690,
+     "medianTileMs": 527,
+     "maxTileMs": 917,
+     "kb": 530,
+     "oneExportMs": 688,
      "oneExportOk": true,
      "mode": "export per tile"
     },
@@ -786,11 +786,11 @@
      "groundM": 0.51,
      "tiles": 30,
      "ok": 30,
-     "totalMs": 1603,
-     "medianTileMs": 222,
-     "maxTileMs": 672,
+     "totalMs": 2723,
+     "medianTileMs": 414,
+     "maxTileMs": 1334,
      "kb": 376,
-     "oneExportMs": 332,
+     "oneExportMs": 805,
      "oneExportOk": true,
      "mode": "export per tile"
     },
@@ -799,11 +799,11 @@
      "groundM": 0.25,
      "tiles": 24,
      "ok": 24,
-     "totalMs": 843,
-     "medianTileMs": 180,
-     "maxTileMs": 377,
+     "totalMs": 1800,
+     "medianTileMs": 367,
+     "maxTileMs": 614,
      "kb": 219,
-     "oneExportMs": 814,
+     "oneExportMs": 943,
      "oneExportOk": true,
      "mode": "export per tile"
     }
@@ -1047,9 +1047,9 @@
      "groundM": 1.02,
      "w": 512,
      "h": 512,
-     "detail": 8.02,
+     "detail": 8.68,
      "rgb": [
-      165,
+      145,
       154,
       116
      ]
@@ -1103,6 +1103,40 @@
    }
   }
  ],
+ "spot": {
+  "lat": 31.588,
+  "lon": -86.258,
+  "services": [
+   {
+    "service": "USGSImageryOnly",
+    "status": 200,
+    "saved": true
+   },
+   {
+    "service": "USGSImageryTopo",
+    "status": 200,
+    "saved": true
+   },
+   {
+    "service": "USGSNAIPImagery",
+    "status": 200,
+    "saved": true,
+    "value": "76, 87, 80, 115",
+    "images": [
+     "m_3108630_ne_16_060_20230528 (2023-05-28)"
+    ]
+   },
+   {
+    "service": "USGSNAIPPlus",
+    "status": 200,
+    "saved": true,
+    "value": "76, 87, 80, 115",
+    "images": [
+     "m_3108630_ne_16_060_20230528 (2023-05-28)"
+    ]
+   }
+  ]
+ },
  "cachedZ16": {
   "tile": [
    16,
@@ -1122,28 +1156,28 @@
   {
    "service": "USGSImageryOnly",
    "kind": "export",
-   "ms": 749,
+   "ms": 858,
    "errors": [],
    "loaded": true
   },
   {
    "service": "USGSImageryTopo",
    "kind": "export",
-   "ms": 764,
+   "ms": 857,
    "errors": [],
    "loaded": true
   },
   {
    "service": "USGSNAIPImagery",
    "kind": "export",
-   "ms": 753,
+   "ms": 2640,
    "errors": [],
    "loaded": true
   },
   {
    "service": "USGSNAIPPlus",
    "kind": "export",
-   "ms": 866,
+   "ms": 1923,
    "errors": [],
    "loaded": true
   }
@@ -1155,11 +1189,11 @@
    "tileSize": 256,
    "requests": 30,
    "runsMs": [
-    1805,
-    473,
-    472
+    4847,
+    610,
+    556
    ],
-   "medianMs": 473
+   "medianMs": 610
   },
   {
    "service": "USGSNAIPImagery",
@@ -1167,11 +1201,11 @@
    "tileSize": 512,
    "requests": 9,
    "runsMs": [
-    709,
-    467,
-    441
+    5740,
+    548,
+    503
    ],
-   "medianMs": 467
+   "medianMs": 548
   },
   {
    "service": "USGSNAIPImagery",
@@ -1179,11 +1213,11 @@
    "tileSize": 256,
    "requests": 24,
    "runsMs": [
-    1082,
-    497,
-    471
+    8683,
+    613,
+    528
    ],
-   "medianMs": 497
+   "medianMs": 613
   },
   {
    "service": "USGSNAIPImagery",
@@ -1191,11 +1225,11 @@
    "tileSize": 512,
    "requests": 12,
    "runsMs": [
-    820,
-    461,
-    445
+    3906,
+    529,
+    530
    ],
-   "medianMs": 461
+   "medianMs": 530
   },
   {
    "service": "USGSNAIPPlus",
@@ -1203,11 +1237,11 @@
    "tileSize": 256,
    "requests": 30,
    "runsMs": [
-    1647,
-    537,
-    508
+    6262,
+    563,
+    536
    ],
-   "medianMs": 537
+   "medianMs": 563
   },
   {
    "service": "USGSNAIPPlus",
@@ -1215,11 +1249,11 @@
    "tileSize": 512,
    "requests": 9,
    "runsMs": [
-    457,
-    430,
-    411
+    532,
+    494,
+    526
    ],
-   "medianMs": 430
+   "medianMs": 526
   },
   {
    "service": "USGSNAIPPlus",
@@ -1227,11 +1261,11 @@
    "tileSize": 256,
    "requests": 24,
    "runsMs": [
-    1338,
-    504,
-    509
+    3086,
+    593,
+    535
    ],
-   "medianMs": 509
+   "medianMs": 593
   },
   {
    "service": "USGSNAIPPlus",
@@ -1239,11 +1273,11 @@
    "tileSize": 512,
    "requests": 12,
    "runsMs": [
-    452,
-    426,
-    454
+    543,
+    514,
+    525
    ],
-   "medianMs": 452
+   "medianMs": 525
   }
  ]
 }

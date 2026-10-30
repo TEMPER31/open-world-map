@@ -1,12 +1,12 @@
 # Rendering and behaviour tests
 
-Generated 2026-10-30T21:28:02.212Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
+Generated 2026-10-30T21:42:17.177Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
 
 | Test | Result | Detail |
 |---|---|---|
-| Westerly (+U only): particles move east | pass | {"dx":0.0243,"dy":-0.0011} |
-| Southerly (+V only): particles move north (screen up) | pass | {"dx":-0.0009,"dy":-0.031} |
-| Easterly (-U only): particles move west | pass | {"dx":-0.0199,"dy":-0.0011} |
+| Westerly (+U only): particles move east | pass | {"dx":0.0214,"dy":-0.0012} |
+| Southerly (+V only): particles move north (screen up) | pass | {"dx":-0.001,"dy":-0.0283} |
+| Easterly (-U only): particles move west | pass | {"dx":-0.0182,"dy":-0.0014} |
 | Pressure: isobars drawn by the field shader and H/L labels are a WebGL symbol layer (no DOM markers) | pass | {"domMarkers":0,"hlFeatures":67,"isobarsInShader":true} |
 | Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 9 of 9 pan frames rendered the H/L layer; DOM labels: 0 |
 | No page errors (pressure) | pass |  |
@@ -20,5 +20,5 @@ Generated 2026-10-30T21:28:02.212Z by `scripts/data/render-tests.mjs` (headless 
 
 | Field | Long tasks per hour step (ms) | Worst frame gap while stepping (ms) | Frames/s during a 2 s pan |
 |---|---|---|---|
-| pres | 0 | 340 | 8 |
-| temp | 0 | 421 | 8 |
+| pres | 0 | 438 | 7.5 |
+| temp | 0 | 374 | 7.5 |

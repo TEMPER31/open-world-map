@@ -1,6 +1,6 @@
 # Satellite zoom probe
 
-Generated 2026-10-30T21:28:02.582Z by `scripts/data/satellite-probe.mjs` (GitHub Actions runner). Point: Brantley, AL (31.585, -86.255). **Zooms are the site's map zooms** (MapLibre, 512 px tiles): map zoom z uses 256 px web tiles of level z + 1, so the cached USGS layer (levels ≤ 16) is sharp up to map zoom 15. Ground size of one screen pixel at Brantley: z15 2.03 m, z16 1.02 m, z17 0.51 m, z18 0.25 m.
+Generated 2026-10-30T21:42:17.629Z by `scripts/data/satellite-probe.mjs` (GitHub Actions runner). Point: Brantley, AL (31.585, -86.255). **Zooms are the site's map zooms** (MapLibre, 512 px tiles): map zoom z uses 256 px web tiles of level z + 1, so the cached USGS layer (levels ≤ 16) is sharp up to map zoom 15. Ground size of one screen pixel at Brantley: z15 2.03 m, z16 1.02 m, z17 0.51 m, z18 0.25 m.
 
 ## Services directory
 
@@ -28,27 +28,27 @@ Generated 2026-10-30T21:28:02.582Z by `scripts/data/satellite-probe.mjs` (GitHub
 
 | Service | Export | Export CORS | WMS caps | WMS EPSG:3857 | WMS GetMap | WMS CORS |
 |---|---|---|---|---|---|---|
-| USGSImageryOnly | 200 image/jpeg 10983 B 115 ms  | * | 400 no | no | — | none |
-| USGSImageryTopo | 200 image/jpeg 12206 B 104 ms  | * | 400 no | no | — | none |
-| USGSNAIPImagery | 200 image/jpeg 12306 B 219 ms  | * | 400 no | no | — | none |
-| USGSNAIPPlus | 200 image/jpeg 12301 B 192 ms  | * | 400 no | no | — | none |
+| USGSImageryOnly | 200 image/jpeg 10983 B 318 ms  | * | 400 no | no | — | none |
+| USGSImageryTopo | 200 image/jpeg 12206 B 298 ms  | * | 400 no | no | — | none |
+| USGSNAIPImagery | 200 image/jpeg 12306 B 370 ms  | * | 400 no | no | — | none |
+| USGSNAIPPlus | 200 image/jpeg 12301 B 359 ms  | * | 400 no | no | — | none |
 
 ## Load time for one 1280×800 screen at Brantley (256 px requests, 6 at a time; plus one 1280×800 export)
 
 | Service | Zoom | m/pixel | Mode | Requests (ok) | Total | Median / max per request | KB | One export |
 |---|---|---|---|---|---|---|---|---|
-| USGSImageryOnly | 16 | 1.02 | cached tiles (level 17) | 24 (0) | 256 ms | null / null ms | 0 | 441 ms |
-| USGSImageryOnly | 17 | 0.51 | cached tiles (level 18) | 30 (0) | 341 ms | null / null ms | 0 | 469 ms |
-| USGSImageryOnly | 18 | 0.25 | cached tiles (level 19) | 24 (0) | 216 ms | null / null ms | 0 | 428 ms |
-| USGSImageryTopo | 16 | 1.02 | cached tiles (level 17) | 24 (0) | 297 ms | null / null ms | 0 | 575 ms |
-| USGSImageryTopo | 17 | 0.51 | cached tiles (level 18) | 30 (0) | 314 ms | null / null ms | 0 | 499 ms |
-| USGSImageryTopo | 18 | 0.25 | cached tiles (level 19) | 24 (0) | 263 ms | null / null ms | 0 | 526 ms |
-| USGSNAIPImagery | 16 | 1.02 | export per tile | 24 (24) | 1808 ms | 379 / 1099 ms | 379 | 606 ms |
-| USGSNAIPImagery | 17 | 0.51 | export per tile | 30 (30) | 1800 ms | 306 / 752 ms | 376 | 516 ms |
-| USGSNAIPImagery | 18 | 0.25 | export per tile | 24 (24) | 1040 ms | 205 / 421 ms | 219 | 347 ms |
-| USGSNAIPPlus | 16 | 1.02 | export per tile | 24 (24) | 3470 ms | 636 / 1817 ms | 591 | 834 ms |
-| USGSNAIPPlus | 17 | 0.51 | export per tile | 30 (30) | 1603 ms | 222 / 672 ms | 376 | 332 ms |
-| USGSNAIPPlus | 18 | 0.25 | export per tile | 24 (24) | 843 ms | 180 / 377 ms | 219 | 814 ms |
+| USGSImageryOnly | 16 | 1.02 | cached tiles (level 17) | 24 (0) | 1003 ms | null / null ms | 0 | 816 ms |
+| USGSImageryOnly | 17 | 0.51 | cached tiles (level 18) | 30 (0) | 1223 ms | null / null ms | 0 | 847 ms |
+| USGSImageryOnly | 18 | 0.25 | cached tiles (level 19) | 24 (0) | 1012 ms | null / null ms | 0 | 678 ms |
+| USGSImageryTopo | 16 | 1.02 | cached tiles (level 17) | 24 (0) | 1021 ms | null / null ms | 0 | 971 ms |
+| USGSImageryTopo | 17 | 0.51 | cached tiles (level 18) | 30 (0) | 1209 ms | null / null ms | 0 | 902 ms |
+| USGSImageryTopo | 18 | 0.25 | cached tiles (level 19) | 24 (0) | 972 ms | null / null ms | 0 | 681 ms |
+| USGSNAIPImagery | 16 | 1.02 | export per tile | 24 (24) | 4713 ms | 520 / 4117 ms | 379 | 713 ms |
+| USGSNAIPImagery | 17 | 0.51 | export per tile | 30 (30) | 4249 ms | 436 / 2377 ms | 376 | 638 ms |
+| USGSNAIPImagery | 18 | 0.25 | export per tile | 24 (24) | 2338 ms | 398 / 1562 ms | 219 | 6048 ms |
+| USGSNAIPPlus | 16 | 1.02 | export per tile | 24 (24) | 2690 ms | 527 / 917 ms | 530 | 688 ms |
+| USGSNAIPPlus | 17 | 0.51 | export per tile | 30 (30) | 2723 ms | 414 / 1334 ms | 376 | 805 ms |
+| USGSNAIPPlus | 18 | 0.25 | export per tile | 24 (24) | 1800 ms | 367 / 614 ms | 219 | 943 ms |
 
 ## Image detail by zoom (512×512 export at Brantley)
 
@@ -59,7 +59,7 @@ Mean absolute difference between neighbouring pixels. While the source is sharpe
 | USGSImageryOnly | 12.63 | 12 | 6.51 | 3.89 | 2.9 | 2.54 |
 | USGSImageryTopo | 12.39 | 15.76 | 7.23 | 4.33 | 3.46 | 2.91 |
 | USGSNAIPImagery | 12.68 | 12.29 | 8.68 | 5.58 | 2.8 | 1.46 |
-| USGSNAIPPlus | 12.68 | 12.28 | 8.02 | 5.58 | 2.8 | 1.46 |
+| USGSNAIPPlus | 12.68 | 12.28 | 8.68 | 5.58 | 2.8 | 1.46 |
 
 ## Handover: last cached tile (level 16) vs an export of the same area (colour = mean RGB)
 
@@ -80,24 +80,33 @@ Mean absolute difference between neighbouring pixels. While the source is sharpe
 - **USGSNAIPImagery**: m_3108630_ne_16_060_20230528 (2023-05-28, 0.6 m, USDA; 15 of 25 points); m_3108631_nw_16_060_20230528 (2023-05-28, 0.6 m, USDA; 10 of 25 points)
 - **USGSNAIPPlus**: m_3108630_ne_16_060_20230528 (2023-05-28, 0.6 m, USDA; 15 of 25 points); m_3108631_nw_16_060_20230528 (2023-05-28, 0.6 m, USDA; 10 of 25 points)
 
+## Spot check: teal strip near 31.588 N, 86.258 W
+
+Export of the strip area (86.272–86.244 W, 31.5865–31.5895 N, 1400×180 px, about 1.9 m/px) straight from each service; images saved as `spot-<service>.png`.
+
+- **USGSImageryOnly**: HTTP 200, saved
+- **USGSImageryTopo**: HTTP 200, saved
+- **USGSNAIPImagery**: HTTP 200, saved; pixel value at the point: 76, 87, 80, 115; source images: m_3108630_ne_16_060_20230528 (2023-05-28)
+- **USGSNAIPPlus**: HTTP 200, saved; pixel value at the point: 76, 87, 80, 115; source images: m_3108630_ne_16_060_20230528 (2023-05-28)
+
 ## Full 1280×800 screen in MapLibre (until idle, fresh cache each run)
 
 | Service | Zoom | Request size | Requests | Runs (ms) | Median |
 |---|---|---|---|---|---|
-| USGSNAIPImagery | 17 | 256 px | 30 | 1805, 473, 472 | 473 ms |
-| USGSNAIPImagery | 17 | 512 px | 9 | 709, 467, 441 | 467 ms |
-| USGSNAIPImagery | 18 | 256 px | 24 | 1082, 497, 471 | 497 ms |
-| USGSNAIPImagery | 18 | 512 px | 12 | 820, 461, 445 | 461 ms |
-| USGSNAIPPlus | 17 | 256 px | 30 | 1647, 537, 508 | 537 ms |
-| USGSNAIPPlus | 17 | 512 px | 9 | 457, 430, 411 | 430 ms |
-| USGSNAIPPlus | 18 | 256 px | 24 | 1338, 504, 509 | 509 ms |
-| USGSNAIPPlus | 18 | 512 px | 12 | 452, 426, 454 | 452 ms |
+| USGSNAIPImagery | 17 | 256 px | 30 | 4847, 610, 556 | 610 ms |
+| USGSNAIPImagery | 17 | 512 px | 9 | 5740, 548, 503 | 548 ms |
+| USGSNAIPImagery | 18 | 256 px | 24 | 8683, 613, 528 | 613 ms |
+| USGSNAIPImagery | 18 | 512 px | 12 | 3906, 529, 530 | 530 ms |
+| USGSNAIPPlus | 17 | 256 px | 30 | 6262, 563, 536 | 563 ms |
+| USGSNAIPPlus | 17 | 512 px | 9 | 532, 494, 526 | 526 ms |
+| USGSNAIPPlus | 18 | 256 px | 24 | 3086, 593, 535 | 593 ms |
+| USGSNAIPPlus | 18 | 512 px | 12 | 543, 514, 525 | 525 ms |
 
 ## MapLibre 5.24.0 drawing the endpoint as raster tiles ({bbox-epsg-3857}, z17)
 
 | Service | Kind | Idle after | All tiles loaded | Errors |
 |---|---|---|---|---|
-| USGSImageryOnly | export | 749 ms | yes | none |
-| USGSImageryTopo | export | 764 ms | yes | none |
-| USGSNAIPImagery | export | 753 ms | yes | none |
-| USGSNAIPPlus | export | 866 ms | yes | none |
+| USGSImageryOnly | export | 858 ms | yes | none |
+| USGSImageryTopo | export | 857 ms | yes | none |
+| USGSNAIPImagery | export | 2640 ms | yes | none |
+| USGSNAIPPlus | export | 1923 ms | yes | none |
