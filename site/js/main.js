@@ -2,9 +2,9 @@
 
 import { CREDITS, SAMPLE_GRID_DEG } from './config.js';
 import * as S from './state.js';
-import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024 } from './scales.js';
+import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024, setTempUnit, toTemp, unitOf } from './scales.js';
 import { sample } from './grid.js';
-import { initData, meta, getGrid, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
+import { initData, meta, getGrid, getPoint, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
 import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
 import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
@@ -16,7 +16,6 @@ const mobile = matchMedia('(max-width: 1023px)');
 
 const hhmm = ms => new Date(ms).toISOString().slice(11, 16);
 const runLabel = ms => `${new Date(ms).toISOString().slice(11, 13)}Z ${new Date(ms).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}`;
-let current = null; // {t, grids: {field: grid}} currently drawn on the map
 
 const BASEMAPS = [['dark', 'Dark'], ['light', 'Light'], ['satellite', 'Satellite']];
 const DENSITY = [[0.5, 'Low'], [1, 'Normal'], [1.6, 'High']];
@@ -45,24 +44,37 @@ const fmtLat = la => `${Math.abs(la).toFixed(2)}°${la >= 0 ? 'N' : 'S'}`;
 const fmtLon = lo => { lo = ((lo + 540) % 360) - 180; return `${Math.abs(lo).toFixed(2)}°${lo >= 0 ? 'E' : 'W'}`; };
 const fmtCoord = (lo, la) => `${fmtLat(la)} ${fmtLon(lo)}`;
 
-function reading(g, k, lo, la) {
-  if (!g) return ['—', '', 'loading'];
-  const v = sample(g.grid, g.data, lo, la);
+// [value, unit, description] for a point value p = {v, u, w, aqi} (from getPoint).
+// Cloud cover and rain are stored as area averages (a 3x3 tent over the 0.25° points, about
+// 50 km across), which is what the colours show, so they are labelled as such: a single 0.25°
+// point can differ by 25 % or more where clouds are patchy.
+function readingOf(k, p) {
+  if (p === undefined) return ['—', '', 'loading'];
+  const v = p ? p.v : NaN;
   if (v !== v) return ['—', '', k === 'aq' ? 'no data' : ''];
   switch (k) {
-    case 'wind': return [Math.round(v), 'km/h', `from ${dirFrom(sample(g.grid, g.u, lo, la), sample(g.grid, g.v, lo, la))}`];
-    case 'temp': return [Math.round(v), '°C', 'at 2 m'];
-    case 'rain': return v < 0.1 ? ['Dry', '', 'past hour'] : [v.toFixed(1), 'mm/h', 'past hour'];
+    case 'wind': return [Math.round(v), 'km/h', `from ${dirFrom(p.u, p.w)}`];
+    case 'temp': return [Math.round(toTemp(v)), unitOf('temp'), 'at 2 m'];
+    case 'rain': return v < 0.1 ? ['Dry', '', 'past hour · area avg'] : [v.toFixed(1), 'mm/h', 'past hour · area avg'];
     case 'aq': {
       // Category from the hourly PM2.5 (what the colours show). The AQI number follows EPA's
       // definition (24-hour mean): Open-Meteo's us_aqi, which the CI check matched to the 2024
       // table on 24-h means. Without it, the hourly-based value is shown and labelled so.
-      const a = g.aqi ? sample(g.grid, g.aqi, lo, la) : NaN;
+      const a = p.aqi ?? NaN;
       return [v < 10 ? v.toFixed(1) : Math.round(v), 'µg/m³', `${aqCategory(v)} · ${a === a ? `AQI ${Math.round(a)} (24 h)` : `AQI ${aqi2024(v)} (hourly)`}`];
     }
-    case 'cloud': return [Math.round(v), '%', 'cloud cover'];
+    case 'cloud': return [Math.round(v), '%', 'area average'];
     case 'pres': return [Math.round(v), 'hPa', 'sea level'];
   }
+}
+
+// The same from a whole grid (used by the test scripts through window.owmTest).
+function reading(g, k, lo, la) {
+  if (!g) return readingOf(k, undefined);
+  const p = { v: sample(g.grid, g.data, lo, la) };
+  if (g.u) { p.u = sample(g.grid, g.u, lo, la); p.w = sample(g.grid, g.v, lo, la); }
+  if (g.aqi) p.aqi = sample(g.grid, g.aqi, lo, la);
+  return readingOf(k, p);
 }
 
 // ---- toast ---------------------------------------------------------------------
@@ -96,7 +108,7 @@ function buildLayers() {
   $('#lsheet').innerHTML = `
     <div class="ls-hd"><b>Map layers</b><button class="d-x" type="button" data-lyr-close aria-label="Close">×</button></div>
     <div class="grp"><div class="kick"><span>Field</span><span>${meta.live ? 'GFS · CAMS' : 'sample data'}</span></div>
-      <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span>${FIELDS[k].unit}</span></button>`).join('')}<button class="ftile" type="button" role="radio" data-field="none"><b>None</b><div class="lg-bar"></div><span>map only</span></button></div></div>
+      <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span data-unit="${k}">${unitOf(k)}</span></button>`).join('')}<button class="ftile" type="button" role="radio" data-field="none"><b>None</b><div class="lg-bar"></div><span>map only</span></button></div></div>
     <div class="grp"><div class="kick"><span>Basemap</span><span></span></div>
       <div class="card"><div class="it">Map<div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div></div></div></div>
     <div class="grp"><div class="card">
@@ -107,6 +119,7 @@ function buildLayers() {
 
   $$('[data-basemaps]').forEach(g => g.innerHTML = BASEMAPS.map(([v, n]) => `<button type="button" role="radio" data-basemap="${v}">${n}</button>`).join(''));
   $('[data-density]').innerHTML = DENSITY.map(([v, n]) => `<button type="button" role="radio" data-dens="${v}">${n}</button>`).join('');
+  $('[data-tunits]').innerHTML = [['C', '°C'], ['F', '°F']].map(([v, n]) => `<button type="button" role="radio" data-tunit="${v}">${n}</button>`).join('');
 }
 
 // Header, banner and data popover copy for live vs sample data.
@@ -144,6 +157,7 @@ function bindChrome(map) {
     }
     else if (t.dataset.basemap) S.set({ basemap: t.dataset.basemap });
     else if (t.dataset.dens) S.set({ density: +t.dataset.dens });
+    else if (t.dataset.tunit) S.set({ tempUnit: t.dataset.tunit });
     else if ('particles' in t.dataset) S.set({ particles: !S.get('particles') });
     else if ('lmin' in t.dataset) S.set({ layersMin: !S.get('layersMin') });
     else if (t.dataset.soon) toast(`${t.dataset.soon} arrives in a later phase.`);
@@ -170,6 +184,11 @@ function bindChrome(map) {
     $$('[data-lsum]').forEach(el => el.textContent = s.field === 'none' ? 'No layer' : `${FIELDS[s.field].short} · ${meta.live ? 'GFS' : 'sample'}`);
   });
   S.on(['basemap'], s => $$('[data-basemap]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.basemap === s.basemap))));
+  S.on(['tempUnit'], s => {
+    setTempUnit(s.tempUnit);
+    $$('[data-tunit]').forEach(el => el.closest('[data-tunits]') && el.setAttribute('aria-checked', String(el.dataset.tunit === s.tempUnit)));
+    $$('[data-unit="temp"]').forEach(el => el.textContent = unitOf('temp'));
+  });
   S.on(['density'], s => $$('[data-dens]').forEach(el => el.setAttribute('aria-checked', String(+el.dataset.dens === s.density))));
   S.on(['particles'], s => $$('[data-particles]').forEach(el => { el.classList.toggle('on', s.particles); el.setAttribute('aria-checked', String(s.particles)); }));
   S.on(['layersMin'], s => {
@@ -178,7 +197,7 @@ function bindChrome(map) {
     b.setAttribute('aria-expanded', String(!s.layersMin));
     b.setAttribute('aria-label', s.layersMin ? 'Expand layers' : 'Minimise layers');
   });
-  S.on(['field', 'basemap'], s => {
+  S.on(['field', 'basemap', 'tempUnit'], s => {
     const light = s.basemap === 'light', f = FIELDS[s.field];
     if (!f) {
       $('#legend').innerHTML = '<div class="lg-h"><span>No layer</span><span>map only</span></div>';
@@ -187,7 +206,7 @@ function bindChrome(map) {
     }
     $('#legend').innerHTML = legendHTML(s.field, light, L.legendMeta(s.field));
     $('#legend').title = s.field === 'aq' ? 'PM2.5 categories use the US EPA breakpoints revised in May 2024. EPA defines them for 24-hour averages; this map applies them to hourly forecast values.' : '';
-    $('#mchip').innerHTML = `${f.short} ${f.unit}${barHTML(s.field, light)}${rangeText(s.field)}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
+    $('#mchip').innerHTML = `${f.short} ${unitOf(s.field)}${barHTML(s.field, light)}${rangeText(s.field)}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
   });
 }
 
@@ -209,6 +228,7 @@ function toggleLayersSheet(force) {
 function chartSVG(series, t) {
   if (!series?.length) return '<p class="src">Chart loading…</p>';
   const w = 310, h = 64, n = meta.hours || 1, x = t => (t / n * w).toFixed(1);
+  series = series.map(p => ({ ...p, temp: toTemp(p.temp) }));
   const T = series.map(p => p.temp), W = series.map(p => p.wind);
   const tMin = Math.min(...T) - 1, tMax = Math.max(...T) + 1, wMax = Math.max(40, ...W);
   const y = v => (6 + (tMax - v) / (tMax - tMin) * (h - 26)).toFixed(1);
@@ -227,20 +247,28 @@ function chartSVG(series, t) {
     <text x="${w}" y="${h - 1}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">+${n} h</text></svg>`;
 }
 
-let detailGrids = null, detailSeries = null, detailKey = '';
-async function loadDetail(s) {
+let detailVals = null, detailSeries = null, detailKey = '';
+// Each value appears as soon as its own file is ready (the field on screen is already loaded,
+// so it shows at once) instead of waiting for all six downloads.
+let detailFrame = 0;
+const redrawDetail = () => { detailFrame ||= requestAnimationFrame(() => { detailFrame = 0; renderDetail(S.get()); }); };
+function loadDetail(s) {
   if (!s.selection) return;
-  const { lon, lat } = s.selection, key = `${lon},${lat},${s.t}`;
+  const { lon, lat } = s.selection, key = `${lon},${lat},${s.t}`, place = `${lon},${lat}`;
   if (key === detailKey) return;
   detailKey = key;
-  const [grids, series] = await Promise.all([
-    Promise.all(ORDER.map(k => getGrid(s.t, k).catch(() => null))),
-    detailSeries?.key === `${lon},${lat}` ? detailSeries : getSeries(lon, lat).then(v => Object.assign(v, { key: `${lon},${lat}` })).catch(() => [])
-  ]);
-  if (detailKey !== key) return;
-  detailGrids = Object.fromEntries(ORDER.map((k, i) => [k, grids[i]]));
-  detailSeries = series;
-  renderDetail(S.get());
+  const vals = detailVals = {};
+  for (const k of [s.field, ...ORDER.filter(k => k !== s.field)].filter(k => FIELDS[k])) {
+    getPoint(s.t, [k], lon, lat).then(p => p[k], () => null).then(v => {
+      if (detailKey === key) { vals[k] = v; redrawDetail(); }
+    });
+  }
+  if (detailSeries?.key !== place) {
+    detailSeries = null;
+    getSeries(lon, lat).catch(() => []).then(v => {
+      if (S.get('selection')?.lon === lon && S.get('selection')?.lat === lat) { detailSeries = Object.assign(v, { key: place }); redrawDetail(); }
+    });
+  }
 }
 
 function renderDetail(s) {
@@ -248,9 +276,9 @@ function renderDetail(s) {
   document.body.classList.toggle('has-detail', !!s.selection);
   if (!s.selection) { el.hidden = true; detailKey = ''; return; }
   const { lon, lat } = s.selection, t = s.t;
-  const stat = k => { const [v, u, d] = reading(detailGrids?.[k], k, lon, lat); return `<button class="stat${k === s.field ? ' on' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
+  const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
   const note = meta.live
-    ? `<div class="d-sec"><div class="src">NOAA GFS run ${runLabel(meta.run)} · air quality CAMS ${meta.aq ? fmtUTC(meta.aqGenerated) : 'unavailable'} · model values on a ${meta.gfs.grid.deg}° grid, not local observations</div></div>`
+    ? `<div class="d-sec"><div class="src">NOAA GFS run ${runLabel(meta.run)} · air quality CAMS ${meta.aq ? fmtUTC(meta.aqGenerated) : 'unavailable'} </div><div class="src">Model values on a ~50 km grid; mountains and coasts can differ from local conditions.</div></div>`
     : `<div class="d-sec"><div class="alert"><b>Sample data</b><span>Generated to test the layout. Not an observation or a forecast.</span></div></div>`;
   el.innerHTML = `
     <div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close">×</button>
@@ -287,34 +315,43 @@ function renderScale(map) {
 
 // ---- probe (desktop hover) -------------------------------------------------------------
 function bindProbe(map) {
+  // Values come from the worker (a few bytes per move); one lookup is in flight at a time and
+  // the newest mouse position runs next.
   const probe = $('#probe');
-  let pending = null;
-  map.on('mousemove', e => {
-    if (mobile.matches) return;
-    pending = e;
-    requestAnimationFrame(() => {
-      if (!pending) return;
-      const { lngLat: { lng, lat }, point } = pending; pending = null;
-      const k = S.get('field');
-      if (k === 'none' || Math.abs(lat) > 85 || !current?.grids[k] || current.t !== S.get('t')) { probe.hidden = true; return; }
-      const [v, u, d] = reading(current.grids[k], k, lng, lat);
+  let pending = null, busy = false;
+  async function show() {
+    if (busy || !pending) return;
+    const { lngLat: { lng, lat }, point } = pending; pending = null;
+    const k = S.get('field'), t = S.get('t');
+    if (k === 'none' || Math.abs(lat) > 85) { probe.hidden = true; return; }
+    busy = true;
+    const p = await getPoint(t, [k], lng, lat).catch(() => null);
+    busy = false;
+    if (p && S.get('field') === k && S.get('t') === t && !left) {
+      const [v, u, d] = readingOf(k, p[k]);
       probe.innerHTML = `<b>${v}${u ? ' ' + u : ''}</b><span>${d}</span><span>·</span><span>${fmtLat(lat).replace(/(\.\d)\d/, '$1')} ${fmtLon(lng).replace(/(\.\d)\d/, '$1')}</span>`;
       probe.style.left = point.x + 'px';
       probe.style.top = point.y + 'px';
       probe.hidden = false;
-    });
+    }
+    if (pending) requestAnimationFrame(show);
+  }
+  let left = false;
+  map.on('mousemove', e => {
+    if (mobile.matches) return;
+    left = false;
+    pending = e;
+    requestAnimationFrame(show);
   });
-  map.getCanvas().addEventListener('mouseleave', () => { pending = null; probe.hidden = true; });
+  map.getCanvas().addEventListener('mouseleave', () => { pending = null; left = true; probe.hidden = true; });
   map.on('movestart', () => { probe.hidden = true; });
 }
 
 // ---- boot ------------------------------------------------------------------------------
 async function boot() {
   if (!window.maplibregl) { document.body.insertAdjacentHTML('beforeend', '<p class="noscript">The map library failed to load. Check your connection and reload.</p>'); return; }
-  await Promise.all([loadScales(), initData()]);
-  buildLayers();
-  renderStatus();
-
+  // The basemap starts loading at once; forecast data and scales load alongside it.
+  const dataReady = Promise.all([loadScales(), initData()]);
   const map = new maplibregl.Map({
     container: 'map',
     style: buildStyle(S.get('basemap')),
@@ -328,7 +365,12 @@ async function boot() {
   });
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
+  const mapLoaded = new Promise(r => map.once('load', r));
+  await dataReady;
   window.owmMap = map; // handy for debugging in the console and used by the test scripts
+  setTempUnit(S.get('tempUnit'));
+  buildLayers();
+  renderStatus();
 
   bindChrome(map);
   S.set({ t: Math.min(S.get('t'), meta.hours) });
@@ -341,7 +383,7 @@ async function boot() {
   function particleCount() { return Math.round((mobile.matches ? 12000 : 36000) * S.get('density')); }
   const light = () => S.get('basemap') === 'light';
 
-  await new Promise(r => map.once('load', r));
+  await mapLoaded;
   field.addTo(map);
   map.addLayer(wind, 'omt-road-minor'); // above the field, below roads, borders and labels
   window.owmWind = wind;
@@ -359,20 +401,18 @@ async function boot() {
       busy = false;
     };
   }
-  current = { t: -1, grids: {} };
   const updateField = latest(async () => {
     const t = S.get('t'), k = S.get('field');
     field.setVisible(k !== 'none');
-    if (k === 'none') { field.setOverlays(null, light()); field.setIsobars(null); current = { t, grids: {} }; return; }
+    if (k === 'none') { field.setOverlays(null, light()); field.setIsobars(null); return; }
     const tex = await getFieldTexture(t, k);
     if (S.get('field') !== k) return;
     field.setData(tex);
     field.setIsobars(k === 'pres' ? FIELDS.pres : null, light());
     $('#legend').classList.toggle('unavailable', !!tex.missing);
-    // probe values and pressure overlays follow without holding up the colours
-    const [g, ov] = await Promise.all([getGrid(t, k), k === 'pres' ? getPressureOverlays(t) : null]);
+    // pressure H/L labels follow without holding up the colours
+    const ov = k === 'pres' ? await getPressureOverlays(t) : null;
     if (S.get('field') !== k) return;
-    current = { t, grids: { [k]: g } };
     field.setOverlays(ov, light());
     const n = t + 1;
     if (n <= meta.hours) getFieldTexture(n, k).catch(() => {}); // prefetch the next hour
@@ -393,8 +433,8 @@ async function boot() {
   S.on(['opacity', 'basemap'], s => field.setOpacity(s.opacity * (s.basemap === 'satellite' ? 0.6 : 1)));
   S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
   S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
-  S.on(['selection', 't'], s => { renderDetail(s); loadDetail(s); });
-  S.on(['field'], s => { if (s.selection) renderDetail(s); }, { now: false });
+  S.on(['selection', 't'], s => { loadDetail(s); renderDetail(s); });
+  S.on(['field', 'tempUnit'], s => { if (s.selection) renderDetail(s); }, { now: false });
 
   // Selection marker + detail panel on click / tap.
   let pin = null;

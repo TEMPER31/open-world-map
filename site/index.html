@@ -8,6 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#07090c">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
 <link rel="preload" href="fonts/ibm-plex-sans-condensed-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css" integrity="sha384-uTttxo/aOKbdE5RlD/SPzSDoDmNvGlUYPjONi2MN/b7c9HPSvW07OIuyP7uL6jxK" crossorigin="anonymous">
@@ -79,7 +80,7 @@
     <div class="pop-hd"><b>Data</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
     <div data-live-only hidden>
       <p>Weather: <b>NOAA GFS</b> 0.25° forecast, run <b data-run></b>, shown hourly for 48 hours (0.5° grid; wind 0.75°).</p>
-      <p>Air quality: <b>CAMS</b> global forecast via Open-Meteo (CC BY 4.0), updated <b data-aq-run></b>, 5° grid.</p>
+      <p>Air quality: <b>CAMS</b> global forecast via Open-Meteo (CC BY 4.0), updated <b data-aq-run></b>, 4° grid.</p>
       <p>Downloads of the processed files arrive in a later phase.</p>
     </div>
     <div data-sample-only>
@@ -90,6 +91,7 @@
   <section class="pop panel" id="pop-settings" aria-label="Settings" hidden>
     <div class="pop-hd"><b>Settings</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
     <div class="it"><label for="set-opacity">Field opacity</label><input id="set-opacity" type="range" min="30" max="100" step="5"></div>
+    <div class="it">Temperature<div class="seg" role="radiogroup" aria-label="Temperature unit" data-tunits></div></div>
     <div class="it">Wind particles<div class="seg" role="radiogroup" aria-label="Particle density" data-density></div></div>
     <p class="note">Wind particles start off if your device asks for reduced motion. Settings are stored on this device only.</p>
     <p class="note"><a href="https://github.com/TEMPER31/open-world-map" rel="noopener">Source code · MIT</a></p>

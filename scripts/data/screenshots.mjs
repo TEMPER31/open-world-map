@@ -11,6 +11,8 @@ mkdirSync(out, { recursive: true });
 const VIEWS = [
   { name: 'wind-atlantic', field: 'wind', hash: '2.6/42/-38', particles: true },
   { name: 'temperature', field: 'temp', hash: '1.6/30/0' },
+  { name: 'temperature-f', field: 'temp', hash: '1.6/30/0', tempUnit: 'F' },
+  { name: 'place-panel', field: 'cloud', hash: '5/39.80/-89.64', click: true },
   { name: 'precipitation', field: 'rain', hash: '1.6/20/-30' },
   { name: 'clouds', field: 'cloud', hash: '1.6/20/30' },
   { name: 'pressure', field: 'pres', hash: '1.6/35/-20' },
@@ -33,16 +35,21 @@ for (const v of VIEWS) {
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { field: v.field, basemap: 'dark', particles: !!v.particles, opacity: 1, density: 1 });
+    { field: v.field, basemap: 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 });
   await page.waitForTimeout(v.particles ? 5000 : 2500);
   const box = await page.$('#map').then(e => e.boundingBox());
+  if (v.click) { // open the place panel at the map centre
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(1500);
+  }
   await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.45);
   await page.waitForTimeout(400);
   const info = await page.evaluate(() => ({
     legend: document.querySelector('#legend .lg-h')?.textContent,
     probe: document.querySelector('#probe')?.textContent,
+    detail: document.querySelector('#detail:not([hidden])')?.innerText.replace(/\s+/g, ' ').trim() || null,
     stale: document.querySelector('#stale').hidden ? null : document.querySelector('#stale').textContent,
     updated: document.querySelector('[data-updated]')?.textContent,
     sampleLabelsVisible: [...document.querySelectorAll('[data-sample-only]')].filter(e => !e.hidden).length
