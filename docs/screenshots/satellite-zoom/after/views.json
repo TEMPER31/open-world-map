@@ -2,10 +2,10 @@
  {
   "view": "wind-atlantic",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "probe": "6 km/hfrom WNW·45.3°N 23.1°W",
+  "probe": "5 km/hfrom WNW·45.3°N 23.1°W",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -15,7 +15,7 @@
   "probe": "12 °Cat 2 m·37.6°N 29.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -25,17 +25,17 @@
   "probe": "54 °Fat 2 m·37.6°N 29.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
  {
   "view": "place-panel",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "probe": "7 %area average·40.4°N 81.3°W",
-  "detail": "× PLACE · GFS FORECAST 39.76°N 84.19°W Now Fri 30 Oct · 21:00 UTC Wind speed 11km/h from NE Temperature 19°C at 2 m Precipitation Dry past hour · area avg Air quality 3.4µg/m³ Good · AQI 38 (24 h) Clouds 32% area average Pressure 1026hPa sea level FORECAST — TEMP · ▮ WIND Now +20 h +39 h NOAA GFS run 12Z 30 Oct · air quality CAMS Fri 30 Oct · 16:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 21:32 UTC",
+  "probe": "8 %area average·40.4°N 81.3°W",
+  "detail": "× PLACE · GFS FORECAST 39.76°N 84.19°W Now Fri 30 Oct · 21:00 UTC Wind speed 11km/h from NE Temperature 19°C at 2 m Precipitation Dry past hour · area avg Air quality 3.4µg/m³ Good · AQI 38 (24 h) Clouds 27% area average Pressure 1026hPa sea level FORECAST — TEMP · ▮ WIND Now +23 h +45 h NOAA GFS run 18Z 30 Oct · air quality CAMS Fri 30 Oct · 16:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 21:48 UTC",
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -45,17 +45,17 @@
   "probe": "Drypast hour · area avg·28.4°N 0.3°W",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
  {
   "view": "clouds",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "probe": "34 %area average·28.4°N 59.6°E",
+  "probe": "43 %area average·28.4°N 59.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -65,7 +65,7 @@
   "probe": "1021 hPasea level·42.2°N 9.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -75,7 +75,7 @@
   "probe": "1.1 µg/m³Good · AQI 30 (24 h)·33.1°N 99.6°E",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -85,7 +85,7 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -95,7 +95,7 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -105,7 +105,7 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -115,7 +115,7 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  },
@@ -125,7 +125,7 @@
   "probe": "",
   "detail": null,
   "stale": null,
-  "updated": "Updated 21:32 UTC",
+  "updated": "Updated 21:48 UTC",
   "sampleLabelsVisible": 0,
   "errors": []
  }
