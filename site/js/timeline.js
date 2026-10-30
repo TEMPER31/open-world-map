@@ -44,7 +44,10 @@ export function initTimeline(base, hours, zone) {
       e.setAttribute('aria-valuetext', `${relT(t)}, ${fmtUTC(abs)}`);
     });
     document.querySelectorAll('[data-rel]').forEach(e => e.textContent = relT(t));
-    document.querySelectorAll('[data-abs]').forEach(e => e.textContent = fmtUTC(abs));
+    // UTC is the reference; local time is shown too so the hour is easy to compare with
+    // local forecasts (skipped when the browser itself is on UTC).
+    const local = new Date().getTimezoneOffset() ? ` · ${new Date(abs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} local` : '';
+    document.querySelectorAll('[data-abs]').forEach(e => e.textContent = fmtUTC(abs) + local);
     document.querySelectorAll('[data-abs-short]').forEach(e => e.textContent = fmtUTC(abs).replace(/ \d+ \w+ ·/, '').replace(' UTC', ''));
   });
 }

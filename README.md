@@ -92,9 +92,9 @@ site/                 the deployed site (only this folder is published)
   js/data-core.js     PNG decode + dequantise, AQ by valid time, caches
   js/frame-worker.js  module worker running data-core off the main thread
   js/sample-data.js   SAMPLE weather generator (fallback only, labelled)
-  js/colorize.js      grid -> Web Mercator RGBA, bilinear sampling
-  js/contours.js      isobars + H/L centres
-  js/field-layer.js   field canvas source, isobars, H/L plates
+  js/grid.js          bilinear sampling, view extent, NaN fill, Catmull-Rom upsampling
+  js/contours.js      H/L pressure centres
+  js/field-gl.js      weather field on the GPU (value texture + colour LUT), isobars, H/L labels
   js/wind-gl.js       GPU wind particles (MapLibre custom layer, webgl-wind technique)
   js/timeline.js      timeline + mobile scrubber
   data/               field-scales.json, Natural Earth GeoJSON; data/live/ is built in CI

@@ -14,13 +14,21 @@ const VIEWS = [
   { name: 'precipitation', field: 'rain', hash: '1.6/20/-30' },
   { name: 'clouds', field: 'cloud', hash: '1.6/20/30' },
   { name: 'pressure', field: 'pres', hash: '1.6/35/-20' },
-  { name: 'air-quality', field: 'aq', hash: '1.6/25/70' }
+  { name: 'air-quality', field: 'aq', hash: '1.6/25/70' },
+  { name: 'none', field: 'none', hash: '2.6/42/-38', particles: true }
 ];
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const report = [];
 for (const v of VIEWS) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
+    const { readFileSync } = await import('node:fs');
+    await page.route('https://cdn.jsdelivr.net/npm/maplibre-gl@*/dist/*', r => {
+      const f = new URL(r.request().url()).pathname.split('/').pop();
+      r.fulfill({ body: readFileSync(`${process.env.OWM_ML_DIR}/${f}`), contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', headers: { 'access-control-allow-origin': '*' } });
+    });
+  }
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
