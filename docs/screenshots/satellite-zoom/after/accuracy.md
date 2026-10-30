@@ -1,6 +1,6 @@
 # Accuracy check (after)
 
-Generated 2026-10-30T22:11:52.643Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-30T18:00:00.000Z, timeline +0 h = 2026-10-30T22:00:00.000Z (f004); live data: true.
+Generated 2026-10-30T22:24:00.070Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-30T18:00:00.000Z, timeline +0 h = 2026-10-30T22:00:00.000Z (f004); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
