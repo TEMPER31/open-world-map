@@ -73,7 +73,7 @@ export async function initData() {
 const f = t => meta.first + t;
 
 export const getGrid = (t, field) => worker ? call({ type: 'grid', f: f(t), field }) : core.grid(f(t), field);
-export const getPixels = (t, field, light) => worker ? call({ type: 'pixels', f: f(t), field, light }) : core.pixels(f(t), field, light);
+export const getFieldTexture = (t, field) => worker ? call({ type: 'fieldtex', f: f(t), field }) : core.fieldTexture(f(t), field);
 export const getPressureOverlays = t => worker ? call({ type: 'isobars', f: f(t) }) : core.pressureOverlays(f(t));
 export const getWindTexture = t => worker ? call({ type: 'windtex', f: f(t) }) : core.windTexture(f(t));
 

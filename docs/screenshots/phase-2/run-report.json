@@ -1,0 +1,128 @@
+{
+ "generated_utc": "2026-10-29T21:54:47Z",
+ "gfs_publish": {
+  "source": "nomads",
+  "run": "2026-10-29T18:00:00Z",
+  "f000": "2026-10-29T21:33:36Z",
+  "f048": "2026-10-29T21:46:23Z"
+ },
+ "series_kb": 190.4,
+ "gfs_seconds": 135.3,
+ "gfs_sizes": {
+  "wind": {
+   "min": 136495,
+   "max": 151268,
+   "mean": 142532
+  },
+  "temp": {
+   "min": 87103,
+   "max": 94937,
+   "mean": 91417
+  },
+  "rain": {
+   "min": 91623,
+   "max": 104448,
+   "mean": 98845
+  },
+  "cloud": {
+   "min": 128950,
+   "max": 136772,
+   "mean": 131828
+  },
+  "pres": {
+   "min": 62846,
+   "max": 69156,
+   "mean": 66183
+  }
+ },
+ "gfs_spot": {
+  "0": {
+   "London": {
+    "temp_c": 13.2,
+    "wind_kmh": 9.5,
+    "wind_from_deg": 114
+   },
+   "New York": {
+    "temp_c": 18.2,
+    "wind_kmh": 14.4,
+    "wind_from_deg": 225
+   },
+   "Tokyo": {
+    "temp_c": 15.1,
+    "wind_kmh": 5.2,
+    "wind_from_deg": 249
+   }
+  },
+  "24": {
+   "London": {
+    "temp_c": 12.3,
+    "wind_kmh": 10.8,
+    "wind_from_deg": 87
+   },
+   "New York": {
+    "temp_c": 18.2,
+    "wind_kmh": 25.8,
+    "wind_from_deg": 310
+   },
+   "Tokyo": {
+    "temp_c": 17.2,
+    "wind_kmh": 8.8,
+    "wind_from_deg": 257
+   }
+  }
+ },
+ "aq_seconds": 372.7,
+ "aq_sizes": {
+  "files": 67,
+  "max": 5376
+ },
+ "aq_pm25_coverage_pct_min": 100.0,
+ "spot_check": {
+  "London": {
+   "gfs": {
+    "temp_c": 13.2,
+    "wind_kmh": 9.5,
+    "wind_from_deg": 114
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 12.7,
+    "wind_kmh": 6.3,
+    "wind_from_deg": 103
+   }
+  },
+  "New York": {
+   "gfs": {
+    "temp_c": 18.2,
+    "wind_kmh": 14.4,
+    "wind_from_deg": 225
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 19.4,
+    "wind_kmh": 11.5,
+    "wind_from_deg": 221
+   }
+  },
+  "Tokyo": {
+   "gfs": {
+    "temp_c": 15.1,
+    "wind_kmh": 5.2,
+    "wind_from_deg": 249
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 10.8,
+    "wind_kmh": 3.9,
+    "wind_from_deg": 292
+   }
+  }
+ },
+ "seconds_total": 509.3,
+ "stats": {
+  "http_requests": 81,
+  "http_bytes": 362352023,
+  "aq_locations": 2520,
+  "aq_requests": 26,
+  "aq_429": 0,
+  "spot_locations": 3
+ },
+ "manifest_kb": 17.0
+}

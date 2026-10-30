@@ -1,0 +1,1270 @@
+{
+ "generated_utc": "2026-10-29T22:41:18Z",
+ "gfs_publish": {
+  "source": "nomads",
+  "run": "2026-10-29T18:00:00Z",
+  "f000": "2026-10-29T21:33:36Z",
+  "f048": "2026-10-29T21:46:23Z"
+ },
+ "series_kb": 190.4,
+ "gfs_seconds": 109.8,
+ "gfs_sizes": {
+  "wind": {
+   "min": 136495,
+   "max": 151268,
+   "mean": 142532
+  },
+  "temp": {
+   "min": 87103,
+   "max": 94937,
+   "mean": 91417
+  },
+  "rain": {
+   "min": 91623,
+   "max": 104448,
+   "mean": 98845
+  },
+  "cloud": {
+   "min": 128950,
+   "max": 136772,
+   "mean": 131828
+  },
+  "pres": {
+   "min": 62846,
+   "max": 69156,
+   "mean": 66183
+  }
+ },
+ "gfs_spot": {
+  "0": {
+   "London": {
+    "temp_c": 13.2,
+    "wind_kmh": 9.5,
+    "wind_from_deg": 114
+   },
+   "New York": {
+    "temp_c": 18.2,
+    "wind_kmh": 14.4,
+    "wind_from_deg": 225
+   },
+   "Tokyo": {
+    "temp_c": 15.1,
+    "wind_kmh": 5.2,
+    "wind_from_deg": 249
+   }
+  },
+  "24": {
+   "London": {
+    "temp_c": 12.3,
+    "wind_kmh": 10.8,
+    "wind_from_deg": 87
+   },
+   "New York": {
+    "temp_c": 18.2,
+    "wind_kmh": 25.8,
+    "wind_from_deg": 310
+   },
+   "Tokyo": {
+    "temp_c": 17.2,
+    "wind_kmh": 8.8,
+    "wind_from_deg": 257
+   }
+  }
+ },
+ "align_points": {
+  "nodes": [
+   {
+    "name": "Tokyo Bay",
+    "lat": 35.5,
+    "lon": 139.5
+   },
+   {
+    "name": "Chile coast",
+    "lat": -33.5,
+    "lon": -71.5
+   },
+   {
+    "name": "Dayton",
+    "lat": 40.0,
+    "lon": -84.0
+   }
+  ],
+  "hours": [
+   {
+    "f": 0,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1020.08,
+      "temp": 15.223,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1016.41,
+      "temp": 18.713,
+      "rain": 0.0,
+      "cloud": 78.3
+     },
+     "Dayton": {
+      "pres": 1019.8,
+      "temp": 22.363,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 1,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1019.44,
+      "temp": 15.386,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.56,
+      "temp": 19.346,
+      "rain": 0.0,
+      "cloud": 28.1
+     },
+     "Dayton": {
+      "pres": 1018.98,
+      "temp": 23.166,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 2,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1019.36,
+      "temp": 15.359,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.05,
+      "temp": 19.259,
+      "rain": 0.0,
+      "cloud": 15.5
+     },
+     "Dayton": {
+      "pres": 1018.93,
+      "temp": 23.399,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 3,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1019.81,
+      "temp": 15.102,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.31,
+      "temp": 17.722,
+      "rain": 0.0,
+      "cloud": 19.4
+     },
+     "Dayton": {
+      "pres": 1018.99,
+      "temp": 22.722,
+      "rain": 0.0,
+      "cloud": 10.6
+     }
+    }
+   },
+   {
+    "f": 4,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1018.73,
+      "temp": 15.234,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.24,
+      "temp": 15.774,
+      "rain": 0.0,
+      "cloud": 17.9
+     },
+     "Dayton": {
+      "pres": 1019.13,
+      "temp": 20.244,
+      "rain": 0.0,
+      "cloud": 39.3
+     }
+    }
+   },
+   {
+    "f": 5,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1018.37,
+      "temp": 16.201,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.24,
+      "temp": 13.301,
+      "rain": 0.0,
+      "cloud": 12.4
+     },
+     "Dayton": {
+      "pres": 1019.66,
+      "temp": 17.981,
+      "rain": 0.0,
+      "cloud": 39.0
+     }
+    }
+   },
+   {
+    "f": 6,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.85,
+      "temp": 17.815,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.52,
+      "temp": 12.195,
+      "rain": 0.0,
+      "cloud": 16.6
+     },
+     "Dayton": {
+      "pres": 1019.92,
+      "temp": 17.695,
+      "rain": 0.0,
+      "cloud": 5.9
+     }
+    }
+   },
+   {
+    "f": 7,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.31,
+      "temp": 18.26,
+      "rain": 0.0,
+      "cloud": 98.9
+     },
+     "Chile coast": {
+      "pres": 1015.4,
+      "temp": 11.99,
+      "rain": 0.0,
+      "cloud": 14.6
+     },
+     "Dayton": {
+      "pres": 1020.08,
+      "temp": 16.93,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 8,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1015.39,
+      "temp": 20.812,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1015.02,
+      "temp": 11.802,
+      "rain": 0.0,
+      "cloud": 12.3
+     },
+     "Dayton": {
+      "pres": 1020.46,
+      "temp": 16.172,
+      "rain": 0.0,
+      "cloud": 0.9
+     }
+    }
+   },
+   {
+    "f": 9,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.53,
+      "temp": 21.811,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1014.3,
+      "temp": 11.511,
+      "rain": 0.0,
+      "cloud": 18.6
+     },
+     "Dayton": {
+      "pres": 1021.45,
+      "temp": 15.341,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 10,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.42,
+      "temp": 20.965,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1013.78,
+      "temp": 11.385,
+      "rain": 0.0,
+      "cloud": 23.1
+     },
+     "Dayton": {
+      "pres": 1021.72,
+      "temp": 14.385,
+      "rain": 0.0,
+      "cloud": 4.0
+     }
+    }
+   },
+   {
+    "f": 11,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.12,
+      "temp": 21.048,
+      "rain": 0.0,
+      "cloud": 86.3
+     },
+     "Chile coast": {
+      "pres": 1013.21,
+      "temp": 11.438,
+      "rain": 0.0,
+      "cloud": 27.2
+     },
+     "Dayton": {
+      "pres": 1021.91,
+      "temp": 14.048,
+      "rain": 0.0,
+      "cloud": 55.0
+     }
+    }
+   },
+   {
+    "f": 12,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.19,
+      "temp": 20.889,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1012.67,
+      "temp": 11.489,
+      "rain": 0.0,
+      "cloud": 21.6
+     },
+     "Dayton": {
+      "pres": 1022.19,
+      "temp": 14.729,
+      "rain": 0.0,
+      "cloud": 52.3
+     }
+    }
+   },
+   {
+    "f": 13,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.64,
+      "temp": 20.575,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1012.56,
+      "temp": 11.695,
+      "rain": 0.0,
+      "cloud": 19.4
+     },
+     "Dayton": {
+      "pres": 1022.96,
+      "temp": 14.445,
+      "rain": 0.0,
+      "cloud": 0.4
+     }
+    }
+   },
+   {
+    "f": 14,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.69,
+      "temp": 20.007,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1012.65,
+      "temp": 11.877,
+      "rain": 0.0,
+      "cloud": 16.2
+     },
+     "Dayton": {
+      "pres": 1023.66,
+      "temp": 12.067,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 15,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.83,
+      "temp": 19.84,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1012.79,
+      "temp": 11.84,
+      "rain": 0.0,
+      "cloud": 13.5
+     },
+     "Dayton": {
+      "pres": 1024.08,
+      "temp": 10.36,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 16,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.65,
+      "temp": 19.464,
+      "rain": 0.012,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1013.09,
+      "temp": 11.904,
+      "rain": 0.0,
+      "cloud": 14.8
+     },
+     "Dayton": {
+      "pres": 1024.82,
+      "temp": 9.464,
+      "rain": 0.0,
+      "cloud": 3.4
+     }
+    }
+   },
+   {
+    "f": 17,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.17,
+      "temp": 19.096,
+      "rain": 0.0,
+      "cloud": 19.1
+     },
+     "Chile coast": {
+      "pres": 1013.59,
+      "temp": 13.776,
+      "rain": 0.0,
+      "cloud": 15.2
+     },
+     "Dayton": {
+      "pres": 1025.63,
+      "temp": 8.876,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 18,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1013.89,
+      "temp": 18.456,
+      "rain": 0.0,
+      "cloud": 4.9
+     },
+     "Chile coast": {
+      "pres": 1013.84,
+      "temp": 15.606,
+      "rain": 0.0,
+      "cloud": 31.6
+     },
+     "Dayton": {
+      "pres": 1026.13,
+      "temp": 8.376,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 19,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1013.32,
+      "temp": 18.167,
+      "rain": 0.0,
+      "cloud": 5.0
+     },
+     "Chile coast": {
+      "pres": 1013.93,
+      "temp": 17.677,
+      "rain": 0.0,
+      "cloud": 84.4
+     },
+     "Dayton": {
+      "pres": 1026.84,
+      "temp": 9.177,
+      "rain": 0.0,
+      "cloud": 2.2
+     }
+    }
+   },
+   {
+    "f": 20,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.63,
+      "temp": 17.894,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Chile coast": {
+      "pres": 1014.01,
+      "temp": 19.204,
+      "rain": 0.0,
+      "cloud": 40.0
+     },
+     "Dayton": {
+      "pres": 1027.32,
+      "temp": 11.814,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 21,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.55,
+      "temp": 17.734,
+      "rain": 0.0,
+      "cloud": 97.3
+     },
+     "Chile coast": {
+      "pres": 1014.01,
+      "temp": 20.104,
+      "rain": 0.0,
+      "cloud": 27.1
+     },
+     "Dayton": {
+      "pres": 1026.99,
+      "temp": 13.924,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 22,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.07,
+      "temp": 17.468,
+      "rain": 0.0,
+      "cloud": 71.5
+     },
+     "Chile coast": {
+      "pres": 1013.78,
+      "temp": 20.568,
+      "rain": 0.0,
+      "cloud": 33.9
+     },
+     "Dayton": {
+      "pres": 1026.93,
+      "temp": 15.608,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 23,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.27,
+      "temp": 17.131,
+      "rain": 0.0,
+      "cloud": 14.4
+     },
+     "Chile coast": {
+      "pres": 1013.46,
+      "temp": 20.331,
+      "rain": 0.0,
+      "cloud": 21.6
+     },
+     "Dayton": {
+      "pres": 1026.38,
+      "temp": 16.831,
+      "rain": 0.0,
+      "cloud": 0.0
+     }
+    }
+   },
+   {
+    "f": 24,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.07,
+      "temp": 16.992,
+      "rain": 0.0,
+      "cloud": 11.4
+     },
+     "Chile coast": {
+      "pres": 1013.04,
+      "temp": 20.192,
+      "rain": 0.0,
+      "cloud": 12.2
+     },
+     "Dayton": {
+      "pres": 1025.78,
+      "temp": 17.892,
+      "rain": 0.0,
+      "cloud": 4.5
+     }
+    }
+   },
+   {
+    "f": 25,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.83,
+      "temp": 16.649,
+      "rain": 0.0,
+      "cloud": 5.8
+     },
+     "Chile coast": {
+      "pres": 1012.48,
+      "temp": 19.949,
+      "rain": 0.0,
+      "cloud": 5.5
+     },
+     "Dayton": {
+      "pres": 1025.62,
+      "temp": 18.449,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 26,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.93,
+      "temp": 16.391,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1012.22,
+      "temp": 19.091,
+      "rain": 0.0,
+      "cloud": 7.6
+     },
+     "Dayton": {
+      "pres": 1025.53,
+      "temp": 18.471,
+      "rain": 0.0,
+      "cloud": 5.0
+     }
+    }
+   },
+   {
+    "f": 27,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.16,
+      "temp": 16.226,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1012.66,
+      "temp": 17.916,
+      "rain": 0.0,
+      "cloud": 14.0
+     },
+     "Dayton": {
+      "pres": 1025.77,
+      "temp": 17.926,
+      "rain": 0.0,
+      "cloud": 77.7
+     }
+    }
+   },
+   {
+    "f": 28,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.66,
+      "temp": 16.656,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1012.73,
+      "temp": 16.706,
+      "rain": 0.0,
+      "cloud": 28.7
+     },
+     "Dayton": {
+      "pres": 1026.1,
+      "temp": 15.526,
+      "rain": 0.0,
+      "cloud": 97.0
+     }
+    }
+   },
+   {
+    "f": 29,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.19,
+      "temp": 17.939,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.56,
+      "temp": 14.579,
+      "rain": 0.0,
+      "cloud": 66.8
+     },
+     "Dayton": {
+      "pres": 1026.94,
+      "temp": 13.329,
+      "rain": 0.0,
+      "cloud": 70.3
+     }
+    }
+   },
+   {
+    "f": 30,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.94,
+      "temp": 19.077,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.89,
+      "temp": 13.237,
+      "rain": 0.0,
+      "cloud": 99.3
+     },
+     "Dayton": {
+      "pres": 1027.74,
+      "temp": 12.367,
+      "rain": 0.0,
+      "cloud": 41.0
+     }
+    }
+   },
+   {
+    "f": 31,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.71,
+      "temp": 20.165,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.82,
+      "temp": 13.155,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.35,
+      "temp": 11.625,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 32,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.46,
+      "temp": 21.443,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.6,
+      "temp": 13.343,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.43,
+      "temp": 11.753,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 33,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.91,
+      "temp": 22.429,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.16,
+      "temp": 12.999,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.79,
+      "temp": 10.749,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 34,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.47,
+      "temp": 22.975,
+      "rain": 0.0,
+      "cloud": 1.0
+     },
+     "Chile coast": {
+      "pres": 1013.0,
+      "temp": 12.845,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.81,
+      "temp": 10.535,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 35,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.66,
+      "temp": 23.294,
+      "rain": 0.0,
+      "cloud": 56.4
+     },
+     "Chile coast": {
+      "pres": 1012.63,
+      "temp": 12.884,
+      "rain": 0.0,
+      "cloud": 94.1
+     },
+     "Dayton": {
+      "pres": 1028.67,
+      "temp": 10.064,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 36,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.16,
+      "temp": 23.194,
+      "rain": 0.0,
+      "cloud": 89.0
+     },
+     "Chile coast": {
+      "pres": 1012.27,
+      "temp": 12.434,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.56,
+      "temp": 9.694,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 37,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.83,
+      "temp": 22.626,
+      "rain": 0.0,
+      "cloud": 78.1
+     },
+     "Chile coast": {
+      "pres": 1012.17,
+      "temp": 12.416,
+      "rain": 0.0,
+      "cloud": 81.0
+     },
+     "Dayton": {
+      "pres": 1028.74,
+      "temp": 9.576,
+      "rain": 0.0,
+      "cloud": 99.9
+     }
+    }
+   },
+   {
+    "f": 38,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.64,
+      "temp": 21.897,
+      "rain": 0.0,
+      "cloud": 40.2
+     },
+     "Chile coast": {
+      "pres": 1012.49,
+      "temp": 12.407,
+      "rain": 0.0,
+      "cloud": 28.3
+     },
+     "Dayton": {
+      "pres": 1028.47,
+      "temp": 9.517,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 39,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.03,
+      "temp": 21.369,
+      "rain": 0.0,
+      "cloud": 5.8
+     },
+     "Chile coast": {
+      "pres": 1012.61,
+      "temp": 12.279,
+      "rain": 0.0,
+      "cloud": 34.6
+     },
+     "Dayton": {
+      "pres": 1028.35,
+      "temp": 9.719,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 40,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.69,
+      "temp": 20.766,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1012.86,
+      "temp": 12.326,
+      "rain": 0.0,
+      "cloud": 94.0
+     },
+     "Dayton": {
+      "pres": 1028.56,
+      "temp": 9.296,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 41,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1015.16,
+      "temp": 20.045,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.36,
+      "temp": 13.935,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.57,
+      "temp": 9.505,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 42,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.03,
+      "temp": 19.417,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.55,
+      "temp": 15.287,
+      "rain": 0.0,
+      "cloud": 96.0
+     },
+     "Dayton": {
+      "pres": 1028.82,
+      "temp": 9.537,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 43,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.35,
+      "temp": 18.776,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1013.84,
+      "temp": 16.366,
+      "rain": 0.003,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1029.45,
+      "temp": 9.916,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 44,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.28,
+      "temp": 18.039,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1014.15,
+      "temp": 17.559,
+      "rain": 0.003,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1029.67,
+      "temp": 11.189,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 45,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.27,
+      "temp": 17.36,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1014.19,
+      "temp": 19.06,
+      "rain": 0.001,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1029.18,
+      "temp": 12.75,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 46,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.75,
+      "temp": 16.806,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1014.04,
+      "temp": 20.206,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.8,
+      "temp": 14.406,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 47,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.65,
+      "temp": 16.211,
+      "rain": 0.0,
+      "cloud": 3.8
+     },
+     "Chile coast": {
+      "pres": 1014.05,
+      "temp": 20.211,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1028.09,
+      "temp": 15.811,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   },
+   {
+    "f": 48,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.42,
+      "temp": 15.85,
+      "rain": 0.0,
+      "cloud": 0.0
+     },
+     "Chile coast": {
+      "pres": 1014.03,
+      "temp": 20.15,
+      "rain": 0.0,
+      "cloud": 100.0
+     },
+     "Dayton": {
+      "pres": 1027.21,
+      "temp": 15.95,
+      "rain": 0.0,
+      "cloud": 100.0
+     }
+    }
+   }
+  ]
+ },
+ "spot_check": {
+  "London": {
+   "gfs": {
+    "temp_c": 13.2,
+    "wind_kmh": 9.5,
+    "wind_from_deg": 114
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 12.7,
+    "wind_kmh": 6.3,
+    "wind_from_deg": 103
+   }
+  },
+  "New York": {
+   "gfs": {
+    "temp_c": 18.2,
+    "wind_kmh": 14.4,
+    "wind_from_deg": 225
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 19.4,
+    "wind_kmh": 11.5,
+    "wind_from_deg": 221
+   }
+  },
+  "Tokyo": {
+   "gfs": {
+    "temp_c": 15.1,
+    "wind_kmh": 5.2,
+    "wind_from_deg": 249
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 10.8,
+    "wind_kmh": 3.9,
+    "wind_from_deg": 292
+   }
+  }
+ },
+ "seconds_total": 117.7,
+ "stats": {
+  "http_requests": 123,
+  "http_bytes": 354991720,
+  "aq_locations": 0,
+  "aq_requests": 0,
+  "aq_429": 0,
+  "spot_locations": 3
+ },
+ "manifest_kb": 17.0
+}

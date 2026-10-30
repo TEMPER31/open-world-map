@@ -244,7 +244,7 @@
       "level": "PM2.5",
       "source": "CAMS",
       "mode": "banded",
-      "render": "Stepped bands at US EPA PM2.5 breakpoints, with no blending between bands. The probe and place sheet show the category name.",
+      "render": "Stepped bands at the US EPA PM2.5 breakpoints revised on 6 May 2024 (Good 0-9.0, Moderate 9.1-35.4, Sensitive groups 35.5-55.4, Unhealthy 55.5-125.4, Very unhealthy 125.5-225.4, Hazardous 225.5+), with no blending between bands. EPA defines these for 24-hour averages; the map applies them to hourly values. The probe and place sheet show the category name.",
       "stops": [
         [
           0,
@@ -252,7 +252,7 @@
           "Good"
         ],
         [
-          12.1,
+          9.1,
           "#d9c94a",
           "Moderate"
         ],
@@ -267,12 +267,12 @@
           "Unhealthy"
         ],
         [
-          150.5,
+          125.5,
           "#8e3a8f",
           "Very unhealthy"
         ],
         [
-          250.5,
+          225.5,
           "#6b1f3a",
           "Hazardous"
         ]
