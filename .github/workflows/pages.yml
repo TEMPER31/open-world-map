@@ -143,8 +143,8 @@ jobs:
     permissions:
       contents: write
     env:
-      OUT: docs/screenshots/satellite-zoom/before
-      LABEL: before
+      OUT: docs/screenshots/satellite-zoom/after
+      LABEL: after
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

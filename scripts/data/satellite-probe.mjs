@@ -20,12 +20,16 @@ const SCREEN = [1280, 800];
 const R = 6378137, HALF = Math.PI * R;
 
 const merc = (lon, lat) => [lon * Math.PI / 180 * R, Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) * R];
-const mpp = z => 2 * HALF / (256 * 2 ** z);               // metres per pixel at the equator (Mercator units)
+// Zooms below are MapLibre map zooms (the site's #map= hash), which count 512 px tiles: map
+// zoom z shows 256 px web tiles of level z + 1. The cached USGS layer ends at level 16, i.e.
+// it is sharp up to map zoom 15.
+const LV = z => z + 1;
+const mpp = z => 2 * HALF / (512 * 2 ** z);               // Mercator metres per screen pixel at map zoom z
 const ground = z => mpp(z) * Math.cos(PT.lat * Math.PI / 180); // real metres per pixel at Brantley
 const [X0, Y0] = merc(PT.lon, PT.lat);
 const bboxAround = (z, w, h) => [X0 - w / 2 * mpp(z), Y0 - h / 2 * mpp(z), X0 + w / 2 * mpp(z), Y0 + h / 2 * mpp(z)];
-const tileOf = z => { const n = 2 ** z; return [(X0 + HALF) / (2 * HALF) * n, (HALF - Y0) / (2 * HALF) * n]; };
-const tileBbox = (z, x, y) => { const s = 2 * HALF / 2 ** z; return [-HALF + x * s, HALF - (y + 1) * s, -HALF + (x + 1) * s, HALF - y * s]; };
+const tileOf = l => { const n = 2 ** l; return [(X0 + HALF) / (2 * HALF) * n, (HALF - Y0) / (2 * HALF) * n]; };
+const tileBbox = (l, x, y) => { const s = 2 * HALF / 2 ** l; return [-HALF + x * s, HALF - (y + 1) * s, -HALF + (x + 1) * s, HALF - y * s]; };
 
 async function get(url, { origin = false, method = 'GET' } = {}) {
   const t = performance.now();
@@ -100,22 +104,32 @@ for (const s of targets) {
   // browser on HTTP/1.1) and as one export image
   svc.screens = [];
   for (const z of [16, 17, 18]) {
-    const [tx, ty] = tileOf(z), x0 = Math.floor(tx - SCREEN[0] / 512), x1 = Math.floor(tx + SCREEN[0] / 512), y0 = Math.floor(ty - SCREEN[1] / 512), y1 = Math.floor(ty + SCREEN[1] / 512);
+    const l = LV(z), [tx, ty] = tileOf(l), x0 = Math.floor(tx - SCREEN[0] / 512), x1 = Math.floor(tx + SCREEN[0] / 512), y0 = Math.floor(ty - SCREEN[1] / 512), y1 = Math.floor(ty + SCREEN[1] / 512);
     const tiles = [];
     for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) tiles.push([x, y]);
-    const url = ([x, y]) => svc.cached && (svc.cachedMaxLevel ?? -1) >= z ? `${base}/tile/${z}/${y}/${x}` : canExport ? exp(tileBbox(z, x, y), 256, 256) : null;
+    const url = ([x, y]) => svc.cached && (svc.cachedMaxLevel ?? -1) >= l ? `${base}/tile/${l}/${y}/${x}` : canExport ? exp(tileBbox(l, x, y), 256, 256) : null;
     if (!url(tiles[0])) { svc.screens.push({ z, note: 'no tile or export at this zoom' }); continue; }
     const t = performance.now();
     const rs = await pool(tiles, 6, xy => get(url(xy)));
     const total = Math.round(performance.now() - t), ok = rs.filter(imageOk), ms = ok.map(r => r.ms).sort((a, b) => a - b);
     const one = canExport ? await get(exp(bboxAround(z, ...SCREEN), ...SCREEN)) : null;
-    svc.screens.push({ z, groundM: +ground(z).toFixed(2), tiles: tiles.length, ok: ok.length, totalMs: total, medianTileMs: ms[ms.length >> 1] ?? null, maxTileMs: ms.at(-1) ?? null, kb: Math.round(ok.reduce((a, r) => a + r.bytes, 0) / 1024), oneExportMs: one?.ms ?? null, oneExportOk: one ? imageOk(one) : null, mode: svc.cached && (svc.cachedMaxLevel ?? -1) >= z ? 'cached tiles' : 'export per tile' });
+    svc.screens.push({ z, groundM: +ground(z).toFixed(2), tiles: tiles.length, ok: ok.length, totalMs: total, medianTileMs: ms[ms.length >> 1] ?? null, maxTileMs: ms.at(-1) ?? null, kb: Math.round(ok.reduce((a, r) => a + r.bytes, 0) / 1024), oneExportMs: one?.ms ?? null, oneExportOk: one ? imageOk(one) : null, mode: svc.cached && (svc.cachedMaxLevel ?? -1) >= l ? `cached tiles (level ${l})` : 'export per tile' });
   }
   // metadata at the point (acquisition dates, resolution) where the service offers it
   const g = encodeURIComponent(JSON.stringify({ x: PT.lon, y: PT.lat, spatialReference: { wkid: 4326 } }));
   if (isImage) {
     const id = await json(`${base}/identify?geometry=${g}&geometryType=esriGeometryPoint&returnCatalogItems=true&returnGeometry=false&f=json`);
     svc.identify = { status: id.status, value: id.j?.value, items: (id.j?.catalogItems?.features || []).slice(0, 8).map(f => f.attributes) };
+    // which source images cover the 4.8 km area around the point (a 5 x 5 grid): seams sit
+    // where the image name or date changes
+    const sheets = new Map();
+    for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) {
+      const q = encodeURIComponent(JSON.stringify({ x: PT.lon + b * 0.0105, y: PT.lat + a * 0.0105, spatialReference: { wkid: 4326 } }));
+      const r = await json(`${base}/identify?geometry=${q}&geometryType=esriGeometryPoint&returnCatalogItems=true&returnGeometry=false&f=json`);
+      const f = (r.j?.catalogItems?.features || []).map(x => x.attributes).find(x => x.Category === 1);
+      if (f) { const k = f.Name; const e = sheets.get(k) || { name: k, date: f.acquisition_date ? new Date(f.acquisition_date).toISOString().slice(0, 10) : null, year: f.Year, res: f.resolution_value, agency: f.agency, points: 0 }; e.points++; sheets.set(k, e); }
+    }
+    svc.sheets = [...sheets.values()];
   } else {
     const ext = [PT.lon - 0.01, PT.lat - 0.01, PT.lon + 0.01, PT.lat + 0.01].join(',');
     const id = await json(`${base}/identify?geometry=${PT.lon},${PT.lat}&geometryType=esriGeometryPoint&sr=4326&layers=all&tolerance=1&mapExtent=${ext}&imageDisplay=256,256,96&returnGeometry=false&f=json`);
@@ -150,7 +164,7 @@ for (const svc of report.services.filter(s => s.keyless && s.canExport)) {
     ? `${base}/exportImage?bbox=${bb.map(v => v.toFixed(2)).join(',')}&bboxSR=3857&imageSR=3857&size=${w},${h}&format=png&f=image`
     : `${base}/export?bbox=${bb.map(v => v.toFixed(2)).join(',')}&bboxSR=3857&imageSR=3857&size=${w},${h}&format=png&transparent=false&f=image`;
   svc.detail = [];
-  for (const z of [15, 16, 17, 18, 19, 20]) {
+  for (const z of [14, 15, 16, 17, 18, 19]) {
     const r = await get(exp(bboxAround(z, 512, 512), 512, 512));
     svc.detail.push({ z, groundM: +ground(z).toFixed(2), ...(imageOk(r) ? await stats(r.body.toString('base64')) : { error: `${r.status} ${r.type}` }) });
   }
@@ -161,7 +175,7 @@ for (const svc of report.services.filter(s => s.keyless && s.canExport)) {
 // cached z16 tile vs each export service over the same tile: colour/date match at the handover
 const cached = report.services.find(s => s.name === 'USGSImageryOnly');
 if (cached?.keyless) {
-  const [tx, ty] = tileOf(16), x = Math.floor(tx), y = Math.floor(ty);
+  const [tx, ty] = tileOf(16), x = Math.floor(tx), y = Math.floor(ty); // level 16 = the last cached level
   const t = await get(`${cached.url}/tile/16/${y}/${x}`);
   if (imageOk(t)) {
     writeFileSync(`${out}/cached-z16-tile.jpg`, t.body);
@@ -197,11 +211,37 @@ for (const svc of report.services.filter(s => s.keyless)) {
     await p.close();
   }
 }
+// Full 1280x800 screen in MapLibre: 256 px vs 512 px requests (fewer, larger exports), z17
+// and z18, three alternating runs each, fresh browser context per run (no cache).
+report.screenTiming = [];
+const timeScreen = async (tpl, tileSize, z) => {
+  const ctx = await browser.newContext({ viewport: { width: SCREEN[0], height: SCREEN[1] } }), p = await ctx.newPage();
+  await p.setContent(`<html><head><link rel="stylesheet" href="${ML}.css"><script src="${ML}.js"></script></head><body style="margin:0"><div id="m" style="width:${SCREEN[0]}px;height:${SCREEN[1]}px"></div></body></html>`);
+  const r = await p.evaluate(([tpl, ts, z, c]) => new Promise(done => {
+    let n = 0;
+    const map = new maplibregl.Map({ container: 'm', center: [c.lon, c.lat], zoom: z, fadeDuration: 0, attributionControl: false,
+      style: { version: 8, sources: { s: { type: 'raster', tiles: [tpl], tileSize: ts, maxzoom: 20 } }, layers: [{ id: 's', type: 'raster', source: 's' }] } });
+    map.on('dataloading', e => { if (e.tile) n++; });
+    const t0 = performance.now();
+    map.once('idle', () => done({ ms: Math.round(performance.now() - t0), requests: n }));
+    setTimeout(() => done({ ms: null, requests: n }), 60000);
+  }), [tpl, tileSize, z, PT]);
+  await ctx.close();
+  return r;
+};
+for (const svc of report.services.filter(s => s.keyless && s.type === 'ImageServer' && s.exportTemplate)) {
+  for (const z of [17, 18]) for (const ts of [256, 512]) {
+    const tpl = svc.exportTemplate.replace('size=256,256', `size=${ts},${ts}`), runs = [];
+    for (let k = 0; k < 3; k++) runs.push(await timeScreen(tpl, ts, z));
+    const ms = runs.map(r => r.ms).filter(v => v != null).sort((a, b) => a - b);
+    report.screenTiming.push({ service: svc.name, z, tileSize: ts, requests: runs[0].requests, runsMs: runs.map(r => r.ms), medianMs: ms[ms.length >> 1] ?? null });
+  }
+}
 await browser.close();
 
 // ---- 4. report -------------------------------------------------------------------------------
 const yes = v => v == null ? '—' : v ? 'yes' : 'no';
-const md = [`# Satellite zoom probe`, '', `Generated ${report.generated} by \`scripts/data/satellite-probe.mjs\` (GitHub Actions runner). Point: ${PT.name} (${PT.lat}, ${PT.lon}). Ground size of one screen pixel there: z16 ${ground(16).toFixed(2)} m, z17 ${ground(17).toFixed(2)} m, z18 ${ground(18).toFixed(2)} m.`, '',
+const md = [`# Satellite zoom probe`, '', `Generated ${report.generated} by \`scripts/data/satellite-probe.mjs\` (GitHub Actions runner). Point: ${PT.name} (${PT.lat}, ${PT.lon}). **Zooms are the site's map zooms** (MapLibre, 512 px tiles): map zoom z uses 256 px web tiles of level z + 1, so the cached USGS layer (levels ≤ 16) is sharp up to map zoom 15. Ground size of one screen pixel at Brantley: z15 ${ground(15).toFixed(2)} m, z16 ${ground(16).toFixed(2)} m, z17 ${ground(17).toFixed(2)} m, z18 ${ground(18).toFixed(2)} m.`, '',
   '## Services directory', '', ...Object.entries(report.directory).map(([h, d]) => `- ${h}: HTTP ${d.status}${d.services ? ` — ${d.services.join(', ')}` : ` — ${d.error}`}${d.folders?.length ? `; folders: ${d.folders.join(', ')}` : ''}`), '',
   '## Imagery services', '', '| Service | Type | Keyless | Cached (max level) | Export | Formats | Max image | Pixel size | Max scale |', '|---|---|---|---|---|---|---|---|---|',
   ...report.services.map(s => `| ${s.name} | ${s.type} | ${yes(s.keyless)}${s.error ? ` (${s.error})` : ''} | ${s.cached ? `yes (${s.cachedMaxLevel})` : 'no'} | ${yes(s.canExport)} | ${s.formats || '—'} | ${s.maxImage || '—'} | ${s.pixelSize || '—'} | ${s.maxScale ?? '—'} |`), '',
@@ -211,12 +251,16 @@ const md = [`# Satellite zoom probe`, '', `Generated ${report.generated} by \`sc
   '## Load time for one 1280×800 screen at Brantley (256 px requests, 6 at a time; plus one 1280×800 export)', '', '| Service | Zoom | m/pixel | Mode | Requests (ok) | Total | Median / max per request | KB | One export |', '|---|---|---|---|---|---|---|---|---|',
   ...report.services.filter(s => s.screens).flatMap(s => s.screens.map(r => r.note ? `| ${s.name} | ${r.z} | | ${r.note} | | | | | |` : `| ${s.name} | ${r.z} | ${r.groundM} | ${r.mode} | ${r.tiles} (${r.ok}) | ${r.totalMs} ms | ${r.medianTileMs} / ${r.maxTileMs} ms | ${r.kb} | ${r.oneExportMs ?? '—'} ms${r.oneExportOk === false ? ' (failed)' : ''} |`)), '',
   '## Image detail by zoom (512×512 export at Brantley)', '', 'Mean absolute difference between neighbouring pixels. While the source is sharper than the request, detail stays roughly level or rises; once requests are finer than the source, it roughly halves with each zoom level (the image is only being upscaled).', '',
-  '| Service | ' + [15, 16, 17, 18, 19, 20].map(z => `z${z} (${ground(z).toFixed(2)} m)`).join(' | ') + ' |', '|---|' + [15, 16, 17, 18, 19, 20].map(() => '---').join('|') + '|',
+  '| Service | ' + [14, 15, 16, 17, 18, 19].map(z => `z${z} (${ground(z).toFixed(2)} m)`).join(' | ') + ' |', '|---|' + [14, 15, 16, 17, 18, 19].map(() => '---').join('|') + '|',
   ...report.services.filter(s => s.detail).map(s => `| ${s.name} | ${s.detail.map(d => d.error || d.detail).join(' | ')} |`), '',
-  '## Handover at z16: cached tile vs export of the same tile (colour = mean RGB)', '',
+  '## Handover: last cached tile (level 16) vs an export of the same area (colour = mean RGB)', '',
   report.cachedZ16 ? `- USGSImageryOnly cached tile ${report.cachedZ16.tile.join('/')}: mean RGB ${report.cachedZ16.rgb.join(', ')}, detail ${report.cachedZ16.detail}` : '- cached tile unavailable',
   ...report.services.filter(s => s.vsCachedZ16).map(s => `- ${s.name} export of the same tile: mean RGB ${s.vsCachedZ16.rgb.join(', ')}, detail ${s.vsCachedZ16.detail}`), '',
   '## Metadata at the point (identify)', '', ...report.services.filter(s => s.identify).map(s => `- **${s.name}** (HTTP ${s.identify.status}${s.identify.error ? `, ${s.identify.error}` : ''}): ${s.identify.items?.length ? '```' + JSON.stringify(s.identify.items).slice(0, 1500) + '```' : 'no items'}`), '',
+  '## Source images around the point (5 × 5 identify grid, about 4.8 km across)', '',
+  ...report.services.filter(s => s.sheets).map(s => `- **${s.name}**: ${s.sheets.map(x => `${x.name} (${x.date || x.year}, ${x.res ?? '?'} m, ${x.agency || '?'}; ${x.points} of 25 points)`).join('; ') || 'none'}`), '',
+  '## Full 1280×800 screen in MapLibre (until idle, fresh cache each run)', '', '| Service | Zoom | Request size | Requests | Runs (ms) | Median |', '|---|---|---|---|---|---|',
+  ...report.screenTiming.map(t => `| ${t.service} | ${t.z} | ${t.tileSize} px | ${t.requests} | ${t.runsMs.join(', ')} | ${t.medianMs ?? '—'} ms |`), '',
   '## MapLibre 5.24.0 drawing the endpoint as raster tiles ({bbox-epsg-3857}, z17)', '', '| Service | Kind | Idle after | All tiles loaded | Errors |', '|---|---|---|---|---|',
   ...report.maplibre.map(m => `| ${m.service} | ${m.kind} | ${m.ms ?? '—'} ms | ${yes(m.loaded)} | ${m.errors.join('; ') || 'none'} |`), ''].join('\n');
 writeFileSync(`${out}/satellite-probe.md`, md);
