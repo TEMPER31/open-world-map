@@ -233,6 +233,44 @@ report.tileCheck = [];
     }
   }
 }
+// The teal tile, traced (CI, 30 Oct): a format=jpgpng request that USGS answered with an RGBA
+// PNG in which one side of a source-image seam has no red. Request that exact map zoom 16
+// tile (full-precision bbox, as MapLibre sends it) with each format variant, plus a tile that
+// is half sea off Miami Beach (to see how each format fills no-data). Saved as
+// variant-<tile>-<n>.<ext>.
+report.variants = [];
+{
+  const naip = report.services.find(s => s.name === 'USGSNAIPPlus' && s.keyless);
+  const tileAt = (z, lon, lat) => { const [x, y] = merc(lon, lat), n = 2 ** z; return [Math.floor((x + HALF) / (2 * HALF) * n), Math.floor((HALF - y) / (2 * HALF) * n)]; };
+  const cases = [['teal-seam', 16, ...tileAt(16, -86.2605, 31.5865)], ['miami-coast', 16, ...tileAt(16, -80.125, 25.79)]];
+  const fmts = { jpgpng: '&format=jpgpng', 'jpgpng+bands': '&format=jpgpng&bandIds=0,1,2', jpg: '&format=jpg', 'jpg+bands': '&format=jpg&bandIds=0,1,2', png: '&format=png', 'png+bands': '&format=png&bandIds=0,1,2' };
+  let n = 0;
+  for (const [name, z, x, y] of naip ? cases : []) {
+    const bb = tileBbox(z, x, y).join(',');
+    for (const [label, q] of Object.entries(fmts)) {
+      const r = await get(`${naip.url}/exportImage?bbox=${bb}&bboxSR=3857&imageSR=3857&size=512,512${q}&f=image`);
+      const e = { tile: `${name} ${z}/${x}/${y}`, variant: label, status: r.status, type: r.type, kb: Math.round(r.bytes / 1024) };
+      if (imageOk(r)) {
+        const st = await page.evaluate(async ([b64, mime]) => {
+          const bmp = await createImageBitmap(await (await fetch(`data:${mime};base64,${b64}`)).blob(), { premultiplyAlpha: 'none' });
+          const c = new OffscreenCanvas(bmp.width, bmp.height), g = c.getContext('2d'); g.drawImage(bmp, 0, 0);
+          const d = g.getImageData(0, 0, bmp.width, bmp.height).data; let r = 0, gg = 0, b = 0, a = 0, clear = 0, black = 0, white = 0, teal = 0;
+          for (let k = 0; k < d.length; k += 4) {
+            r += d[k]; gg += d[k + 1]; b += d[k + 2]; a += d[k + 3];
+            if (d[k + 3] === 0) clear++; else if (d[k] + d[k + 1] + d[k + 2] < 6) black++; else if (d[k] + d[k + 1] + d[k + 2] > 759) white++;
+            if (d[k + 3] && d[k] < 0.5 * Math.min(d[k + 1], d[k + 2]) && d[k + 1] > 60) teal++;
+          }
+          const p = d.length / 4, pc = v => +(v / p * 100).toFixed(1);
+          return { rgba: [r / p, gg / p, b / p, a / p].map(Math.round), transparentPct: pc(clear), blackPct: pc(black), whitePct: pc(white), tealPct: pc(teal) };
+        }, [r.body.toString('base64'), r.type.split(';')[0]]);
+        Object.assign(e, st);
+        e.saved = `variant-${name}-${n++}.${/png/.test(r.type) ? 'png' : 'jpg'}`;
+        writeFileSync(`${out}/${e.saved}`, r.body);
+      }
+      report.variants.push(e);
+    }
+  }
+}
 // cached z16 tile vs each export service over the same tile: colour/date match at the handover
 const cached = report.services.find(s => s.name === 'USGSImageryOnly');
 if (cached?.keyless) {
@@ -324,6 +362,8 @@ const md = [`# Satellite zoom probe`, '', `Generated ${report.generated} by \`sc
   ...report.spot.services.map(e => `- **${e.service}**: HTTP ${e.status}${e.saved ? ', saved' : ''}${e.value != null ? `; pixel value at the point: ${e.value}` : ''}${e.images ? `; source images: ${e.images.join(', ') || 'none'}` : ''}`), '',
   '## Tile colour check (NAIP Plus, 3 × 3 tiles of 512 px at map zoom 16, 3 rounds)', '', '| Variant | Responses | Teal / off-colour | Partly transparent | Types | Mean KB |', '|---|---|---|---|---|---|',
   ...report.tileCheck.map(t => `| ${t.variant} | ${t.responses} | ${t.teal} | ${t.partialAlpha} | ${Object.entries(t.types).map(([k, v]) => `${k} ×${v}`).join(', ')} | ${t.kb} |`), '',
+  '## Format variants on two tiles (NAIP Plus, map zoom 16, full-precision bbox)', '', 'teal-seam: the tile that drew teal in the page; miami-coast: half sea. Pixel shares: transparent / black / white / teal (red under half of green and blue).', '', '| Tile | Variant | HTTP | Type | KB | Mean RGBA | Transparent % | Black % | White % | Teal % | File |', '|---|---|---|---|---|---|---|---|---|---|---|',
+  ...report.variants.map(v => `| ${v.tile} | ${v.variant} | ${v.status} | ${v.type} | ${v.kb} | ${v.rgba?.join(', ') ?? '—'} | ${v.transparentPct ?? '—'} | ${v.blackPct ?? '—'} | ${v.whitePct ?? '—'} | ${v.tealPct ?? '—'} | ${v.saved || ''} |`), '',
   '## Full 1280×800 screen in MapLibre (until idle, fresh cache each run)', '', '| Service | Zoom | Request size | Requests | Runs (ms) | Median |', '|---|---|---|---|---|---|',
   ...report.screenTiming.map(t => `| ${t.service} | ${t.z} | ${t.tileSize} px | ${t.requests} | ${t.runsMs.join(', ')} | ${t.medianMs ?? '—'} ms |`), '',
   '## MapLibre 5.24.0 drawing the endpoint as raster tiles ({bbox-epsg-3857}, z17)', '', '| Service | Kind | Idle after | All tiles loaded | Errors |', '|---|---|---|---|---|',
