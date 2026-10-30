@@ -67,8 +67,9 @@ Notes on these numbers:
 * USGS renders each image on demand and caches it. An area nobody has viewed recently can take
   several seconds; repeat views are fast. Meanwhile the cached layer stays visible underneath,
   so the user sees the soft image first, then the sharp one.
-* 512 px requests were within ±0.03 s of 256 px on warm views, and up to 12× faster on first
-  views (0.53 vs 6.26 s in one run).
+* 512 px requests were about the same or up to 0.1 s faster than 256 px on warm views. On first
+  views they were faster in 11 of 12 cases, by up to 12× (0.53 vs 6.26 s in one run); in the
+  other one they were 0.02 s slower.
 * All of this was measured from GitHub's US runners; phone and home-connection times are not
   measured.
 
