@@ -195,6 +195,44 @@ report.spot = { lat: 31.588, lon: -86.258, services: [] };
     report.spot.services.push(e);
   }
 }
+// Tile colour check: at map zoom 16 one 512 px NAIP Plus tile came back teal in CI (and a
+// thin teal strip in an earlier run), while direct exports were clean. Request the 3 x 3
+// tiles around Brantley at map zoom 16 three times, with the layer's URL and with variants,
+// decode each response as the browser would (RGBA), and flag tiles whose colour is off
+// (red far below green and blue) or that carry partial transparency.
+report.tileCheck = [];
+{
+  const naip = report.services.find(s => s.name === 'USGSNAIPPlus' && s.keyless);
+  if (naip) {
+    const variants = {
+      'layer (jpgpng)': '&format=jpgpng',
+      'jpgpng + bandIds=0,1,2': '&format=jpgpng&bandIds=0,1,2',
+      'jpg + bandIds=0,1,2': '&format=jpg&bandIds=0,1,2',
+      'png': '&format=png'
+    };
+    const z = 16, n = 2 ** z, cx = Math.floor((X0 + HALF) / (2 * HALF) * n), cy = Math.floor((HALF - Y0) / (2 * HALF) * n);
+    for (const [label, q] of Object.entries(variants)) {
+      const res = { variant: label, responses: 0, teal: 0, partialAlpha: 0, types: {}, kb: 0 };
+      for (let k = 0; k < 3; k++) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const bb = tileBbox(z, cx + dx, cy + dy).map(v => v.toFixed(2)).join(',');
+        const r = await get(`${naip.url}/exportImage?bbox=${bb}&bboxSR=3857&imageSR=3857&size=512,512${q}&f=image`);
+        if (!imageOk(r)) continue;
+        res.responses++; res.kb += r.bytes / 1024; res.types[r.type] = (res.types[r.type] || 0) + 1;
+        const st = await page.evaluate(async ([b64, mime]) => {
+          const bmp = await createImageBitmap(await (await fetch(`data:${mime};base64,${b64}`)).blob(), { premultiplyAlpha: 'none' });
+          const c = new OffscreenCanvas(bmp.width, bmp.height), x = c.getContext('2d'); x.drawImage(bmp, 0, 0);
+          const d = x.getImageData(0, 0, bmp.width, bmp.height).data; let r = 0, g = 0, b = 0, a = 0, part = 0;
+          for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; a += d[i + 3]; if (d[i + 3] > 0 && d[i + 3] < 255) part++; }
+          const p = d.length / 4; return { r: r / p, g: g / p, b: b / p, a: a / p, part: part / p };
+        }, [r.body.toString('base64'), r.type.split(';')[0]]);
+        if (st.r < 0.6 * Math.min(st.g, st.b)) res.teal++;
+        if (st.part > 0.01) res.partialAlpha++;
+      }
+      res.kb = Math.round(res.kb / Math.max(1, res.responses));
+      report.tileCheck.push(res);
+    }
+  }
+}
 // cached z16 tile vs each export service over the same tile: colour/date match at the handover
 const cached = report.services.find(s => s.name === 'USGSImageryOnly');
 if (cached?.keyless) {
@@ -284,6 +322,8 @@ const md = [`# Satellite zoom probe`, '', `Generated ${report.generated} by \`sc
   ...report.services.filter(s => s.sheets).map(s => `- **${s.name}**: ${s.sheets.map(x => `${x.name} (${x.date || x.year}, ${x.res ?? '?'} m, ${x.agency || '?'}; ${x.points} of 25 points)`).join('; ') || 'none'}`), '',
   '## Spot check: teal strip near 31.588 N, 86.258 W', '', 'Export of the strip area (86.272–86.244 W, 31.5865–31.5895 N, 1400×180 px, about 1.9 m/px) straight from each service; images saved as `spot-<service>.png`.', '',
   ...report.spot.services.map(e => `- **${e.service}**: HTTP ${e.status}${e.saved ? ', saved' : ''}${e.value != null ? `; pixel value at the point: ${e.value}` : ''}${e.images ? `; source images: ${e.images.join(', ') || 'none'}` : ''}`), '',
+  '## Tile colour check (NAIP Plus, 3 × 3 tiles of 512 px at map zoom 16, 3 rounds)', '', '| Variant | Responses | Teal / off-colour | Partly transparent | Types | Mean KB |', '|---|---|---|---|---|---|',
+  ...report.tileCheck.map(t => `| ${t.variant} | ${t.responses} | ${t.teal} | ${t.partialAlpha} | ${Object.entries(t.types).map(([k, v]) => `${k} ×${v}`).join(', ')} | ${t.kb} |`), '',
   '## Full 1280×800 screen in MapLibre (until idle, fresh cache each run)', '', '| Service | Zoom | Request size | Requests | Runs (ms) | Median |', '|---|---|---|---|---|---|',
   ...report.screenTiming.map(t => `| ${t.service} | ${t.z} | ${t.tileSize} px | ${t.requests} | ${t.runsMs.join(', ')} | ${t.medianMs ?? '—'} ms |`), '',
   '## MapLibre 5.24.0 drawing the endpoint as raster tiles ({bbox-epsg-3857}, z17)', '', '| Service | Kind | Idle after | All tiles loaded | Errors |', '|---|---|---|---|---|',
