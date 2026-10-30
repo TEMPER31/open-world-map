@@ -1,14 +1,14 @@
 # Rendering and behaviour tests
 
-Generated 2026-10-30T00:02:40.419Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
+Generated 2026-10-30T00:13:45.356Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
 
 | Test | Result | Detail |
 |---|---|---|
-| Westerly (+U only): particles move east | pass | {"dx":0.0242,"dy":0.0004} |
-| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0013,"dy":-0.028} |
-| Easterly (-U only): particles move west | pass | {"dx":-0.0192,"dy":-0.0001} |
+| Westerly (+U only): particles move east | pass | {"dx":0.0234,"dy":0.001} |
+| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0004,"dy":-0.0291} |
+| Easterly (-U only): particles move west | pass | {"dx":-0.0214,"dy":-0.0002} |
 | Pressure: isobars drawn by the field shader and H/L labels are a WebGL symbol layer (no DOM markers) | pass | {"domMarkers":0,"hlFeatures":50,"isobarsInShader":true} |
-| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 10 of 10 pan frames rendered the H/L layer; DOM labels: 0 |
+| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 8 of 8 pan frames rendered the H/L layer; DOM labels: 0 |
 | No page errors (pressure) | pass |  |
 | None: field hidden and legend says "No layer" | pass | {"visible":false,"legend":"No layermap only","isobars":false,"hl":0} |
 | None + particles off: no data files fetched while stepping 4 hours | pass | 0 requests:  |
@@ -20,5 +20,5 @@ Generated 2026-10-30T00:02:40.419Z by `scripts/data/render-tests.mjs` (headless 
 
 | Field | Long tasks per hour step (ms) | Worst frame gap while stepping (ms) | Frames/s during a 2 s pan |
 |---|---|---|---|
-| pres | 0 | 351 | 8 |
-| temp | 0 | 297 | 8 |
+| pres | 0 | 345 | 7.5 |
+| temp | 0 | 306 | 8.5 |

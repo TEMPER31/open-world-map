@@ -1,5 +1,5 @@
 {
- "generated_utc": "2026-10-29T23:47:15Z",
+ "generated_utc": "2026-10-30T00:04:46Z",
  "gfs_publish": {
   "source": "nomads",
   "run": "2026-10-29T18:00:00Z",
@@ -7,7 +7,7 @@
   "f048": "2026-10-29T21:46:23Z"
  },
  "series_kb": 190.4,
- "gfs_seconds": 194.0,
+ "gfs_seconds": 208.7,
  "gfs_sizes": {
   "wind": {
    "min": 136495,
@@ -4389,12 +4389,6 @@
    }
   ]
  },
- "aq_seconds": 432.4,
- "aq_sizes": {
-  "files": 67,
-  "max": 14851
- },
- "aq_pm25_coverage_pct_min": 100.0,
  "spot_check": {
   "London": {
    "gfs": {
@@ -4433,12 +4427,12 @@
    }
   }
  },
- "seconds_total": 627.8,
+ "seconds_total": 210.2,
  "stats": {
-  "http_requests": 94,
-  "http_bytes": 405406948,
-  "aq_locations": 3870,
-  "aq_requests": 39,
+  "http_requests": 56,
+  "http_bytes": 393527336,
+  "aq_locations": 0,
+  "aq_requests": 0,
   "aq_429": 0,
   "spot_locations": 3
  },
