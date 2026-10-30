@@ -1,0 +1,6155 @@
+{
+ "generated_utc": "2026-10-30T21:19:05Z",
+ "gfs_publish": {
+  "source": "nomads",
+  "run": "2026-10-30T12:00:00Z",
+  "f000": "2026-10-30T15:32:36Z",
+  "f048": "2026-10-30T15:45:21Z"
+ },
+ "series_kb": 186.8,
+ "gfs_seconds": 195.4,
+ "gfs_sizes": {
+  "wind": {
+   "min": 131756,
+   "max": 148876,
+   "mean": 139535
+  },
+  "temp": {
+   "min": 143494,
+   "max": 147130,
+   "mean": 145053
+  },
+  "rain": {
+   "min": 89448,
+   "max": 114953,
+   "mean": 107488
+  },
+  "cloud": {
+   "min": 128610,
+   "max": 134559,
+   "mean": 130929
+  },
+  "pres": {
+   "min": 141957,
+   "max": 148197,
+   "mean": 145025
+  }
+ },
+ "gfs_spot": {
+  "0": {
+   "London": {
+    "temp_c": 14.9,
+    "wind_kmh": 15.7,
+    "wind_from_deg": 119
+   },
+   "New York": {
+    "temp_c": 14.5,
+    "wind_kmh": 14.4,
+    "wind_from_deg": 262
+   },
+   "Tokyo": {
+    "temp_c": 18.4,
+    "wind_kmh": 8.5,
+    "wind_from_deg": 254
+   }
+  },
+  "24": {
+   "London": {
+    "temp_c": 14.7,
+    "wind_kmh": 11.6,
+    "wind_from_deg": 105
+   },
+   "New York": {
+    "temp_c": 8.7,
+    "wind_kmh": 18.5,
+    "wind_from_deg": 345
+   },
+   "Tokyo": {
+    "temp_c": 18.3,
+    "wind_kmh": 11.1,
+    "wind_from_deg": 2
+   }
+  }
+ },
+ "align_points": {
+  "nodes": [
+   {
+    "name": "Tokyo Bay",
+    "lat": 35.5,
+    "lon": 139.5
+   },
+   {
+    "name": "Chile coast",
+    "lat": -33.5,
+    "lon": -71.5
+   },
+   {
+    "name": "Dayton",
+    "lat": 40.0,
+    "lon": -84.0
+   }
+  ],
+  "hours": [
+   {
+    "f": 0,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1013.83,
+      "temp": 18.178,
+      "prate_raw": 0.0,
+      "cloud_raw": 3.2,
+      "cloud": 24.575,
+      "rain": 0.0,
+      "u": 1.193,
+      "v": -0.322
+     },
+     "Chile coast": {
+      "pres": 1014.43,
+      "temp": 14.908,
+      "prate_raw": 0.026,
+      "cloud_raw": 100.0,
+      "cloud": 96.063,
+      "rain": 0.028,
+      "u": 0.233,
+      "v": -0.902
+     },
+     "Dayton": {
+      "pres": 1026.29,
+      "temp": 8.458,
+      "prate_raw": 0.0,
+      "cloud_raw": 0.0,
+      "cloud": 0.0,
+      "rain": 0.0,
+      "u": -0.487,
+      "v": -3.562
+     }
+    }
+   },
+   {
+    "f": 1,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1013.52,
+      "temp": 17.87,
+      "cloud_raw": 5.9,
+      "cloud": 35.031,
+      "rain": 0.0,
+      "u": 0.891,
+      "v": -0.694
+     },
+     "Chile coast": {
+      "pres": 1014.86,
+      "temp": 15.53,
+      "cloud_raw": 100.0,
+      "cloud": 96.45,
+      "rain": 0.016,
+      "u": 1.071,
+      "v": -0.824
+     },
+     "Dayton": {
+      "pres": 1026.79,
+      "temp": 9.26,
+      "cloud_raw": 0.0,
+      "cloud": 0.0,
+      "rain": 0.0,
+      "u": -1.159,
+      "v": -3.594
+     }
+    }
+   },
+   {
+    "f": 2,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.74,
+      "temp": 17.416,
+      "cloud_raw": 48.2,
+      "cloud": 67.931,
+      "rain": 0.051,
+      "u": 0.585,
+      "v": -1.292
+     },
+     "Chile coast": {
+      "pres": 1015.1,
+      "temp": 16.166,
+      "cloud_raw": 99.9,
+      "cloud": 95.888,
+      "rain": 0.0,
+      "u": 1.705,
+      "v": -0.592
+     },
+     "Dayton": {
+      "pres": 1027.21,
+      "temp": 11.886,
+      "cloud_raw": 0.0,
+      "cloud": 0.0,
+      "rain": 0.0,
+      "u": -1.425,
+      "v": -4.152
+     }
+    }
+   },
+   {
+    "f": 3,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.03,
+      "temp": 16.837,
+      "cloud_raw": 100.0,
+      "cloud": 98.25,
+      "rain": 0.316,
+      "u": -0.198,
+      "v": -0.365
+     },
+     "Chile coast": {
+      "pres": 1015.18,
+      "temp": 16.777,
+      "cloud_raw": 100.0,
+      "cloud": 91.569,
+      "rain": 0.008,
+      "u": 2.082,
+      "v": -0.295
+     },
+     "Dayton": {
+      "pres": 1026.94,
+      "temp": 14.097,
+      "cloud_raw": 0.0,
+      "cloud": 0.213,
+      "rain": 0.0,
+      "u": -1.548,
+      "v": -3.785
+     }
+    }
+   },
+   {
+    "f": 4,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.03,
+      "temp": 16.244,
+      "cloud_raw": 100.0,
+      "cloud": 89.675,
+      "rain": 0.75,
+      "u": -0.267,
+      "v": -1.201
+     },
+     "Chile coast": {
+      "pres": 1014.87,
+      "temp": 17.524,
+      "cloud_raw": 97.5,
+      "cloud": 86.944,
+      "rain": 0.012,
+      "u": 2.643,
+      "v": 0.089
+     },
+     "Dayton": {
+      "pres": 1026.84,
+      "temp": 15.814,
+      "cloud_raw": 0.0,
+      "cloud": 0.444,
+      "rain": 0.0,
+      "u": -1.477,
+      "v": -3.641
+     }
+    }
+   },
+   {
+    "f": 5,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.6,
+      "temp": 16.71,
+      "cloud_raw": 10.6,
+      "cloud": 36.681,
+      "rain": 0.398,
+      "u": 0.004,
+      "v": 0.285
+     },
+     "Chile coast": {
+      "pres": 1014.42,
+      "temp": 18.39,
+      "cloud_raw": 98.4,
+      "cloud": 85.775,
+      "rain": 0.004,
+      "u": 2.814,
+      "v": 0.655
+     },
+     "Dayton": {
+      "pres": 1026.36,
+      "temp": 17.15,
+      "cloud_raw": 2.8,
+      "cloud": 2.15,
+      "rain": 0.0,
+      "u": -1.886,
+      "v": -3.085
+     }
+    }
+   },
+   {
+    "f": 6,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1009.77,
+      "temp": 16.754,
+      "cloud_raw": 13.4,
+      "cloud": 24.112,
+      "rain": 0.168,
+      "u": 0.19,
+      "v": 0.458
+     },
+     "Chile coast": {
+      "pres": 1013.79,
+      "temp": 19.694,
+      "cloud_raw": 100.0,
+      "cloud": 72.625,
+      "rain": 0.0,
+      "u": 3.18,
+      "v": 1.368
+     },
+     "Dayton": {
+      "pres": 1025.81,
+      "temp": 18.124,
+      "cloud_raw": 5.0,
+      "cloud": 4.694,
+      "rain": 0.0,
+      "u": -1.83,
+      "v": -2.832
+     }
+    }
+   },
+   {
+    "f": 7,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1009.39,
+      "temp": 16.589,
+      "cloud_raw": 13.1,
+      "cloud": 24.613,
+      "rain": 0.004,
+      "u": 0.775,
+      "v": -1.37
+     },
+     "Chile coast": {
+      "pres": 1013.18,
+      "temp": 19.569,
+      "cloud_raw": 76.2,
+      "cloud": 59.769,
+      "rain": 0.004,
+      "u": 3.415,
+      "v": 1.62
+     },
+     "Dayton": {
+      "pres": 1025.45,
+      "temp": 18.669,
+      "cloud_raw": 5.0,
+      "cloud": 5.044,
+      "rain": 0.0,
+      "u": -1.905,
+      "v": -2.69
+     }
+    }
+   },
+   {
+    "f": 8,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1009.23,
+      "temp": 16.313,
+      "cloud_raw": 1.5,
+      "cloud": 19.287,
+      "rain": 0.008,
+      "u": 0.421,
+      "v": -2.53
+     },
+     "Chile coast": {
+      "pres": 1012.93,
+      "temp": 18.663,
+      "cloud_raw": 55.8,
+      "cloud": 55.394,
+      "rain": 0.004,
+      "u": 3.531,
+      "v": 1.64
+     },
+     "Dayton": {
+      "pres": 1025.69,
+      "temp": 18.733,
+      "cloud_raw": 24.0,
+      "cloud": 10.35,
+      "rain": 0.0,
+      "u": -1.969,
+      "v": -2.83
+     }
+    }
+   },
+   {
+    "f": 9,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1009.65,
+      "temp": 16.209,
+      "cloud_raw": 23.8,
+      "cloud": 14.931,
+      "rain": 0.0,
+      "u": 0.435,
+      "v": -2.565
+     },
+     "Chile coast": {
+      "pres": 1013.19,
+      "temp": 17.409,
+      "cloud_raw": 56.7,
+      "cloud": 55.65,
+      "rain": 0.0,
+      "u": 3.125,
+      "v": 1.125
+     },
+     "Dayton": {
+      "pres": 1025.74,
+      "temp": 18.089,
+      "cloud_raw": 19.0,
+      "cloud": 28.087,
+      "rain": 0.0,
+      "u": -2.315,
+      "v": -2.575
+     }
+    }
+   },
+   {
+    "f": 10,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.45,
+      "temp": 16.713,
+      "cloud_raw": 24.8,
+      "cloud": 12.994,
+      "rain": 0.0,
+      "u": 0.127,
+      "v": -2.795
+     },
+     "Chile coast": {
+      "pres": 1013.3,
+      "temp": 16.173,
+      "cloud_raw": 52.6,
+      "cloud": 64.706,
+      "rain": 0.016,
+      "u": 2.547,
+      "v": 0.635
+     },
+     "Dayton": {
+      "pres": 1026.31,
+      "temp": 15.623,
+      "cloud_raw": 59.3,
+      "cloud": 65.894,
+      "rain": 0.0,
+      "u": -1.783,
+      "v": -2.345
+     }
+    }
+   },
+   {
+    "f": 11,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.97,
+      "temp": 17.674,
+      "cloud_raw": 31.1,
+      "cloud": 19.237,
+      "rain": 0.0,
+      "u": -0.774,
+      "v": -2.89
+     },
+     "Chile coast": {
+      "pres": 1013.76,
+      "temp": 14.264,
+      "cloud_raw": 100.0,
+      "cloud": 90.794,
+      "rain": 0.043,
+      "u": 1.826,
+      "v": 0.14
+     },
+     "Dayton": {
+      "pres": 1027.18,
+      "temp": 13.414,
+      "cloud_raw": 97.5,
+      "cloud": 93.138,
+      "rain": 0.0,
+      "u": -2.214,
+      "v": -2.72
+     }
+    }
+   },
+   {
+    "f": 12,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.0,
+      "temp": 18.619,
+      "cloud_raw": 45.2,
+      "cloud": 26.888,
+      "rain": 0.0,
+      "u": -1.181,
+      "v": -3.36
+     },
+     "Chile coast": {
+      "pres": 1014.31,
+      "temp": 13.089,
+      "cloud_raw": 100.0,
+      "cloud": 99.2,
+      "rain": 0.023,
+      "u": 0.989,
+      "v": 0.28
+     },
+     "Dayton": {
+      "pres": 1027.97,
+      "temp": 12.709,
+      "cloud_raw": 98.5,
+      "cloud": 80.931,
+      "rain": 0.0,
+      "u": -2.431,
+      "v": -2.47
+     }
+    }
+   },
+   {
+    "f": 13,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.69,
+      "temp": 19.888,
+      "cloud_raw": 60.1,
+      "cloud": 35.575,
+      "rain": 0.02,
+      "u": 0.394,
+      "v": -5.245
+     },
+     "Chile coast": {
+      "pres": 1014.5,
+      "temp": 12.768,
+      "cloud_raw": 100.0,
+      "cloud": 99.831,
+      "rain": 0.0,
+      "u": 0.594,
+      "v": 0.445
+     },
+     "Dayton": {
+      "pres": 1028.41,
+      "temp": 11.988,
+      "cloud_raw": 100.0,
+      "cloud": 96.862,
+      "rain": 0.0,
+      "u": -2.876,
+      "v": -1.885
+     }
+    }
+   },
+   {
+    "f": 14,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.37,
+      "temp": 20.675,
+      "cloud_raw": 98.4,
+      "cloud": 53.231,
+      "rain": 0.031,
+      "u": -0.118,
+      "v": -5.802
+     },
+     "Chile coast": {
+      "pres": 1014.24,
+      "temp": 12.655,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": 0.362,
+      "v": 0.528
+     },
+     "Dayton": {
+      "pres": 1028.94,
+      "temp": 11.035,
+      "cloud_raw": 100.0,
+      "cloud": 99.625,
+      "rain": 0.0,
+      "u": -3.208,
+      "v": -1.632
+     }
+    }
+   },
+   {
+    "f": 15,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1009.98,
+      "temp": 21.06,
+      "cloud_raw": 88.0,
+      "cloud": 57.613,
+      "rain": 0.055,
+      "u": -1.707,
+      "v": -5.443
+     },
+     "Chile coast": {
+      "pres": 1013.82,
+      "temp": 12.68,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": 0.693,
+      "v": -0.263
+     },
+     "Dayton": {
+      "pres": 1029.17,
+      "temp": 10.32,
+      "cloud_raw": 100.0,
+      "cloud": 99.769,
+      "rain": 0.0,
+      "u": -3.407,
+      "v": -1.433
+     }
+    }
+   },
+   {
+    "f": 16,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1009.94,
+      "temp": 21.367,
+      "cloud_raw": 35.5,
+      "cloud": 35.962,
+      "rain": 0.082,
+      "u": -1.955,
+      "v": -4.211
+     },
+     "Chile coast": {
+      "pres": 1013.37,
+      "temp": 13.037,
+      "cloud_raw": 100.0,
+      "cloud": 99.975,
+      "rain": 0.0,
+      "u": 0.735,
+      "v": -0.081
+     },
+     "Dayton": {
+      "pres": 1029.1,
+      "temp": 9.747,
+      "cloud_raw": 95.4,
+      "cloud": 98.062,
+      "rain": 0.0,
+      "u": -3.575,
+      "v": -1.181
+     }
+    }
+   },
+   {
+    "f": 17,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1010.27,
+      "temp": 22.007,
+      "cloud_raw": 35.2,
+      "cloud": 40.163,
+      "rain": 0.102,
+      "u": -1.058,
+      "v": -4.786
+     },
+     "Chile coast": {
+      "pres": 1013.04,
+      "temp": 12.857,
+      "cloud_raw": 100.0,
+      "cloud": 99.95,
+      "rain": 0.004,
+      "u": 0.752,
+      "v": -0.806
+     },
+     "Dayton": {
+      "pres": 1028.86,
+      "temp": 9.607,
+      "cloud_raw": 100.0,
+      "cloud": 99.975,
+      "rain": 0.0,
+      "u": -3.828,
+      "v": -0.476
+     }
+    }
+   },
+   {
+    "f": 18,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.05,
+      "temp": 21.704,
+      "cloud_raw": 6.2,
+      "cloud": 27.406,
+      "rain": 0.09,
+      "u": -0.449,
+      "v": -4.335
+     },
+     "Chile coast": {
+      "pres": 1012.69,
+      "temp": 12.934,
+      "cloud_raw": 100.0,
+      "cloud": 99.988,
+      "rain": 0.016,
+      "u": 0.351,
+      "v": -1.005
+     },
+     "Dayton": {
+      "pres": 1029.05,
+      "temp": 9.464,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.629,
+      "v": 0.105
+     }
+    }
+   },
+   {
+    "f": 19,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1011.55,
+      "temp": 21.55,
+      "cloud_raw": 3.7,
+      "cloud": 8.544,
+      "rain": 0.082,
+      "u": -0.743,
+      "v": -3.539
+     },
+     "Chile coast": {
+      "pres": 1012.49,
+      "temp": 13.33,
+      "cloud_raw": 100.0,
+      "cloud": 97.762,
+      "rain": 0.051,
+      "u": 0.397,
+      "v": -0.969
+     },
+     "Dayton": {
+      "pres": 1029.46,
+      "temp": 9.25,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.263,
+      "v": -0.189
+     }
+    }
+   },
+   {
+    "f": 20,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1012.62,
+      "temp": 20.737,
+      "cloud_raw": 0.0,
+      "cloud": 1.0,
+      "rain": 0.031,
+      "u": -0.388,
+      "v": -3.352
+     },
+     "Chile coast": {
+      "pres": 1012.65,
+      "temp": 13.707,
+      "cloud_raw": 99.9,
+      "cloud": 90.638,
+      "rain": 0.031,
+      "u": 0.732,
+      "v": -1.122
+     },
+     "Dayton": {
+      "pres": 1029.11,
+      "temp": 9.517,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.748,
+      "v": -0.512
+     }
+    }
+   },
+   {
+    "f": 21,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.05,
+      "temp": 20.06,
+      "cloud_raw": 0.0,
+      "cloud": 1.213,
+      "rain": 0.012,
+      "u": -0.536,
+      "v": -4.167
+     },
+     "Chile coast": {
+      "pres": 1012.69,
+      "temp": 13.99,
+      "cloud_raw": 100.0,
+      "cloud": 92.537,
+      "rain": 0.031,
+      "u": 0.674,
+      "v": -0.997
+     },
+     "Dayton": {
+      "pres": 1029.04,
+      "temp": 10.0,
+      "cloud_raw": 99.1,
+      "cloud": 99.175,
+      "rain": 0.0,
+      "u": -3.706,
+      "v": 0.093
+     }
+    }
+   },
+   {
+    "f": 22,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1014.6,
+      "temp": 19.372,
+      "cloud_raw": 0.0,
+      "cloud": 0.188,
+      "rain": 0.008,
+      "u": -0.547,
+      "v": -4.257
+     },
+     "Chile coast": {
+      "pres": 1012.98,
+      "temp": 14.072,
+      "cloud_raw": 100.0,
+      "cloud": 96.494,
+      "rain": 0.016,
+      "u": 0.663,
+      "v": -1.077
+     },
+     "Dayton": {
+      "pres": 1029.15,
+      "temp": 10.052,
+      "cloud_raw": 100.0,
+      "cloud": 99.938,
+      "rain": 0.0,
+      "u": -3.877,
+      "v": 0.793
+     }
+    }
+   },
+   {
+    "f": 23,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1015.32,
+      "temp": 18.92,
+      "cloud_raw": 0.0,
+      "cloud": 0.15,
+      "rain": 0.004,
+      "u": -0.712,
+      "v": -4.312
+     },
+     "Chile coast": {
+      "pres": 1013.44,
+      "temp": 14.53,
+      "cloud_raw": 99.9,
+      "cloud": 97.394,
+      "rain": 0.035,
+      "u": 0.618,
+      "v": -1.022
+     },
+     "Dayton": {
+      "pres": 1029.26,
+      "temp": 9.29,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.062,
+      "v": 0.568
+     }
+    }
+   },
+   {
+    "f": 24,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.3,
+      "temp": 18.486,
+      "cloud_raw": 0.0,
+      "cloud": 1.3,
+      "rain": 0.0,
+      "u": -1.03,
+      "v": -4.448
+     },
+     "Chile coast": {
+      "pres": 1013.87,
+      "temp": 15.286,
+      "cloud_raw": 99.9,
+      "cloud": 97.363,
+      "rain": 0.012,
+      "u": 0.74,
+      "v": -1.398
+     },
+     "Dayton": {
+      "pres": 1029.75,
+      "temp": 9.096,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.21,
+      "v": 0.532
+     }
+    }
+   },
+   {
+    "f": 25,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.82,
+      "temp": 18.097,
+      "cloud_raw": 0.0,
+      "cloud": 1.306,
+      "rain": 0.0,
+      "u": -0.939,
+      "v": -3.746
+     },
+     "Chile coast": {
+      "pres": 1014.16,
+      "temp": 16.107,
+      "cloud_raw": 99.9,
+      "cloud": 96.9,
+      "rain": 0.012,
+      "u": 1.051,
+      "v": -1.856
+     },
+     "Dayton": {
+      "pres": 1030.47,
+      "temp": 9.887,
+      "cloud_raw": 98.5,
+      "cloud": 98.875,
+      "rain": 0.0,
+      "u": -4.099,
+      "v": 0.794
+     }
+    }
+   },
+   {
+    "f": 26,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.8,
+      "temp": 17.705,
+      "cloud_raw": 0.1,
+      "cloud": 1.275,
+      "rain": 0.0,
+      "u": -0.744,
+      "v": -2.812
+     },
+     "Chile coast": {
+      "pres": 1014.37,
+      "temp": 16.895,
+      "cloud_raw": 100.0,
+      "cloud": 99.419,
+      "rain": 0.004,
+      "u": 1.746,
+      "v": -1.952
+     },
+     "Dayton": {
+      "pres": 1030.61,
+      "temp": 11.295,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.984,
+      "v": 1.508
+     }
+    }
+   },
+   {
+    "f": 27,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.1,
+      "temp": 17.278,
+      "cloud_raw": 0.3,
+      "cloud": 3.219,
+      "rain": 0.0,
+      "u": -0.46,
+      "v": -2.161
+     },
+     "Chile coast": {
+      "pres": 1014.47,
+      "temp": 17.878,
+      "cloud_raw": 100.0,
+      "cloud": 99.9,
+      "rain": 0.0,
+      "u": 2.51,
+      "v": -1.801
+     },
+     "Dayton": {
+      "pres": 1030.34,
+      "temp": 12.178,
+      "cloud_raw": 100.0,
+      "cloud": 99.95,
+      "rain": 0.0,
+      "u": -4.99,
+      "v": 1.729
+     }
+    }
+   },
+   {
+    "f": 28,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.2,
+      "temp": 16.848,
+      "cloud_raw": 1.8,
+      "cloud": 2.494,
+      "rain": 0.0,
+      "u": -1.14,
+      "v": -2.289
+     },
+     "Chile coast": {
+      "pres": 1014.36,
+      "temp": 19.048,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.027,
+      "u": 3.82,
+      "v": -1.159
+     },
+     "Dayton": {
+      "pres": 1029.74,
+      "temp": 14.048,
+      "cloud_raw": 100.0,
+      "cloud": 99.025,
+      "rain": 0.0,
+      "u": -4.9,
+      "v": 1.901
+     }
+    }
+   },
+   {
+    "f": 29,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.78,
+      "temp": 16.452,
+      "cloud_raw": 4.0,
+      "cloud": 5.056,
+      "rain": 0.0,
+      "u": -0.111,
+      "v": -1.777
+     },
+     "Chile coast": {
+      "pres": 1014.18,
+      "temp": 19.652,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": 4.459,
+      "v": -1.207
+     },
+     "Dayton": {
+      "pres": 1029.03,
+      "temp": 15.752,
+      "cloud_raw": 100.0,
+      "cloud": 98.488,
+      "rain": 0.0,
+      "u": -5.061,
+      "v": 2.093
+     }
+    }
+   },
+   {
+    "f": 30,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1016.76,
+      "temp": 16.127,
+      "cloud_raw": 0.0,
+      "cloud": 0.219,
+      "rain": 0.0,
+      "u": -0.632,
+      "v": -1.587
+     },
+     "Chile coast": {
+      "pres": 1014.23,
+      "temp": 19.627,
+      "cloud_raw": 100.0,
+      "cloud": 97.869,
+      "rain": 0.008,
+      "u": 4.978,
+      "v": -1.787
+     },
+     "Dayton": {
+      "pres": 1028.11,
+      "temp": 16.627,
+      "cloud_raw": 100.0,
+      "cloud": 99.988,
+      "rain": 0.0,
+      "u": -4.792,
+      "v": 2.023
+     }
+    }
+   },
+   {
+    "f": 31,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.88,
+      "temp": 15.95,
+      "cloud_raw": 0.0,
+      "cloud": 0.162,
+      "rain": 0.0,
+      "u": 0.389,
+      "v": -1.898
+     },
+     "Chile coast": {
+      "pres": 1014.17,
+      "temp": 18.85,
+      "cloud_raw": 88.1,
+      "cloud": 89.375,
+      "rain": 0.004,
+      "u": 4.979,
+      "v": -1.648
+     },
+     "Dayton": {
+      "pres": 1027.36,
+      "temp": 17.25,
+      "cloud_raw": 100.0,
+      "cloud": 99.962,
+      "rain": 0.0,
+      "u": -4.761,
+      "v": 1.942
+     }
+    }
+   },
+   {
+    "f": 32,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1018.08,
+      "temp": 15.647,
+      "cloud_raw": 0.1,
+      "cloud": 9.862,
+      "rain": 0.0,
+      "u": 0.458,
+      "v": -0.952
+     },
+     "Chile coast": {
+      "pres": 1013.98,
+      "temp": 18.347,
+      "cloud_raw": 89.0,
+      "cloud": 80.256,
+      "rain": 0.0,
+      "u": 4.438,
+      "v": -1.562
+     },
+     "Dayton": {
+      "pres": 1027.16,
+      "temp": 17.447,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.442,
+      "v": 1.738
+     }
+    }
+   },
+   {
+    "f": 33,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1018.63,
+      "temp": 15.47,
+      "cloud_raw": 20.6,
+      "cloud": 27.938,
+      "rain": 0.0,
+      "u": 0.617,
+      "v": -0.504
+     },
+     "Chile coast": {
+      "pres": 1014.31,
+      "temp": 17.77,
+      "cloud_raw": 16.3,
+      "cloud": 40.412,
+      "rain": 0.0,
+      "u": 3.827,
+      "v": -1.684
+     },
+     "Dayton": {
+      "pres": 1027.02,
+      "temp": 16.67,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.193,
+      "v": 1.626
+     }
+    }
+   },
+   {
+    "f": 34,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1019.66,
+      "temp": 15.858,
+      "cloud_raw": 15.0,
+      "cloud": 37.531,
+      "rain": 0.008,
+      "u": 0.077,
+      "v": -0.738
+     },
+     "Chile coast": {
+      "pres": 1014.74,
+      "temp": 16.608,
+      "cloud_raw": 9.7,
+      "cloud": 35.269,
+      "rain": 0.0,
+      "u": 2.817,
+      "v": -1.508
+     },
+     "Dayton": {
+      "pres": 1027.2,
+      "temp": 15.188,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.553,
+      "v": 1.092
+     }
+    }
+   },
+   {
+    "f": 35,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1020.27,
+      "temp": 16.68,
+      "cloud_raw": 18.7,
+      "cloud": 38.544,
+      "rain": 0.0,
+      "u": -1.068,
+      "v": -0.779
+     },
+     "Chile coast": {
+      "pres": 1015.16,
+      "temp": 13.87,
+      "cloud_raw": 5.5,
+      "cloud": 37.194,
+      "rain": 0.0,
+      "u": 1.672,
+      "v": -0.569
+     },
+     "Dayton": {
+      "pres": 1028.01,
+      "temp": 14.32,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.328,
+      "v": 1.011
+     }
+    }
+   },
+   {
+    "f": 36,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1020.27,
+      "temp": 17.513,
+      "cloud_raw": 69.0,
+      "cloud": 78.231,
+      "rain": 0.0,
+      "u": -1.475,
+      "v": -0.856
+     },
+     "Chile coast": {
+      "pres": 1015.77,
+      "temp": 12.293,
+      "cloud_raw": 5.0,
+      "cloud": 33.5,
+      "rain": 0.004,
+      "u": 0.885,
+      "v": -0.816
+     },
+     "Dayton": {
+      "pres": 1028.59,
+      "temp": 13.933,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.505,
+      "v": 1.064
+     }
+    }
+   },
+   {
+    "f": 37,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1020.24,
+      "temp": 17.761,
+      "cloud_raw": 98.4,
+      "cloud": 99.188,
+      "rain": 0.012,
+      "u": -1.863,
+      "v": 0.917
+     },
+     "Chile coast": {
+      "pres": 1016.25,
+      "temp": 11.781,
+      "cloud_raw": 13.6,
+      "cloud": 36.181,
+      "rain": 0.0,
+      "u": 0.277,
+      "v": -1.153
+     },
+     "Dayton": {
+      "pres": 1028.59,
+      "temp": 13.461,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -3.364,
+      "v": 1.387
+     }
+    }
+   },
+   {
+    "f": 38,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1019.43,
+      "temp": 17.676,
+      "cloud_raw": 97.8,
+      "cloud": 88.244,
+      "rain": 0.012,
+      "u": -2.614,
+      "v": 2.191
+     },
+     "Chile coast": {
+      "pres": 1016.56,
+      "temp": 11.376,
+      "cloud_raw": 4.6,
+      "cloud": 28.25,
+      "rain": 0.0,
+      "u": -0.074,
+      "v": -1.269
+     },
+     "Dayton": {
+      "pres": 1028.13,
+      "temp": 13.346,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.384,
+      "v": 1.231
+     }
+    }
+   },
+   {
+    "f": 39,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1019.29,
+      "temp": 17.635,
+      "cloud_raw": 81.1,
+      "cloud": 88.369,
+      "rain": 0.0,
+      "u": -1.937,
+      "v": 2.486
+     },
+     "Chile coast": {
+      "pres": 1016.49,
+      "temp": 11.055,
+      "cloud_raw": 13.9,
+      "cloud": 41.994,
+      "rain": 0.004,
+      "u": -0.387,
+      "v": -1.334
+     },
+     "Dayton": {
+      "pres": 1027.9,
+      "temp": 13.475,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -4.077,
+      "v": 2.106
+     }
+    }
+   },
+   {
+    "f": 40,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1018.21,
+      "temp": 17.989,
+      "cloud_raw": 91.9,
+      "cloud": 85.569,
+      "rain": 0.02,
+      "u": -2.635,
+      "v": 2.215
+     },
+     "Chile coast": {
+      "pres": 1016.29,
+      "temp": 10.799,
+      "cloud_raw": 24.9,
+      "cloud": 54.087,
+      "rain": 0.008,
+      "u": -0.755,
+      "v": -1.125
+     },
+     "Dayton": {
+      "pres": 1027.98,
+      "temp": 13.259,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.935,
+      "v": 2.335
+     }
+    }
+   },
+   {
+    "f": 41,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.64,
+      "temp": 17.437,
+      "cloud_raw": 76.8,
+      "cloud": 66.131,
+      "rain": 0.039,
+      "u": -3.398,
+      "v": 2.788
+     },
+     "Chile coast": {
+      "pres": 1016.12,
+      "temp": 10.647,
+      "cloud_raw": 29.0,
+      "cloud": 62.069,
+      "rain": 0.004,
+      "u": -0.828,
+      "v": -1.112
+     },
+     "Dayton": {
+      "pres": 1027.81,
+      "temp": 12.867,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.688,
+      "v": 1.298
+     }
+    }
+   },
+   {
+    "f": 42,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.69,
+      "temp": 17.067,
+      "cloud_raw": 75.4,
+      "cloud": 79.45,
+      "rain": 0.016,
+      "u": -3.2,
+      "v": 2.238
+     },
+     "Chile coast": {
+      "pres": 1015.92,
+      "temp": 10.527,
+      "cloud_raw": 38.9,
+      "cloud": 69.494,
+      "rain": 0.0,
+      "u": -0.7,
+      "v": -0.912
+     },
+     "Dayton": {
+      "pres": 1027.69,
+      "temp": 12.757,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.61,
+      "v": 1.048
+     }
+    }
+   },
+   {
+    "f": 43,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.71,
+      "temp": 17.215,
+      "cloud_raw": 76.1,
+      "cloud": 63.687,
+      "rain": 0.02,
+      "u": -2.965,
+      "v": 1.335
+     },
+     "Chile coast": {
+      "pres": 1015.87,
+      "temp": 10.705,
+      "cloud_raw": 71.2,
+      "cloud": 80.4,
+      "rain": 0.008,
+      "u": -0.625,
+      "v": -0.715
+     },
+     "Dayton": {
+      "pres": 1027.57,
+      "temp": 12.525,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.775,
+      "v": 0.925
+     }
+    }
+   },
+   {
+    "f": 44,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.72,
+      "temp": 17.181,
+      "cloud_raw": 52.9,
+      "cloud": 62.0,
+      "rain": 0.016,
+      "u": -2.595,
+      "v": 0.9
+     },
+     "Chile coast": {
+      "pres": 1015.94,
+      "temp": 11.661,
+      "cloud_raw": 98.1,
+      "cloud": 93.794,
+      "rain": 0.008,
+      "u": -0.545,
+      "v": -0.37
+     },
+     "Dayton": {
+      "pres": 1027.59,
+      "temp": 12.731,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.155,
+      "v": 1.21
+     }
+    }
+   },
+   {
+    "f": 45,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.98,
+      "temp": 17.083,
+      "cloud_raw": 41.0,
+      "cloud": 42.637,
+      "rain": 0.008,
+      "u": -1.964,
+      "v": 0.226
+     },
+     "Chile coast": {
+      "pres": 1016.24,
+      "temp": 12.493,
+      "cloud_raw": 100.0,
+      "cloud": 97.194,
+      "rain": 0.0,
+      "u": -0.044,
+      "v": 0.006
+     },
+     "Dayton": {
+      "pres": 1027.53,
+      "temp": 12.973,
+      "cloud_raw": 97.6,
+      "cloud": 99.4,
+      "rain": 0.0,
+      "u": -2.524,
+      "v": 1.566
+     }
+    }
+   },
+   {
+    "f": 46,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.71,
+      "temp": 17.034,
+      "cloud_raw": 15.1,
+      "cloud": 39.994,
+      "rain": 0.0,
+      "u": -1.617,
+      "v": -0.497
+     },
+     "Chile coast": {
+      "pres": 1016.29,
+      "temp": 12.694,
+      "cloud_raw": 100.0,
+      "cloud": 94.156,
+      "rain": 0.008,
+      "u": -0.707,
+      "v": 0.373
+     },
+     "Dayton": {
+      "pres": 1027.31,
+      "temp": 13.084,
+      "cloud_raw": 100.0,
+      "cloud": 99.988,
+      "rain": 0.0,
+      "u": -2.907,
+      "v": 1.633
+     }
+    }
+   },
+   {
+    "f": 47,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.29,
+      "temp": 16.884,
+      "cloud_raw": 5.0,
+      "cloud": 15.812,
+      "rain": 0.0,
+      "u": -0.122,
+      "v": -0.582
+     },
+     "Chile coast": {
+      "pres": 1016.58,
+      "temp": 13.414,
+      "cloud_raw": 95.0,
+      "cloud": 85.431,
+      "rain": 0.0,
+      "u": -0.742,
+      "v": 0.168
+     },
+     "Dayton": {
+      "pres": 1027.1,
+      "temp": 13.204,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.312,
+      "v": 1.468
+     }
+    }
+   },
+   {
+    "f": 48,
+    "points": {
+     "Tokyo Bay": {
+      "pres": 1017.09,
+      "temp": 16.774,
+      "cloud_raw": 5.0,
+      "cloud": 13.631,
+      "rain": 0.0,
+      "u": 0.841,
+      "v": 0.078
+     },
+     "Chile coast": {
+      "pres": 1016.62,
+      "temp": 14.354,
+      "cloud_raw": 92.0,
+      "cloud": 69.469,
+      "rain": 0.0,
+      "u": -0.029,
+      "v": 0.008
+     },
+     "Dayton": {
+      "pres": 1027.11,
+      "temp": 13.324,
+      "cloud_raw": 100.0,
+      "cloud": 100.0,
+      "rain": 0.0,
+      "u": -2.389,
+      "v": 1.438
+     }
+    }
+   }
+  ]
+ },
+ "city_raw": {
+  "cities": [
+   {
+    "name": "Dayton OH",
+    "lat": 39.76,
+    "lon": -84.19
+   },
+   {
+    "name": "Miami",
+    "lat": 25.76,
+    "lon": -80.19
+   },
+   {
+    "name": "Denver",
+    "lat": 39.74,
+    "lon": -104.99
+   },
+   {
+    "name": "London",
+    "lat": 51.51,
+    "lon": -0.13
+   },
+   {
+    "name": "Delhi",
+    "lat": 28.61,
+    "lon": 77.21
+   }
+  ],
+  "hours": [
+   {
+    "f": 0,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.114,
+      "temp": 9.288,
+      "cloud": 0.0,
+      "u": -0.731,
+      "v": -3.356,
+      "rain": 0.0,
+      "wind_kmh": 12.36,
+      "wind_from_deg": 12.3,
+      "grid": {
+       "temp": 8.522,
+       "pres": 1026.238,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 12.17
+      }
+     },
+     "Miami": {
+      "pres": 1013.867,
+      "temp": 26.146,
+      "cloud": 13.281,
+      "u": 0.184,
+      "v": -3.178,
+      "rain": 0.057,
+      "wind_kmh": 11.46,
+      "wind_from_deg": 356.7,
+      "grid": {
+       "temp": 25.636,
+       "pres": 1013.906,
+       "cloud": 13.52,
+       "rain": 0.039,
+       "wind_kmh": 10.55
+      }
+     },
+     "Denver": {
+      "pres": 1016.368,
+      "temp": 10.156,
+      "cloud": 100.0,
+      "u": -0.468,
+      "v": -0.978,
+      "rain": 0.0,
+      "wind_kmh": 3.9,
+      "wind_from_deg": 25.6,
+      "grid": {
+       "temp": 6.723,
+       "pres": 1016.892,
+       "cloud": 99.99,
+       "rain": 0.0,
+       "wind_kmh": 4.39
+      }
+     },
+     "London": {
+      "pres": 1029.617,
+      "temp": 14.919,
+      "cloud": 49.1154,
+      "u": -2.794,
+      "v": 1.302,
+      "rain": 0.0,
+      "wind_kmh": 11.1,
+      "wind_from_deg": 115.0,
+      "grid": {
+       "temp": 14.915,
+       "pres": 1029.611,
+       "cloud": 41.24,
+       "rain": 0.0,
+       "wind_kmh": 15.84
+      }
+     },
+     "Delhi": {
+      "pres": 1015.689,
+      "temp": 25.219,
+      "cloud": 20.6211,
+      "u": -0.11,
+      "v": -0.288,
+      "rain": 0.0007,
+      "wind_kmh": 1.11,
+      "wind_from_deg": 20.9,
+      "grid": {
+       "temp": 24.504,
+       "pres": 1015.742,
+       "cloud": 11.59,
+       "rain": 0.0003,
+       "wind_kmh": 1.5
+      }
+     }
+    }
+   },
+   {
+    "f": 1,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.708,
+      "temp": 9.931,
+      "cloud": 0.0,
+      "u": -1.086,
+      "v": -3.124,
+      "rain": 0.0,
+      "wind_kmh": 11.91,
+      "wind_from_deg": 19.2,
+      "grid": {
+       "temp": 9.381,
+       "pres": 1026.831,
+       "cloud": 0.05,
+       "rain": 0.0,
+       "wind_kmh": 11.26
+      }
+     },
+     "Miami": {
+      "pres": 1014.374,
+      "temp": 26.636,
+      "cloud": 16.6712,
+      "u": -0.327,
+      "v": -3.227,
+      "rain": 0.0894,
+      "wind_kmh": 11.68,
+      "wind_from_deg": 5.8,
+      "grid": {
+       "temp": 26.279,
+       "pres": 1014.414,
+       "cloud": 15.2,
+       "rain": 0.0615,
+       "wind_kmh": 11.79
+      }
+     },
+     "Denver": {
+      "pres": 1016.474,
+      "temp": 9.856,
+      "cloud": 100.0,
+      "u": -1.134,
+      "v": -0.325,
+      "rain": 0.0,
+      "wind_kmh": 4.25,
+      "wind_from_deg": 74.0,
+      "grid": {
+       "temp": 6.608,
+       "pres": 1016.885,
+       "cloud": 98.05,
+       "rain": 0.0,
+       "wind_kmh": 4.86
+      }
+     },
+     "London": {
+      "pres": 1029.225,
+      "temp": 15.451,
+      "cloud": 60.3373,
+      "u": -3.009,
+      "v": 1.086,
+      "rain": 0.0,
+      "wind_kmh": 11.52,
+      "wind_from_deg": 109.8,
+      "grid": {
+       "temp": 15.441,
+       "pres": 1029.223,
+       "cloud": 57.82,
+       "rain": 0.0,
+       "wind_kmh": 16.19
+      }
+     },
+     "Delhi": {
+      "pres": 1016.305,
+      "temp": 24.519,
+      "cloud": 20.5341,
+      "u": -0.158,
+      "v": 0.113,
+      "rain": 0.0,
+      "wind_kmh": 0.7,
+      "wind_from_deg": 125.6,
+      "grid": {
+       "temp": 23.527,
+       "pres": 1016.4,
+       "cloud": 13.73,
+       "rain": 0.0,
+       "wind_kmh": 2.48
+      }
+     }
+    }
+   },
+   {
+    "f": 2,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.33,
+      "temp": 12.251,
+      "cloud": 0.0,
+      "u": -1.365,
+      "v": -3.253,
+      "rain": 0.0,
+      "wind_kmh": 12.7,
+      "wind_from_deg": 22.8,
+      "grid": {
+       "temp": 12.018,
+       "pres": 1027.332,
+       "cloud": 2.25,
+       "rain": 0.0,
+       "wind_kmh": 13.24
+      }
+     },
+     "Miami": {
+      "pres": 1014.712,
+      "temp": 27.508,
+      "cloud": 18.2128,
+      "u": -1.281,
+      "v": -3.093,
+      "rain": 0.1225,
+      "wind_kmh": 12.05,
+      "wind_from_deg": 22.5,
+      "grid": {
+       "temp": 27.044,
+       "pres": 1014.761,
+       "cloud": 18.49,
+       "rain": 0.0661,
+       "wind_kmh": 12.29
+      }
+     },
+     "Denver": {
+      "pres": 1016.842,
+      "temp": 9.604,
+      "cloud": 100.0,
+      "u": -0.947,
+      "v": 0.512,
+      "rain": 0.0,
+      "wind_kmh": 3.88,
+      "wind_from_deg": 118.4,
+      "grid": {
+       "temp": 6.982,
+       "pres": 1017.266,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 4.37
+      }
+     },
+     "London": {
+      "pres": 1028.907,
+      "temp": 15.589,
+      "cloud": 72.0154,
+      "u": -3.116,
+      "v": 0.75,
+      "rain": 0.0,
+      "wind_kmh": 11.54,
+      "wind_from_deg": 103.5,
+      "grid": {
+       "temp": 15.554,
+       "pres": 1028.913,
+       "cloud": 49.22,
+       "rain": 0.0,
+       "wind_kmh": 15.7
+      }
+     },
+     "Delhi": {
+      "pres": 1017.141,
+      "temp": 24.01,
+      "cloud": 18.4598,
+      "u": -0.365,
+      "v": 0.388,
+      "rain": 0.0,
+      "wind_kmh": 1.92,
+      "wind_from_deg": 136.7,
+      "grid": {
+       "temp": 22.906,
+       "pres": 1017.29,
+       "cloud": 16.21,
+       "rain": 0.0,
+       "wind_kmh": 3.26
+      }
+     }
+    }
+   },
+   {
+    "f": 3,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.07,
+      "temp": 14.372,
+      "cloud": 0.0,
+      "u": -1.606,
+      "v": -3.002,
+      "rain": 0.0,
+      "wind_kmh": 12.26,
+      "wind_from_deg": 28.1,
+      "grid": {
+       "temp": 14.245,
+       "pres": 1027.022,
+       "cloud": 0.67,
+       "rain": 0.0,
+       "wind_kmh": 12.94
+      }
+     },
+     "Miami": {
+      "pres": 1014.699,
+      "temp": 28.318,
+      "cloud": 21.2352,
+      "u": -2.368,
+      "v": -2.764,
+      "rain": 0.0163,
+      "wind_kmh": 13.1,
+      "wind_from_deg": 40.6,
+      "grid": {
+       "temp": 27.798,
+       "pres": 1014.784,
+       "cloud": 19.56,
+       "rain": 0.0529,
+       "wind_kmh": 13.01
+      }
+     },
+     "Denver": {
+      "pres": 1016.884,
+      "temp": 10.712,
+      "cloud": 100.0,
+      "u": -0.009,
+      "v": 1.286,
+      "rain": 0.0,
+      "wind_kmh": 4.63,
+      "wind_from_deg": 179.6,
+      "grid": {
+       "temp": 9.326,
+       "pres": 1017.305,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 4.74
+      }
+     },
+     "London": {
+      "pres": 1028.907,
+      "temp": 15.182,
+      "cloud": 26.6421,
+      "u": -3.131,
+      "v": 0.236,
+      "rain": 0.0,
+      "wind_kmh": 11.3,
+      "wind_from_deg": 94.3,
+      "grid": {
+       "temp": 15.071,
+       "pres": 1028.923,
+       "cloud": 24.81,
+       "rain": 0.0,
+       "wind_kmh": 13.48
+      }
+     },
+     "Delhi": {
+      "pres": 1017.951,
+      "temp": 23.562,
+      "cloud": 12.9453,
+      "u": -0.549,
+      "v": 0.467,
+      "rain": 0.0,
+      "wind_kmh": 2.59,
+      "wind_from_deg": 130.4,
+      "grid": {
+       "temp": 22.435,
+       "pres": 1018.067,
+       "cloud": 10.9,
+       "rain": 0.0013,
+       "wind_kmh": 3.77
+      }
+     }
+    }
+   },
+   {
+    "f": 4,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.822,
+      "temp": 16.183,
+      "cloud": 0.7296,
+      "u": -1.648,
+      "v": -3.04,
+      "rain": 0.0,
+      "wind_kmh": 12.45,
+      "wind_from_deg": 28.5,
+      "grid": {
+       "temp": 16.056,
+       "pres": 1026.784,
+       "cloud": 1.89,
+       "rain": 0.0,
+       "wind_kmh": 13.16
+      }
+     },
+     "Miami": {
+      "pres": 1014.429,
+      "temp": 28.737,
+      "cloud": 19.995,
+      "u": -3.545,
+      "v": -2.312,
+      "rain": 0.0619,
+      "wind_kmh": 15.24,
+      "wind_from_deg": 56.9,
+      "grid": {
+       "temp": 28.411,
+       "pres": 1014.468,
+       "cloud": 23.72,
+       "rain": 0.0534,
+       "wind_kmh": 15.02
+      }
+     },
+     "Denver": {
+      "pres": 1016.108,
+      "temp": 12.576,
+      "cloud": 100.0,
+      "u": -0.427,
+      "v": 0.536,
+      "rain": 0.0,
+      "wind_kmh": 2.47,
+      "wind_from_deg": 141.5,
+      "grid": {
+       "temp": 12.08,
+       "pres": 1016.179,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 2.67
+      }
+     },
+     "London": {
+      "pres": 1029.164,
+      "temp": 14.061,
+      "cloud": 8.8043,
+      "u": -2.919,
+      "v": -0.408,
+      "rain": 0.0,
+      "wind_kmh": 10.61,
+      "wind_from_deg": 82.0,
+      "grid": {
+       "temp": 13.894,
+       "pres": 1029.163,
+       "cloud": 24.16,
+       "rain": 0.0,
+       "wind_kmh": 11.38
+      }
+     },
+     "Delhi": {
+      "pres": 1018.393,
+      "temp": 23.404,
+      "cloud": 9.2946,
+      "u": -0.389,
+      "v": 0.391,
+      "rain": 0.0,
+      "wind_kmh": 1.99,
+      "wind_from_deg": 135.1,
+      "grid": {
+       "temp": 22.234,
+       "pres": 1018.495,
+       "cloud": 4.55,
+       "rain": 0.0,
+       "wind_kmh": 4.33
+      }
+     }
+    }
+   },
+   {
+    "f": 5,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.293,
+      "temp": 17.6,
+      "cloud": 0.1424,
+      "u": -1.985,
+      "v": -2.616,
+      "rain": 0.0,
+      "wind_kmh": 11.82,
+      "wind_from_deg": 37.2,
+      "grid": {
+       "temp": 17.45,
+       "pres": 1026.3,
+       "cloud": 2.22,
+       "rain": 0.0,
+       "wind_kmh": 12.42
+      }
+     },
+     "Miami": {
+      "pres": 1013.889,
+      "temp": 28.84,
+      "cloud": 31.3677,
+      "u": -4.212,
+      "v": -1.709,
+      "rain": 0.0456,
+      "wind_kmh": 16.36,
+      "wind_from_deg": 67.9,
+      "grid": {
+       "temp": 28.769,
+       "pres": 1013.877,
+       "cloud": 32.13,
+       "rain": 0.0627,
+       "wind_kmh": 16.98
+      }
+     },
+     "Denver": {
+      "pres": 1015.307,
+      "temp": 14.278,
+      "cloud": 10.7699,
+      "u": -1.48,
+      "v": -0.225,
+      "rain": 0.0,
+      "wind_kmh": 5.39,
+      "wind_from_deg": 81.4,
+      "grid": {
+       "temp": 14.686,
+       "pres": 1014.926,
+       "cloud": 48.83,
+       "rain": 0.0,
+       "wind_kmh": 5.59
+      }
+     },
+     "London": {
+      "pres": 1029.464,
+      "temp": 12.853,
+      "cloud": 77.6266,
+      "u": -3.078,
+      "v": -0.593,
+      "rain": 0.0,
+      "wind_kmh": 11.28,
+      "wind_from_deg": 79.1,
+      "grid": {
+       "temp": 12.744,
+       "pres": 1029.466,
+       "cloud": 74.54,
+       "rain": 0.0,
+       "wind_kmh": 11.42
+      }
+     },
+     "Delhi": {
+      "pres": 1018.501,
+      "temp": 23.255,
+      "cloud": 4.3672,
+      "u": -0.092,
+      "v": 0.359,
+      "rain": 0.0,
+      "wind_kmh": 1.33,
+      "wind_from_deg": 165.6,
+      "grid": {
+       "temp": 22.042,
+       "pres": 1018.613,
+       "cloud": 1.83,
+       "rain": 0.0,
+       "wind_kmh": 3.99
+      }
+     }
+    }
+   },
+   {
+    "f": 6,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1025.697,
+      "temp": 18.659,
+      "cloud": 1.5709,
+      "u": -1.97,
+      "v": -2.355,
+      "rain": 0.0,
+      "wind_kmh": 11.05,
+      "wind_from_deg": 39.9,
+      "grid": {
+       "temp": 18.456,
+       "pres": 1025.727,
+       "cloud": 4.0,
+       "rain": 0.0,
+       "wind_kmh": 11.46
+      }
+     },
+     "Miami": {
+      "pres": 1013.313,
+      "temp": 28.646,
+      "cloud": 31.393,
+      "u": -4.175,
+      "v": -1.274,
+      "rain": 0.0025,
+      "wind_kmh": 15.71,
+      "wind_from_deg": 73.0,
+      "grid": {
+       "temp": 28.659,
+       "pres": 1013.224,
+       "cloud": 35.66,
+       "rain": 0.0865,
+       "wind_kmh": 16.6
+      }
+     },
+     "Denver": {
+      "pres": 1014.305,
+      "temp": 16.154,
+      "cloud": 5.125,
+      "u": -1.559,
+      "v": -0.908,
+      "rain": 0.0,
+      "wind_kmh": 6.49,
+      "wind_from_deg": 59.8,
+      "grid": {
+       "temp": 16.695,
+       "pres": 1013.833,
+       "cloud": 20.07,
+       "rain": 0.0,
+       "wind_kmh": 6.31
+      }
+     },
+     "London": {
+      "pres": 1029.786,
+      "temp": 12.369,
+      "cloud": 97.2891,
+      "u": -3.094,
+      "v": -0.319,
+      "rain": 0.0,
+      "wind_kmh": 11.2,
+      "wind_from_deg": 84.1,
+      "grid": {
+       "temp": 12.274,
+       "pres": 1029.771,
+       "cloud": 91.55,
+       "rain": 0.0,
+       "wind_kmh": 11.79
+      }
+     },
+     "Delhi": {
+      "pres": 1018.135,
+      "temp": 23.078,
+      "cloud": 0.0,
+      "u": 0.095,
+      "v": 0.323,
+      "rain": 0.0,
+      "wind_kmh": 1.21,
+      "wind_from_deg": 196.4,
+      "grid": {
+       "temp": 21.848,
+       "pres": 1018.245,
+       "cloud": 0.15,
+       "rain": 0.0,
+       "wind_kmh": 3.95
+      }
+     }
+    }
+   },
+   {
+    "f": 7,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1025.51,
+      "temp": 19.305,
+      "cloud": 5.0,
+      "u": -1.697,
+      "v": -2.191,
+      "rain": 0.0,
+      "wind_kmh": 9.98,
+      "wind_from_deg": 37.8,
+      "grid": {
+       "temp": 19.043,
+       "pres": 1025.479,
+       "cloud": 4.8,
+       "rain": 0.0,
+       "wind_kmh": 10.79
+      }
+     },
+     "Miami": {
+      "pres": 1012.996,
+      "temp": 28.67,
+      "cloud": 3.8165,
+      "u": -4.125,
+      "v": -0.889,
+      "rain": 0.0805,
+      "wind_kmh": 15.19,
+      "wind_from_deg": 77.8,
+      "grid": {
+       "temp": 28.453,
+       "pres": 1012.951,
+       "cloud": 28.25,
+       "rain": 0.1696,
+       "wind_kmh": 16.72
+      }
+     },
+     "Denver": {
+      "pres": 1013.202,
+      "temp": 17.686,
+      "cloud": 63.5469,
+      "u": -1.014,
+      "v": -0.811,
+      "rain": 0.0,
+      "wind_kmh": 4.67,
+      "wind_from_deg": 51.3,
+      "grid": {
+       "temp": 17.963,
+       "pres": 1012.784,
+       "cloud": 53.24,
+       "rain": 0.0,
+       "wind_kmh": 4.44
+      }
+     },
+     "London": {
+      "pres": 1029.84,
+      "temp": 12.108,
+      "cloud": 69.3827,
+      "u": -3.066,
+      "v": -0.084,
+      "rain": 0.0,
+      "wind_kmh": 11.04,
+      "wind_from_deg": 88.4,
+      "grid": {
+       "temp": 12.005,
+       "pres": 1029.838,
+       "cloud": 69.22,
+       "rain": 0.0,
+       "wind_kmh": 11.95
+      }
+     },
+     "Delhi": {
+      "pres": 1017.445,
+      "temp": 22.874,
+      "cloud": 0.0,
+      "u": 0.034,
+      "v": -0.212,
+      "rain": 0.0,
+      "wind_kmh": 0.77,
+      "wind_from_deg": 350.9,
+      "grid": {
+       "temp": 21.659,
+       "pres": 1017.563,
+       "cloud": 0.05,
+       "rain": 0.0,
+       "wind_kmh": 2.39
+      }
+     }
+    }
+   },
+   {
+    "f": 8,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1025.431,
+      "temp": 19.44,
+      "cloud": 5.2797,
+      "u": -2.076,
+      "v": -2.469,
+      "rain": 0.0,
+      "wind_kmh": 11.61,
+      "wind_from_deg": 40.1,
+      "grid": {
+       "temp": 19.147,
+       "pres": 1025.495,
+       "cloud": 11.94,
+       "rain": 0.0,
+       "wind_kmh": 11.93
+      }
+     },
+     "Miami": {
+      "pres": 1012.843,
+      "temp": 28.762,
+      "cloud": 6.445,
+      "u": -4.246,
+      "v": -0.577,
+      "rain": 0.0594,
+      "wind_kmh": 15.43,
+      "wind_from_deg": 82.3,
+      "grid": {
+       "temp": 28.539,
+       "pres": 1012.78,
+       "cloud": 23.38,
+       "rain": 0.1391,
+       "wind_kmh": 16.72
+      }
+     },
+     "Denver": {
+      "pres": 1011.764,
+      "temp": 18.739,
+      "cloud": 95.6613,
+      "u": -1.643,
+      "v": -0.946,
+      "rain": 0.0,
+      "wind_kmh": 6.83,
+      "wind_from_deg": 60.1,
+      "grid": {
+       "temp": 18.91,
+       "pres": 1011.467,
+       "cloud": 62.81,
+       "rain": 0.0,
+       "wind_kmh": 6.52
+      }
+     },
+     "London": {
+      "pres": 1030.028,
+      "temp": 11.86,
+      "cloud": 12.2661,
+      "u": -3.07,
+      "v": 0.098,
+      "rain": 0.0,
+      "wind_kmh": 11.06,
+      "wind_from_deg": 91.8,
+      "grid": {
+       "temp": 11.766,
+       "pres": 1030.02,
+       "cloud": 35.6,
+       "rain": 0.0,
+       "wind_kmh": 11.84
+      }
+     },
+     "Delhi": {
+      "pres": 1017.315,
+      "temp": 22.654,
+      "cloud": 0.0,
+      "u": 0.323,
+      "v": -0.607,
+      "rain": 0.0,
+      "wind_kmh": 2.48,
+      "wind_from_deg": 332.0,
+      "grid": {
+       "temp": 21.521,
+       "pres": 1017.412,
+       "cloud": 0.09,
+       "rain": 0.0,
+       "wind_kmh": 2.12
+      }
+     }
+    }
+   },
+   {
+    "f": 9,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1025.54,
+      "temp": 18.947,
+      "cloud": 10.939,
+      "u": -2.096,
+      "v": -2.279,
+      "rain": 0.0,
+      "wind_kmh": 11.15,
+      "wind_from_deg": 42.6,
+      "grid": {
+       "temp": 18.597,
+       "pres": 1025.643,
+       "cloud": 31.87,
+       "rain": 0.0,
+       "wind_kmh": 11.81
+      }
+     },
+     "Miami": {
+      "pres": 1012.994,
+      "temp": 28.613,
+      "cloud": 8.4018,
+      "u": -4.405,
+      "v": 0.225,
+      "rain": 0.0906,
+      "wind_kmh": 15.88,
+      "wind_from_deg": 92.9,
+      "grid": {
+       "temp": 28.344,
+       "pres": 1012.957,
+       "cloud": 19.44,
+       "rain": 0.1267,
+       "wind_kmh": 16.79
+      }
+     },
+     "Denver": {
+      "pres": 1010.543,
+      "temp": 19.718,
+      "cloud": 59.151,
+      "u": -2.362,
+      "v": -1.134,
+      "rain": 0.0,
+      "wind_kmh": 9.43,
+      "wind_from_deg": 64.4,
+      "grid": {
+       "temp": 19.65,
+       "pres": 1010.58,
+       "cloud": 60.64,
+       "rain": 0.0,
+       "wind_kmh": 9.05
+      }
+     },
+     "London": {
+      "pres": 1030.149,
+      "temp": 11.669,
+      "cloud": 45.2227,
+      "u": -2.747,
+      "v": 0.088,
+      "rain": 0.0,
+      "wind_kmh": 9.89,
+      "wind_from_deg": 91.8,
+      "grid": {
+       "temp": 11.584,
+       "pres": 1030.149,
+       "cloud": 53.53,
+       "rain": 0.0,
+       "wind_kmh": 10.8
+      }
+     },
+     "Delhi": {
+      "pres": 1017.13,
+      "temp": 22.47,
+      "cloud": 0.0,
+      "u": 0.634,
+      "v": -0.912,
+      "rain": 0.0,
+      "wind_kmh": 4.0,
+      "wind_from_deg": 325.2,
+      "grid": {
+       "temp": 21.361,
+       "pres": 1017.199,
+       "cloud": 0.06,
+       "rain": 0.0,
+       "wind_kmh": 2.96
+      }
+     }
+    }
+   },
+   {
+    "f": 10,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1025.987,
+      "temp": 16.764,
+      "cloud": 51.0042,
+      "u": -1.771,
+      "v": -2.203,
+      "rain": 0.0,
+      "wind_kmh": 10.18,
+      "wind_from_deg": 38.8,
+      "grid": {
+       "temp": 16.106,
+       "pres": 1026.073,
+       "cloud": 58.03,
+       "rain": 0.0,
+       "wind_kmh": 10.15
+      }
+     },
+     "Miami": {
+      "pres": 1013.337,
+      "temp": 28.156,
+      "cloud": 11.8093,
+      "u": -4.825,
+      "v": 1.356,
+      "rain": 0.1387,
+      "wind_kmh": 18.04,
+      "wind_from_deg": 105.7,
+      "grid": {
+       "temp": 27.82,
+       "pres": 1013.35,
+       "cloud": 14.21,
+       "rain": 0.1259,
+       "wind_kmh": 16.85
+      }
+     },
+     "Denver": {
+      "pres": 1010.23,
+      "temp": 20.008,
+      "cloud": 6.3032,
+      "u": -2.561,
+      "v": -1.582,
+      "rain": 0.0,
+      "wind_kmh": 10.84,
+      "wind_from_deg": 58.3,
+      "grid": {
+       "temp": 19.584,
+       "pres": 1010.325,
+       "cloud": 27.62,
+       "rain": 0.0,
+       "wind_kmh": 10.68
+      }
+     },
+     "London": {
+      "pres": 1030.39,
+      "temp": 11.458,
+      "cloud": 80.9638,
+      "u": -2.363,
+      "v": 0.01,
+      "rain": 0.0,
+      "wind_kmh": 8.51,
+      "wind_from_deg": 90.2,
+      "grid": {
+       "temp": 11.4,
+       "pres": 1030.387,
+       "cloud": 73.15,
+       "rain": 0.0,
+       "wind_kmh": 9.36
+      }
+     },
+     "Delhi": {
+      "pres": 1016.772,
+      "temp": 22.328,
+      "cloud": 0.0,
+      "u": 0.702,
+      "v": -1.505,
+      "rain": 0.0,
+      "wind_kmh": 5.98,
+      "wind_from_deg": 335.0,
+      "grid": {
+       "temp": 21.204,
+       "pres": 1016.851,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 4.85
+      }
+     }
+    }
+   },
+   {
+    "f": 11,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.737,
+      "temp": 14.634,
+      "cloud": 84.1629,
+      "u": -1.972,
+      "v": -2.322,
+      "rain": 0.0,
+      "wind_kmh": 10.97,
+      "wind_from_deg": 40.3,
+      "grid": {
+       "temp": 13.789,
+       "pres": 1026.885,
+       "cloud": 72.99,
+       "rain": 0.0,
+       "wind_kmh": 11.81
+      }
+     },
+     "Miami": {
+      "pres": 1013.979,
+      "temp": 27.659,
+      "cloud": 6.9882,
+      "u": -5.524,
+      "v": 1.427,
+      "rain": 0.1312,
+      "wind_kmh": 20.54,
+      "wind_from_deg": 104.5,
+      "grid": {
+       "temp": 27.219,
+       "pres": 1013.994,
+       "cloud": 9.04,
+       "rain": 0.1542,
+       "wind_kmh": 17.5
+      }
+     },
+     "Denver": {
+      "pres": 1010.236,
+      "temp": 19.151,
+      "cloud": 99.9928,
+      "u": -2.623,
+      "v": -1.987,
+      "rain": 0.0,
+      "wind_kmh": 11.85,
+      "wind_from_deg": 52.9,
+      "grid": {
+       "temp": 18.403,
+       "pres": 1010.339,
+       "cloud": 95.47,
+       "rain": 0.0,
+       "wind_kmh": 12.01
+      }
+     },
+     "London": {
+      "pres": 1030.364,
+      "temp": 11.133,
+      "cloud": 19.9933,
+      "u": -1.87,
+      "v": -0.214,
+      "rain": 0.0,
+      "wind_kmh": 6.78,
+      "wind_from_deg": 83.5,
+      "grid": {
+       "temp": 11.071,
+       "pres": 1030.363,
+       "cloud": 33.68,
+       "rain": 0.0,
+       "wind_kmh": 9.04
+      }
+     },
+     "Delhi": {
+      "pres": 1016.801,
+      "temp": 22.177,
+      "cloud": 0.0,
+      "u": 0.763,
+      "v": -1.848,
+      "rain": 0.0,
+      "wind_kmh": 7.2,
+      "wind_from_deg": 337.6,
+      "grid": {
+       "temp": 21.063,
+       "pres": 1016.874,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 6.89
+      }
+     }
+    }
+   },
+   {
+    "f": 12,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.632,
+      "temp": 13.765,
+      "cloud": 76.276,
+      "u": -2.237,
+      "v": -2.13,
+      "rain": 0.0,
+      "wind_kmh": 11.12,
+      "wind_from_deg": 46.4,
+      "grid": {
+       "temp": 12.89,
+       "pres": 1027.716,
+       "cloud": 80.61,
+       "rain": 0.0,
+       "wind_kmh": 11.86
+      }
+     },
+     "Miami": {
+      "pres": 1014.77,
+      "temp": 27.419,
+      "cloud": 5.912,
+      "u": -6.117,
+      "v": 0.044,
+      "rain": 0.0956,
+      "wind_kmh": 22.02,
+      "wind_from_deg": 90.4,
+      "grid": {
+       "temp": 26.947,
+       "pres": 1014.742,
+       "cloud": 8.87,
+       "rain": 0.0982,
+       "wind_kmh": 20.28
+      }
+     },
+     "Denver": {
+      "pres": 1010.801,
+      "temp": 17.315,
+      "cloud": 90.9606,
+      "u": -2.239,
+      "v": -2.408,
+      "rain": 0.0,
+      "wind_kmh": 11.84,
+      "wind_from_deg": 42.9,
+      "grid": {
+       "temp": 13.79,
+       "pres": 1011.254,
+       "cloud": 94.03,
+       "rain": 0.0,
+       "wind_kmh": 12.05
+      }
+     },
+     "London": {
+      "pres": 1030.508,
+      "temp": 10.764,
+      "cloud": 20.1243,
+      "u": -1.558,
+      "v": -0.55,
+      "rain": 0.0,
+      "wind_kmh": 5.95,
+      "wind_from_deg": 70.6,
+      "grid": {
+       "temp": 10.687,
+       "pres": 1030.501,
+       "cloud": 33.02,
+       "rain": 0.0,
+       "wind_kmh": 8.58
+      }
+     },
+     "Delhi": {
+      "pres": 1017.247,
+      "temp": 21.975,
+      "cloud": 0.0,
+      "u": 0.862,
+      "v": -1.778,
+      "rain": 0.0,
+      "wind_kmh": 7.11,
+      "wind_from_deg": 334.1,
+      "grid": {
+       "temp": 20.881,
+       "pres": 1017.353,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 6.4
+      }
+     }
+    }
+   },
+   {
+    "f": 13,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.029,
+      "temp": 13.104,
+      "cloud": 100.0,
+      "u": -2.637,
+      "v": -1.752,
+      "rain": 0.0,
+      "wind_kmh": 11.4,
+      "wind_from_deg": 56.4,
+      "grid": {
+       "temp": 12.159,
+       "pres": 1028.175,
+       "cloud": 97.87,
+       "rain": 0.0,
+       "wind_kmh": 12.07
+      }
+     },
+     "Miami": {
+      "pres": 1015.502,
+      "temp": 27.363,
+      "cloud": 5.8842,
+      "u": -5.864,
+      "v": -0.365,
+      "rain": 0.0019,
+      "wind_kmh": 21.15,
+      "wind_from_deg": 86.4,
+      "grid": {
+       "temp": 26.885,
+       "pres": 1015.468,
+       "cloud": 6.99,
+       "rain": 0.08,
+       "wind_kmh": 19.95
+      }
+     },
+     "Denver": {
+      "pres": 1012.089,
+      "temp": 15.837,
+      "cloud": 100.0,
+      "u": -1.611,
+      "v": -2.175,
+      "rain": 0.0,
+      "wind_kmh": 9.74,
+      "wind_from_deg": 36.5,
+      "grid": {
+       "temp": 11.851,
+       "pres": 1012.449,
+       "cloud": 99.53,
+       "rain": 0.0,
+       "wind_kmh": 10.3
+      }
+     },
+     "London": {
+      "pres": 1030.755,
+      "temp": 10.506,
+      "cloud": 76.6266,
+      "u": -1.683,
+      "v": -0.493,
+      "rain": 0.0,
+      "wind_kmh": 6.31,
+      "wind_from_deg": 73.7,
+      "grid": {
+       "temp": 10.433,
+       "pres": 1030.751,
+       "cloud": 74.97,
+       "rain": 0.0,
+       "wind_kmh": 8.79
+      }
+     },
+     "Delhi": {
+      "pres": 1017.944,
+      "temp": 21.83,
+      "cloud": 0.0,
+      "u": 0.353,
+      "v": -1.409,
+      "rain": 0.0,
+      "wind_kmh": 5.23,
+      "wind_from_deg": 345.9,
+      "grid": {
+       "temp": 20.716,
+       "pres": 1018.029,
+       "cloud": 0.02,
+       "rain": 0.0,
+       "wind_kmh": 5.12
+      }
+     }
+    }
+   },
+   {
+    "f": 14,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.347,
+      "temp": 12.573,
+      "cloud": 96.4979,
+      "u": -2.866,
+      "v": -1.756,
+      "rain": 0.0,
+      "wind_kmh": 12.1,
+      "wind_from_deg": 58.5,
+      "grid": {
+       "temp": 11.543,
+       "pres": 1028.507,
+       "cloud": 93.34,
+       "rain": 0.0,
+       "wind_kmh": 12.73
+      }
+     },
+     "Miami": {
+      "pres": 1016.064,
+      "temp": 27.309,
+      "cloud": 3.6442,
+      "u": -5.913,
+      "v": 0.107,
+      "rain": 0.0036,
+      "wind_kmh": 21.29,
+      "wind_from_deg": 91.0,
+      "grid": {
+       "temp": 26.819,
+       "pres": 1016.04,
+       "cloud": 6.95,
+       "rain": 0.1698,
+       "wind_kmh": 19.33
+      }
+     },
+     "Denver": {
+      "pres": 1012.806,
+      "temp": 14.923,
+      "cloud": 99.3549,
+      "u": -0.963,
+      "v": -2.013,
+      "rain": 0.0,
+      "wind_kmh": 8.03,
+      "wind_from_deg": 25.6,
+      "grid": {
+       "temp": 11.286,
+       "pres": 1013.335,
+       "cloud": 97.39,
+       "rain": 0.0,
+       "wind_kmh": 9.16
+      }
+     },
+     "London": {
+      "pres": 1030.695,
+      "temp": 10.316,
+      "cloud": 99.9958,
+      "u": -1.651,
+      "v": -0.358,
+      "rain": 0.0,
+      "wind_kmh": 6.08,
+      "wind_from_deg": 77.8,
+      "grid": {
+       "temp": 10.248,
+       "pres": 1030.689,
+       "cloud": 92.56,
+       "rain": 0.0,
+       "wind_kmh": 8.38
+      }
+     },
+     "Delhi": {
+      "pres": 1018.719,
+      "temp": 22.166,
+      "cloud": 0.0,
+      "u": 0.375,
+      "v": -1.414,
+      "rain": 0.0,
+      "wind_kmh": 5.27,
+      "wind_from_deg": 345.1,
+      "grid": {
+       "temp": 21.348,
+       "pres": 1018.821,
+       "cloud": 0.08,
+       "rain": 0.0,
+       "wind_kmh": 5.01
+      }
+     }
+    }
+   },
+   {
+    "f": 15,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.611,
+      "temp": 11.855,
+      "cloud": 97.3005,
+      "u": -3.152,
+      "v": -1.344,
+      "rain": 0.0,
+      "wind_kmh": 12.34,
+      "wind_from_deg": 66.9,
+      "grid": {
+       "temp": 10.875,
+       "pres": 1028.719,
+       "cloud": 99.69,
+       "rain": 0.0,
+       "wind_kmh": 13.16
+      }
+     },
+     "Miami": {
+      "pres": 1016.15,
+      "temp": 27.259,
+      "cloud": 7.0442,
+      "u": -5.735,
+      "v": 0.01,
+      "rain": 0.031,
+      "wind_kmh": 20.65,
+      "wind_from_deg": 90.1,
+      "grid": {
+       "temp": 26.644,
+       "pres": 1016.179,
+       "cloud": 9.26,
+       "rain": 0.2586,
+       "wind_kmh": 18.57
+      }
+     },
+     "Denver": {
+      "pres": 1013.443,
+      "temp": 14.246,
+      "cloud": 100.0,
+      "u": -0.603,
+      "v": -1.623,
+      "rain": 0.0,
+      "wind_kmh": 6.23,
+      "wind_from_deg": 20.4,
+      "grid": {
+       "temp": 10.594,
+       "pres": 1014.028,
+       "cloud": 99.23,
+       "rain": 0.0,
+       "wind_kmh": 7.59
+      }
+     },
+     "London": {
+      "pres": 1030.59,
+      "temp": 10.198,
+      "cloud": 82.5125,
+      "u": -1.572,
+      "v": -0.376,
+      "rain": 0.0,
+      "wind_kmh": 5.82,
+      "wind_from_deg": 76.5,
+      "grid": {
+       "temp": 10.114,
+       "pres": 1030.596,
+       "cloud": 88.88,
+       "rain": 0.0,
+       "wind_kmh": 7.93
+      }
+     },
+     "Delhi": {
+      "pres": 1019.631,
+      "temp": 23.222,
+      "cloud": 0.0,
+      "u": 0.671,
+      "v": -1.332,
+      "rain": 0.0,
+      "wind_kmh": 5.37,
+      "wind_from_deg": 333.3,
+      "grid": {
+       "temp": 22.767,
+       "pres": 1019.697,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 4.48
+      }
+     }
+    }
+   },
+   {
+    "f": 16,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.65,
+      "temp": 11.24,
+      "cloud": 99.9558,
+      "u": -3.215,
+      "v": -1.078,
+      "rain": 0.0,
+      "wind_kmh": 12.21,
+      "wind_from_deg": 71.5,
+      "grid": {
+       "temp": 10.382,
+       "pres": 1028.739,
+       "cloud": 99.3,
+       "rain": 0.0,
+       "wind_kmh": 12.98
+      }
+     },
+     "Miami": {
+      "pres": 1016.005,
+      "temp": 27.172,
+      "cloud": 5.8712,
+      "u": -5.861,
+      "v": -0.15,
+      "rain": 0.1198,
+      "wind_kmh": 21.11,
+      "wind_from_deg": 88.5,
+      "grid": {
+       "temp": 26.494,
+       "pres": 1016.041,
+       "cloud": 11.66,
+       "rain": 0.3373,
+       "wind_kmh": 18.42
+      }
+     },
+     "Denver": {
+      "pres": 1013.173,
+      "temp": 13.959,
+      "cloud": 99.9901,
+      "u": -1.013,
+      "v": -1.564,
+      "rain": 0.0,
+      "wind_kmh": 6.71,
+      "wind_from_deg": 32.9,
+      "grid": {
+       "temp": 10.507,
+       "pres": 1013.808,
+       "cloud": 99.69,
+       "rain": 0.0,
+       "wind_kmh": 8.09
+      }
+     },
+     "London": {
+      "pres": 1030.585,
+      "temp": 9.97,
+      "cloud": 99.7488,
+      "u": -1.722,
+      "v": -0.285,
+      "rain": 0.0,
+      "wind_kmh": 6.28,
+      "wind_from_deg": 80.6,
+      "grid": {
+       "temp": 9.909,
+       "pres": 1030.583,
+       "cloud": 95.02,
+       "rain": 0.0,
+       "wind_kmh": 8.45
+      }
+     },
+     "Delhi": {
+      "pres": 1020.113,
+      "temp": 24.551,
+      "cloud": 0.0,
+      "u": 0.776,
+      "v": -1.369,
+      "rain": 0.0,
+      "wind_kmh": 5.67,
+      "wind_from_deg": 330.5,
+      "grid": {
+       "temp": 24.263,
+       "pres": 1020.156,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 5.32
+      }
+     }
+    }
+   },
+   {
+    "f": 17,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.573,
+      "temp": 10.957,
+      "cloud": 100.0,
+      "u": -3.223,
+      "v": -0.269,
+      "rain": 0.0,
+      "wind_kmh": 11.64,
+      "wind_from_deg": 85.2,
+      "grid": {
+       "temp": 10.224,
+       "pres": 1028.626,
+       "cloud": 99.98,
+       "rain": 0.0,
+       "wind_kmh": 12.71
+      }
+     },
+     "Miami": {
+      "pres": 1015.767,
+      "temp": 27.058,
+      "cloud": 5.1275,
+      "u": -5.964,
+      "v": -0.412,
+      "rain": 0.0867,
+      "wind_kmh": 21.52,
+      "wind_from_deg": 86.0,
+      "grid": {
+       "temp": 26.393,
+       "pres": 1015.812,
+       "cloud": 10.02,
+       "rain": 0.2987,
+       "wind_kmh": 19.44
+      }
+     },
+     "Denver": {
+      "pres": 1013.007,
+      "temp": 13.743,
+      "cloud": 80.4267,
+      "u": -0.419,
+      "v": -0.458,
+      "rain": 0.0,
+      "wind_kmh": 2.23,
+      "wind_from_deg": 42.5,
+      "grid": {
+       "temp": 10.667,
+       "pres": 1013.71,
+       "cloud": 92.63,
+       "rain": 0.0,
+       "wind_kmh": 3.78
+      }
+     },
+     "London": {
+      "pres": 1030.745,
+      "temp": 9.815,
+      "cloud": 74.5829,
+      "u": -1.766,
+      "v": -0.277,
+      "rain": 0.0,
+      "wind_kmh": 6.44,
+      "wind_from_deg": 81.1,
+      "grid": {
+       "temp": 9.744,
+       "pres": 1030.746,
+       "cloud": 71.65,
+       "rain": 0.0,
+       "wind_kmh": 8.9
+      }
+     },
+     "Delhi": {
+      "pres": 1019.927,
+      "temp": 25.959,
+      "cloud": 0.0,
+      "u": 0.769,
+      "v": -1.287,
+      "rain": 0.0,
+      "wind_kmh": 5.4,
+      "wind_from_deg": 329.1,
+      "grid": {
+       "temp": 25.738,
+       "pres": 1019.937,
+       "cloud": 0.0,
+       "rain": 0.0,
+       "wind_kmh": 5.25
+      }
+     }
+    }
+   },
+   {
+    "f": 18,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.701,
+      "temp": 10.802,
+      "cloud": 100.0,
+      "u": -3.118,
+      "v": 0.246,
+      "rain": 0.0,
+      "wind_kmh": 11.26,
+      "wind_from_deg": 94.5,
+      "grid": {
+       "temp": 10.294,
+       "pres": 1028.764,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 12.2
+      }
+     },
+     "Miami": {
+      "pres": 1015.736,
+      "temp": 26.977,
+      "cloud": 3.7856,
+      "u": -5.937,
+      "v": -0.432,
+      "rain": 0.0805,
+      "wind_kmh": 21.43,
+      "wind_from_deg": 85.8,
+      "grid": {
+       "temp": 26.294,
+       "pres": 1015.793,
+       "cloud": 8.07,
+       "rain": 0.2354,
+       "wind_kmh": 20.21
+      }
+     },
+     "Denver": {
+      "pres": 1012.623,
+      "temp": 13.23,
+      "cloud": 76.8574,
+      "u": -0.478,
+      "v": 0.257,
+      "rain": 0.0,
+      "wind_kmh": 1.95,
+      "wind_from_deg": 118.3,
+      "grid": {
+       "temp": 9.806,
+       "pres": 1013.517,
+       "cloud": 75.43,
+       "rain": 0.0,
+       "wind_kmh": 2.46
+      }
+     },
+     "London": {
+      "pres": 1030.779,
+      "temp": 9.588,
+      "cloud": 7.7274,
+      "u": -1.775,
+      "v": -0.208,
+      "rain": 0.0,
+      "wind_kmh": 6.43,
+      "wind_from_deg": 83.3,
+      "grid": {
+       "temp": 9.517,
+       "pres": 1030.782,
+       "cloud": 23.34,
+       "rain": 0.0,
+       "wind_kmh": 8.87
+      }
+     },
+     "Delhi": {
+      "pres": 1019.048,
+      "temp": 27.157,
+      "cloud": 0.0179,
+      "u": 0.54,
+      "v": -1.488,
+      "rain": 0.0,
+      "wind_kmh": 5.7,
+      "wind_from_deg": 340.1,
+      "grid": {
+       "temp": 26.955,
+       "pres": 1019.038,
+       "cloud": 0.39,
+       "rain": 0.0,
+       "wind_kmh": 6.46
+      }
+     }
+    }
+   },
+   {
+    "f": 19,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.73,
+      "temp": 11.588,
+      "cloud": 100.0,
+      "u": -3.561,
+      "v": 0.201,
+      "rain": 0.0,
+      "wind_kmh": 12.84,
+      "wind_from_deg": 93.2,
+      "grid": {
+       "temp": 10.238,
+       "pres": 1028.91,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 13.19
+      }
+     },
+     "Miami": {
+      "pres": 1015.459,
+      "temp": 26.861,
+      "cloud": 4.34,
+      "u": -5.961,
+      "v": -0.535,
+      "rain": 0.0943,
+      "wind_kmh": 21.55,
+      "wind_from_deg": 84.9,
+      "grid": {
+       "temp": 26.196,
+       "pres": 1015.51,
+       "cloud": 7.87,
+       "rain": 0.2108,
+       "wind_kmh": 20.84
+      }
+     },
+     "Denver": {
+      "pres": 1012.16,
+      "temp": 12.786,
+      "cloud": 99.252,
+      "u": -0.694,
+      "v": 0.619,
+      "rain": 0.0,
+      "wind_kmh": 3.35,
+      "wind_from_deg": 131.7,
+      "grid": {
+       "temp": 8.624,
+       "pres": 1013.219,
+       "cloud": 93.51,
+       "rain": 0.0,
+       "wind_kmh": 3.29
+      }
+     },
+     "London": {
+      "pres": 1031.004,
+      "temp": 9.383,
+      "cloud": 5.3454,
+      "u": -1.724,
+      "v": -0.124,
+      "rain": 0.0,
+      "wind_kmh": 6.22,
+      "wind_from_deg": 85.9,
+      "grid": {
+       "temp": 9.31,
+       "pres": 1031.0,
+       "cloud": 7.36,
+       "rain": 0.0,
+       "wind_kmh": 8.62
+      }
+     },
+     "Delhi": {
+      "pres": 1017.887,
+      "temp": 28.085,
+      "cloud": 25.4715,
+      "u": 0.649,
+      "v": -1.981,
+      "rain": 0.0,
+      "wind_kmh": 7.5,
+      "wind_from_deg": 341.9,
+      "grid": {
+       "temp": 27.919,
+       "pres": 1017.913,
+       "cloud": 12.58,
+       "rain": 0.0,
+       "wind_kmh": 7.88
+      }
+     }
+    }
+   },
+   {
+    "f": 20,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.591,
+      "temp": 11.339,
+      "cloud": 100.0,
+      "u": -3.624,
+      "v": -0.169,
+      "rain": 0.0,
+      "wind_kmh": 13.06,
+      "wind_from_deg": 87.3,
+      "grid": {
+       "temp": 10.124,
+       "pres": 1028.711,
+       "cloud": 99.99,
+       "rain": 0.0,
+       "wind_kmh": 13.3
+      }
+     },
+     "Miami": {
+      "pres": 1015.348,
+      "temp": 26.64,
+      "cloud": 1.8538,
+      "u": -6.343,
+      "v": -0.693,
+      "rain": 0.3178,
+      "wind_kmh": 22.97,
+      "wind_from_deg": 83.8,
+      "grid": {
+       "temp": 26.066,
+       "pres": 1015.379,
+       "cloud": 6.23,
+       "rain": 0.3846,
+       "wind_kmh": 21.59
+      }
+     },
+     "Denver": {
+      "pres": 1012.384,
+      "temp": 12.47,
+      "cloud": 99.6429,
+      "u": -0.401,
+      "v": 1.464,
+      "rain": 0.0,
+      "wind_kmh": 5.46,
+      "wind_from_deg": 164.7,
+      "grid": {
+       "temp": 8.192,
+       "pres": 1013.405,
+       "cloud": 98.22,
+       "rain": 0.0,
+       "wind_kmh": 4.87
+      }
+     },
+     "London": {
+      "pres": 1031.413,
+      "temp": 9.955,
+      "cloud": 5.972,
+      "u": -1.596,
+      "v": -0.097,
+      "rain": 0.0,
+      "wind_kmh": 5.76,
+      "wind_from_deg": 86.5,
+      "grid": {
+       "temp": 9.901,
+       "pres": 1031.413,
+       "cloud": 12.13,
+       "rain": 0.0,
+       "wind_kmh": 8.01
+      }
+     },
+     "Delhi": {
+      "pres": 1016.706,
+      "temp": 28.902,
+      "cloud": 2.8902,
+      "u": 0.539,
+      "v": -2.344,
+      "rain": 0.0,
+      "wind_kmh": 8.66,
+      "wind_from_deg": 347.1,
+      "grid": {
+       "temp": 28.713,
+       "pres": 1016.708,
+       "cloud": 4.6,
+       "rain": 0.0,
+       "wind_kmh": 9.27
+      }
+     }
+    }
+   },
+   {
+    "f": 21,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.792,
+      "temp": 10.892,
+      "cloud": 99.9093,
+      "u": -3.505,
+      "v": -0.001,
+      "rain": 0.0,
+      "wind_kmh": 12.62,
+      "wind_from_deg": 90.0,
+      "grid": {
+       "temp": 9.923,
+       "pres": 1028.781,
+       "cloud": 99.6,
+       "rain": 0.0,
+       "wind_kmh": 13.22
+      }
+     },
+     "Miami": {
+      "pres": 1015.321,
+      "temp": 26.471,
+      "cloud": 1.5506,
+      "u": -6.625,
+      "v": -0.802,
+      "rain": 0.5809,
+      "wind_kmh": 24.02,
+      "wind_from_deg": 83.1,
+      "grid": {
+       "temp": 26.045,
+       "pres": 1015.308,
+       "cloud": 6.71,
+       "rain": 0.579,
+       "wind_kmh": 21.74
+      }
+     },
+     "Denver": {
+      "pres": 1011.962,
+      "temp": 12.074,
+      "cloud": 100.0,
+      "u": -0.237,
+      "v": 1.137,
+      "rain": 0.0,
+      "wind_kmh": 4.18,
+      "wind_from_deg": 168.2,
+      "grid": {
+       "temp": 7.899,
+       "pres": 1012.955,
+       "cloud": 99.65,
+       "rain": 0.0,
+       "wind_kmh": 3.69
+      }
+     },
+     "London": {
+      "pres": 1031.566,
+      "temp": 11.338,
+      "cloud": 6.1546,
+      "u": -2.131,
+      "v": 0.279,
+      "rain": 0.0,
+      "wind_kmh": 7.74,
+      "wind_from_deg": 97.5,
+      "grid": {
+       "temp": 11.339,
+       "pres": 1031.569,
+       "cloud": 13.39,
+       "rain": 0.0,
+       "wind_kmh": 9.46
+      }
+     },
+     "Delhi": {
+      "pres": 1015.911,
+      "temp": 29.407,
+      "cloud": 7.8486,
+      "u": 0.418,
+      "v": -2.315,
+      "rain": 0.0,
+      "wind_kmh": 8.47,
+      "wind_from_deg": 349.8,
+      "grid": {
+       "temp": 29.17,
+       "pres": 1015.941,
+       "cloud": 22.47,
+       "rain": 0.0,
+       "wind_kmh": 8.69
+      }
+     }
+    }
+   },
+   {
+    "f": 22,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.776,
+      "temp": 10.636,
+      "cloud": 100.0,
+      "u": -3.813,
+      "v": 0.07,
+      "rain": 0.0,
+      "wind_kmh": 13.73,
+      "wind_from_deg": 91.1,
+      "grid": {
+       "temp": 9.819,
+       "pres": 1028.877,
+       "cloud": 99.5,
+       "rain": 0.0,
+       "wind_kmh": 14.65
+      }
+     },
+     "Miami": {
+      "pres": 1015.446,
+      "temp": 26.376,
+      "cloud": 1.5989,
+      "u": -6.859,
+      "v": -0.741,
+      "rain": 0.8361,
+      "wind_kmh": 24.84,
+      "wind_from_deg": 83.8,
+      "grid": {
+       "temp": 25.986,
+       "pres": 1015.469,
+       "cloud": 5.89,
+       "rain": 0.5635,
+       "wind_kmh": 21.67
+      }
+     },
+     "Denver": {
+      "pres": 1011.327,
+      "temp": 11.676,
+      "cloud": 99.9011,
+      "u": 0.213,
+      "v": 0.672,
+      "rain": 0.0,
+      "wind_kmh": 2.54,
+      "wind_from_deg": 197.6,
+      "grid": {
+       "temp": 7.662,
+       "pres": 1012.338,
+       "cloud": 95.94,
+       "rain": 0.0,
+       "wind_kmh": 2.08
+      }
+     },
+     "London": {
+      "pres": 1031.597,
+      "temp": 12.707,
+      "cloud": 15.1758,
+      "u": -2.325,
+      "v": 0.401,
+      "rain": 0.0,
+      "wind_kmh": 8.49,
+      "wind_from_deg": 99.8,
+      "grid": {
+       "temp": 12.737,
+       "pres": 1031.593,
+       "cloud": 19.51,
+       "rain": 0.0,
+       "wind_kmh": 11.33
+      }
+     },
+     "Delhi": {
+      "pres": 1015.509,
+      "temp": 29.571,
+      "cloud": 10.6445,
+      "u": 0.2,
+      "v": -2.3,
+      "rain": 0.0,
+      "wind_kmh": 8.31,
+      "wind_from_deg": 355.0,
+      "grid": {
+       "temp": 29.316,
+       "pres": 1015.541,
+       "cloud": 13.26,
+       "rain": 0.0,
+       "wind_kmh": 8.17
+      }
+     }
+    }
+   },
+   {
+    "f": 23,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.945,
+      "temp": 10.324,
+      "cloud": 100.0,
+      "u": -3.664,
+      "v": 0.265,
+      "rain": 0.0,
+      "wind_kmh": 13.22,
+      "wind_from_deg": 94.1,
+      "grid": {
+       "temp": 9.308,
+       "pres": 1029.033,
+       "cloud": 99.33,
+       "rain": 0.0,
+       "wind_kmh": 14.75
+      }
+     },
+     "Miami": {
+      "pres": 1015.998,
+      "temp": 26.326,
+      "cloud": 3.0246,
+      "u": -7.106,
+      "v": -1.052,
+      "rain": 1.0481,
+      "wind_kmh": 25.86,
+      "wind_from_deg": 81.6,
+      "grid": {
+       "temp": 25.972,
+       "pres": 1016.01,
+       "cloud": 6.4,
+       "rain": 0.5196,
+       "wind_kmh": 23.2
+      }
+     },
+     "Denver": {
+      "pres": 1011.073,
+      "temp": 11.545,
+      "cloud": 100.0,
+      "u": 0.433,
+      "v": 0.172,
+      "rain": 0.0,
+      "wind_kmh": 1.68,
+      "wind_from_deg": 248.3,
+      "grid": {
+       "temp": 7.48,
+       "pres": 1012.099,
+       "cloud": 99.92,
+       "rain": 0.0,
+       "wind_kmh": 1.79
+      }
+     },
+     "London": {
+      "pres": 1031.556,
+      "temp": 13.873,
+      "cloud": 29.0454,
+      "u": -2.46,
+      "v": 0.399,
+      "rain": 0.0,
+      "wind_kmh": 8.97,
+      "wind_from_deg": 99.2,
+      "grid": {
+       "temp": 13.909,
+       "pres": 1031.546,
+       "cloud": 26.15,
+       "rain": 0.0,
+       "wind_kmh": 11.94
+      }
+     },
+     "Delhi": {
+      "pres": 1015.39,
+      "temp": 29.388,
+      "cloud": 8.0237,
+      "u": -0.045,
+      "v": -2.328,
+      "rain": 0.0,
+      "wind_kmh": 8.38,
+      "wind_from_deg": 1.1,
+      "grid": {
+       "temp": 29.05,
+       "pres": 1015.389,
+       "cloud": 6.96,
+       "rain": 0.0,
+       "wind_kmh": 7.46
+      }
+     }
+    }
+   },
+   {
+    "f": 24,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1029.263,
+      "temp": 10.325,
+      "cloud": 100.0,
+      "u": -3.666,
+      "v": 0.545,
+      "rain": 0.0,
+      "wind_kmh": 13.34,
+      "wind_from_deg": 98.5,
+      "grid": {
+       "temp": 9.39,
+       "pres": 1029.407,
+       "cloud": 99.98,
+       "rain": 0.0,
+       "wind_kmh": 14.84
+      }
+     },
+     "Miami": {
+      "pres": 1016.577,
+      "temp": 26.368,
+      "cloud": 4.7427,
+      "u": -6.948,
+      "v": -1.079,
+      "rain": 1.1011,
+      "wind_kmh": 25.31,
+      "wind_from_deg": 81.2,
+      "grid": {
+       "temp": 26.087,
+       "pres": 1016.585,
+       "cloud": 5.31,
+       "rain": 0.5596,
+       "wind_kmh": 23.23
+      }
+     },
+     "Denver": {
+      "pres": 1010.853,
+      "temp": 11.479,
+      "cloud": 100.0,
+      "u": 0.002,
+      "v": 0.103,
+      "rain": 0.0,
+      "wind_kmh": 0.37,
+      "wind_from_deg": 181.1,
+      "grid": {
+       "temp": 7.86,
+       "pres": 1011.845,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 0.74
+      }
+     },
+     "London": {
+      "pres": 1031.296,
+      "temp": 14.719,
+      "cloud": 26.9606,
+      "u": -2.399,
+      "v": 0.381,
+      "rain": 0.0,
+      "wind_kmh": 8.74,
+      "wind_from_deg": 99.0,
+      "grid": {
+       "temp": 14.703,
+       "pres": 1031.296,
+       "cloud": 26.55,
+       "rain": 0.0,
+       "wind_kmh": 11.73
+      }
+     },
+     "Delhi": {
+      "pres": 1015.439,
+      "temp": 28.559,
+      "cloud": 3.7262,
+      "u": -0.751,
+      "v": -2.217,
+      "rain": 0.0,
+      "wind_kmh": 8.43,
+      "wind_from_deg": 18.7,
+      "grid": {
+       "temp": 27.626,
+       "pres": 1015.47,
+       "cloud": 7.32,
+       "rain": 0.0,
+       "wind_kmh": 7.83
+      }
+     }
+    }
+   },
+   {
+    "f": 25,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1030.061,
+      "temp": 10.843,
+      "cloud": 99.8032,
+      "u": -3.697,
+      "v": 0.444,
+      "rain": 0.0,
+      "wind_kmh": 13.4,
+      "wind_from_deg": 96.8,
+      "grid": {
+       "temp": 10.114,
+       "pres": 1030.091,
+       "cloud": 99.49,
+       "rain": 0.0,
+       "wind_kmh": 14.5
+      }
+     },
+     "Miami": {
+      "pres": 1017.38,
+      "temp": 26.575,
+      "cloud": 6.2603,
+      "u": -7.486,
+      "v": -1.308,
+      "rain": 1.342,
+      "wind_kmh": 27.36,
+      "wind_from_deg": 80.1,
+      "grid": {
+       "temp": 26.65,
+       "pres": 1017.392,
+       "cloud": 6.61,
+       "rain": 0.6648,
+       "wind_kmh": 24.61
+      }
+     },
+     "Denver": {
+      "pres": 1010.914,
+      "temp": 11.404,
+      "cloud": 100.0,
+      "u": -0.282,
+      "v": -0.644,
+      "rain": 0.0,
+      "wind_kmh": 2.53,
+      "wind_from_deg": 23.6,
+      "grid": {
+       "temp": 8.354,
+       "pres": 1011.883,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 3.6
+      }
+     },
+     "London": {
+      "pres": 1031.089,
+      "temp": 15.208,
+      "cloud": 13.4768,
+      "u": -2.402,
+      "v": 0.189,
+      "rain": 0.0,
+      "wind_kmh": 8.67,
+      "wind_from_deg": 94.5,
+      "grid": {
+       "temp": 15.162,
+       "pres": 1031.094,
+       "cloud": 18.24,
+       "rain": 0.0,
+       "wind_kmh": 11.66
+      }
+     },
+     "Delhi": {
+      "pres": 1015.974,
+      "temp": 27.93,
+      "cloud": 11.4747,
+      "u": -1.502,
+      "v": -1.779,
+      "rain": 0.0,
+      "wind_kmh": 8.38,
+      "wind_from_deg": 40.2,
+      "grid": {
+       "temp": 26.89,
+       "pres": 1015.987,
+       "cloud": 7.06,
+       "rain": 0.0,
+       "wind_kmh": 8.59
+      }
+     }
+    }
+   },
+   {
+    "f": 26,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1030.252,
+      "temp": 11.777,
+      "cloud": 100.0,
+      "u": -4.215,
+      "v": 0.707,
+      "rain": 0.0,
+      "wind_kmh": 15.39,
+      "wind_from_deg": 99.5,
+      "grid": {
+       "temp": 11.429,
+       "pres": 1030.268,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 17.03
+      }
+     },
+     "Miami": {
+      "pres": 1018.179,
+      "temp": 26.917,
+      "cloud": 16.1019,
+      "u": -7.812,
+      "v": -1.456,
+      "rain": 1.2657,
+      "wind_kmh": 28.61,
+      "wind_from_deg": 79.4,
+      "grid": {
+       "temp": 27.083,
+       "pres": 1018.12,
+       "cloud": 17.63,
+       "rain": 0.6527,
+       "wind_kmh": 26.26
+      }
+     },
+     "Denver": {
+      "pres": 1011.351,
+      "temp": 11.349,
+      "cloud": 100.0,
+      "u": -0.563,
+      "v": -1.328,
+      "rain": 0.0,
+      "wind_kmh": 5.19,
+      "wind_from_deg": 23.0,
+      "grid": {
+       "temp": 8.608,
+       "pres": 1012.124,
+       "cloud": 92.88,
+       "rain": 0.0,
+       "wind_kmh": 6.17
+      }
+     },
+     "London": {
+      "pres": 1030.694,
+      "temp": 15.303,
+      "cloud": 30.9384,
+      "u": -2.457,
+      "v": 0.114,
+      "rain": 0.0,
+      "wind_kmh": 8.85,
+      "wind_from_deg": 92.7,
+      "grid": {
+       "temp": 15.251,
+       "pres": 1030.707,
+       "cloud": 36.8,
+       "rain": 0.0,
+       "wind_kmh": 11.7
+      }
+     },
+     "Delhi": {
+      "pres": 1016.673,
+      "temp": 27.311,
+      "cloud": 3.0027,
+      "u": -1.898,
+      "v": -1.016,
+      "rain": 0.0,
+      "wind_kmh": 7.75,
+      "wind_from_deg": 61.8,
+      "grid": {
+       "temp": 26.385,
+       "pres": 1016.682,
+       "cloud": 3.4,
+       "rain": 0.0,
+       "wind_kmh": 8.02
+      }
+     }
+    }
+   },
+   {
+    "f": 27,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1030.011,
+      "temp": 12.672,
+      "cloud": 100.0,
+      "u": -4.361,
+      "v": 0.987,
+      "rain": 0.0,
+      "wind_kmh": 16.1,
+      "wind_from_deg": 102.8,
+      "grid": {
+       "temp": 12.749,
+       "pres": 1029.972,
+       "cloud": 99.96,
+       "rain": 0.0,
+       "wind_kmh": 18.03
+      }
+     },
+     "Miami": {
+      "pres": 1018.46,
+      "temp": 27.359,
+      "cloud": 16.7901,
+      "u": -7.704,
+      "v": -1.268,
+      "rain": 1.2995,
+      "wind_kmh": 28.11,
+      "wind_from_deg": 80.7,
+      "grid": {
+       "temp": 27.532,
+       "pres": 1018.408,
+       "cloud": 26.55,
+       "rain": 0.5965,
+       "wind_kmh": 26.76
+      }
+     },
+     "Denver": {
+      "pres": 1011.794,
+      "temp": 11.776,
+      "cloud": 88.8122,
+      "u": 0.042,
+      "v": -1.663,
+      "rain": 0.0,
+      "wind_kmh": 5.99,
+      "wind_from_deg": 358.6,
+      "grid": {
+       "temp": 10.208,
+       "pres": 1012.229,
+       "cloud": 85.08,
+       "rain": 0.0,
+       "wind_kmh": 6.49
+      }
+     },
+     "London": {
+      "pres": 1030.54,
+      "temp": 14.956,
+      "cloud": 55.6688,
+      "u": -2.294,
+      "v": -0.058,
+      "rain": 0.0,
+      "wind_kmh": 8.26,
+      "wind_from_deg": 88.6,
+      "grid": {
+       "temp": 14.869,
+       "pres": 1030.547,
+       "cloud": 61.79,
+       "rain": 0.0,
+       "wind_kmh": 9.44
+      }
+     },
+     "Delhi": {
+      "pres": 1016.915,
+      "temp": 26.787,
+      "cloud": 4.7606,
+      "u": -1.775,
+      "v": -0.002,
+      "rain": 0.0,
+      "wind_kmh": 6.39,
+      "wind_from_deg": 89.9,
+      "grid": {
+       "temp": 25.811,
+       "pres": 1016.962,
+       "cloud": 4.05,
+       "rain": 0.0,
+       "wind_kmh": 6.42
+      }
+     }
+    }
+   },
+   {
+    "f": 28,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1029.413,
+      "temp": 14.526,
+      "cloud": 99.9878,
+      "u": -4.471,
+      "v": 1.256,
+      "rain": 0.0,
+      "wind_kmh": 16.72,
+      "wind_from_deg": 105.7,
+      "grid": {
+       "temp": 14.554,
+       "pres": 1029.328,
+       "cloud": 99.47,
+       "rain": 0.0,
+       "wind_kmh": 18.79
+      }
+     },
+     "Miami": {
+      "pres": 1018.27,
+      "temp": 27.885,
+      "cloud": 20.0427,
+      "u": -7.731,
+      "v": -1.216,
+      "rain": 0.9331,
+      "wind_kmh": 28.17,
+      "wind_from_deg": 81.1,
+      "grid": {
+       "temp": 27.841,
+       "pres": 1018.243,
+       "cloud": 26.76,
+       "rain": 0.403,
+       "wind_kmh": 26.76
+      }
+     },
+     "Denver": {
+      "pres": 1011.586,
+      "temp": 12.894,
+      "cloud": 97.017,
+      "u": 0.144,
+      "v": -1.958,
+      "rain": 0.0,
+      "wind_kmh": 7.07,
+      "wind_from_deg": 355.8,
+      "grid": {
+       "temp": 12.379,
+       "pres": 1011.649,
+       "cloud": 75.86,
+       "rain": 0.0,
+       "wind_kmh": 7.44
+      }
+     },
+     "London": {
+      "pres": 1030.625,
+      "temp": 13.85,
+      "cloud": 79.0749,
+      "u": -2.086,
+      "v": -0.254,
+      "rain": 0.0,
+      "wind_kmh": 7.57,
+      "wind_from_deg": 83.1,
+      "grid": {
+       "temp": 13.674,
+       "pres": 1030.646,
+       "cloud": 78.85,
+       "rain": 0.0,
+       "wind_kmh": 8.55
+      }
+     },
+     "Delhi": {
+      "pres": 1017.026,
+      "temp": 26.277,
+      "cloud": 4.9059,
+      "u": -1.28,
+      "v": 0.784,
+      "rain": 0.0,
+      "wind_kmh": 5.4,
+      "wind_from_deg": 121.5,
+      "grid": {
+       "temp": 25.07,
+       "pres": 1017.102,
+       "cloud": 3.79,
+       "rain": 0.0,
+       "wind_kmh": 6.03
+      }
+     }
+    }
+   },
+   {
+    "f": 29,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.72,
+      "temp": 16.256,
+      "cloud": 98.2912,
+      "u": -4.494,
+      "v": 1.362,
+      "rain": 0.0,
+      "wind_kmh": 16.91,
+      "wind_from_deg": 106.9,
+      "grid": {
+       "temp": 16.292,
+       "pres": 1028.668,
+       "cloud": 99.07,
+       "rain": 0.0,
+       "wind_kmh": 18.98
+      }
+     },
+     "Miami": {
+      "pres": 1017.746,
+      "temp": 28.138,
+      "cloud": 26.3256,
+      "u": -7.846,
+      "v": -1.193,
+      "rain": 0.5761,
+      "wind_kmh": 28.57,
+      "wind_from_deg": 81.4,
+      "grid": {
+       "temp": 27.983,
+       "pres": 1017.709,
+       "cloud": 31.66,
+       "rain": 0.2846,
+       "wind_kmh": 26.17
+      }
+     },
+     "Denver": {
+      "pres": 1011.026,
+      "temp": 14.132,
+      "cloud": 86.8122,
+      "u": -0.201,
+      "v": -2.16,
+      "rain": 0.0,
+      "wind_kmh": 7.81,
+      "wind_from_deg": 5.3,
+      "grid": {
+       "temp": 14.126,
+       "pres": 1010.799,
+       "cloud": 82.06,
+       "rain": 0.0,
+       "wind_kmh": 8.03
+      }
+     },
+     "London": {
+      "pres": 1031.066,
+      "temp": 12.638,
+      "cloud": 91.0448,
+      "u": -1.945,
+      "v": -0.32,
+      "rain": 0.0,
+      "wind_kmh": 7.1,
+      "wind_from_deg": 80.7,
+      "grid": {
+       "temp": 12.469,
+       "pres": 1031.07,
+       "cloud": 79.86,
+       "rain": 0.0,
+       "wind_kmh": 7.84
+      }
+     },
+     "Delhi": {
+      "pres": 1016.882,
+      "temp": 25.701,
+      "cloud": 0.0,
+      "u": -0.734,
+      "v": 1.423,
+      "rain": 0.0,
+      "wind_kmh": 5.76,
+      "wind_from_deg": 152.7,
+      "grid": {
+       "temp": 24.351,
+       "pres": 1017.001,
+       "cloud": 1.04,
+       "rain": 0.0,
+       "wind_kmh": 7.07
+      }
+     }
+    }
+   },
+   {
+    "f": 30,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.713,
+      "temp": 17.587,
+      "cloud": 100.0,
+      "u": -4.234,
+      "v": 1.492,
+      "rain": 0.0,
+      "wind_kmh": 16.16,
+      "wind_from_deg": 109.4,
+      "grid": {
+       "temp": 17.45,
+       "pres": 1027.712,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 18.37
+      }
+     },
+     "Miami": {
+      "pres": 1017.012,
+      "temp": 28.156,
+      "cloud": 54.2195,
+      "u": -7.69,
+      "v": -1.193,
+      "rain": 0.6099,
+      "wind_kmh": 28.02,
+      "wind_from_deg": 81.2,
+      "grid": {
+       "temp": 27.926,
+       "pres": 1016.957,
+       "cloud": 62.11,
+       "rain": 0.4029,
+       "wind_kmh": 25.77
+      }
+     },
+     "Denver": {
+      "pres": 1010.611,
+      "temp": 15.415,
+      "cloud": 52.6528,
+      "u": -0.229,
+      "v": -2.39,
+      "rain": 0.0,
+      "wind_kmh": 8.64,
+      "wind_from_deg": 5.5,
+      "grid": {
+       "temp": 15.49,
+       "pres": 1010.343,
+       "cloud": 69.14,
+       "rain": 0.0,
+       "wind_kmh": 8.62
+      }
+     },
+     "London": {
+      "pres": 1031.453,
+      "temp": 12.055,
+      "cloud": 48.6645,
+      "u": -1.68,
+      "v": -0.353,
+      "rain": 0.0,
+      "wind_kmh": 6.18,
+      "wind_from_deg": 78.1,
+      "grid": {
+       "temp": 11.915,
+       "pres": 1031.45,
+       "cloud": 56.63,
+       "rain": 0.0,
+       "wind_kmh": 7.32
+      }
+     },
+     "Delhi": {
+      "pres": 1016.419,
+      "temp": 25.123,
+      "cloud": 0.1848,
+      "u": -0.271,
+      "v": 1.939,
+      "rain": 0.0,
+      "wind_kmh": 7.05,
+      "wind_from_deg": 172.0,
+      "grid": {
+       "temp": 23.718,
+       "pres": 1016.53,
+       "cloud": 0.45,
+       "rain": 0.0,
+       "wind_kmh": 7.59
+      }
+     }
+    }
+   },
+   {
+    "f": 31,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.906,
+      "temp": 18.281,
+      "cloud": 100.0,
+      "u": -4.433,
+      "v": 1.471,
+      "rain": 0.0,
+      "wind_kmh": 16.81,
+      "wind_from_deg": 108.4,
+      "grid": {
+       "temp": 17.964,
+       "pres": 1026.939,
+       "cloud": 99.99,
+       "rain": 0.0,
+       "wind_kmh": 18.79
+      }
+     },
+     "Miami": {
+      "pres": 1016.648,
+      "temp": 28.053,
+      "cloud": 88.5506,
+      "u": -7.409,
+      "v": -1.695,
+      "rain": 0.7018,
+      "wind_kmh": 27.36,
+      "wind_from_deg": 77.1,
+      "grid": {
+       "temp": 27.89,
+       "pres": 1016.544,
+       "cloud": 84.76,
+       "rain": 0.4958,
+       "wind_kmh": 25.45
+      }
+     },
+     "Denver": {
+      "pres": 1009.857,
+      "temp": 16.426,
+      "cloud": 7.1517,
+      "u": -0.225,
+      "v": -2.918,
+      "rain": 0.0,
+      "wind_kmh": 10.54,
+      "wind_from_deg": 4.4,
+      "grid": {
+       "temp": 16.296,
+       "pres": 1009.737,
+       "cloud": 25.35,
+       "rain": 0.0,
+       "wind_kmh": 10.45
+      }
+     },
+     "London": {
+      "pres": 1031.689,
+      "temp": 11.526,
+      "cloud": 92.6254,
+      "u": -1.483,
+      "v": -0.427,
+      "rain": 0.0,
+      "wind_kmh": 5.56,
+      "wind_from_deg": 73.9,
+      "grid": {
+       "temp": 11.413,
+       "pres": 1031.674,
+       "cloud": 82.36,
+       "rain": 0.0,
+       "wind_kmh": 6.96
+      }
+     },
+     "Delhi": {
+      "pres": 1016.08,
+      "temp": 24.711,
+      "cloud": 3.4723,
+      "u": 0.041,
+      "v": 2.108,
+      "rain": 0.0,
+      "wind_kmh": 7.59,
+      "wind_from_deg": 181.1,
+      "grid": {
+       "temp": 23.268,
+       "pres": 1016.218,
+       "cloud": 2.35,
+       "rain": 0.0,
+       "wind_kmh": 7.33
+      }
+     }
+    }
+   },
+   {
+    "f": 32,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.721,
+      "temp": 18.332,
+      "cloud": 100.0,
+      "u": -4.255,
+      "v": 0.942,
+      "rain": 0.0,
+      "wind_kmh": 15.69,
+      "wind_from_deg": 102.5,
+      "grid": {
+       "temp": 18.025,
+       "pres": 1026.762,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 17.72
+      }
+     },
+     "Miami": {
+      "pres": 1016.297,
+      "temp": 27.929,
+      "cloud": 99.881,
+      "u": -7.299,
+      "v": -1.809,
+      "rain": 0.6845,
+      "wind_kmh": 27.07,
+      "wind_from_deg": 76.1,
+      "grid": {
+       "temp": 27.849,
+       "pres": 1016.246,
+       "cloud": 97.0,
+       "rain": 0.5121,
+       "wind_kmh": 25.39
+      }
+     },
+     "Denver": {
+      "pres": 1009.097,
+      "temp": 17.223,
+      "cloud": 5.288,
+      "u": -0.368,
+      "v": -3.494,
+      "rain": 0.0,
+      "wind_kmh": 12.65,
+      "wind_from_deg": 6.0,
+      "grid": {
+       "temp": 17.076,
+       "pres": 1009.06,
+       "cloud": 16.74,
+       "rain": 0.0,
+       "wind_kmh": 12.5
+      }
+     },
+     "London": {
+      "pres": 1031.857,
+      "temp": 11.221,
+      "cloud": 73.9083,
+      "u": -1.516,
+      "v": -0.284,
+      "rain": 0.0,
+      "wind_kmh": 5.55,
+      "wind_from_deg": 79.4,
+      "grid": {
+       "temp": 11.081,
+       "pres": 1031.863,
+       "cloud": 70.33,
+       "rain": 0.0,
+       "wind_kmh": 6.46
+      }
+     },
+     "Delhi": {
+      "pres": 1015.793,
+      "temp": 24.427,
+      "cloud": 4.4792,
+      "u": 0.329,
+      "v": 1.94,
+      "rain": 0.0,
+      "wind_kmh": 7.08,
+      "wind_from_deg": 189.6,
+      "grid": {
+       "temp": 22.967,
+       "pres": 1015.933,
+       "cloud": 3.12,
+       "rain": 0.0,
+       "wind_kmh": 7.56
+      }
+     }
+    }
+   },
+   {
+    "f": 33,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.714,
+      "temp": 17.637,
+      "cloud": 100.0,
+      "u": -3.898,
+      "v": 1.082,
+      "rain": 0.0,
+      "wind_kmh": 14.56,
+      "wind_from_deg": 105.5,
+      "grid": {
+       "temp": 17.235,
+       "pres": 1026.714,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 15.5
+      }
+     },
+     "Miami": {
+      "pres": 1016.294,
+      "temp": 27.62,
+      "cloud": 100.0,
+      "u": -7.292,
+      "v": -1.739,
+      "rain": 0.764,
+      "wind_kmh": 26.99,
+      "wind_from_deg": 76.6,
+      "grid": {
+       "temp": 27.629,
+       "pres": 1016.268,
+       "cloud": 99.64,
+       "rain": 0.5398,
+       "wind_kmh": 25.23
+      }
+     },
+     "Denver": {
+      "pres": 1009.459,
+      "temp": 17.738,
+      "cloud": 44.1619,
+      "u": -0.004,
+      "v": -3.798,
+      "rain": 0.0,
+      "wind_kmh": 13.67,
+      "wind_from_deg": 0.1,
+      "grid": {
+       "temp": 17.495,
+       "pres": 1009.451,
+       "cloud": 38.9,
+       "rain": 0.0,
+       "wind_kmh": 13.4
+      }
+     },
+     "London": {
+      "pres": 1032.146,
+      "temp": 10.944,
+      "cloud": 71.4434,
+      "u": -1.22,
+      "v": -0.464,
+      "rain": 0.0,
+      "wind_kmh": 4.7,
+      "wind_from_deg": 69.2,
+      "grid": {
+       "temp": 10.78,
+       "pres": 1032.14,
+       "cloud": 62.34,
+       "rain": 0.0,
+       "wind_kmh": 5.28
+      }
+     },
+     "Delhi": {
+      "pres": 1015.44,
+      "temp": 24.155,
+      "cloud": 2.0936,
+      "u": 0.479,
+      "v": 1.166,
+      "rain": 0.0,
+      "wind_kmh": 4.54,
+      "wind_from_deg": 202.3,
+      "grid": {
+       "temp": 22.71,
+       "pres": 1015.56,
+       "cloud": 1.9,
+       "rain": 0.0,
+       "wind_kmh": 6.1
+      }
+     }
+    }
+   },
+   {
+    "f": 34,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.951,
+      "temp": 16.1,
+      "cloud": 100.0,
+      "u": -3.194,
+      "v": 1.086,
+      "rain": 0.0,
+      "wind_kmh": 12.14,
+      "wind_from_deg": 108.8,
+      "grid": {
+       "temp": 15.615,
+       "pres": 1026.987,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 12.5
+      }
+     },
+     "Miami": {
+      "pres": 1016.644,
+      "temp": 27.346,
+      "cloud": 100.0,
+      "u": -7.572,
+      "v": -1.93,
+      "rain": 0.7964,
+      "wind_kmh": 28.13,
+      "wind_from_deg": 75.7,
+      "grid": {
+       "temp": 27.165,
+       "pres": 1016.632,
+       "cloud": 99.75,
+       "rain": 0.5976,
+       "wind_kmh": 25.85
+      }
+     },
+     "Denver": {
+      "pres": 1009.841,
+      "temp": 17.777,
+      "cloud": 36.2414,
+      "u": -0.406,
+      "v": -4.102,
+      "rain": 0.0,
+      "wind_kmh": 14.84,
+      "wind_from_deg": 5.7,
+      "grid": {
+       "temp": 17.004,
+       "pres": 1010.133,
+       "cloud": 39.8,
+       "rain": 0.004,
+       "wind_kmh": 14.62
+      }
+     },
+     "London": {
+      "pres": 1032.313,
+      "temp": 10.659,
+      "cloud": 59.0826,
+      "u": -1.196,
+      "v": -0.469,
+      "rain": 0.0,
+      "wind_kmh": 4.62,
+      "wind_from_deg": 68.6,
+      "grid": {
+       "temp": 10.526,
+       "pres": 1032.314,
+       "cloud": 53.65,
+       "rain": 0.0,
+       "wind_kmh": 4.88
+      }
+     },
+     "Delhi": {
+      "pres": 1015.142,
+      "temp": 23.929,
+      "cloud": 4.2493,
+      "u": 0.503,
+      "v": 0.761,
+      "rain": 0.0,
+      "wind_kmh": 3.28,
+      "wind_from_deg": 213.5,
+      "grid": {
+       "temp": 22.487,
+       "pres": 1015.218,
+       "cloud": 3.58,
+       "rain": 0.0,
+       "wind_kmh": 4.18
+      }
+     }
+    }
+   },
+   {
+    "f": 35,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.628,
+      "temp": 15.316,
+      "cloud": 100.0,
+      "u": -3.075,
+      "v": 1.016,
+      "rain": 0.0,
+      "wind_kmh": 11.66,
+      "wind_from_deg": 108.3,
+      "grid": {
+       "temp": 14.568,
+       "pres": 1027.687,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 12.08
+      }
+     },
+     "Miami": {
+      "pres": 1017.202,
+      "temp": 26.997,
+      "cloud": 100.0,
+      "u": -8.035,
+      "v": -1.635,
+      "rain": 1.0505,
+      "wind_kmh": 29.52,
+      "wind_from_deg": 78.5,
+      "grid": {
+       "temp": 26.734,
+       "pres": 1017.172,
+       "cloud": 99.21,
+       "rain": 0.5804,
+       "wind_kmh": 26.84
+      }
+     },
+     "Denver": {
+      "pres": 1010.184,
+      "temp": 17.277,
+      "cloud": 8.7566,
+      "u": -0.669,
+      "v": -4.119,
+      "rain": 0.0024,
+      "wind_kmh": 15.02,
+      "wind_from_deg": 9.2,
+      "grid": {
+       "temp": 16.216,
+       "pres": 1010.517,
+       "cloud": 25.07,
+       "rain": 0.014,
+       "wind_kmh": 15.0
+      }
+     },
+     "London": {
+      "pres": 1032.326,
+      "temp": 10.412,
+      "cloud": 5.599,
+      "u": -0.7,
+      "v": -0.822,
+      "rain": 0.0,
+      "wind_kmh": 3.89,
+      "wind_from_deg": 40.4,
+      "grid": {
+       "temp": 10.282,
+       "pres": 1032.318,
+       "cloud": 10.43,
+       "rain": 0.0,
+       "wind_kmh": 4.22
+      }
+     },
+     "Delhi": {
+      "pres": 1015.032,
+      "temp": 23.841,
+      "cloud": 4.0043,
+      "u": 0.773,
+      "v": 0.694,
+      "rain": 0.0,
+      "wind_kmh": 3.74,
+      "wind_from_deg": 228.1,
+      "grid": {
+       "temp": 22.324,
+       "pres": 1015.143,
+       "cloud": 3.86,
+       "rain": 0.0,
+       "wind_kmh": 3.64
+      }
+     }
+    }
+   },
+   {
+    "f": 36,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1028.199,
+      "temp": 14.899,
+      "cloud": 100.0,
+      "u": -3.143,
+      "v": 1.075,
+      "rain": 0.0,
+      "wind_kmh": 11.96,
+      "wind_from_deg": 108.9,
+      "grid": {
+       "temp": 14.064,
+       "pres": 1028.238,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 12.04
+      }
+     },
+     "Miami": {
+      "pres": 1017.779,
+      "temp": 26.947,
+      "cloud": 100.0,
+      "u": -8.178,
+      "v": -1.631,
+      "rain": 1.3286,
+      "wind_kmh": 30.02,
+      "wind_from_deg": 78.7,
+      "grid": {
+       "temp": 26.648,
+       "pres": 1017.789,
+       "cloud": 97.9,
+       "rain": 0.6114,
+       "wind_kmh": 27.15
+      }
+     },
+     "Denver": {
+      "pres": 1011.086,
+      "temp": 16.158,
+      "cloud": 5.192,
+      "u": -0.797,
+      "v": -3.11,
+      "rain": 0.0,
+      "wind_kmh": 11.56,
+      "wind_from_deg": 14.4,
+      "grid": {
+       "temp": 12.956,
+       "pres": 1011.802,
+       "cloud": 14.12,
+       "rain": 0.0,
+       "wind_kmh": 11.63
+      }
+     },
+     "London": {
+      "pres": 1032.287,
+      "temp": 10.202,
+      "cloud": 5.0,
+      "u": -0.71,
+      "v": -0.874,
+      "rain": 0.0,
+      "wind_kmh": 4.05,
+      "wind_from_deg": 39.1,
+      "grid": {
+       "temp": 10.063,
+       "pres": 1032.299,
+       "cloud": 5.0,
+       "rain": 0.0,
+       "wind_kmh": 4.31
+      }
+     },
+     "Delhi": {
+      "pres": 1015.231,
+      "temp": 23.752,
+      "cloud": 21.8811,
+      "u": 1.102,
+      "v": 0.584,
+      "rain": 0.0,
+      "wind_kmh": 4.49,
+      "wind_from_deg": 242.1,
+      "grid": {
+       "temp": 22.186,
+       "pres": 1015.381,
+       "cloud": 12.13,
+       "rain": 0.0,
+       "wind_kmh": 4.16
+      }
+     }
+    }
+   },
+   {
+    "f": 37,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.988,
+      "temp": 14.597,
+      "cloud": 100.0,
+      "u": -3.837,
+      "v": 0.472,
+      "rain": 0.0,
+      "wind_kmh": 13.92,
+      "wind_from_deg": 97.0,
+      "grid": {
+       "temp": 13.753,
+       "pres": 1028.103,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 14.24
+      }
+     },
+     "Miami": {
+      "pres": 1018.072,
+      "temp": 26.932,
+      "cloud": 100.0,
+      "u": -8.376,
+      "v": -1.545,
+      "rain": 1.0554,
+      "wind_kmh": 30.66,
+      "wind_from_deg": 79.5,
+      "grid": {
+       "temp": 26.641,
+       "pres": 1018.099,
+       "cloud": 99.14,
+       "rain": 0.5248,
+       "wind_kmh": 28.84
+      }
+     },
+     "Denver": {
+      "pres": 1012.795,
+      "temp": 15.236,
+      "cloud": 23.5611,
+      "u": -0.569,
+      "v": -2.62,
+      "rain": 0.0,
+      "wind_kmh": 9.65,
+      "wind_from_deg": 12.3,
+      "grid": {
+       "temp": 11.189,
+       "pres": 1013.515,
+       "cloud": 58.58,
+       "rain": 0.0,
+       "wind_kmh": 9.77
+      }
+     },
+     "London": {
+      "pres": 1032.222,
+      "temp": 10.003,
+      "cloud": 5.0,
+      "u": -0.549,
+      "v": -0.973,
+      "rain": 0.0,
+      "wind_kmh": 4.02,
+      "wind_from_deg": 29.4,
+      "grid": {
+       "temp": 9.858,
+       "pres": 1032.229,
+       "cloud": 4.99,
+       "rain": 0.0,
+       "wind_kmh": 4.86
+      }
+     },
+     "Delhi": {
+      "pres": 1015.59,
+      "temp": 23.622,
+      "cloud": 35.2202,
+      "u": 1.299,
+      "v": 0.254,
+      "rain": 0.0,
+      "wind_kmh": 4.76,
+      "wind_from_deg": 258.9,
+      "grid": {
+       "temp": 22.045,
+       "pres": 1015.725,
+       "cloud": 31.03,
+       "rain": 0.0,
+       "wind_kmh": 5.0
+      }
+     }
+    }
+   },
+   {
+    "f": 38,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.699,
+      "temp": 14.448,
+      "cloud": 100.0,
+      "u": -3.798,
+      "v": 1.395,
+      "rain": 0.0,
+      "wind_kmh": 14.57,
+      "wind_from_deg": 110.2,
+      "grid": {
+       "temp": 13.564,
+       "pres": 1027.821,
+       "cloud": 99.99,
+       "rain": 0.0,
+       "wind_kmh": 15.71
+      }
+     },
+     "Miami": {
+      "pres": 1018.341,
+      "temp": 26.915,
+      "cloud": 100.0,
+      "u": -8.289,
+      "v": -0.991,
+      "rain": 0.3694,
+      "wind_kmh": 30.05,
+      "wind_from_deg": 83.2,
+      "grid": {
+       "temp": 26.647,
+       "pres": 1018.352,
+       "cloud": 99.38,
+       "rain": 0.2649,
+       "wind_kmh": 29.41
+      }
+     },
+     "Denver": {
+      "pres": 1013.697,
+      "temp": 14.082,
+      "cloud": 74.6354,
+      "u": -1.1,
+      "v": -1.516,
+      "rain": 0.0,
+      "wind_kmh": 6.74,
+      "wind_from_deg": 36.0,
+      "grid": {
+       "temp": 10.37,
+       "pres": 1014.001,
+       "cloud": 84.91,
+       "rain": 0.0,
+       "wind_kmh": 6.99
+      }
+     },
+     "London": {
+      "pres": 1032.224,
+      "temp": 9.8,
+      "cloud": 4.9773,
+      "u": -0.188,
+      "v": -1.239,
+      "rain": 0.0,
+      "wind_kmh": 4.51,
+      "wind_from_deg": 8.6,
+      "grid": {
+       "temp": 9.641,
+       "pres": 1032.223,
+       "cloud": 4.86,
+       "rain": 0.0,
+       "wind_kmh": 5.9
+      }
+     },
+     "Delhi": {
+      "pres": 1016.07,
+      "temp": 24.034,
+      "cloud": 54.7354,
+      "u": 1.252,
+      "v": -0.241,
+      "rain": 0.0,
+      "wind_kmh": 4.59,
+      "wind_from_deg": 280.9,
+      "grid": {
+       "temp": 22.77,
+       "pres": 1016.176,
+       "cloud": 40.96,
+       "rain": 0.0,
+       "wind_kmh": 5.11
+      }
+     }
+    }
+   },
+   {
+    "f": 39,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.764,
+      "temp": 14.184,
+      "cloud": 100.0,
+      "u": -3.152,
+      "v": 1.786,
+      "rain": 0.0,
+      "wind_kmh": 13.04,
+      "wind_from_deg": 119.5,
+      "grid": {
+       "temp": 13.42,
+       "pres": 1027.825,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 14.05
+      }
+     },
+     "Miami": {
+      "pres": 1018.177,
+      "temp": 26.788,
+      "cloud": 100.0,
+      "u": -8.505,
+      "v": -0.563,
+      "rain": 0.4643,
+      "wind_kmh": 30.69,
+      "wind_from_deg": 86.2,
+      "grid": {
+       "temp": 26.638,
+       "pres": 1018.179,
+       "cloud": 99.65,
+       "rain": 0.1644,
+       "wind_kmh": 29.36
+      }
+     },
+     "Denver": {
+      "pres": 1014.271,
+      "temp": 13.57,
+      "cloud": 67.0851,
+      "u": -0.804,
+      "v": -0.407,
+      "rain": 0.0,
+      "wind_kmh": 3.24,
+      "wind_from_deg": 63.2,
+      "grid": {
+       "temp": 9.939,
+       "pres": 1014.517,
+       "cloud": 76.83,
+       "rain": 0.0,
+       "wind_kmh": 3.49
+      }
+     },
+     "London": {
+      "pres": 1032.018,
+      "temp": 9.589,
+      "cloud": 3.1883,
+      "u": -0.246,
+      "v": -1.185,
+      "rain": 0.0,
+      "wind_kmh": 4.36,
+      "wind_from_deg": 11.7,
+      "grid": {
+       "temp": 9.427,
+       "pres": 1032.04,
+       "cloud": 3.95,
+       "rain": 0.0,
+       "wind_kmh": 6.45
+      }
+     },
+     "Delhi": {
+      "pres": 1016.54,
+      "temp": 25.194,
+      "cloud": 47.4805,
+      "u": 1.206,
+      "v": -0.823,
+      "rain": 0.0,
+      "wind_kmh": 5.26,
+      "wind_from_deg": 304.3,
+      "grid": {
+       "temp": 24.395,
+       "pres": 1016.605,
+       "cloud": 23.8,
+       "rain": 0.0,
+       "wind_kmh": 5.49
+      }
+     }
+    }
+   },
+   {
+    "f": 40,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.726,
+      "temp": 13.887,
+      "cloud": 100.0,
+      "u": -2.52,
+      "v": 1.551,
+      "rain": 0.0,
+      "wind_kmh": 10.65,
+      "wind_from_deg": 121.6,
+      "grid": {
+       "temp": 13.125,
+       "pres": 1027.762,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 11.76
+      }
+     },
+     "Miami": {
+      "pres": 1017.804,
+      "temp": 26.696,
+      "cloud": 100.0,
+      "u": -8.572,
+      "v": -0.482,
+      "rain": 0.3699,
+      "wind_kmh": 30.91,
+      "wind_from_deg": 86.8,
+      "grid": {
+       "temp": 26.558,
+       "pres": 1017.833,
+       "cloud": 98.12,
+       "rain": 0.1483,
+       "wind_kmh": 28.66
+      }
+     },
+     "Denver": {
+      "pres": 1014.845,
+      "temp": 13.351,
+      "cloud": 94.7328,
+      "u": -0.225,
+      "v": 0.037,
+      "rain": 0.0,
+      "wind_kmh": 0.82,
+      "wind_from_deg": 99.3,
+      "grid": {
+       "temp": 9.574,
+       "pres": 1015.115,
+       "cloud": 88.25,
+       "rain": 0.0,
+       "wind_kmh": 1.07
+      }
+     },
+     "London": {
+      "pres": 1032.212,
+      "temp": 9.392,
+      "cloud": 0.119,
+      "u": -0.035,
+      "v": -1.38,
+      "rain": 0.0,
+      "wind_kmh": 4.97,
+      "wind_from_deg": 1.5,
+      "grid": {
+       "temp": 9.222,
+       "pres": 1032.214,
+       "cloud": 1.04,
+       "rain": 0.0,
+       "wind_kmh": 7.17
+      }
+     },
+     "Delhi": {
+      "pres": 1016.78,
+      "temp": 26.605,
+      "cloud": 8.7472,
+      "u": 1.028,
+      "v": -1.095,
+      "rain": 0.0,
+      "wind_kmh": 5.41,
+      "wind_from_deg": 316.8,
+      "grid": {
+       "temp": 26.206,
+       "pres": 1016.833,
+       "cloud": 13.13,
+       "rain": 0.0,
+       "wind_kmh": 5.59
+      }
+     }
+    }
+   },
+   {
+    "f": 41,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.438,
+      "temp": 13.624,
+      "cloud": 100.0,
+      "u": -2.401,
+      "v": 1.194,
+      "rain": 0.0,
+      "wind_kmh": 9.65,
+      "wind_from_deg": 116.4,
+      "grid": {
+       "temp": 12.931,
+       "pres": 1027.54,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 11.13
+      }
+     },
+     "Miami": {
+      "pres": 1017.706,
+      "temp": 26.585,
+      "cloud": 100.0,
+      "u": -8.464,
+      "v": -0.266,
+      "rain": 0.5273,
+      "wind_kmh": 30.49,
+      "wind_from_deg": 88.2,
+      "grid": {
+       "temp": 26.412,
+       "pres": 1017.651,
+       "cloud": 99.94,
+       "rain": 0.2737,
+       "wind_kmh": 28.39
+      }
+     },
+     "Denver": {
+      "pres": 1014.375,
+      "temp": 13.095,
+      "cloud": 98.4333,
+      "u": -0.936,
+      "v": 0.082,
+      "rain": 0.0,
+      "wind_kmh": 3.38,
+      "wind_from_deg": 95.0,
+      "grid": {
+       "temp": 9.173,
+       "pres": 1014.839,
+       "cloud": 94.74,
+       "rain": 0.0,
+       "wind_kmh": 3.72
+      }
+     },
+     "London": {
+      "pres": 1032.206,
+      "temp": 9.178,
+      "cloud": 0.9296,
+      "u": -0.165,
+      "v": -1.304,
+      "rain": 0.0,
+      "wind_kmh": 4.73,
+      "wind_from_deg": 7.2,
+      "grid": {
+       "temp": 9.004,
+       "pres": 1032.211,
+       "cloud": 2.91,
+       "rain": 0.0,
+       "wind_kmh": 7.04
+      }
+     },
+     "Delhi": {
+      "pres": 1016.528,
+      "temp": 28.075,
+      "cloud": 20.5853,
+      "u": 1.154,
+      "v": -1.019,
+      "rain": 0.0,
+      "wind_kmh": 5.54,
+      "wind_from_deg": 311.4,
+      "grid": {
+       "temp": 27.868,
+       "pres": 1016.55,
+       "cloud": 12.83,
+       "rain": 0.0,
+       "wind_kmh": 6.05
+      }
+     }
+    }
+   },
+   {
+    "f": 42,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.287,
+      "temp": 13.499,
+      "cloud": 100.0,
+      "u": -2.3,
+      "v": 0.753,
+      "rain": 0.0,
+      "wind_kmh": 8.71,
+      "wind_from_deg": 108.1,
+      "grid": {
+       "temp": 12.842,
+       "pres": 1027.337,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 10.74
+      }
+     },
+     "Miami": {
+      "pres": 1017.659,
+      "temp": 26.491,
+      "cloud": 99.7781,
+      "u": -8.364,
+      "v": -0.229,
+      "rain": 0.4605,
+      "wind_kmh": 30.12,
+      "wind_from_deg": 88.4,
+      "grid": {
+       "temp": 26.273,
+       "pres": 1017.661,
+       "cloud": 99.55,
+       "rain": 0.3626,
+       "wind_kmh": 28.03
+      }
+     },
+     "Denver": {
+      "pres": 1014.389,
+      "temp": 12.823,
+      "cloud": 99.1706,
+      "u": -0.165,
+      "v": 0.451,
+      "rain": 0.0,
+      "wind_kmh": 1.73,
+      "wind_from_deg": 159.9,
+      "grid": {
+       "temp": 9.122,
+       "pres": 1015.133,
+       "cloud": 90.09,
+       "rain": 0.0,
+       "wind_kmh": 1.69
+      }
+     },
+     "London": {
+      "pres": 1032.107,
+      "temp": 8.983,
+      "cloud": 5.0,
+      "u": -0.023,
+      "v": -1.343,
+      "rain": 0.0,
+      "wind_kmh": 4.84,
+      "wind_from_deg": 1.0,
+      "grid": {
+       "temp": 8.8,
+       "pres": 1032.122,
+       "cloud": 4.95,
+       "rain": 0.0,
+       "wind_kmh": 8.26
+      }
+     },
+     "Delhi": {
+      "pres": 1015.628,
+      "temp": 29.321,
+      "cloud": 1.68,
+      "u": 1.186,
+      "v": -1.364,
+      "rain": 0.0,
+      "wind_kmh": 6.51,
+      "wind_from_deg": 319.0,
+      "grid": {
+       "temp": 29.17,
+       "pres": 1015.633,
+       "cloud": 8.53,
+       "rain": 0.0,
+       "wind_kmh": 7.11
+      }
+     }
+    }
+   },
+   {
+    "f": 43,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.268,
+      "temp": 13.35,
+      "cloud": 100.0,
+      "u": -1.974,
+      "v": 0.697,
+      "rain": 0.0,
+      "wind_kmh": 7.54,
+      "wind_from_deg": 109.4,
+      "grid": {
+       "temp": 12.745,
+       "pres": 1027.338,
+       "cloud": 99.99,
+       "rain": 0.0,
+       "wind_kmh": 10.6
+      }
+     },
+     "Miami": {
+      "pres": 1017.345,
+      "temp": 26.374,
+      "cloud": 100.0,
+      "u": -8.217,
+      "v": -0.086,
+      "rain": 0.5904,
+      "wind_kmh": 29.58,
+      "wind_from_deg": 89.4,
+      "grid": {
+       "temp": 26.17,
+       "pres": 1017.357,
+       "cloud": 100.0,
+       "rain": 0.4336,
+       "wind_kmh": 27.23
+      }
+     },
+     "Denver": {
+      "pres": 1013.556,
+      "temp": 12.694,
+      "cloud": 100.0,
+      "u": -0.814,
+      "v": 0.479,
+      "rain": 0.0,
+      "wind_kmh": 3.4,
+      "wind_from_deg": 120.5,
+      "grid": {
+       "temp": 8.842,
+       "pres": 1014.592,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 3.35
+      }
+     },
+     "London": {
+      "pres": 1032.416,
+      "temp": 8.726,
+      "cloud": 5.0,
+      "u": 0.002,
+      "v": -1.512,
+      "rain": 0.0,
+      "wind_kmh": 5.44,
+      "wind_from_deg": 359.9,
+      "grid": {
+       "temp": 8.561,
+       "pres": 1032.425,
+       "cloud": 5.0,
+       "rain": 0.0,
+       "wind_kmh": 8.45
+      }
+     },
+     "Delhi": {
+      "pres": 1014.648,
+      "temp": 30.273,
+      "cloud": 1.195,
+      "u": 1.278,
+      "v": -1.791,
+      "rain": 0.0,
+      "wind_kmh": 7.92,
+      "wind_from_deg": 324.5,
+      "grid": {
+       "temp": 30.132,
+       "pres": 1014.633,
+       "cloud": 2.49,
+       "rain": 0.0,
+       "wind_kmh": 8.55
+      }
+     }
+    }
+   },
+   {
+    "f": 44,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.358,
+      "temp": 13.446,
+      "cloud": 100.0,
+      "u": -1.777,
+      "v": 1.054,
+      "rain": 0.0,
+      "wind_kmh": 7.44,
+      "wind_from_deg": 120.7,
+      "grid": {
+       "temp": 12.722,
+       "pres": 1027.288,
+       "cloud": 99.99,
+       "rain": 0.0,
+       "wind_kmh": 7.99
+      }
+     },
+     "Miami": {
+      "pres": 1017.112,
+      "temp": 26.256,
+      "cloud": 100.0,
+      "u": -8.205,
+      "v": 0.092,
+      "rain": 0.8079,
+      "wind_kmh": 29.54,
+      "wind_from_deg": 90.6,
+      "grid": {
+       "temp": 26.094,
+       "pres": 1017.137,
+       "cloud": 100.0,
+       "rain": 0.4932,
+       "wind_kmh": 26.7
+      }
+     },
+     "Denver": {
+      "pres": 1014.12,
+      "temp": 12.598,
+      "cloud": 100.0,
+      "u": -0.862,
+      "v": 0.293,
+      "rain": 0.0,
+      "wind_kmh": 3.28,
+      "wind_from_deg": 108.8,
+      "grid": {
+       "temp": 9.02,
+       "pres": 1015.092,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 3.46
+      }
+     },
+     "London": {
+      "pres": 1032.687,
+      "temp": 9.166,
+      "cloud": 5.0,
+      "u": -0.097,
+      "v": -1.285,
+      "rain": 0.0,
+      "wind_kmh": 4.64,
+      "wind_from_deg": 4.3,
+      "grid": {
+       "temp": 9.033,
+       "pres": 1032.699,
+       "cloud": 5.0,
+       "rain": 0.0,
+       "wind_kmh": 8.57
+      }
+     },
+     "Delhi": {
+      "pres": 1013.711,
+      "temp": 30.898,
+      "cloud": 2.4139,
+      "u": 1.133,
+      "v": -1.964,
+      "rain": 0.0,
+      "wind_kmh": 8.16,
+      "wind_from_deg": 330.0,
+      "grid": {
+       "temp": 30.766,
+       "pres": 1013.705,
+       "cloud": 3.13,
+       "rain": 0.0,
+       "wind_kmh": 8.69
+      }
+     }
+    }
+   },
+   {
+    "f": 45,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.032,
+      "temp": 13.606,
+      "cloud": 99.977,
+      "u": -2.846,
+      "v": 0.509,
+      "rain": 0.0,
+      "wind_kmh": 10.41,
+      "wind_from_deg": 100.1,
+      "grid": {
+       "temp": 13.08,
+       "pres": 1027.125,
+       "cloud": 99.81,
+       "rain": 0.0,
+       "wind_kmh": 10.67
+      }
+     },
+     "Miami": {
+      "pres": 1017.083,
+      "temp": 26.265,
+      "cloud": 100.0,
+      "u": -8.245,
+      "v": 0.095,
+      "rain": 0.8186,
+      "wind_kmh": 29.68,
+      "wind_from_deg": 90.7,
+      "grid": {
+       "temp": 26.039,
+       "pres": 1017.056,
+       "cloud": 100.0,
+       "rain": 0.5122,
+       "wind_kmh": 26.73
+      }
+     },
+     "Denver": {
+      "pres": 1013.703,
+      "temp": 12.458,
+      "cloud": 100.0,
+      "u": -0.222,
+      "v": 0.508,
+      "rain": 0.0,
+      "wind_kmh": 2.0,
+      "wind_from_deg": 156.4,
+      "grid": {
+       "temp": 9.157,
+       "pres": 1014.568,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 1.8
+      }
+     },
+     "London": {
+      "pres": 1032.789,
+      "temp": 10.328,
+      "cloud": 5.0,
+      "u": -0.084,
+      "v": -2.013,
+      "rain": 0.0,
+      "wind_kmh": 7.25,
+      "wind_from_deg": 2.4,
+      "grid": {
+       "temp": 10.243,
+       "pres": 1032.802,
+       "cloud": 5.0,
+       "rain": 0.0,
+       "wind_kmh": 10.48
+      }
+     },
+     "Delhi": {
+      "pres": 1012.966,
+      "temp": 31.245,
+      "cloud": 2.2982,
+      "u": 0.81,
+      "v": -1.884,
+      "rain": 0.0,
+      "wind_kmh": 7.38,
+      "wind_from_deg": 336.7,
+      "grid": {
+       "temp": 31.046,
+       "pres": 1012.969,
+       "cloud": 2.22,
+       "rain": 0.0,
+       "wind_kmh": 7.58
+      }
+     }
+    }
+   },
+   {
+    "f": 46,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1027.034,
+      "temp": 13.71,
+      "cloud": 100.0,
+      "u": -2.306,
+      "v": 0.937,
+      "rain": 0.0,
+      "wind_kmh": 8.96,
+      "wind_from_deg": 112.1,
+      "grid": {
+       "temp": 13.304,
+       "pres": 1027.042,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 10.61
+      }
+     },
+     "Miami": {
+      "pres": 1017.083,
+      "temp": 26.217,
+      "cloud": 100.0,
+      "u": -8.309,
+      "v": 0.119,
+      "rain": 0.5319,
+      "wind_kmh": 29.92,
+      "wind_from_deg": 90.8,
+      "grid": {
+       "temp": 26.049,
+       "pres": 1017.08,
+       "cloud": 100.0,
+       "rain": 0.5028,
+       "wind_kmh": 27.19
+      }
+     },
+     "Denver": {
+      "pres": 1013.229,
+      "temp": 12.314,
+      "cloud": 100.0,
+      "u": -0.33,
+      "v": -0.106,
+      "rain": 0.0,
+      "wind_kmh": 1.25,
+      "wind_from_deg": 72.2,
+      "grid": {
+       "temp": 8.973,
+       "pres": 1014.036,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 1.6
+      }
+     },
+     "London": {
+      "pres": 1032.863,
+      "temp": 11.514,
+      "cloud": 5.0,
+      "u": -0.22,
+      "v": -2.349,
+      "rain": 0.0,
+      "wind_kmh": 8.49,
+      "wind_from_deg": 5.4,
+      "grid": {
+       "temp": 11.474,
+       "pres": 1032.873,
+       "cloud": 4.99,
+       "rain": 0.0,
+       "wind_kmh": 12.49
+      }
+     },
+     "Delhi": {
+      "pres": 1012.558,
+      "temp": 31.248,
+      "cloud": 3.833,
+      "u": 0.643,
+      "v": -1.692,
+      "rain": 0.0,
+      "wind_kmh": 6.52,
+      "wind_from_deg": 339.2,
+      "grid": {
+       "temp": 31.023,
+       "pres": 1012.565,
+       "cloud": 4.47,
+       "rain": 0.0,
+       "wind_kmh": 6.34
+      }
+     }
+    }
+   },
+   {
+    "f": 47,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.764,
+      "temp": 13.959,
+      "cloud": 100.0,
+      "u": -2.34,
+      "v": 0.682,
+      "rain": 0.0,
+      "wind_kmh": 8.77,
+      "wind_from_deg": 106.2,
+      "grid": {
+       "temp": 13.467,
+       "pres": 1026.82,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 9.33
+      }
+     },
+     "Miami": {
+      "pres": 1017.29,
+      "temp": 26.25,
+      "cloud": 100.0,
+      "u": -8.532,
+      "v": 0.201,
+      "rain": 0.5443,
+      "wind_kmh": 30.72,
+      "wind_from_deg": 91.3,
+      "grid": {
+       "temp": 26.058,
+       "pres": 1017.287,
+       "cloud": 100.0,
+       "rain": 0.4508,
+       "wind_kmh": 27.76
+      }
+     },
+     "Denver": {
+      "pres": 1013.177,
+      "temp": 12.092,
+      "cloud": 100.0,
+      "u": -0.339,
+      "v": -0.521,
+      "rain": 0.0,
+      "wind_kmh": 2.24,
+      "wind_from_deg": 33.1,
+      "grid": {
+       "temp": 8.699,
+       "pres": 1013.941,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 2.8
+      }
+     },
+     "London": {
+      "pres": 1032.949,
+      "temp": 12.653,
+      "cloud": 5.0,
+      "u": -0.321,
+      "v": -2.898,
+      "rain": 0.0,
+      "wind_kmh": 10.5,
+      "wind_from_deg": 6.3,
+      "grid": {
+       "temp": 12.634,
+       "pres": 1032.948,
+       "cloud": 5.0,
+       "rain": 0.0,
+       "wind_kmh": 14.97
+      }
+     },
+     "Delhi": {
+      "pres": 1012.534,
+      "temp": 30.942,
+      "cloud": 3.4507,
+      "u": 0.42,
+      "v": -1.174,
+      "rain": 0.0,
+      "wind_kmh": 4.49,
+      "wind_from_deg": 340.3,
+      "grid": {
+       "temp": 30.612,
+       "pres": 1012.558,
+       "cloud": 3.98,
+       "rain": 0.0,
+       "wind_kmh": 3.94
+      }
+     }
+    }
+   },
+   {
+    "f": 48,
+    "cities": {
+     "Dayton OH": {
+      "pres": 1026.526,
+      "temp": 14.182,
+      "cloud": 100.0,
+      "u": -2.989,
+      "v": 0.267,
+      "rain": 0.0,
+      "wind_kmh": 10.8,
+      "wind_from_deg": 95.1,
+      "grid": {
+       "temp": 13.56,
+       "pres": 1026.702,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 9.77
+      }
+     },
+     "Miami": {
+      "pres": 1017.811,
+      "temp": 26.288,
+      "cloud": 100.0,
+      "u": -8.757,
+      "v": 0.093,
+      "rain": 0.6068,
+      "wind_kmh": 31.53,
+      "wind_from_deg": 90.6,
+      "grid": {
+       "temp": 26.16,
+       "pres": 1017.834,
+       "cloud": 100.0,
+       "rain": 0.4774,
+       "wind_kmh": 28.53
+      }
+     },
+     "Denver": {
+      "pres": 1013.01,
+      "temp": 11.842,
+      "cloud": 100.0,
+      "u": -0.203,
+      "v": -0.203,
+      "rain": 0.0,
+      "wind_kmh": 1.03,
+      "wind_from_deg": 45.0,
+      "grid": {
+       "temp": 8.345,
+       "pres": 1013.754,
+       "cloud": 100.0,
+       "rain": 0.0,
+       "wind_kmh": 1.57
+      }
+     },
+     "London": {
+      "pres": 1032.664,
+      "temp": 13.463,
+      "cloud": 4.9981,
+      "u": -0.411,
+      "v": -3.189,
+      "rain": 0.0,
+      "wind_kmh": 11.58,
+      "wind_from_deg": 7.3,
+      "grid": {
+       "temp": 13.467,
+       "pres": 1032.67,
+       "cloud": 5.14,
+       "rain": 0.0,
+       "wind_kmh": 15.8
+      }
+     },
+     "Delhi": {
+      "pres": 1012.735,
+      "temp": 29.959,
+      "cloud": 2.432,
+      "u": -0.136,
+      "v": -0.675,
+      "rain": 0.0,
+      "wind_kmh": 2.48,
+      "wind_from_deg": 11.4,
+      "grid": {
+       "temp": 28.861,
+       "pres": 1012.77,
+       "cloud": 2.75,
+       "rain": 0.0,
+       "wind_kmh": 2.49
+      }
+     }
+    }
+   }
+  ]
+ },
+ "spot_check": {
+  "London": {
+   "gfs": {
+    "temp_c": 14.9,
+    "wind_kmh": 15.7,
+    "wind_from_deg": 119
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 14.7,
+    "wind_kmh": 7.2,
+    "wind_from_deg": 90
+   }
+  },
+  "New York": {
+   "gfs": {
+    "temp_c": 14.5,
+    "wind_kmh": 14.4,
+    "wind_from_deg": 262
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 12.9,
+    "wind_kmh": 9.6,
+    "wind_from_deg": 257
+   }
+  },
+  "Tokyo": {
+   "gfs": {
+    "temp_c": 18.4,
+    "wind_kmh": 8.5,
+    "wind_from_deg": 254
+   },
+   "ecmwf_ifs025": {
+    "temp_c": 13.5,
+    "wind_kmh": 3.6,
+    "wind_from_deg": 315
+   }
+  }
+ },
+ "seconds_total": 196.7,
+ "stats": {
+  "http_requests": 56,
+  "http_bytes": 393094195,
+  "aq_locations": 0,
+  "aq_requests": 0,
+  "aq_429": 0,
+  "spot_locations": 3
+ },
+ "manifest_kb": 16.7
+}
