@@ -137,7 +137,11 @@ button.row:hover, .row[data-toggle]:hover { background: var(--hover); }
 
 /* ---- timeline ---- */
 .timeline { position: absolute; z-index: 5; left: calc(var(--rail) + var(--edge)); right: var(--edge); bottom: var(--tl-bottom); height: var(--tl-h); display: flex; align-items: stretch; }
-.tl-ctrl { display: flex; align-items: center; gap: 12px; padding: 0 18px; border-right: 1px solid var(--line); width: 236px; flex: none; }
+.tl-ctrl { display: flex; align-items: center; gap: 12px; padding: 0 14px; border-right: 1px solid var(--line); width: 290px; flex: none; }
+.tl-btns { display: flex; align-items: center; gap: 4px; flex: none; }
+.tl-step { width: 26px; height: 36px; display: grid; place-items: center; font: 500 18px var(--mono); color: var(--ink); border: 1px solid var(--line2); border-radius: var(--r); flex: none; }
+.tl-step:hover:not(:disabled) { background: var(--hover); }
+.tl-step:disabled { opacity: .35; cursor: default; }
 .play { width: 36px; height: 36px; border-radius: var(--r); background: var(--accent); position: relative; flex: none; }
 .play::after { content: ""; position: absolute; left: 14px; top: 11px; border-left: 11px solid var(--accentInk); border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
 .play.on::after { left: 12px; top: 11px; width: 4px; height: 14px; border: 0; background: var(--accentInk); box-shadow: 8px 0 0 var(--accentInk); }
@@ -230,7 +234,7 @@ input[type=range] { accent-color: var(--accent); width: 140px; }
 
 /* ---- toast ---- */
 .stale { position: absolute; z-index: 7; left: 50%; top: calc(var(--top) + 8px); transform: translateX(-50%); max-width: min(640px, calc(100% - 32px)); padding: 7px 12px; font: 12px/1.4 var(--sans); color: var(--ink); background: color-mix(in oklab, var(--accent) 22%, var(--panel)); border: 1px solid color-mix(in oklab, var(--accent) 60%, transparent); text-align: center; }
-.legend.unavailable::after { content: "No data for this hour"; display: block; margin-top: 4px; font: 10px var(--mono); color: var(--accent); }
+.legend.unavailable::after { content: attr(data-msg); display: block; margin-top: 4px; font: 10px var(--mono); color: var(--accent); }
 .toast { position: absolute; z-index: 30; left: 50%; top: calc(var(--top) + 14px); transform: translate(-50%, -8px); opacity: 0; pointer-events: none; padding: 8px 12px; background: var(--panel); border: 1px solid var(--line2); font: 12px var(--mono); transition: opacity .15s, transform .15s; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .noscript { position: absolute; inset: 40% 0 auto; text-align: center; color: var(--mute); }
@@ -319,3 +323,20 @@ input[type=range] { accent-color: var(--accent); width: 140px; }
 /* Temperature unit toggle in the legend header (°C <-> °F) */
 .lg-u { font: inherit; color: var(--accent); background: none; border: 0; padding: 0 2px; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
 .lg-u:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* 7-day timeline: the 3-hourly part (after f120) and the "less certain" part (after ~3 days) */
+.tl-coarse, .tl-unc { position: absolute; top: 12px; right: 0; height: 30px; padding: 3px 6px; font: 600 9px var(--mono); letter-spacing: .1em; color: var(--faint); pointer-events: none; }
+.tl-unc { top: 26px; height: 16px; padding-top: 2px; background: linear-gradient(90deg, transparent, rgba(0,0,0,.18)); border-left: 1px dotted var(--line2); }
+.tl-coarse { border-left: 1.5px solid var(--line2); background: rgba(237,232,221,.035); }
+.tl-tick.coarse { background: var(--mute); }
+.tl-lab.mini { top: 21px; font-size: 8.5px; }
+.legend.ended .lg-bar, .legend.ended .lg-t, .legend.ended .lg-cats { opacity: .3; }
+@media (max-width: 1023px) {
+  .m-scrub { gap: 6px; padding: 0 10px 0 6px; }
+  .m-scrub .tl-step { width: 32px; height: 44px; }
+  .m-scrub .play { width: 44px; height: 44px; }
+  .m-scrub .play::after { left: 18px; top: 15px; }
+  .m-scrub .play.on::after { left: 16px; top: 15px; }
+  .m-track .tl-coarse { top: 0; height: 20px; padding: 0; }
+  .m-track .tl-unc { top: 10px; height: 10px; }
+}

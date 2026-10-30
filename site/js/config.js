@@ -1,7 +1,8 @@
 // Open World Map: static configuration. No keys or tokens belong in this file (or any other).
 // Every external host listed here is also recorded in docs/sources-register.md.
 
-// Sample-mode timeline length. With live data the timeline runs from now to the run's f048.
+// Sample-mode timeline length. With live data the timeline runs from now to the run's f168
+// (hourly to f120, then 3-hourly).
 export const HOURS = 48;
 
 // Sample weather grid, used only when live data (data/live/) is unavailable.
