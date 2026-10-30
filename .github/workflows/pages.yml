@@ -143,7 +143,7 @@ jobs:
     permissions:
       contents: write
     env:
-      OUT: docs/screenshots/phase-2-fixes-2/after
+      OUT: docs/screenshots/satellite-zoom/after
       LABEL: after
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -173,6 +173,9 @@ jobs:
       - name: Rendering and behaviour tests (direction, pressure sync, None layer, profiling)
         continue-on-error: true
         run: node scripts/data/render-tests.mjs http://127.0.0.1:8123/ "$OUT/render-tests.md"
+      - name: Satellite imagery probe (USGS services, keyless zoom 16+ over the US)
+        continue-on-error: true
+        run: node scripts/data/satellite-probe.mjs "$OUT/probe"
       - name: Commit screenshots, accuracy table and run report to the PR branch
         run: |
           git config user.name "github-actions[bot]"

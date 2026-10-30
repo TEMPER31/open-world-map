@@ -17,12 +17,17 @@ const VIEWS = [
   { name: 'clouds', field: 'cloud', hash: '1.6/20/30' },
   { name: 'pressure', field: 'pres', hash: '1.6/35/-20' },
   { name: 'air-quality', field: 'aq', hash: '1.6/25/70' },
-  { name: 'none', field: 'none', hash: '2.6/42/-38', particles: true }
+  { name: 'none', field: 'none', hash: '2.6/42/-38', particles: true },
+  // Satellite past the cached USGS level 16, at Brantley AL (no weather field on top)
+  ...[16, 17, 18].map(z => ({ name: `satellite-brantley-z${z}`, field: 'none', basemap: 'satellite', hash: `${z}/31.585/-86.255`, wait: 6000 })),
+  // the teal strip seen in the NAIP Plus layer at z16 (31.588 N, ~86.258 W), centred
+  { name: 'satellite-strip-z17', field: 'none', basemap: 'satellite', hash: '17/31.588/-86.262', wait: 6000 }
 ];
+const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const report = [];
-for (const v of VIEWS) {
+for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     const { readFileSync } = await import('node:fs');
@@ -34,11 +39,16 @@ for (const v of VIEWS) {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  // NAIP Plus tiles (satellite views): keep every response, and every failed request, so an
+  // odd-coloured tile can be traced to the bytes USGS sent or to drawing.
+  const naip = [], naipFailed = [];
+  page.on('response', r => { if (/imagery\.nationalmap\.gov\/.*exportImage/.test(r.url())) naip.push(r.body().then(body => ({ url: r.url(), status: r.status(), type: r.headers()['content-type'] || '', body }), e => ({ url: r.url(), status: r.status(), error: String(e).slice(0, 120) }))); });
+  page.on('requestfailed', r => { if (/imagery\.nationalmap\.gov/.test(r.url())) naipFailed.push({ bbox: new URL(r.url()).searchParams.get('bbox'), failure: r.failure()?.errorText }); });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { field: v.field, basemap: 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
+    { field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
   await page.goto(`${site}#map=${v.hash}`);
-  await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 });
-  await page.waitForTimeout(v.particles ? 5000 : 2500);
+  await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
+  await page.waitForTimeout(v.wait || (v.particles ? 5000 : 2500));
   const box = await page.$('#map').then(e => e.boundingBox());
   if (v.click) { // open the place panel at the map centre
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
@@ -55,7 +65,29 @@ for (const v of VIEWS) {
     sampleLabelsVisible: [...document.querySelectorAll('[data-sample-only]')].filter(e => !e.hidden).length
   }));
   await page.screenshot({ path: `${out}/${v.name}.png` });
-  report.push({ view: v.name, ...info, errors });
+  const tiles = [];
+  for (const [i, x] of (await Promise.all(naip)).entries()) {
+    const bbox = new URL(x.url).searchParams.get('bbox')?.split(',').map(v => Math.round(+v)).join(',');
+    if (!x.body) { tiles.push({ bbox, status: x.status, error: x.error }); continue; }
+    const st = await page.evaluate(async ([b64, mime]) => {
+      try {
+        const bmp = await createImageBitmap(await (await fetch(`data:${mime};base64,${b64}`)).blob(), { premultiplyAlpha: 'none' });
+        const c = new OffscreenCanvas(bmp.width, bmp.height), g = c.getContext('2d'); g.drawImage(bmp, 0, 0);
+        const d = g.getImageData(0, 0, bmp.width, bmp.height).data; let r = 0, gg = 0, b = 0, a = 0;
+        for (let k = 0; k < d.length; k += 4) { r += d[k]; gg += d[k + 1]; b += d[k + 2]; a += d[k + 3]; }
+        const n = d.length / 4; return { w: bmp.width, rgba: [r / n, gg / n, b / n, a / n].map(Math.round) };
+      } catch (e) { return { decodeError: String(e).slice(0, 100) }; }
+    }, [x.body.toString('base64'), x.type.split(';')[0] || 'image/jpeg']);
+    const teal = st.rgba && st.rgba[0] < 0.6 * Math.min(st.rgba[1], st.rgba[2]);
+    const t = { bbox, status: x.status, type: x.type, kb: Math.round(x.body.length / 1024), ...st, teal };
+    if (teal || !/jpeg/.test(x.type)) {
+      mkdirSync(`${out}/naip-tiles`, { recursive: true });
+      t.saved = `naip-tiles/${v.name}-${i}.${/png/.test(x.type) ? 'png' : /jpeg/.test(x.type) ? 'jpg' : 'bin'}`;
+      writeFileSync(`${out}/${t.saved}`, x.body);
+    }
+    tiles.push(t);
+  }
+  report.push({ view: v.name, ...info, errors, ...(tiles.length || naipFailed.length ? { naip: tiles, naipFailed } : {}) });
   await page.close();
 }
 await browser.close();
