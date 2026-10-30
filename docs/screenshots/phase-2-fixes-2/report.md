@@ -2,11 +2,12 @@
 
 **Where the numbers come from.** Every number here is labeled with its source:
 
-* **CI before / CI after**: `before/accuracy.md` and `after/accuracy.md` in this folder.
-  * Both used GFS run **18Z 29 Oct 2026**.
-  * "+0 h" is **f007** (01Z 30 Oct) and "+24 h" is **f031**.
-  * The data pipeline's encoding did not change, so both tables have the same values. Only the
-    labels and the new rows differ.
+* **CI before**: `before/accuracy.md`, GFS run **18Z 29 Oct 2026**, "+0 h" = **f007**
+  (01Z 30 Oct), "+24 h" = **f031**.
+* **CI after**: `after/accuracy.md`, the same run, one hour later because CI ran an hour
+  later: "+0 h" = **f008** (02Z 30 Oct), "+24 h" = **f032**.
+  * The pipeline's encoding did not change. Numbers differ between before and after only
+    because the hours differ.
 * **Local**: measured in the Claude Code session from NOAA's own files on the AWS mirror (same
   run, hours **f006** and **f030**) with the pinned wgrib2.
 * **PR #4**: `docs/screenshots/phase-2-fixes/after/accuracy.md`, run 18Z 29 Oct, f006 / f030.
@@ -25,13 +26,14 @@
 | + | Speed | — | First field paint 3.4 → 2.4 s on simulated 4G. Panel's first value 0.97 → 0.27 s |
 
 The CI "page vs raw NOAA 0.25°" results are **47 ok / 9 outside / 4 n/a**, both before and
-after. The 9 outside, all in CI after, run 18Z 29 Oct:
+after. The 9 outside in CI after (f008 / f032):
 
-* **Temperature:** Miami +0 h (−0.7, i.e. −0.74), Delhi +0 h (−0.8) and +24 h (−0.9), and
-  Denver both hours (−3.7).
-* **Wind:** Miami +0 h (−3.3) and +24 h (−4.9).
-* **Rain:** Miami +24 h (0.47 vs 0.82 mm/h).
+* **Temperature:** Dayton +24 h (−0.7, i.e. −0.71), Miami +0 h (−0.9), Delhi +24 h (−0.7,
+  i.e. −0.73), and Denver +0 h (−3.3) and +24 h (−3.9).
+* **Wind:** Miami +24 h (−4.9). Miami +0 h is −2.8, just inside ±3.
+* **Rain:** Miami +24 h (0.55 vs 1.20 mm/h).
 * **Pressure:** Denver +0 h (+0.5 against a ±0.5 limit).
+* **Cloud:** Denver +24 h (area average 76 % vs 0.25° point 91 %).
 
 The new **"page vs stored grid" (encoding only)** check is **40 ok / 0 outside**. So all 9
 differences come from grid resolution, not from the PNG files or the browser code.
@@ -41,9 +43,18 @@ differences come from grid resolution, not from the PNG files or the browser cod
 * **Root cause (confirmed).**
   * The stored 0.5° grid, interpolated at the city, is colder than NOAA's 0.25° value there.
     The page reproduces that grid exactly.
-  * CI after, stored grid minus 0.25°: Dayton −0.56 / −0.56, Miami −0.74 / −0.30, Delhi
-    −0.80 / −0.91, London −0.10 / −0.09, Denver −3.67 / −3.66 (+0 h / +24 h).
-  * Page minus stored grid is at most 0.05 °C at every city, both hours.
+  * Stored grid minus 0.25° (+0 h / +24 h):
+
+    | City | CI after (f008 / f032) | CI before (f007 / f031) |
+    |---|---|---|
+    | Dayton OH | −0.59 / −0.71 | −0.5 / −0.6 |
+    | Miami | −0.93 / −0.22 | −0.7 / −0.3 |
+    | Delhi | −0.25 / −0.73 | −0.8 / −0.9 |
+    | London | −0.10 / −0.09 | −0.1 / −0.1 |
+    | Denver | −3.37 / −3.86 | −3.7 / −3.7 |
+
+    The before table has no stored-grid rows, so its column is page minus 0.25°.
+  * Page minus stored grid is within ±0.15 °C at every city, both hours (CI after).
   * It is **not a global bias**. Over 20,000 random points, 0.5° minus 0.25° averages
     +0.001 °C (local, f006) and −0.001 °C (local, f030).
   * It is one-sided at these cities because the 0.25° points next to each city are warmer
@@ -63,7 +74,7 @@ differences come from grid resolution, not from the PNG files or the browser cod
   * CI encoding-only rows: 10 of 10 temperature rows within ±0.15 °C.
   * CI resolution table.
   * Grid alignment at nodes: 18 ok / 0 outside.
-* **Unresolved.** Dayton, Miami and Delhi can read 0.3–0.9 °C cold, and Denver about 3.7 °C.
+* **Unresolved.** Dayton, Miami and Delhi can read 0.2–0.9 °C cold, and Denver 3.3–3.9 °C.
   This is documented in `docs/data-pipeline.md` → "Grid resolution".
 
 ## 2. Miami wind
@@ -78,8 +89,8 @@ differences come from grid resolution, not from the PNG files or the browser cod
 
   * The 0.75° cell around Miami reaches 79.50° W and 25.50° N, where the wind is
     14.5–16.3 km/h, against 20.5–27.7 at the 0.25° points next to the city.
-  * CI after: the stored 0.75° grid is −3.6 / −4.6 km/h against 0.25°. Encoding adds
-    +0.4 / −0.3.
+  * CI after (f008 / f032): the stored 0.75° grid is −3.0 / −4.7 km/h against 0.25°. Page
+    minus stored grid is within ±1 km/h at all 10 city rows (8-bit encoding).
 * **Cost of 0.5° wind (measured locally, f006):** **260 KB/hour**, against 137 KB at 0.75°
   (8-bit U+V, Sub filter).
 * **Recommendation: keep 0.75°.**
@@ -102,9 +113,9 @@ Why not show the point value:
 
 **Verified (CI after):**
 
-* Probe text: "6 %area average", "Drypast hour · area avg", and so on (accuracy table →
+* Probe text at Dayton: "2 %area average", "Drypast hour · area avg" (accuracy table →
   Probe text).
-* `views.json` → `place-panel`: "Clouds 6% area average".
+* `views.json` → `place-panel`: "Clouds 2% area average".
 * Encoding-only cloud rows: 10 of 10 within ±1 %.
 
 ## 4. Corrections to the PR #4 report
@@ -116,7 +127,8 @@ All from the PR #4 table, run 18Z 29 Oct, +0 h = f006, +24 h = f030.
   only 20.7 in that table is Delhi's raw NOAA temperature at +24 h, which is probably where
   the mix-up came from.
 * **Hours.** Every PR #4 number was from run 18Z 29 Oct at f006 or f030. This PR's CI tables
-  are f007 / f031 of the same run, because CI ran an hour later.
+  use the same run: before is f007 / f031 and after is f008 / f032, because each CI run
+  happened an hour later.
 
 ## 5. Place panel note
 
@@ -129,7 +141,7 @@ conditions." It replaced the old "model values on a 0.5° grid, not local observ
 
 These are in `docs/data-pipeline.md` → "Known limits":
 
-* **Mountain temperature.** Denver: CI after −3.7 / −3.7; local −3.56 / −3.22. The fix is
+* **Mountain temperature.** Denver: CI after −3.3 / −3.9 (f008 / f032); local −3.56 / −3.22 (f006 / f030). The fix is
   0.25° (427 KB/hour measured) or an elevation correction.
 * **Air quality between grid nodes.** About 7–10 µg/m³ near hotspots (PR #4: Delhi +9.7,
   Denver −7.6). The long-term fix is the full CAMS grid from the Copernicus Atmosphere Data
@@ -148,9 +160,13 @@ These are in `docs/data-pipeline.md` → "Known limits":
 * **Verified:**
   * Temperature colours are pixel-identical in °C and °F: 0 of 131,120 sampled map pixels
     differ (CI `after/temperature.png` vs `after/temperature-f.png`).
-  * They are also identical before vs after this PR: 0 of 131,120 (CI `before/` vs `after/`,
-    same run and hour).
-  * The probe reads "9 °C" in `temperature` and "47 °F" in `temperature-f` (`views.json`).
+  * They are also identical before vs after this PR, with the same data: 0 of 131,120.
+    * Checked twice: CI `before/temperature.png` vs the first CI after run (both f007,
+      commit 19d4da9), and locally (`main` vs this branch).
+    * The committed `after/` was re-run at f008, so its picture is an hour later than
+      `before/`.
+  * The probe reads "8 °C" in `temperature` and "47 °F" in `temperature-f` (`views.json`).
+    8 °C is a rounded 8.x °C; 47 °F rounds the same reading converted.
 
 ## Speed (owner request)
 
@@ -192,7 +208,8 @@ runners, so they can't be compared; the table itself says to compare on one mach
   * clouds 126 / 130
   * Unchanged from PR #4.
 * **Open-Meteo calls:**
-  * This PR run: 0 air-quality locations (cached copy reused) and 3 spot-check locations.
+  * This PR's CI runs: 0 air-quality locations (cached copy reused) and 3 spot-check
+    locations each.
   * Steady state is unchanged: about 7,740 a day, under 10,000.
 * **Render tests:** 11 pass / 0 fail (CI after).
 * **Site checks:** no keys, MapLibre 5.24.0 pinned with SRI (hash re-verified against the npm
