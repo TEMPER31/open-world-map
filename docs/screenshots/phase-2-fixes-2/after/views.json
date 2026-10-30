@@ -1,0 +1,92 @@
+[
+ {
+  "view": "wind-atlantic",
+  "legend": "Wind speed · km/h10 m · GFS 0.75°",
+  "probe": "33 km/hfrom NW·45.3°N 23.1°W",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "temperature",
+  "legend": "Temperature · °C2 m · GFS 0.5°",
+  "probe": "8 °Cat 2 m·37.6°N 29.6°E",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "temperature-f",
+  "legend": "Temperature · °F2 m · GFS 0.5°",
+  "probe": "47 °Fat 2 m·37.6°N 29.6°E",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "place-panel",
+  "legend": "Clouds · %total cover · GFS 0.5°",
+  "probe": "2 %area average·40.4°N 81.3°W",
+  "detail": "× PLACE · GFS FORECAST 39.76°N 84.19°W Now Fri 30 Oct · 02:00 UTC Wind speed 13km/h from SW Temperature 16°C at 2 m Precipitation Dry past hour · area avg Air quality 14µg/m³ Moderate · AQI 52 (24 h) Clouds 2% area average Pressure 1021hPa sea level FORECAST — TEMP · ▮ WIND Now +20 h +40 h NOAA GFS run 18Z 29 Oct · air quality CAMS Fri 30 Oct · 00:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 02:08 UTC",
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "precipitation",
+  "legend": "Precipitation · mm/hpast hour · GFS 0.5°",
+  "probe": "Drypast hour · area avg·28.4°N 0.3°W",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "clouds",
+  "legend": "Clouds · %total cover · GFS 0.5°",
+  "probe": "90 %area average·28.4°N 59.6°E",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "pressure",
+  "legend": "Pressure · hPamean sea level · GFS 0.5°",
+  "probe": "1021 hPasea level·42.2°N 9.6°E",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "air-quality",
+  "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
+  "probe": "5.2 µg/m³Good · AQI 25 (24 h)·33.1°N 99.6°E",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ },
+ {
+  "view": "none",
+  "legend": "No layermap only",
+  "probe": "",
+  "detail": null,
+  "stale": null,
+  "updated": "Updated 02:08 UTC",
+  "sampleLabelsVisible": 0,
+  "errors": []
+ }
+]

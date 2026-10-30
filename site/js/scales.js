@@ -4,13 +4,22 @@
 
 export let FIELDS = {};
 export let ORDER = [];
+let loaded = null;
 
-export async function loadScales() {
-  const r = await fetch(new URL('../data/field-scales.json', import.meta.url));
-  const j = await r.json();
-  FIELDS = j.fields;
-  ORDER = j.order;
+// Loads once; `json` (the file's parsed contents) lets the worker skip its own fetch.
+export function loadScales(json) {
+  loaded ||= (json ? Promise.resolve(json) : fetch(new URL('../data/field-scales.json', import.meta.url)).then(r => r.json()))
+    .then(j => { FIELDS = j.fields; ORDER = j.order; return j; });
+  return loaded;
 }
+
+// Display unit for temperature: 'C' or 'F'. Data, colour scales and the GPU field stay in
+// degC; only labels and numbers shown to people are converted.
+let tempUnit = 'C';
+export const setTempUnit = u => { tempUnit = u === 'F' ? 'F' : 'C'; };
+export const toTemp = c => tempUnit === 'F' ? c * 9 / 5 + 32 : c;
+export const unitOf = k => k === 'temp' ? (tempUnit === 'F' ? '°F' : '°C') : FIELDS[k].unit;
+const tick = (k, x) => k === 'temp' ? Math.round(toTemp(+x)) : x;
 
 // "light" = the Light basemap: use stopsLight where provided (design README).
 const stopsFor = (f, light) => (light && f.stopsLight) || f.stops;
@@ -104,12 +113,13 @@ export function legendHTML(k, light, meta) {
     ticks = `<div class="lg-t band">${raw.map(s => `<span>${s[0]}</span>`).join('')}</div><div class="lg-cats">${raw.map(s => `<span>${s[2]}</span>`).join('')}</div>`;
   } else {
     const a = tf(raw[0][0]), b = tf(raw[raw.length - 1][0]), p = v => ((tf(parseFloat(v)) - a) / (b - a) * 100).toFixed(1);
-    ticks = `<div class="lg-t">${f.ticks.map(x => `<span style="left:${p(x)}%">${x}</span>`).join('')}</div>`;
+    ticks = `<div class="lg-t">${f.ticks.map(x => `<span style="left:${p(x)}%">${tick(k, x)}</span>`).join('')}</div>`;
   }
-  return `<div class="lg-h"><span>${f.label} · ${f.unit}</span><span>${meta}</span></div>${barHTML(k, light)}${ticks}`;
+  const unit = k === 'temp' ? `<button class="lg-u" type="button" data-tunit="${tempUnit === 'F' ? 'C' : 'F'}" title="Show temperature in ${tempUnit === 'F' ? '°C' : '°F'}">${unitOf(k)}</button>` : f.unit;
+  return `<div class="lg-h"><span>${f.label} · ${unit}</span><span>${meta}</span></div>${barHTML(k, light)}${ticks}`;
 }
 
 export function rangeText(k) {
   const f = FIELDS[k];
-  return f.mode === 'banded' ? 'US EPA' : `${f.ticks[0]}–${f.ticks[f.ticks.length - 1]}`;
+  return f.mode === 'banded' ? 'US EPA' : `${tick(k, f.ticks[0])}–${tick(k, f.ticks[f.ticks.length - 1])}`;
 }

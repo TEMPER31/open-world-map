@@ -12,7 +12,7 @@
 
 import { loadScales, FIELDS, lut } from './scales.js';
 import { centres } from './contours.js';
-import { fillNaN, upsample } from './grid.js';
+import { fillNaN, upsample, sample } from './grid.js';
 import { frame as sampleFrame, pointSeries } from './sample-data.js';
 import { HOURS } from './config.js';
 
@@ -31,12 +31,16 @@ function remember(key, make) {
   return p;
 }
 
-export async function init(manifestUrl) {
-  await loadScales();
+// The page passes the manifest and scales it already fetched, so neither is downloaded twice.
+export async function init(manifestUrl, manifest, scales) {
+  await loadScales(scales);
   if (!manifestUrl) return null;
-  const r = await fetch(manifestUrl, { cache: 'no-cache' });
-  if (!r.ok) throw new Error(`manifest HTTP ${r.status}`);
-  M = await r.json();
+  if (manifest) M = manifest;
+  else {
+    const r = await fetch(manifestUrl, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(`manifest HTTP ${r.status}`);
+    M = await r.json();
+  }
   base = new URL('.', new URL(manifestUrl, self.location.href)).href;
   // Frame files are cached by the browser; tag them with the run so a new run never reuses
   // an older run's frame under the new metadata.
@@ -116,6 +120,23 @@ async function liveGrid(f, field) {
 
 export function grid(f, field) {
   return remember(`${f}:${field}`, () => M ? liveGrid(f, field) : Promise.resolve(sampleFrame(f).grids[field]));
+}
+
+// Values at one place for several fields: {field: {v, u, w, aqi, missing} | null}. Small
+// enough to post from the worker on every mouse move, unlike the grids themselves (about
+// 1 MB each), which used to be copied to the page on every hour step.
+export async function point(f, fields, lon, lat) {
+  const out = {};
+  await Promise.all(fields.map(async k => {
+    try {
+      const g = await grid(f, k), o = { v: sample(g.grid, g.data, lon, lat) };
+      if (g.u) { o.u = sample(g.grid, g.u, lon, lat); o.w = sample(g.grid, g.v, lon, lat); }
+      if (g.aqi) o.aqi = sample(g.grid, g.aqi, lon, lat);
+      if (g.missing) o.missing = true;
+      out[k] = o;
+    } catch { out[k] = null; }
+  }));
+  return out;
 }
 
 // Fixed storage ranges (in the scale's transformed units: log for precipitation) for the

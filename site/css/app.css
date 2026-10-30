@@ -316,3 +316,6 @@ input[type=range] { accent-color: var(--accent); width: 140px; }
   .has-detail .zoom { right: calc(var(--edge) + 348px + 12px); }
   .has-detail .scale { right: calc(var(--edge) + 348px + 60px); }
 }
+/* Temperature unit toggle in the legend header (°C <-> °F) */
+.lg-u { font: inherit; color: var(--accent); background: none; border: 0; padding: 0 2px; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+.lg-u:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
