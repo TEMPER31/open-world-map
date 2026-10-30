@@ -121,6 +121,91 @@ field plus wind for the current hour (≈ 230 KB) and prefetches the next hour.
 
 PNG filters were chosen by measurement on real frames: Sub for wind, temperature and pressure,
 None for clouds and rain.
+Re-measured in phase-2-fixes-2 (GFS 18Z 29 Oct, f006): adaptive per-row filters (None/Sub/Up/
+Paeth, PNG's own heuristic) saved nothing (temperature 141 KB adaptive vs 140 KB Sub, wind 138 vs
+137 KB), so
+the fixed filters stay.
+
+## Grid resolution: what it costs at a point (phase-2-fixes-2)
+
+All numbers below were measured locally from the raw NOAA files on the AWS mirror (GFS run
+**18Z 29 Oct 2026**, forecast hours **f006** and **f030**, which were "+0 h" and "+24 h" in the
+PR #4 accuracy table), with the pinned wgrib2 and bilinear interpolation at the city
+coordinates used by `scripts/data/accuracy.mjs`.
+
+### Temperature: why cities read cold (root cause confirmed)
+
+| City | f006: 0.25° | f006: 0.5° grid | diff | f030: 0.25° | f030: 0.5° grid | diff |
+|---|---|---|---|---|---|---|
+| Dayton OH | 18.02 | 17.48 | −0.54 | 13.68 | 12.86 | −0.83 |
+| Miami | 27.50 | 26.87 | −0.62 | 26.82 | 26.44 | −0.38 |
+| Denver | 16.64 | 13.08 | −3.56 | 17.42 | 14.20 | −3.22 |
+| London | 11.22 | 11.12 | −0.10 | 10.81 | 10.73 | −0.09 |
+| Delhi | 21.93 | 21.17 | −0.75 | 20.67 | 19.83 | −0.84 |
+
+* The "0.5° grid" column, computed straight from NOAA's file, reproduces the page's numbers in
+  the PR #4 table to 0.1 °C (page 17.5, 26.9, 13.1, 11.1, 21.1 at +0 h). Encoding, decoding
+  and the browser's interpolation add nothing. The whole error is the 0.5° grid.
+* It is **not a global bias**: over 20,000 random points (60° S to 70° N) the 0.5° grid minus
+  the 0.25° value averages **+0.001 °C** (f006) and **−0.001 °C** (f030).
+* It is one-sided at these cities because the 0.25° points next to each city are warmer than
+  the 0.5° nodes around it. Dayton's nearest 0.25° points are 18.2 and 18.5 °C, but the 0.5°
+  nodes are 16.9–18.0. Miami's point at 26.00° N 80.25° W (Fort Lauderdale) is 28.6 °C, but
+  the 0.5° nodes inland are 25.9 and 26.6. Delhi's 0.25° points are 21.4–22.4 °C, but the
+  0.5° nodes at 29° N are 19.1–19.6. Thinning the grid to every second point drops exactly
+  those warm points. Why GFS has the cities as warm spots (urban land use in the land model,
+  most likely, since every check was in the evening or night local time) is a **theory, not
+  verified**.
+* **Not fixed in this PR.** 0.25° temperature measured **427 KB/hour** (16-bit, 0.2 °C) or
+  **266 KB/hour** (8-bit, ~0.35 °C steps), both over the ~150 KB budget. The handoff's 560 KB
+  figure was an earlier estimate. A least-squares fit of the 0.5° nodes, so that
+  interpolation best matches all 0.25° points, was tested. It brought Dayton to −0.34/−0.70
+  and Miami to −0.35/−0.31. But it made London worse (−0.60) and moved node values by up
+  to 7 °C, which breaks the exact-NOAA-at-nodes guarantee, so it was rejected.
+
+### Wind: Miami (root cause confirmed: the 0.75° grid at the coast)
+
+| City | f006: 0.25° | 0.5° | 0.75° (page grid) | 1° | f030: 0.25° | 0.5° | 0.75° | 1° |
+|---|---|---|---|---|---|---|---|---|
+| Miami | 21.9 | 18.9 | 16.7 | 23.0 | 23.2 | 22.9 | 19.5 | 27.1 |
+| Dayton OH | 11.0 | 12.2 | 11.4 | 12.3 | 11.3 | 12.0 | 12.0 | 12.3 |
+| Denver | 10.9 | 9.6 | 10.7 | 9.7 | 9.8 | 8.5 | 9.5 | 8.9 |
+| London | 5.7 | 5.7 | 7.4 | 7.9 | 5.8 | 5.7 | 8.1 | 7.7 |
+| Delhi | 6.8 | 7.1 | 5.2 | 7.0 | 2.4 | 2.3 | 2.3 | 3.7 |
+
+(km/h). The 0.25° points around Miami are 20.5–27.7 km/h, with the highest offshore. The 0.75°
+cell around the city reaches 25.50° N and 79.50° W, where it is 14.5–16.3 km/h, so the coastal
+wind is diluted. 0.5° wind **measured 260 KB/hour** (8-bit U+V, Sub filter; 0.75° is 137 KB).
+**Recommendation: keep 0.75°.** 0.5° is 1.7× the budget, and it only fixes Miami at f030
+(22.9 vs 23.2): at f006 it is still 3 km/h low (18.9 vs 21.9). Particles look the same at
+either resolution. Revisit with Phase 3's tiling or a regional high-resolution file.
+
+### Cloud cover and rain: area average (labelled)
+
+Cloud and rain are stored as an area average (a 3 × 3 tent over the 0.25° points, ~50 km)
+because the decimated point aliased badly (Denver 47 % vs 8 %). The probe and the place panel
+read that same stored value, so they **match the colour under the cursor**, and they are now
+labelled "area average" (cloud) and "past hour · area avg" (rain). Showing a 0.25° point value
+instead would need a second, unsmoothed 0.25° file per hour (about 4× the data) for a number
+that disagrees with the map beneath it.
+
+### Known limits (deferred; not built now)
+
+* **Mountain temperature.** Denver reads 3.2–3.6 °C cold on the 0.5° grid (−3.56 at f006,
+  −3.22 at f030 above). At f006 the 0.25° point next to the city (39.75° N 105.00° W, model
+  terrain 1,633 m) is 17.0 °C; the four 0.5° nodes around it (1,543–1,869 m) are 12.2–14.0 °C,
+  so thinning the grid drops the warm valley point. Fixing
+  it needs 0.25° temperature (measured 427 KB/hour, over budget) or an elevation (lapse-rate)
+  correction against a fine terrain model, which is a bigger project.
+* **Air quality between grid points.** CAMS is sampled on a 4° grid and smoothed in the
+  browser, so values between nodes can be **about 7–10 µg/m³ off** near hotspots (Delhi +9.7
+  at +24 h, Denver −7.6 in the PR #4 table). At the nodes the page matches CAMS exactly. The
+  long-term fix is the full CAMS grid from the **Copernicus Atmosphere Data Store**, with a
+  free account key stored as a GitHub **Actions secret** and used only by the data job,
+  never in the site or the repository.
+* **Place-panel chart.** The 48-hour chart line comes from a 3° grid, every 3 h, 8-bit (one
+  file, loaded on the first click), so it can differ from the panel's own numbers, which use
+  the 0.5° grid. Found during this review; the fix belongs to Phase 3 (shared time state).
 
 ## US air quality index
 

@@ -2,8 +2,10 @@
 // Preferences persist in localStorage on this device only (no accounts, nothing sent).
 
 const STORE_KEY = 'owm:prefs:v1';
-const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density'];
+const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit'];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// First visit: °F where it is the everyday unit (US and a few others), else °C.
+const fahrenheit = /-(US|LR|BS|BZ|KY|PW|FM|MH)$/i.test(navigator.language || '');
 
 const state = {
   field: 'wind',          // wind | temp | rain | aq | cloud | pres
@@ -11,6 +13,7 @@ const state = {
   particles: !reduceMotion,
   opacity: 1,             // field opacity multiplier (Settings)
   density: 1,             // particle density multiplier (Settings)
+  tempUnit: fahrenheit ? 'F' : 'C', // display unit for temperature (Settings, legend)
   t: 0,                   // forecast hour, 0..HOURS
   playing: false,
   selection: null,        // {type: 'place', lon, lat}

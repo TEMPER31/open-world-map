@@ -6,7 +6,7 @@ let ready = null;
 
 onmessage = async ({ data: m }) => {
   try {
-    if (m.type === 'init') { ready = core.init(m.manifestUrl); await ready; return postMessage({ id: m.id, result: true }); }
+    if (m.type === 'init') { ready = core.init(m.manifestUrl, m.manifest, m.scales); await ready; return postMessage({ id: m.id, result: true }); }
     await ready;
     if (m.type === 'grid') {
       postMessage({ id: m.id, result: await core.grid(m.f, m.field) });
@@ -18,6 +18,8 @@ onmessage = async ({ data: m }) => {
       postMessage({ id: m.id, result: w }, [w.rgba.buffer]);
     } else if (m.type === 'isobars') {
       postMessage({ id: m.id, result: await core.pressureOverlays(m.f) });
+    } else if (m.type === 'point') {
+      postMessage({ id: m.id, result: await core.point(m.f, m.fields, m.lon, m.lat) });
     } else if (m.type === 'series') {
       postMessage({ id: m.id, result: await core.pointSeriesAt(m.lon, m.lat) });
     }
