@@ -38,6 +38,10 @@ jobs:
           python3 -m py_compile scripts/*.py scripts/data/*.py
       - name: Unit tests (display-unit conversions, great-circle distance)
         run: node scripts/data/unit-tests.mjs
+      - name: Sources probe (events and street-photo hosts, CORS headers, terms text)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: node scripts/data/sources-probe.mjs sources-probe.md && cat sources-probe.md >> "$GITHUB_STEP_SUMMARY"
 
   data:
     needs: check
