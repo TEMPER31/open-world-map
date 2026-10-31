@@ -6,7 +6,7 @@
 
 import * as S from './state.js';
 
-const TILES = 'https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=';
+const TILES = 'https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}';
 const GRAPH = 'https://graph.mapillary.com/';
 export const CREDIT = 'Street photos: <a href="https://www.mapillary.com/">© Mapillary</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>';
 const GREEN = '#2fd27a', esc = s => String(s ?? '').replace(/[&<>"]/g, c => `&#${c.charCodeAt(0)};`);
@@ -28,7 +28,7 @@ async function show(on) {
     return onChange();
   }
   if (has || !S.get('photos')) return;
-  map.addSource('mly', { type: 'vector', tiles: [TILES + encodeURIComponent(token)], minzoom: 0, maxzoom: 14, attribution: '' });
+  map.addSource('mly', { type: 'vector', tiles: [`${TILES}?access_token=${encodeURIComponent(token)}`], minzoom: 0, maxzoom: 14, attribution: '' });
   const L = o => map.addLayer({ source: 'mly', ...o }, map.getLayer('omt-label-road') ? 'omt-label-road' : undefined);
   L({ id: 'mly-ov', type: 'circle', 'source-layer': 'overview', maxzoom: 6, paint: { 'circle-radius': 1.6, 'circle-color': GREEN, 'circle-opacity': 0.7 } });
   L({ id: 'mly-seq', type: 'line', 'source-layer': 'sequence', minzoom: 6, paint: { 'line-color': GREEN, 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.8, 14, 2.2], 'line-opacity': 0.75 }, layout: { 'line-cap': 'round' } });
