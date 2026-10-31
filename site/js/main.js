@@ -406,8 +406,10 @@ function renderEvStatus() {
 
 function renderPhStatus() {
   const st = phStatus();
-  $$('[data-phs]').forEach(el => { el.textContent = st === 'unavailable' ? 'unavailable' : st === '…' ? '…' : 'CC BY-SA'; el.classList.toggle('bad', st === 'unavailable'); });
-  $$('[data-phnote]').forEach(el => el.textContent = st === 'unavailable' ? 'Street photos: unavailable (no Mapillary access token is configured for this site).' : 'Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.');
+  const bad = st === 'unavailable' || st === 'down';
+  $$('[data-phs]').forEach(el => { el.textContent = bad ? 'unavailable' : st === '…' ? '…' : 'CC BY-SA'; el.classList.toggle('bad', bad); });
+  $$('[data-phnote]').forEach(el => el.textContent = st === 'down' ? 'Street photos: unavailable right now. Mapillary is not accepting requests from this site at the moment (its daily limit may be reached); turn the layer off and on to try again later.'
+    : st === 'unavailable' ? 'Street photos: unavailable (no Mapillary access token is configured for this site).' : 'Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.');
 }
 
 // ---- credits strip -------------------------------------------------------------------

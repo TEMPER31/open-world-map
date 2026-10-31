@@ -45,14 +45,19 @@ export function tile(z, x, y, [lon, lat]) {
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAEElEQVR4nGOIyquAIwacHAAjTg8BdDh92gAAAABJRU5ErkJggg==', 'base64');
 
 // modes: graph 'ok' | 'error' | 'none'; token: true (fake token) | false (empty: "unavailable")
-export async function routePhotos(page, { at = [-73.9855, 40.758], graph = 'ok', token = true } = {}) {
+// tiles: 'ok' | 'limit' (HTTP 429, as when the daily tile limit is reached) | 'rejected' (HTTP 403) |
+// 'blocked' (request fails with no status, as a 4xx without CORS headers does in a browser);
+// graph: also 'token' (code 190, token rejected).
+export async function routePhotos(page, { at = [-73.9855, 40.758], graph = 'ok', token = true, tiles = 'ok' } = {}) {
   await page.route('**/js/secrets.js', r => r.fulfill({ contentType: 'text/javascript', body: `export const MAPILLARY_TOKEN = '${token ? FAKE_TOKEN : ''}';\n` }));
   await page.route('https://tiles.mapillary.com/**', r => {
+    if (tiles === 'blocked') return r.abort('failed'); // a 4xx without CORS headers, as the browser sees it
+    if (tiles !== 'ok') return r.fulfill({ status: tiles === 'limit' ? 429 : 403, contentType: 'text/html', body: '' });
     const [z, x, y] = new URL(r.request().url()).pathname.split('/').slice(-3).map(Number);
     r.fulfill({ status: 200, contentType: 'application/x-protobuf', headers: { 'access-control-allow-origin': '*' }, body: tile(z, x, y, at) });
   });
-  await page.route('https://graph.mapillary.com/**', r => r.fulfill({ status: graph === 'error' ? 500 : 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
-    body: JSON.stringify(graph === 'error' ? { error: { message: 'test: Graph API down', code: 1 } } : graph === 'none' ? { id: IMAGE_ID } :
+  await page.route('https://graph.mapillary.com/**', r => r.fulfill({ status: graph === 'error' || graph === 'token' ? (graph === 'token' ? 401 : 500) : 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+    body: JSON.stringify(graph === 'token' ? { error: { message: 'Invalid OAuth 2.0 Access Token', type: 'MLYApiException', code: 190 } } : graph === 'error' ? { error: { message: 'test: Graph API down', code: 1 } } : graph === 'none' ? { id: IMAGE_ID } :
       { id: IMAGE_ID, thumb_1024_url: 'https://scontent.mapillary-test.invalid/thumb.png', captured_at: 1793000000000, creator: { username: 'test_mapper', id: '1' }, geometry: { type: 'Point', coordinates: at } }) }));
   await page.route('https://scontent.mapillary-test.invalid/**', r => r.fulfill({ contentType: 'image/png', body: PNG, headers: { 'access-control-allow-origin': '*' } }));
 }
