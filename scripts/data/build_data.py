@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Open World Map data pipeline (Phase 2).
 
-Fetches the latest complete NOAA GFS 0.25 deg cycle (f000-f048, hourly) and CAMS air
+Fetches the latest complete NOAA GFS 0.25 deg cycle (f000-f168: hourly to f120, then 3-hourly) and CAMS air
 quality (via Open-Meteo), and writes compact PNG frames plus a manifest for the site.
 
 Standard library only, plus ONE external tool: the wgrib2 binary (path in $WGRIB2),
@@ -41,12 +41,15 @@ AWS = "https://noaa-gfs-bdp-pds.s3.amazonaws.com"
 OPEN_METEO_AQ = "https://air-quality-api.open-meteo.com/v1/air-quality"
 OPEN_METEO_FC = "https://api.open-meteo.com/v1/forecast"
 
-HOURS = list(range(0, 49))          # f000..f048
+# GFS 0.25 deg is hourly to f120, then 3-hourly (checked against the .idx files on the AWS
+# mirror, 12Z 30 Oct 2026: f121, f122, f124, f166 do not exist). 121 + 16 = 137 frames.
+HOURS = list(range(0, 121)) + list(range(123, 169, 3))   # f000..f120 hourly, f123..f168 3-hourly
 NX, NY, DEG = 720, 361, 0.5         # scalar grid: lon -180..179.5, lat 90..-90
 # Wind is stored at 0.75 deg: at 0.5 deg the 8-bit U+V PNG measured ~265-306 KB per hour,
 # over the ~150 KB budget. (earth.nullschool draws wind from 1 deg GFS.)
 WNX, WNY, WDEG = 480, 241, 0.75
-SERIES_DEG, SERIES_STEP = 3, 3     # place-panel chart: 3 deg, every 3 h (2 deg measured 402 KB)
+SERIES_DEG = 3                      # place-panel chart grid (2 deg measured 402 KB at 17 steps)
+SERIES_HOURS = list(range(0, 49, 3)) + list(range(54, 169, 6))   # 3-hourly to 48 h, then 6-hourly
 AQ_DEG = 4                          # 90 x 43 = 3,870 locations; x2 refreshes = 7,740 calls/day
 AQ_LATS = [84 - i * AQ_DEG for i in range(43)]        # 84 .. -84
 AQ_LONS = [-180 + i * AQ_DEG for i in range(90)]      # -180 .. 176
@@ -79,7 +82,7 @@ VARS = [
 MATCH = "|".join(f":{g}:{lvl}:{tr}:" for _, g, lvl, _, tr in VARS)
 
 STATS = {"http_requests": 0, "http_bytes": 0, "aq_locations": 0, "aq_requests": 0, "aq_429": 0,
-         "spot_locations": 0}
+         "spot_locations": 0, "aq_probe_locations": 0}
 NOTICES = []
 
 
@@ -196,14 +199,14 @@ def file_url(source, run, f):
 
 
 def find_cycle(source):
-    """Newest cycle whose f048 index exists (so the whole 48 h window is published)."""
+    """Newest cycle whose last forecast hour (f168) index exists (so the whole 7-day window is published)."""
     t = now_utc()
     run = t.replace(minute=0, second=0, hour=t.hour - t.hour % 6)
     for _ in range(6):
         st, hdr, _ = get(file_url(source, run, HOURS[-1]) + ".idx", method="HEAD", ok404=True, retries=2)
         if st == 200:
             st0, hdr0, _ = get(file_url(source, run, 0) + ".idx", method="HEAD", ok404=True, retries=2)
-            return run, {"f000": last_modified(hdr0), "f048": last_modified(hdr)}
+            return run, {"f000": last_modified(hdr0), "f168": last_modified(hdr)}
         run -= dt.timedelta(hours=6)
     raise RuntimeError(f"{source}: no complete GFS cycle in the last 36 h")
 
@@ -219,7 +222,8 @@ def fetch_nomads(run, f):
     for _, g, lvl, _, _ in VARS:
         q[f"var_{g}"] = "on"
         q["lev_" + lvl.replace(" ", "_")] = "on"
-    scripts = [NOMADS_FILTER_SCRIPT] if NOMADS_FILTER_SCRIPT else ["filter_gfs_0p25.pl", "filter_gfs_0p25_1hr.pl"]
+    # the script that worked last goes first; the other is still tried (hourly vs 3-hourly files)
+    scripts = sorted(["filter_gfs_0p25.pl", "filter_gfs_0p25_1hr.pl"], key=lambda x: x != NOMADS_FILTER_SCRIPT)
     last = None
     for s in scripts:
         url = f"{NOMADS}/cgi-bin/{s}?{urllib.parse.urlencode(q)}"
@@ -391,8 +395,8 @@ def build_gfs(args, out, generated, report):
             t0 = time.time()
             run, pub = find_cycle(source)
             notice("GFS cycle", f"{source}: run {iso(run)}; f000 published {iso(pub['f000']) if pub['f000'] else '?'}, "
-                   f"f048 {iso(pub['f048']) if pub['f048'] else '?'}"
-                   + (f" (+{(pub['f048'] - run).total_seconds() / 60:.0f} min after cycle)" if pub["f048"] else ""))
+                   f"f168 {iso(pub['f168']) if pub['f168'] else '?'}"
+                   + (f" (+{(pub['f168'] - run).total_seconds() / 60:.0f} min after cycle)" if pub["f168"] else ""))
             report["gfs_publish"] = {"source": source, "run": iso(run),
                                      **{k: iso(v) if v else None for k, v in pub.items()}}
             gdir = out / "gfs"
@@ -401,7 +405,7 @@ def build_gfs(args, out, generated, report):
             frames, sizes, spot = [], {k: [] for k in ("wind", "temp", "rain", "cloud", "pres")}, {}
             series = []
             align = []   # raw GFS values at ALIGN_POINTS, every hour (for the alignment test)
-            prev_total = None   # running APCP total of the previous hour (0.5 deg, smoothed)
+            prev_total, prev_f = None, 0   # running APCP total at the previous frame (0.5 deg, smoothed)
             prev_city_total, city_raw = {}, []
             with tempfile.TemporaryDirectory() as td:
                 for f in HOURS:
@@ -416,8 +420,12 @@ def build_gfs(args, out, generated, report):
                     else:
                         total = fld.pop("apcp")
                         prev = prev_total or [0.0] * len(total)
-                        fld["rain"] = [max(0.0, a - b) for a, b in zip(total, prev)]
+                        # mean rate since the previous frame: 1 h to f120, then 3 h (mm/h)
+                        span = f - prev_f
+                        fld["rain"] = [max(0.0, a - b) / span for a, b in zip(total, prev)]
                         prev_total = total
+                    rain_hours = f - prev_f if f else 0
+                    prev_f = f
                     # alignment reference for the smoothed fields = the pipeline's own node value
                     for name, la, lo in ALIGN_POINTS:
                         raw.setdefault(name, {})["cloud"] = round(node_value(fld["cloud"], la, lo), 3)
@@ -429,7 +437,7 @@ def build_gfs(args, out, generated, report):
                     for name, c in city.items():
                         if "apcp" in c:
                             total_c = c.pop("apcp")
-                            c["rain"] = round(max(0.0, total_c - prev_city_total.get(name, 0.0)), 4)
+                            c["rain"] = round(max(0.0, total_c - prev_city_total.get(name, 0.0)) / max(1, rain_hours), 4)
                             prev_city_total[name] = total_c
                         elif "prate" in c:
                             c["rain"] = c.pop("prate")
@@ -440,11 +448,11 @@ def build_gfs(args, out, generated, report):
                         c["grid"] = grid_city(fld, name)
                     city_raw.append({"f": f, "cities": city})
                     valid = run + dt.timedelta(hours=f)
-                    fr = write_gfs_frame(gdir, f, fld, run, valid, generated, sizes)
+                    fr = write_gfs_frame(gdir, f, fld, run, valid, generated, sizes, rain_hours)
                     frames.append(fr)
-                    if f % SERIES_STEP == 0:
+                    if f in SERIES_HOURS:
                         series.append(series_rows(fld))
-                    if f in (0, 24):
+                    if f in (0, 24, 120):
                         spot[f] = {name: sample_point(fld, lat, lon) for name, lat, lon in SPOT_CITIES}
             series_meta = write_series(gdir, series, run, generated)
             report["series_kb"] = round((gdir / "series.png").stat().st_size / 1024, 1)
@@ -465,7 +473,7 @@ def build_gfs(args, out, generated, report):
     raise RuntimeError("; ".join(errors))
 
 
-def write_gfs_frame(gdir, f, fld, run, valid, generated, sizes):
+def write_gfs_frame(gdir, f, fld, run, valid, generated, sizes, rain_hours=1):
     base = {"generated_utc": iso(generated), "run_utc": iso(run), "valid_utc": iso(valid),
             "source": GFS_CREDIT, "license": GFS_LICENSE}
     name = f"f{f:03d}.png"
@@ -496,9 +504,10 @@ def write_gfs_frame(gdir, f, fld, run, valid, generated, sizes):
     meta["cloud"] = {"range": [0.0, 255.0]}
     qb = q_log_rain(fld["rain"])
     m = {**base, "field": "rain", "units": "mm/h", "encoding": "log8", "log10_offset": -2, "log10_scale": 0.02,
-         "note": "mm that fell in the hour before valid_utc (f000: instantaneous rate)"}
+         "rain_hours": rain_hours,
+         "note": "mean rate (mm/h) over the rain_hours before valid_utc: 1 h to f120, 3 h after (f000: instantaneous rate)"}
     put(gdir / "rain" / name, png(NX, NY, 1, [qb[j * NX:(j + 1) * NX] for j in range(NY)], m, 0), sizes["rain"])
-    return {"f": f, "valid_utc": iso(valid), **meta}
+    return {"f": f, "valid_utc": iso(valid), "rain_hours": rain_hours, **meta}
 
 
 def series_rows(fld):
@@ -527,7 +536,7 @@ def write_series(gdir, series, run, generated):
     for t, w in series:
         qt, qw = q_linear(t, tl, th), q_linear(w, 0, wh)
         rows += [bytes(b for i in range(j * sn, (j + 1) * sn) for b in (qt[i], qw[i], 0)) for j in range(sm)]
-    hours = list(range(0, HOURS[-1] + 1, SERIES_STEP))
+    hours = SERIES_HOURS
     meta = {"generated_utc": iso(generated), "run_utc": iso(run), "source": GFS_CREDIT, "license": GFS_LICENSE,
             "field": "series", "encoding": "rgb8 R=temp G=wind_kmh", "temp": [tl, th], "wind_kmh": [0, wh],
             "hours": hours, "grid": {"nx": sn, "ny": sm, "deg": SERIES_DEG, "lon0": -180, "lat0": 90}}
@@ -588,7 +597,7 @@ def build_aq(args, out, generated, report, gfs_run):
             sent_this_minute, minute_start = 0, time.time()
         q = {"latitude": ",".join(f"{la:g}" for la, _ in batch), "longitude": ",".join(f"{lo:g}" for _, lo in batch),
              "hourly": "pm2_5,pm10,us_aqi", "domains": "cams_global", "timezone": "GMT", "timeformat": "unixtime",
-             "past_days": 1, "forecast_days": 4}
+             "past_days": 1, "forecast_days": 6}   # 7 days of data = 1 call per location
         _, _, body = get(f"{OPEN_METEO_AQ}?{urllib.parse.urlencode(q)}", timeout=120)
         STATS["aq_requests"] += 1
         STATS["aq_locations"] += len(batch)
@@ -613,7 +622,12 @@ def build_aq(args, out, generated, report, gfs_run):
         pm25 = [v[0] if v else None for v in vals]
         pm10 = [v[1] if v else None for v in vals]
         aqi = [v[2] if v else None for v in vals]
-        nonnull.append(sum(x is not None for x in pm25) / len(pm25))
+        share = sum(x is not None for x in pm25) / len(pm25)
+        # CAMS global forecasts 5 days; past its end Open-Meteo returns nulls. Hours that are
+        # mostly empty are not written, and the page shows where the forecast ends.
+        if share < 0.5:
+            continue
+        nonnull.append(share)
         # Exact fixed-step 16-bit values (no per-hour max scaling: one hotspot used to make each
         # 8-bit step several ug/m3 wide). Three stacked blocks: PM2.5, PM10, US AQI.
         nx, ny = len(AQ_LONS), len(AQ_LATS)
@@ -635,7 +649,33 @@ def build_aq(args, out, generated, report, gfs_run):
     return {"generated_utc": iso(generated), "credit": AQ_CREDIT, "license": AQ_LICENSE, "stale": False,
             "format": AQ_FORMAT, "encoding": {"blocks": ["pm2_5", "pm10", "us_aqi"], "step": [0.1, 0.1, 1], "nodata": 65535},
             "grid": {"nx": len(AQ_LONS), "ny": len(AQ_LATS), "deg": AQ_DEG, "lon0": AQ_LONS[0], "lat0": AQ_LATS[0]},
-            "files": files, "calls": STATS["aq_locations"]}
+            "files": files, "end_utc": files[-1]["valid_utc"] if files else None, "calls": STATS["aq_locations"]}
+
+
+def aq_range_probe(report):
+    """How far the CAMS forecast reaches through Open-Meteo with the job's own parameters, at three
+    points (one request, 3 location-calls). Recorded every run, also when the grid is reused."""
+    pts = [("Delhi", 28, 76), ("London", 52, 0), ("Beijing", 40, 116)]
+    q = {"latitude": ",".join(str(p[1]) for p in pts), "longitude": ",".join(str(p[2]) for p in pts),
+         "hourly": "pm2_5,pm10,us_aqi", "domains": "cams_global", "timezone": "GMT", "timeformat": "unixtime",
+         "past_days": 1, "forecast_days": 6}
+    try:
+        _, _, body = get(f"{OPEN_METEO_AQ}?{urllib.parse.urlencode(q)}", retries=2)
+        STATS["aq_probe_locations"] = len(pts)
+        res = json.loads(body)
+        out = {}
+        for (name, _, _), r in zip(pts, res if isinstance(res, list) else [res]):
+            h = r["hourly"]
+            valid = [t for t, v in zip(h["time"], h["pm2_5"]) if v is not None]
+            out[name] = {"hours_returned": len(h["time"]), "first": iso(dt.datetime.fromtimestamp(h["time"][0], dt.timezone.utc)),
+                         "last": iso(dt.datetime.fromtimestamp(h["time"][-1], dt.timezone.utc)),
+                         "last_non_null": iso(dt.datetime.fromtimestamp(valid[-1], dt.timezone.utc)) if valid else None,
+                         "non_null": len(valid)}
+        report["aq_range"] = out
+        notice("Air-quality range (Open-Meteo cams_global, past_days=1, forecast_days=6)",
+               " ; ".join(f"{k}: {v['hours_returned']} h returned {v['first']}..{v['last']}, pm2_5 to {v['last_non_null']}" for k, v in out.items()))
+    except Exception as e:  # noqa: BLE001 - informational only
+        notice("Air-quality range", f"unavailable ({e})")
 
 
 def spot_check(report):
@@ -757,6 +797,7 @@ def main():
             aq = {**prev[0], "stale": aq_age > 30}
             notice("Air quality reused", f"deployed files from {aq['generated_utc']} ({aq_age:.1f} h old)")
     spot_check(report)
+    aq_range_probe(report)
 
     # Manifest + rolling history (the daily archive is cut from it)
     sizes = report.get("gfs_sizes", {})
@@ -771,14 +812,14 @@ def main():
 
     report.update({"seconds_total": entry["seconds"], "stats": STATS, "manifest_kb": round((out / "manifest.json").stat().st_size / 1024, 1)})
     total = sum(p.stat().st_size for p in out.rglob("*") if p.is_file())
-    notice("Run", f"{entry['seconds']} s total; downloaded {STATS['http_bytes'] / 1e6:.1f} MB in {STATS['http_requests']} requests; "
+    notice("Run", f"{len(gfs.get('frames', []))} GFS frames (f{gfs['frames'][0]['f']:03d}-f{gfs['frames'][-1]['f']:03d}); {entry['seconds']} s total; downloaded {STATS['http_bytes'] / 1e6:.1f} MB in {STATS['http_requests']} requests; "
            f"output {total / 1e6:.1f} MB")
     if sizes:
         notice("File sizes per hour (KB, mean / max)", ", ".join(f"{k} {v['mean'] / 1024:.0f}/{v['max'] / 1024:.0f}" for k, v in sizes.items()))
     if args.report:
         args.report.write_text(json.dumps(report, indent=1, default=str))
     if os.environ.get("GITHUB_ACTIONS"):
-        for title, msg in NOTICES[:10]:
+        for title, msg in NOTICES[:14]:
             print(f"::notice title={title}::{msg}")
 
 

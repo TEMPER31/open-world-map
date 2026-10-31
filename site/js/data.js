@@ -59,11 +59,16 @@ export async function initData() {
 
   if (!manifest) {
     const base = Math.floor(now / 3600e3) * 3600e3;
-    meta = { live: false, error, first: 0, hours: HOURS, base, run: base, generated: base, stale: false };
+    meta = { live: false, error, first: 0, hours: HOURS, base, run: base, generated: base, stale: false,
+      times: Array.from({ length: HOURS + 1 }, (_, t) => t), rainHours: () => 1, aqEnd: null };
     return meta;
   }
-  const run = Date.parse(manifest.gfs.run), last = Math.max(...manifest.gfs.frames.map(x => x.f));
-  const first = Math.max(0, Math.min(last, Math.floor((now - run) / 3600e3)));
+  // Frames are hourly to f120 and 3-hourly after (f123 ... f168). t counts hours from the
+  // first frame shown ("Now": the latest frame at or before the current hour), so the
+  // timeline stays a true time axis and the 3-hourly part simply has wider steps.
+  const run = Date.parse(manifest.gfs.run), fs = manifest.gfs.frames.map(x => x.f).sort((a, b) => a - b), last = fs[fs.length - 1];
+  const hourNow = Math.floor((now - run) / 3600e3);
+  const first = fs.filter(x => x <= hourNow).pop() ?? fs[0];
   const generated = Date.parse(manifest.generated_utc);
   const aqGen = manifest.aq ? Date.parse(manifest.aq.generated_utc) : null;
   meta = {
@@ -71,12 +76,27 @@ export async function initData() {
     gfs: manifest.gfs, aq: manifest.aq,
     stale: manifest.gfs.stale || (now - generated) / 3600e3 > STALE_AFTER_H,
     aqStale: !manifest.aq || manifest.aq.stale || (now - aqGen) / 3600e3 > AQ_STALE_AFTER_H,
-    aqGenerated: aqGen
+    aqGenerated: aqGen,
+    times: fs.filter(x => x >= first).map(x => x - first),
+    // hours of rain each frame's value averages over (1, or 3 after f120; 0 = f000 rate)
+    rainHours: t => manifest.gfs.frames.find(x => x.f === first + t)?.rain_hours ?? 1,
+    // valid time (ms) of the last air-quality hour (CAMS ends ~5 days out), or null
+    aqEnd: manifest.aq?.files?.length ? Date.parse(manifest.aq.end_utc || manifest.aq.files[manifest.aq.files.length - 1].valid_utc) : null
   };
   return meta;
 }
 
 const f = t => meta.first + t;
+
+// The frame time next to t in direction dir (+1 / -1), clamped to the ends; dir 0 snaps t to
+// the nearest frame.
+export function stepTime(t, dir) {
+  const ts = meta.times;
+  if (!dir) return ts.reduce((a, b) => Math.abs(b - t) < Math.abs(a - t) ? b : a, ts[0]);
+  if (dir > 0) return ts.find(x => x > t) ?? ts[ts.length - 1];
+  for (let i = ts.length - 1; i >= 0; i--) if (ts[i] < t) return ts[i];
+  return ts[0];
+}
 
 export const getGrid = (t, field) => worker ? call({ type: 'grid', f: f(t), field }) : core.grid(f(t), field);
 export const getFieldTexture = (t, field) => worker ? call({ type: 'fieldtex', f: f(t), field }) : core.fieldTexture(f(t), field);

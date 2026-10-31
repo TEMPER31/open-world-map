@@ -14,7 +14,7 @@ const state = {
   opacity: 1,             // field opacity multiplier (Settings)
   density: 1,             // particle density multiplier (Settings)
   tempUnit: fahrenheit ? 'F' : 'C', // display unit for temperature (Settings, legend)
-  t: 0,                   // forecast hour, 0..HOURS
+  t: 0,                   // hours from Now (a frame time: hourly to f120, then every 3 h)
   playing: false,
   selection: null,        // {type: 'place', lon, lat}
   layersMin: false
