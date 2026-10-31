@@ -384,6 +384,14 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
     perType[k] = { hosts: got, onlyOwn: got.length > 0 && got.every(h => re.test(h)), afterOff: evCount(hosts) };
   }
   check('Events off (default): 0 requests to USGS, NASA, GDACS or NOAA while stepping the timeline', off0 === 0, `${off0} requests`);
+  const style = () => page.evaluate(() => { const st = window.owmMap.getStyle(); return { sources: Object.keys(st.sources).filter(k => /^(events|nhc|nhc-now|ev-sel)$/.test(k)).length, layers: st.layers.filter(l => /^(ev-|nhc-)/.test(l.id)).length, images: window.owmMap.listImages().filter(i => i.startsWith('ev-')).length }; });
+  const offStyle = await style();
+  await page.click('.layers [data-ev="eq"]'); await evWait(page);
+  const onStyle = await style();
+  await page.click('.layers [data-ev="eq"]'); await page.waitForTimeout(300);
+  const offAgain = await style();
+  for (const h in hosts) delete hosts[h];
+  check('Events off cost nothing: no event sources, layers or icons on the map; added when a type is turned on, removed when the last is turned off', offStyle.sources + offStyle.layers + offStyle.images === 0 && onStyle.layers === 7 && onStyle.sources === 4 && offAgain.sources + offAgain.layers + offAgain.images === 0, JSON.stringify({ offStyle, onStyle, offAgain }));
   check('Each event toggle contacts only its own source, and 0 requests after it is turned off', Object.values(perType).every(x => x.onlyOwn && x.afterOff === 0), JSON.stringify(perType));
   await page.click('.layers [data-ev="eq"]'); await page.click('.layers [data-evwin="24h"]');
   await page.reload(); await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
