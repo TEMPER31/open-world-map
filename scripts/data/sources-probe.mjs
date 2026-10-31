@@ -35,15 +35,15 @@ const PAGES = [
   ['USGS summary feed docs', 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/'],
   ['USGS copyrights and credits', 'https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits'],
   ['EONET v3 docs', 'https://eonet.gsfc.nasa.gov/docs/v3'],
-  ['EONET home', 'https://eonet.gsfc.nasa.gov/'],
-  ['GDACS disclaimer', 'https://www.gdacs.org/About/disclaimer.aspx'],
+  ['EONET about and disclaimer', 'https://eonet.gsfc.nasa.gov/what-is-eonet'],
+  ['GDACS terms of use', 'https://www.gdacs.org/About/termofuse.aspx'],
   ['GDACS about', 'https://www.gdacs.org/About/overview.aspx'],
   ['GDACS feed reference', 'https://www.gdacs.org/feed_reference.aspx'],
   ['GDACS home', 'https://www.gdacs.org/'],
   ['NHC GIS', 'https://www.nhc.noaa.gov/gis/'],
   ['NHC JSON notice', 'https://www.nhc.noaa.gov/aboutnhcgis.shtml'],
   ['NWS disclaimer', 'https://www.weather.gov/disclaimer'],
-  ['Mapillary API docs', 'https://www.mapillary.com/developer/api-documentation'],
+  ['Mapillary API docs', 'https://www.mapillary.com/developer/api-documentation', /rate limit|requests per|per minute|thumb_1024|thumb_256|captured_at -|creator -|client token|restrict|domain/i],
   ['Mapillary terms', 'https://www.mapillary.com/terms'],
   ['Mapillary licence help', 'https://help.mapillary.com/hc/en-us/articles/115001770409'],
   ['Mapillary help home', 'https://help.mapillary.com/hc/en-us'],
@@ -103,7 +103,7 @@ for (const [name, url] of ENDPOINTS) {
     log(`- Access-Control-Allow-Origin: **${H(r, 'access-control-allow-origin')}** · cache-control: ${H(r, 'cache-control')} · last-modified: ${H(r, 'last-modified')}`);
     const rl = [...r.headers].filter(([k]) => /rate|limit|retry/i.test(k)).map(([k, v]) => `${k}: ${v}`);
     if (rl.length) log(`- rate headers: ${rl.join('; ')}`);
-    try { for (const s of summarise(name, JSON.parse(body))) log(`- ${s}`); } catch { log(`- body: ${short(body.replace(/\s+/g, ' '), 400)}`); }
+    try { for (const s of summarise(name, JSON.parse(body.replace(/^\uFEFF/, '')))) log(`- ${s}`); } catch { log(`- body: ${short(body.replace(/\s+/g, ' '), 400)}`); }
     // preflight (needed only for non-simple requests; recorded for the Graph API)
     if (/graph\.mapillary/.test(url)) {
       const p = await get(url, 'OPTIONS', { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' });
@@ -114,13 +114,13 @@ for (const [name, url] of ENDPOINTS) {
 }
 
 log('## Terms and documentation (matching sentences)\n');
-for (const [name, url] of PAGES) {
+for (const [name, url, only] of PAGES) {
   log(`### ${name}\n\n\`${url}\`\n`);
   try {
     const { r, body } = await get(url);
     const text = body.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, "'").replace(/\s+/g, ' ');
     log(`- HTTP ${r.status} · ${text.length.toLocaleString('en-US')} chars of text · final URL ${r.url}`);
-    const hits = [...new Set(text.split(/(?<=[.!?])\s+/).filter(s => KEYS.test(s) && s.length > 20).map(s => s.trim().slice(0, 400)))];
+    const hits = [...new Set(text.split(/(?<=[.!?])\s+/).filter(s => (only || KEYS).test(s) && s.length > 20).map(s => s.trim().slice(0, 400)))];
     for (const s of hits.slice(0, 40)) log(`  - ${s}`);
     const links = [...body.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi)].map(m => [m[1], m[2].replace(/<[^>]+>/g, '').trim()]).filter(([h, t]) => /disclaim|copyright|terms|licen|legal|attribut|about/i.test(h + ' ' + t));
     if (links.length) log(`  - links: ${[...new Set(links.map(([h, t]) => `${t} -> ${h}`))].slice(0, 15).join(' | ')}`);

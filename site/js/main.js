@@ -13,6 +13,7 @@ import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
 import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
 import { initTimeline, relT, fmtUTC, fmtBoth } from './timeline.js';
+import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -41,7 +42,11 @@ const FIELD_NOTE = {
   cloud: () => 'Total cloud cover, area average (about 50 km).',
   pres: () => 'Sea-level pressure. Isobars every 4 hPa; H and L mark highs and lows.'
 };
-const EVENTS = [['eq', 'Earthquakes M2.5+'], ['fi', 'Wildfires'], ['cy', 'Tropical cyclones'], ['st', 'Severe storms']];
+const EV_SW = { eq: 'eq', fv: 'fi', st: 'st', ga: 'ga' };
+// Events section (rail and phone sheet): a toggle per type, the 24 h / 7 d window and a status note.
+const eventsHTML = () => `<div class="lsec ev" data-events><div class="kick"><span>Events</span><div class="seg" role="radiogroup" aria-label="Events shown">${[['24h', '24 h'], ['7d', '7 d']].map(([v, n]) => `<button type="button" role="radio" data-evwin="${v}">${n}</button>`).join('')}</div></div>
+  ${EV_TYPES.map(([k, n, v]) => `<div class="row" data-toggle><span class="sw ${EV_SW[k]}"></span><b>${n}</b><span class="v" data-evs="${k}">${v}</span><button class="tg" type="button" role="switch" data-ev="${k}" aria-label="${n}"></button></div>`).join('')}
+  <p class="lx-note" data-evnote></p></div>`;
 
 // Labels that depend on whether real data is loaded.
 const L = {
@@ -124,9 +129,7 @@ function buildLayers() {
       <button class="row" type="button" role="radio" data-field="none"><span class="rad"></span><b>None</b><span class="v">map only</span></button>
       <div class="row" data-toggle><b>Wind particles</b><button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
     </div>
-    <div class="lsec"><div class="kick"><span>Events</span><span>Phase 5</span></div>
-      ${EVENTS.map(([c, n]) => `<div class="row off" aria-disabled="true"><span class="sw ${c}"></span><b>${n}</b><span class="v soon">Soon</span><button class="tg" type="button" role="switch" aria-checked="false" aria-label="${n} (coming soon)" disabled></button></div>`).join('')}
-    </div>
+    ${eventsHTML()}
     <div class="lsec"><div class="kick"><span>Imagery</span><span>Phase 4</span></div>
       <div class="row off" aria-disabled="true"><span class="gdot"></span><b>Street photos</b><span class="v soon">Soon</span><button class="tg" type="button" role="switch" aria-checked="false" aria-label="Street photos (coming soon)" disabled></button></div>
     </div>
@@ -141,9 +144,9 @@ function buildLayers() {
       <div class="card"><div class="it">Map<div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div></div></div></div>
     <div class="grp"><div class="card">
       <div class="it">Wind particles<button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
-      <div class="it">Events<span class="soon">Coming soon</span></div>
       <div class="it"><span><span class="gdot"></span> Street photos</span><span class="soon">Coming soon</span></div>
-    </div></div>`;
+    </div></div>
+    <div class="grp">${eventsHTML()}</div>`;
 
   $$('[data-basemaps]').forEach(g => g.innerHTML = BASEMAPS.map(([v, n]) => `<button type="button" role="radio" data-basemap="${v}">${n}</button>`).join(''));
   $('[data-density]').innerHTML = DENSITY.map(([v, n]) => `<button type="button" role="radio" data-dens="${v}">${n}</button>`).join('');
@@ -184,6 +187,8 @@ function bindChrome(map) {
       S.set({ field: toggle ? 'none' : t.dataset.field });
     }
     else if (t.dataset.basemap) S.set({ basemap: t.dataset.basemap });
+    else if (t.dataset.ev) S.set({ events: { ...S.get('events'), [t.dataset.ev]: !S.get('events')[t.dataset.ev] } });
+    else if (t.dataset.evwin) S.set({ evWin: t.dataset.evwin });
     else if (t.dataset.dens) S.set({ density: +t.dataset.dens });
     else if (t.dataset.tunit) S.set({ tempUnit: t.dataset.tunit });
     else if (t.dataset.sunit) S.set({ speedUnit: t.dataset.sunit });
@@ -198,6 +203,7 @@ function bindChrome(map) {
     else if (t.dataset.open) togglePop(t.dataset.open);
     else if ('close' in t.dataset) closePops();
     else if ('lyr' in t.dataset) toggleLayersSheet();
+    else if ('lyrTab' in t.dataset) { toggleLayersSheet(true); $('#lsheet [data-events]').scrollIntoView({ block: 'nearest' }); }
     else if ('lyrClose' in t.dataset) toggleLayersSheet(false);
     else if (t.dataset.zoom) t.dataset.zoom > 0 ? map.zoomIn() : map.zoomOut();
   });
@@ -229,6 +235,11 @@ function bindChrome(map) {
       el.setAttribute('aria-checked', String(on));
     });
     $$('[data-lsum]').forEach(el => el.textContent = s.field === 'none' ? 'No layer' : `${FIELDS[s.field].short} · ${meta.live ? 'GFS' : 'sample'}`);
+  });
+  S.on(['events', 'evWin'], s => {
+    $$('[data-ev]').forEach(el => { const on = !!s.events[el.dataset.ev]; el.classList.toggle('on', on); el.setAttribute('aria-checked', String(on)); });
+    $$('[data-evwin]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.evwin === s.evWin)));
+    renderEvStatus();
   });
   S.on(['basemap'], s => $$('[data-basemap]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.basemap === s.basemap))));
   // One units setting for the whole page: probe, place panel, chart, legends, scale bar, measure.
@@ -325,7 +336,7 @@ let detailVals = null, detailSeries = null, detailKey = '', placeSheet = null;
 let detailFrame = 0;
 const redrawDetail = () => { detailFrame ||= requestAnimationFrame(() => { detailFrame = 0; renderDetail(S.get()); }); };
 function loadDetail(s) {
-  if (!s.selection) return;
+  if (s.selection?.type !== 'place') return;
   const { lon, lat } = s.selection, key = `${lon},${lat},${s.t}`, place = `${lon},${lat}`;
   if (key === detailKey) return;
   detailKey = key;
@@ -347,6 +358,12 @@ function renderDetail(s) {
   const el = $('#detail'), body = $('#detail .d-body');
   document.body.classList.toggle('has-detail', !!s.selection);
   if (!s.selection) { el.hidden = true; detailKey = ''; stamp('panel', null); stamp('chart', null); return; }
+  if (s.selection.type === 'event') { // event panel: same panel / sheet, last click wins
+    const html = evPanel(s.selection.id);
+    if (!html) { S.set({ selection: null }); return; }
+    body.innerHTML = html; el.hidden = false; detailKey = ''; stamp('panel', null); stamp('chart', null);
+    return;
+  }
   const { lon, lat } = s.selection, t = s.t;
   const all = detailVals && ORDER.every(k => k in detailVals);
   const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
@@ -369,9 +386,23 @@ function renderDetail(s) {
   stamp('panel', all ? t : -1); stamp('chart', detailSeries ? t : -1);
 }
 
+// ---- events status (counts, unavailable / none active, source update times) --------------
+function renderEvStatus() {
+  const notes = [];
+  for (const [k, , v] of EV_TYPES) {
+    const st = evStatus(k);
+    $$(`[data-evs="${k}"]`).forEach(el => { el.textContent = st ? st.text : v; el.classList.toggle('bad', st?.text === 'unavailable'); });
+    if (st?.note && st.note !== 'loading') notes.push(st.note);
+  }
+  if (evSourceTimes()) notes.push(evSourceTimes() + '.');
+  const on = Object.values(S.get('events')).some(Boolean);
+  $$('[data-evnote]').forEach(el => el.textContent = on ? [`Events from the past ${S.get('evWin') === '24h' ? '24 hours' : '7 days'}; storm forecasts follow the timeline.`, ...notes].join(' ') : 'Events from the past 7 days. Turn a type on to load it.');
+}
+
 // ---- credits strip -------------------------------------------------------------------
 function renderCredits(map) {
   const parts = meta.live ? [CREDITS.gfs, CREDITS.cams] : [CREDITS.sample];
+  parts.push(...evCredits());
   if (S.get('basemap') === 'satellite') parts.push(...activeSatellite(map).map(x => x.credit));
   parts.push(CREDITS.vector, CREDITS.naturalEarth, CREDITS.maplibre);
   const el = $('#credits');
@@ -486,7 +517,8 @@ async function boot() {
   window.owmWind = wind;
   // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
   const measure = initMeasure(map);
-  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets };
+  initEvents(map, () => { renderEvStatus(); renderCredits(map); const s = S.get(); if (s.selection?.type === 'event') renderDetail(s); });
+  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets, events: eventsTest };
   // Public time API for future layers (events, Phase 5): see clock.js.
   window.owmClock = { onTime, getValidTime, layerTimes };
 
@@ -549,16 +581,19 @@ async function boot() {
   let pin = null;
   map.on('click', e => {
     const { lng, lat } = e.lngLat;
-    if (Math.abs(lat) > 85 || S.get('measuring')) return; // the measure tool owns clicks while on
+    if (S.get('measuring')) return; // the measure tool owns clicks while on
+    const ev = evHit(e.point); // an event under the click wins over the place
+    if (ev) return S.set({ selection: ev });
+    if (Math.abs(lat) > 85) return;
     S.set({ selection: { type: 'place', lon: lng, lat } });
   });
   S.on(['selection'], s => {
     pin?.remove(); pin = null;
     if (!s.selection) return;
+    toggleLayersSheet(false); closePops(); placeSheet.set('peek');
+    if (s.selection.type !== 'place') return; // events are highlighted by a map layer
     const el = document.createElement('div'); el.className = 'pin';
     pin = new maplibregl.Marker({ element: el }).setLngLat([s.selection.lon, s.selection.lat]).addTo(map);
-    toggleLayersSheet(false); closePops();
-    placeSheet.set('peek');
   });
   $('#detail').addEventListener('click', e => {
     if (e.target.closest('[data-deselect]')) S.set({ selection: null });
