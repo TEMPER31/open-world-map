@@ -149,6 +149,46 @@ Paeth, PNG's own heuristic) saved nothing (temperature 141 KB adaptive vs 140 KB
 137 KB), so
 the fixed filters stay.
 
+## 7-day forecast: sizes, run time and budgets (forecast-7day PR)
+
+Measured in the PR's CI run (GFS **18Z 30 Oct 2026**, from **NOMADS**; air quality reused from
+the CI cache), unless marked otherwise.
+
+| Field | Grid | Mean / max KB per frame (137 frames) | Frames over 150 KB |
+|---|---|---|---|
+| wind (U+V) | 0.75° | 142.4 / **153.7** | 12 of 137 (all ≤ 153.7 KB) |
+| temperature | 0.5° | 142.6 / 145.0 | 0 |
+| pressure | 0.5° | 142.1 / 147.4 | 0 |
+| precipitation | 0.5° | 104.0 / 113.2 | 0 |
+| clouds | 0.5° | 129.7 / 132.9 | 0 |
+| series (place chart, loaded on first click) | 3°, 3-hourly to 48 h then 6-hourly (37 steps) | **404.8 KB** (one file; 187.3 KB at 48 h) | — |
+| manifest.json | — | 34.7 KB (17.6 KB at 48 h) | — |
+
+| Measure | 48 h (before) | 7 days (this PR) |
+|---|---|---|
+| GFS frames | 49 | **137** (f000–f120 hourly + f123–f168 every 3 h) |
+| Data-build step | 197 s GFS only (satellite-zoom PR run) / 10 min 34 s with an air-quality refresh (main, 30 Oct 16:54) | **9 min 01 s** GFS only (job 9 min 18 s); with a refresh ≈ 15–16 min (estimate: + ~6.5 min for 3,870 AQ locations) |
+| HTTP requests per cycle (NOMADS) | 55 | **144 HTTP requests** in all (137 grib-filter requests, 1 s apart, + checks) |
+| Downloaded per cycle | 0.39 GB | **1.11 GB** from NOMADS (the AWS fallback measured 790 MB locally) |
+| Output per cycle (site/data/live) | 33 MB | **93.1 MB** (local build of the same run) |
+| Pages artifact upload (data job) | 3 s | 4 s |
+| Pages deploy | 16 s job, 7 s deploy step (33 MB, run 30 Oct 16:54) | measured on the first main run after merge |
+
+**Air quality range** (Open-Meteo `cams_global`, `past_days=1&forecast_days=6`, probed every
+run at 3 points): the API returns **168 hours** (7 days of data = 1 call per location under
+Open-Meteo's > 7-day weighting) and **pm2_5 is non-null to about 4 d 18 h after the GFS run**
+(18Z 30 Oct run: last non-null 12Z 4 Nov; 157 of 168 hours), the end of CAMS's 5-day forecast.
+Hours that are mostly empty are not written; the manifest records `aq.end_utc` and the map
+shows "Air quality forecast ends {date}" after it, with the legend dimmed and nothing drawn.
+Calls per day stay at **~7,740** (2 refreshes × 3,870) + 3 spot-check + 3 range-probe
+location-calls per run.
+
+**Pages limits** (GitHub Docs: 1 GB site, 100 GB/month soft bandwidth, 10 min deploy): the site
+is ~95 MB. Bandwidth per visitor, estimated from the file sizes: opening the map ≈ 1 MB (one
+field + wind + the next 2 frames + manifest); a typical visit (scrub ~20 frames, one place
+click) ≈ 7 MB; playing one field with wind through all ~131 frames ≈ 37 MB. So 100 GB/month is
+roughly **14,000 typical visits or 2,700 full plays**. Today's traffic is far below that.
+
 ## Grid resolution: what it costs at a point (phase-2-fixes-2)
 
 All numbers below were measured locally from the raw NOAA files on the AWS mirror (GFS run
