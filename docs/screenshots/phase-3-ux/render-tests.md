@@ -1,41 +1,41 @@
 # Rendering and behaviour tests
 
-Generated 2026-10-31T08:02:36.363Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
+Generated 2026-10-31T08:41:49.657Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
 
 | Test | Result | Detail |
 |---|---|---|
-| Westerly (+U only): particles move east | pass | {"dx":0.0205,"dy":0.0017} |
-| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0019,"dy":-0.0311} |
-| Easterly (-U only): particles move west | pass | {"dx":-0.0183,"dy":0.0011} |
-| Pressure: isobars drawn by the field shader and H/L labels are a WebGL symbol layer (no DOM markers) | pass | {"domMarkers":0,"hlFeatures":63,"isobarsInShader":true} |
-| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 7 of 7 pan frames rendered the H/L layer; DOM labels: 0 |
+| Westerly (+U only): particles move east | pass | {"dx":0.0208,"dy":0.0002} |
+| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0011,"dy":-0.0306} |
+| Easterly (-U only): particles move west | pass | {"dx":-0.017,"dy":0.0025} |
+| Pressure: isobars drawn by the field shader and H/L labels are a WebGL symbol layer (no DOM markers) | pass | {"domMarkers":0,"hlFeatures":64,"isobarsInShader":true} |
+| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 9 of 9 pan frames rendered the H/L layer; DOM labels: 0 |
 | No page errors (pressure) | pass |  |
 | None: field hidden and legend says "No layer" | pass | {"visible":false,"legend":"No layermap only","isobars":false,"hl":0} |
 | None + particles off: no data files fetched while stepping 4 hours | pass | 0 requests:  |
 | Clicking the active layer again turns it off | pass |  |
 | "None" is remembered across reloads | pass |  |
 | No page errors (None) | pass |  |
-| 7-day: frames run to f168, hourly to f120 then every 3 h | pass | first f8, last f168, 129 frames on the timeline (113 hourly + 16 three-hourly) |
-| Step button and arrow keys move to the next available frame (f120 -> f123 -> f126 -> back to f120) | pass | {"button":115,"right":118,"left":112,"chip":"3 h step","t120":112} |
-| Scrubbing in the 3-hourly part snaps to a frame | pass | t=145 (f153) |
-| Play moves frame to frame across f120 (same speed per frame) | pass | 110, 111, 112, 115, 118, 121, 124, 127 |
+| 7-day: frames run to f168, hourly to f120 then every 3 h | pass | first f9, last f168, 128 frames on the timeline (112 hourly + 16 three-hourly) |
+| Step button and arrow keys move to the next available frame (f120 -> f123 -> f126 -> back to f120) | pass | {"button":114,"right":117,"left":111,"chip":"3 h step","t120":111} |
+| Scrubbing in the 3-hourly part snaps to a frame | pass | t=144 (f153) |
+| Play moves frame to frame across f120 (same speed per frame) | pass | 109, 110, 111, 114, 117, 120, 123, 126 |
 | Rain legend says "past 3 h" after f120 and "past hour" before | pass | Precipitation · mm/hpast 3 h · GFS 0.5° / Precipitation · mm/hpast hour · GFS 0.5° |
 | Air quality past its forecast end: legend dimmed with "Air quality forecast ends {date}", no stale data | pass | Air quality forecast ends Wed 4 Nov · 12:00 UTC (AQ files requested at that hour: 0) |
-| Place-panel chart covers the whole run with day boundaries | pass | {"days":6,"end":"+6 d 16 h","points":34} |
+| Place-panel chart covers the whole run with day boundaries | pass | {"days":6,"end":"+6 d 15 h","points":34} |
 | No page errors (7-day timeline) | pass |  |
-| One clock: after each step every layer reports the same valid time (8 steps, across f120 -> f123) | **FAIL** | 8/8 steps in sync; layers: timeline, field, isobars, hl, wind, panel, chart; slowest sync 0 ms; t: 1, 2, 3, 4, 111, 112, 115, 118 |
-| Place panel, chart playhead and probe show the timeline hour (DOM) | pass | {"panel":"118","chart":"118","probe":"118","t":"118"} |
-| Time API for future layers: onTime() fires with {t, valid}; getValidTime() agrees | pass | {"got":{"t":5,"valid":1793451600000},"valid":1793451600000} |
+| One clock: after each step every layer reports the same valid time (8 steps, across f120 -> f123) | pass | 8/8 steps in sync; layers: timeline, wind, field, isobars, hl, panel, chart, probe; slowest sync 351 ms; t: 1, 2, 3, 4, 110, 111, 114, 117 |
+| Place panel, chart playhead and probe show the timeline hour (DOM) | pass | {"panel":"117","chart":"117","probe":"117","t":"117"} |
+| Time API for future layers: onTime() fires with {t, valid}; getValidTime() agrees | pass | {"got":{"t":5,"valid":1793455200000},"valid":1793455200000} |
 | Esc closes the place pop-up | pass |  |
 | No page errors (one clock) | pass |  |
 | Play/pause button and Space toggle playing | pass | {"playBtn":true,"pauseBtn":false,"space":true,"space2":false} |
 | Arrow keys and step buttons move one frame | pass | {"right":2,"left":1,"stepBtn":2} |
 | Speed 4x plays about 4x as many frames as 1x; the chip cycles 1x -> 2x | pass | 1×: 5 frames in 2 s, 4×: 22; chip 2 2× |
-| Local time is shown next to UTC (US Central), and the order can be switched | pass | "Sat 03:00 local · 08:00 UTC" / UTC first: "Sat 08:00 UTC · 03:00 local" (expected local hour 03) |
-| "Now" is the frame closest to the current time and says which forecast hour it is | pass | Now is 2 min from the clock; label "forecast hour 8" |
-| Prefetch: the next 2 frames of the visible field are fetched; no wind (particles off) or other fields | pass | gfs/temp/f019: fetched, gfs/temp/f020: fetched; other files: none |
+| Local time is shown next to UTC (US Central), and the order can be switched | pass | "Sat 04:00 local · 09:00 UTC" / UTC first: "Sat 09:00 UTC · 04:00 local" (expected local hour 04) |
+| "Now" is the frame closest to the current time and says which forecast hour it is | pass | Now is 19 min from the clock; label "forecast hour 9" |
+| Prefetch: the next 2 frames of the visible field are fetched; no wind (particles off) or other fields | pass | gfs/temp/f020: fetched, gfs/temp/f021: fetched; other files: none |
 | No page errors (timeline controls) | pass |  |
-| US units everywhere: probe, place panel, chart, legend ticks, scale bar, measure tool | pass | {"probe":"6 mphfrom SE45.6°N 27.3°W · Sat 03:00 local · 08:00 UTC","panel":"Wind speed 3mph from NW / Temperature 58°F at 2 m","chart":"Forecast— temp °F · ▮ wind mph","legend":"Wind speed · mph10 m · GFS 0.75°0122537506293+","scale":"200 mi","raw":["—","","loading"],"ticks":"0 12 25 37 50 62 93+","measure":"243 mi"} |
+| US units everywhere: probe, place panel, chart, legend ticks, scale bar, measure tool | pass | {"probe":"7 mphfrom SE45.6°N 27.3°W · Sat 04:00 local · 09:00 UTC","panel":"Wind speed 2mph from NNW / Temperature 58°F at 2 m","chart":"Forecast— temp °F · ▮ wind mph","legend":"Wind speed · mph10 m · GFS 0.75°0122537506293+","scale":"200 mi","raw":["—","","loading"],"ticks":"0 12 25 37 50 62 93+","measure":"243 mi"} |
 | Units are remembered after reload | pass | {"t":"F","s":"mph","d":"mi","preset":"us"} |
 | Custom mix (knots with °F) shows the "Custom" preset | pass |  |
 | No page errors (units) | pass |  |
@@ -55,5 +55,5 @@ Generated 2026-10-31T08:02:36.363Z by `scripts/data/render-tests.mjs` (headless 
 
 | Field | Long tasks per hour step (ms) | Worst frame gap while stepping (ms) | Frames/s during a 2 s pan |
 |---|---|---|---|
-| pres | 0 | 448 | 5.5 |
-| temp | 0 | 455 | 7 |
+| pres | 0 | 438 | 7 |
+| temp | 0 | 396 | 8 |
