@@ -587,7 +587,7 @@ async function boot() {
   S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
   S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
   S.on(['selection', 't'], s => { loadDetail(s); renderDetail(s); });
-  S.on(['field', 'tempUnit', 'speedUnit', 'timeFirst'], s => { if (s.selection) renderDetail(s); }, { now: false });
+  S.on(['field', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst'], s => { if (s.selection) renderDetail(s); }, { now: false });
   S.on(['distUnit'], () => renderScale(map), { now: false });
 
   // Selection marker + detail panel on click / tap.
