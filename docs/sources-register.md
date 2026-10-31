@@ -27,6 +27,27 @@ Status as of Phase 1 (foundation).
 | **wgrib2 v3.8.0** (NOAA-EMC) | GRIB2 decoding in the data job | built from `github.com/NOAA-EMC/wgrib2`, pinned tag + commit | Public domain (U.S. Government work) | n/a | Verified: builds from the pinned commit and decodes GFS template 5.3. |
 | **Sample weather** (fallback) | Shown only when no live data exists | none: generated in the browser | n/a | "Weather: generated sample data" | Labelled everywhere when active. |
 
+## Events layer (Phase 5)
+
+All four sources are fetched **by the visitor's browser**, only while a toggle that needs them is
+on, at most once every 10 minutes per source, and kept in memory only (nothing stored, nothing
+proxied). CORS, status and field names were checked from GitHub Actions by
+`scripts/data/sources-probe.mjs` (the build environment cannot reach these hosts); the latest run's
+report is committed as `docs/screenshots/<branch>/sources-probe.md`.
+
+| Source | Used for | Endpoint | Licence / terms | Credit shown | CORS | Rate limit | Status |
+|---|---|---|---|---|---|---|---|
+| **USGS Earthquake Hazards Program**, GeoJSON summary feed | Earthquakes M2.5+, past 7 days | `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson` | USGS: "Public Domain" (with exceptions for marked third-party material); USGS asks that "proper credit be given" (usgs.gov copyrights-and-credits page, read by the probe 31 Oct 2026). | "Earthquakes: USGS" | `Access-Control-Allow-Origin: *` | None published; feed docs say "Updated every minute", `cache-control: public, max-age=60`. | Verified 31 Oct 2026: HTTP 200, 338 features, fields `mag, place, time, updated, url, alert, tsunami, magType, title`; coordinates `[lon, lat, depth km]`. |
+| **NASA EONET v3** | Wildfires, volcanoes, severe storms (open events with a report in the past 7 days) | `https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=7` | NASA data; EONET aggregates other agencies' reports (InciWeb, Smithsonian GVP, JTWC, …), each linked as the event's source. Disclaimer wording: see the probe report (`what-is-eonet#disclaimer`). | "Events: NASA EONET" | `Access-Control-Allow-Origin: *` | Response headers: `x-ratelimit-limit: 60` (window not stated). This page makes ≤ 1 request per 10 min. | Verified 31 Oct 2026: HTTP 200 (content-type says RSS, body is JSON), 15 events; fields `id, title, link, categories, sources, geometry[{date, coordinates, magnitudeValue, magnitudeUnit}]`. Other categories (sea ice, floods, dust…) are not shown. |
+| **GDACS** (Global Disaster Alert and Coordination System; EC Joint Research Centre with UN OCHA) | Disaster alerts (green / orange / red): earthquakes, cyclones, floods, volcanoes, droughts, wildfires | `https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?fromDate=…&toDate=…&alertlevel=Green;Orange;Red&pageSize=100` | Terms page: `https://www.gdacs.org/About/termofuse.aspx` (wording in the probe report). Site footer links the European Commission legal notice and copyright notice. | "Alerts: GDACS (EC JRC, UN OCHA)" | `Access-Control-Allow-Origin: *` | Not published; the API returns at most 100 events per page (newest first), so a busy week can be cut at 100. | Verified 31 Oct 2026: HTTP 200 GeoJSON points. The `MAP` list needs an `eventtype` and was not used. |
+| **NOAA National Hurricane Center** via the NWS tropical map service | Active storms (Atlantic, East and Central Pacific): forecast points, track and cone, moved along the track by the timeline | `https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/{6 + 26 i}/query?…&f=geojson` (Forecast Points, slots AT1–5, EP1–5, CP1–5) and `{8 + 26 i}` (Forecast Cone) | NWS: "in the public domain, unless specifically noted otherwise, and may be used without charge for any lawful purpose so long as you do not: 1) claim it is your own…" (weather.gov/disclaimer). | "Storm forecasts: NOAA NHC" | Echoes the requesting origin (`https://temper31.github.io`) | Not published. Up to 15 small queries (plus one cone per active storm) per refresh, ≤ every 10 min. | Verified 31 Oct 2026: layer list and fields (`stormname, stormtype, advisnum, advdate, tau, validtime "DD/HHMM", maxwind kt, gust kt, mslp, tcdir, tcspd`). No storm was active, so the track was tested with a saved sample. `CurrentStorms.json` has **no** CORS header and was not used. |
+
+Not used (out of scope for Phase 5): **NASA FIRMS** active fires (needs a free MAP_KEY: a key in
+the page would break the no-keys rule, so it would have to be fetched by the data job with the key
+in an Actions secret, and the 6-hourly job would make it up to 6 h old); **JTWC** West Pacific /
+Indian Ocean warnings (US DoD site: terms, CORS and a machine-readable format still to check;
+EONET already relays JTWC storm positions as "severe storms").
+
 ## EOX licence: owner decision needed
 
 EOX publishes Sentinel-2 cloudless under two different licences:
@@ -82,6 +103,5 @@ visual check.
 
 ## Planned (later phases, not yet used)
 
-USGS earthquakes, NASA FIRMS fires, GDACS/JTWC
-cyclones, street-level photos (provider and terms to be confirmed). Each gets a row above,
-with its licence checked, before it ships.
+Street-level photos (Mapillary, Phase 4). NASA FIRMS and JTWC: see the Events section. Each gets
+a row above, with its licence checked, before it ships.

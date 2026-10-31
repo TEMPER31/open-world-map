@@ -4,6 +4,7 @@
 // and views.json with what each view showed (legend text, probe readings, errors).
 import { chromium } from 'playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { route as eventSamples } from './event-fixtures.mjs';
 
 const [, , site = 'http://127.0.0.1:8123/', out = 'screenshots'] = process.argv;
 mkdirSync(out, { recursive: true });
@@ -51,6 +52,18 @@ for (const phone of [false, true]) {
     { name: `p3-${d}-7d-rain`, field: 'rain', hash: h, t: 'end', phone }
   );
 }
+// Phase 5 events: live sources (world view, a quake panel) and the saved storm sample (no live
+// storm may be active): desktop and phone.
+const ALL_EV = { eq: true, fv: true, st: true, ga: true };
+for (const phone of [false, true]) {
+  const d = phone ? 'phone' : 'desktop';
+  VIEWS.push(
+    { name: `p5-${d}-events-world`, field: 'none', hash: phone ? '0.4/20/0' : '1.6/20/0', phone, events: ALL_EV },
+    { name: `p5-${d}-event-panel`, field: 'none', hash: phone ? '0.4/20/0' : '1.6/20/0', phone, events: ALL_EV, act: 'event', snap: 'half' },
+    { name: `p5-${d}-storm-track`, field: 'wind', hash: phone ? '2.4/22/-66' : '3.4/22/-66', phone, events: { st: true }, samples: { nhc: 'storm' }, t: 30, act: 'storm', snap: 'half' },
+    { name: `p5-${d}-layers-events`, field: 'temp', hash: phone ? '0.4/20/0' : '1.6/20/0', phone, events: ALL_EV, act: 'layers-events' }
+  );
+}
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -72,8 +85,9 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
   const naip = [], naipFailed = [];
   page.on('response', r => { if (/imagery\.nationalmap\.gov\/.*exportImage/.test(r.url())) naip.push(r.body().then(body => ({ url: r.url(), status: r.status(), type: r.headers()['content-type'] || '', body }), e => ({ url: r.url(), status: r.status(), error: String(e).slice(0, 120) }))); });
   page.on('requestfailed', r => { if (/imagery\.nationalmap\.gov/.test(r.url())) naipFailed.push({ bbox: new URL(r.url()).searchParams.get('bbox'), failure: r.failure()?.errorText }); });
+  if (v.samples) await eventSamples(page, { usgs: 'live', eonet: 'live', gdacs: 'live', ...v.samples });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
+    { events: v.events || {}, field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
   if (v.t != null) { // jump to a forecast time (snapped to a frame)
@@ -94,6 +108,18 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     for (const p of pts) await page.mouse.click(box.x + p.x, box.y + p.y);
     await page.waitForTimeout(800);
   }
+  if (v.act === 'event' || v.act === 'storm') { // open the panel of the largest quake, or the storm
+    if (v.events) await page.waitForFunction(() => { const C = window.owmTest.events.cache; return Object.keys(C).length && Object.values(C).every(c => c.at); }, null, { timeout: 30000 }).catch(() => {});
+    await page.evaluate(storm => {
+      const C = window.owmTest.events.cache, i = storm ? C.nhc?.items?.[0] : [...(C.usgs?.items || [])].sort((a, b) => b.mag - a.mag)[0];
+      if (!i) return;
+      window.owmMap.jumpTo({ center: [i.lon, i.lat] });
+      window.owmTest.state.set({ selection: { type: 'event', id: i.id, lon: i.lon, lat: i.lat } });
+    }, v.act === 'storm');
+    await page.waitForTimeout(1200);
+    if (v.snap && v.phone) { await page.evaluate(s => window.owmTest.sheets?.place.set(s), v.snap); await page.waitForTimeout(800); }
+  }
+  if (v.act === 'layers-events') { if (v.phone) { await page.tap('.tabs [data-lyr-tab]'); await page.waitForTimeout(800); } else await page.evaluate(() => document.querySelector('.layers [data-events]').scrollIntoView()); }
   if (!v.phone && !v.act) { await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.45); await page.waitForTimeout(400); }
   const info = await page.evaluate(() => ({
     legend: document.querySelector('#legend .lg-h')?.textContent,
@@ -106,6 +132,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     legendMsg: document.querySelector('#legend')?.classList.contains('unavailable') ? document.querySelector('#legend').dataset.msg : null,
     stale: document.querySelector('#stale').hidden ? null : document.querySelector('#stale').textContent,
     updated: document.querySelector('[data-updated]')?.textContent,
+    events: document.querySelector('.layers [data-evnote]')?.textContent, eventCounts: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])),
     sampleLabelsVisible: [...document.querySelectorAll('[data-sample-only]')].filter(e => !e.hidden).length
   }));
   await page.screenshot({ path: `${out}/${v.name}.png` });

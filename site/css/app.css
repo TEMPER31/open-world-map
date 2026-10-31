@@ -420,3 +420,15 @@ button.chip:hover { background: var(--hover); }
 .legend.docked .lg-cats { font-size: 8.5px; }
 .lx { grid-template-columns: minmax(0, 1fr); }
 .legend.docked { min-width: 0; overflow: hidden; }
+
+/* ---- events (Phase 5) ---- */
+.sw.ga { background: #ff9f1c; transform: rotate(45deg) scale(.85); }
+.sw.st { border-radius: 50%; }
+.lsec.ev > .kick { align-items: center; }
+.lsec.ev .seg button { height: 20px; padding: 0 7px; font-size: 10px; }
+.lsec.ev .row .v { margin-left: auto; }
+.lsec.ev .row .tg { margin-left: 8px; }
+.row .v.bad { color: var(--fire); }
+.lsec.ev .lx-note { padding: 4px 8px 0; font-size: 11px; }
+.grp .lsec.ev { padding: 0; }
+@media (max-width: 1023px) { .grp .lsec.ev .row { height: 44px; } .grp .lsec.ev .tg { width: 34px; height: 20px; } .grp .lsec.ev .tg::after { width: 16px; height: 16px; } .grp .lsec.ev .tg.on::after { left: 16px; } .grp .lsec.ev .seg button { height: 32px; padding: 0 12px; } }
