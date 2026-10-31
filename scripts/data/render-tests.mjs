@@ -20,6 +20,7 @@ async function open(prefs, hash = '2/35/-20', ctx = {}) {
       const f = new URL(r.request().url()).pathname.split('/').pop();
       r.fulfill({ body: readFileSync(`${process.env.OWM_ML_DIR}/${f}`), contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', headers: { 'access-control-allow-origin': '*' } });
     });
+    await page.route('https://tiles.openfreemap.org/**', r => r.abort()); // offline: fail fast instead of hanging
   }
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
@@ -200,9 +201,11 @@ const synced = page => page.evaluate(async () => {
   for (const start of starts) {
     await page.evaluate(t => window.owmTest.state.set({ t }), start);
     await page.mouse.move(641, 301);
+    await page.waitForFunction(() => !document.querySelector('#probe').hidden, null, { timeout: 10000 }).catch(() => {});
     for (let i = 0; i < 4; i++) {
-      await page.click('.timeline [data-step="1"]');
-      await page.mouse.move(640 + (i % 2), 300);
+      // step with the arrow key so the pointer stays on the map: the probe must follow the hour
+      // without a mouse move (clicking the step button would take the pointer off the map)
+      await page.keyboard.press('ArrowRight');
       const r = await synced(page);
       rows.push({ t: await page.evaluate(() => window.owmTest.state.get('t')), ...r });
     }
