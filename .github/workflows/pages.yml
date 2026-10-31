@@ -80,6 +80,11 @@ jobs:
         run: |
           python3 scripts/data/build_data.py --out site/data/live --previous "$PAGES_URL/data/live" \
             --aq-cache .aq-cache --report run-report.json
+      # Street photos: the page reads its public Mapillary client token from js/secrets.js. The
+      # build writes it empty (layer shows "unavailable"); only the deploy job (main) fills it in
+      # from the MAPILLARY_CLIENT_TOKEN secret. Never committed (.gitignore; check_site.py scans).
+      - name: Street photos token placeholder (empty in builds)
+        run: printf "export const MAPILLARY_TOKEN = '';\n" > site/js/secrets.js
       - name: Save air-quality cache
         if: hashFiles('.aq-cache/aq.json') != ''
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -111,6 +116,13 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site
+      - name: Street photos token (public Mapillary client token from the MAPILLARY_CLIENT_TOKEN secret)
+        env:
+          MLY: ${{ secrets.MAPILLARY_CLIENT_TOKEN }}
+        run: |
+          t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
+          printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > site/js/secrets.js
+          echo "Mapillary token configured: $([ -n "$t" ] && echo yes || echo 'no (Street photos will show unavailable)')"
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
@@ -163,6 +175,16 @@ jobs:
         with:
           name: site
           path: built
+      # Optional CI-only token so PR screenshots can show photos; without it they show the
+      # "unavailable" state. Written into the downloaded build only, never committed.
+      - name: Street photos token for the PR screenshots (optional MAPILLARY_CI_TOKEN secret)
+        env:
+          MLY: ${{ secrets.MAPILLARY_CI_TOKEN }}
+        run: |
+          t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
+          printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > built/site/js/secrets.js
+          echo "MLY_CI=$([ -n "$t" ] && echo 1 || echo 0)" >> "$GITHUB_ENV"
+          echo "CI Mapillary token configured: $([ -n "$t" ] && echo yes || echo no)"
       - name: Install Playwright 1.63.0 + Chromium
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0

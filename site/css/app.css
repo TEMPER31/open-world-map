@@ -432,3 +432,7 @@ button.chip:hover { background: var(--hover); }
 .lsec.ev .lx-note { padding: 4px 8px 0; font-size: 11px; }
 .grp .lsec.ev { padding: 0; }
 @media (max-width: 1023px) { .grp .lsec.ev .row { height: 44px; } .grp .lsec.ev .tg { width: 34px; height: 20px; } .grp .lsec.ev .tg::after { width: 16px; height: 16px; } .grp .lsec.ev .tg.on::after { left: 16px; } .grp .lsec.ev .seg button { height: 32px; padding: 0 12px; } }
+
+/* ---- street photos (Phase 4) ---- */
+.ph-img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--hover); border: 1px solid var(--line); }
+.ph-msg { display: grid; place-items: center; color: var(--mute); font: 12px var(--mono); text-align: center; padding: 12px; }

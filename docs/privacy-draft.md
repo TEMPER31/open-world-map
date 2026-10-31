@@ -24,7 +24,10 @@ sends `https://temper31.github.io/` cross-site, never the full URL or the `#map=
 | `eonet.gsfc.nasa.gov` | Events · Wildfires & volcanoes, Storms | Same | A fixed query (`status=open&days=7`). |
 | `www.gdacs.org` | Events · Disaster alerts | Same | A fixed query with today's date range. |
 | `mapservices.weather.noaa.gov` | Events · Storms | Same | Fixed queries for the 15 storm slots, plus the cone of each active storm. |
+| `tiles.mapillary.com` | Street photos | While the layer is on (removed when off) | Tile coordinates for the area on screen (reveals the viewed area) and the site's public client token. |
+| `graph.mapillary.com` | Street photos | When a photo dot is clicked | The image id and the site's public client token. |
+| Meta image CDN (host named in each photo's `thumb_1024_url`, e.g. `scontent-*.fbcdn.net` / `*.xx.fbcdn.net`, unverified) | Street photos | When a photo is shown | The image request; no referrer (`referrerpolicy="no-referrer"`). |
 | `gibs.earthdata.nasa.gov`, `tiles.maps.eox.at`, `basemap.nationalmap.gov`, `imagery.nationalmap.gov` | Satellite basemap | While Satellite is selected | Tile coordinates for the area on screen. |
 
 Event sources receive no map position: the same world-wide list is downloaded wherever the map is.
-Clicking "Open source page" opens the source's own site in a new tab, under that site's privacy policy.
+Clicking "Open source page" or "Open on Mapillary" opens the source's own site in a new tab, under that site's privacy policy.
