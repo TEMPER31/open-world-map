@@ -113,7 +113,7 @@ export const credits = () => want(S.get()).map(n => CREDIT[n]);
 const fc = features => ({ type: 'FeatureCollection', features });
 const pt = (c, p = {}) => ({ type: 'Feature', properties: p, geometry: { type: 'Point', coordinates: c } });
 function draw() {
-  if (!map) return;
+  if (!added) return;
   const s = S.get(), now = Date.now(), sel = s.selection?.type === 'event' && byId(s.selection.id);
   map.getSource('events').setData(fc(visible(s).filter(i => !i.nhc).map(i => pt([i.lon, i.lat], { id: i.id, k: i.k, icon: i.icon || '', mag: i.mag ?? 0, recent: +(now - i.time < DAY) }))));
   map.getSource('nhc').setData(fc((s.events.st && cache.nhc?.storms || []).flatMap(st => [...st.cone.map(f => ({ ...f, properties: { k: 'cone' } })),
@@ -136,6 +136,7 @@ function stormAt(i, v = validOf(S.get('t'))) {
 }
 // One clock: event layers report the hour they show (-1 while their first download runs).
 function position(t) {
+  if (!added) return;
   const s = S.get(), on = want(s);
   stamp('events', on.length ? (on.some(n => !cache[n]?.at) ? -1 : t) : null);
   const now = s.events.st ? (cache.nhc?.items || []).map(i => [i, stormAt(i, validOf(t))]).filter(([, c]) => c) : [];
@@ -157,10 +158,24 @@ const ICONS = { fire: ['#ff5a1f', [[0, -7], [5, 1], [3, 6], [-3, 6], [-5, 1]]], 
   'alert-green': ['#45d483', DIA], 'alert-orange': ['#ff9f1c', DIA], 'alert-red': ['#ff3b30', DIA] };
 const HIT = ['ev-eq', 'ev-pt', 'nhc-pt', 'nhc-now'];
 
-export function initEvents(m, changed) {
-  map = m; onChange = changed;
+// Nothing is added to the map, drawn or subscribed while every type is off: the icons, sources and
+// layers are created when the first type is turned on and removed when the last one is turned off.
+const SOURCES = ['events', 'nhc', 'nhc-now', 'ev-sel'], LAYERS = ['nhc-cone', 'nhc-track', 'nhc-pt', 'ev-eq', 'ev-pt', 'nhc-now', 'ev-sel'];
+let added = false, subs = [];
+function setup(on) {
+  if (on === added) return;
+  added = on;
+  if (!on) {
+    subs.forEach(off => off()); subs = [];
+    for (const id of LAYERS) map.removeLayer(id);
+    for (const id of SOURCES) map.removeSource(id);
+    for (const n in ICONS) map.removeImage('ev-' + n);
+    stamp('events', null); stamp('storms', null);
+    if (S.get('selection')?.type === 'event') S.set({ selection: null });
+    return;
+  }
   for (const [n, a] of Object.entries(ICONS)) map.addImage('ev-' + n, icon(...a), { pixelRatio: 2 });
-  for (const id of ['events', 'nhc', 'nhc-now', 'ev-sel']) map.addSource(id, { type: 'geojson', data: fc([]) });
+  for (const id of SOURCES) map.addSource(id, { type: 'geojson', data: fc([]) });
   // above the weather field and particles, below the labels
   const L = o => map.addLayer(o, map.getLayer('omt-label-road') ? 'omt-label-road' : undefined), k = v => ['==', ['get', 'k'], v];
   L({ id: 'nhc-cone', type: 'fill', source: 'nhc', filter: k('cone'), paint: { 'fill-color': '#8a7cff', 'fill-opacity': 0.16, 'fill-outline-color': '#b3a9ff' } });
@@ -171,14 +186,23 @@ export function initEvents(m, changed) {
   L({ id: 'ev-pt', type: 'symbol', source: 'events', filter: ['!=', ['get', 'k'], 'eq'], layout: { 'icon-image': ['concat', 'ev-', ['get', 'icon']], 'icon-allow-overlap': true, 'icon-size': ['interpolate', ['linear'], ['zoom'], 1, 0.8, 6, 1.1] } });
   L({ id: 'nhc-now', type: 'symbol', source: 'nhc-now', layout: { 'icon-image': 'ev-storm', 'icon-size': 1.5, 'icon-allow-overlap': true } });
   L({ id: 'ev-sel', type: 'circle', source: 'ev-sel', paint: { 'circle-radius': 14, 'circle-opacity': 0, 'circle-stroke-color': '#dcb672', 'circle-stroke-width': 2.5 } });
+  subs = [S.on(['evWin', 'selection'], draw, { now: false }), onTime(({ t }) => position(t))];
+}
 
-  S.on(['events'], s => { clearInterval(timer); if (want(s).length) { refresh(); timer = setInterval(refresh, 6e4); } draw(); });
-  S.on(['evWin', 'selection'], draw, { now: false });
-  onTime(({ t }) => position(t));
+export function initEvents(m, changed) {
+  map = m; onChange = changed;
+  S.on(['events'], s => {
+    clearInterval(timer);
+    const on = want(s).length > 0;
+    setup(on);
+    if (on) { refresh(); timer = setInterval(refresh, 6e4); draw(); }
+    onChange();
+  });
 }
 
 // The event under a click or tap (within 8 px), as a selection, or null.
 export function hit(p) {
+  if (!added) return null;
   const f = map.queryRenderedFeatures([[p.x - 8, p.y - 8], [p.x + 8, p.y + 8]], { layers: HIT }).find(f => f.properties.id), i = f && byId(f.properties.id);
   return i ? { type: 'event', id: i.id, lon: i.lon, lat: i.lat } : null;
 }
