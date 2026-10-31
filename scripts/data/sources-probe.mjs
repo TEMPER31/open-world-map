@@ -58,7 +58,7 @@ async function get(url, method = 'GET', headers = {}) {
   return { r, body, ms: Date.now() - t0 };
 }
 const H = (r, k) => r.headers.get(k) ?? '—';
-const short = (v, n = 220) => { const s = typeof v === 'string' ? v : JSON.stringify(v); return s.length > n ? s.slice(0, n) + '…' : s; };
+const short = (v, n = 220) => { const s = typeof v === 'string' ? v : JSON.stringify(v) ?? String(v); return s.length > n ? s.slice(0, n) + '…' : s; };
 
 function summarise(name, j) {
   const o = [];
