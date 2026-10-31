@@ -13,7 +13,7 @@ import { dirname } from 'node:path';
 const [, , site = 'http://127.0.0.1:8123/', reportPath, out = 'accuracy.md', label = ''] = process.argv;
 const UA = 'open-world-map-accuracy-check (+https://github.com/TEMPER31/open-world-map)';
 const CITIES = [
-  { name: 'Springfield IL', lat: 39.80, lon: -89.64, us: true },
+  { name: 'Kansas City MO', lat: 39.10, lon: -94.58, us: true },
   { name: 'Miami', lat: 25.76, lon: -80.19, us: true },
   { name: 'Denver', lat: 39.74, lon: -104.99, us: true },
   { name: 'London', lat: 51.51, lon: -0.13 },
