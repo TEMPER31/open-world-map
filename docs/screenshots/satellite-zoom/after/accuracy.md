@@ -18,60 +18,60 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 
 | City | Time | Field | Ours | Reference | Diff | Tol | |
 |---|---|---|---|---|---|---|---|
-| Dayton OH | +0 h | temp °C | 16.2 | GFS 0.25° raw 16.9 | -0.7 | ±0.7 | **FAIL** |
-| Dayton OH | +0 h | wind km/h | 9.2 | GFS 0.25° raw 9.2 | 0.1 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 43 | GFS 0.25° raw 38 | 5 | ±20 | ok |
-| Dayton OH | +0 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +0 h | cloud % | 36 | GFS 0.25° raw 24 | 12 | ±15 | ok |
-| Dayton OH | +0 h | pressure hPa | 1026.1 | GFS 0.25° raw 1026.0 | 0.1 | ±0.5 | ok |
-| Dayton OH | +0 h | temp °C | 16.2 | stored grid 16.2 | -0.1 | ±0.15 | ok |
-| Dayton OH | +0 h | wind km/h | 9.2 | stored grid 9.6 | -0.3 | ±1 | ok |
-| Dayton OH | +0 h | cloud % | 36 | stored grid 36 | -0 | ±1 | ok |
-| Dayton OH | +0 h | pressure hPa | 1026.08 | stored grid 1026.06 | 0.02 | ±0.1 | ok |
-| Dayton OH | +0 h | temp °C | 16.2 | gfs_global 18.4 | -2.2 | ±1 | **FAIL** |
-| Dayton OH | +0 h | wind km/h | 9.2 | gfs_global 9.4 | -0.2 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 43 | gfs_global 40 | 3 | ±20 | ok |
-| Dayton OH | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +0 h | cloud % | 36 | gfs_global 11 | 25 | ±15 | **FAIL** |
-| Dayton OH | +0 h | pressure hPa | 1026.1 | gfs_global 1026.0 | 0.1 | ±1 | ok |
-| Dayton OH | +0 h | temp °C | 16.2 | gfs_seamless 19.2 | -3.0 | ±1 | **FAIL** |
-| Dayton OH | +0 h | wind km/h | 9.2 | gfs_seamless 7.7 | 1.5 | ±3 | ok |
-| Dayton OH | +0 h | wind from ° | 43 | gfs_seamless 46 | 3 | ±20 | ok |
-| Dayton OH | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +0 h | cloud % | 36 | gfs_seamless 0 | 36 | ±15 | **FAIL** |
-| Dayton OH | +0 h | pressure hPa | 1026.1 | gfs_seamless 1024.7 | 1.4 | ±1 | **FAIL** |
-| Dayton OH | +0 h | PM2.5 µg/m³ | 3.8 | cams_global 5.5 | -1.7 | ±3 | ok |
-| Dayton OH | +0 h | temp °C | 16.2 | NWS 19.4 | -3.3 | ±3 | **FAIL** |
-| Dayton OH | +0 h | wind km/h | 9.2 | NWS 9.3 | -0.0 | ±8 | ok |
-| Dayton OH | +0 h | cloud % | 36 | NWS 7 | 29 | ±30 | ok |
-| Dayton OH | +0 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
-| Dayton OH | +24 h | temp °C | 15.3 | GFS 0.25° raw 15.8 | -0.5 | ±0.7 | ok |
-| Dayton OH | +24 h | wind km/h | 14.8 | GFS 0.25° raw 13.6 | 1.2 | ±3 | ok |
-| Dayton OH | +24 h | wind from ° | 109 | GFS 0.25° raw 111 | 2 | ±20 | ok |
-| Dayton OH | +24 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +24 h | cloud % | 100 | GFS 0.25° raw 100 | 0 | ±15 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.4 | GFS 0.25° raw 1027.4 | 0.0 | ±0.5 | ok |
-| Dayton OH | +24 h | temp °C | 15.3 | stored grid 15.3 | -0.0 | ±0.15 | ok |
-| Dayton OH | +24 h | wind km/h | 14.8 | stored grid 14.8 | -0.0 | ±1 | ok |
-| Dayton OH | +24 h | cloud % | 100 | stored grid 100 | 0 | ±1 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.43 | stored grid 1027.45 | -0.02 | ±0.1 | ok |
-| Dayton OH | +24 h | temp °C | 15.3 | gfs_global 17.2 | -1.9 | ±1 | **FAIL** |
-| Dayton OH | +24 h | wind km/h | 14.8 | gfs_global 11.8 | 3.0 | ±3 | **FAIL** |
-| Dayton OH | +24 h | wind from ° | 109 | gfs_global 110 | 1 | ±20 | ok |
-| Dayton OH | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +24 h | cloud % | 100 | gfs_global 100 | 0 | ±15 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.4 | gfs_global 1027.0 | 0.4 | ±1 | ok |
-| Dayton OH | +24 h | temp °C | 15.3 | gfs_seamless 18.0 | -2.7 | ±1 | **FAIL** |
-| Dayton OH | +24 h | wind km/h | 14.8 | gfs_seamless 10.1 | 4.7 | ±3 | **FAIL** |
-| Dayton OH | +24 h | wind from ° | 109 | gfs_seamless 96 | 13 | ±20 | ok |
-| Dayton OH | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| Dayton OH | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
-| Dayton OH | +24 h | pressure hPa | 1027.4 | gfs_seamless 1027.5 | -0.1 | ±1 | ok |
-| Dayton OH | +24 h | PM2.5 µg/m³ | 5.0 | cams_global 3.7 | 1.3 | ±3 | ok |
-| Dayton OH | +24 h | temp °C | 15.3 | NWS 19.4 | -4.2 | ±3 | **FAIL** |
-| Dayton OH | +24 h | wind km/h | 14.8 | NWS 14.8 | -0.0 | ±8 | ok |
-| Dayton OH | +24 h | cloud % | 100 | NWS 91 | 9 | ±30 | ok |
-| Dayton OH | +24 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
+| US test city | +0 h | temp °C | 16.2 | GFS 0.25° raw 16.9 | -0.7 | ±0.7 | **FAIL** |
+| US test city | +0 h | wind km/h | 9.2 | GFS 0.25° raw 9.2 | 0.1 | ±3 | ok |
+| US test city | +0 h | wind from ° | 43 | GFS 0.25° raw 38 | 5 | ±20 | ok |
+| US test city | +0 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
+| US test city | +0 h | cloud % | 36 | GFS 0.25° raw 24 | 12 | ±15 | ok |
+| US test city | +0 h | pressure hPa | 1026.1 | GFS 0.25° raw 1026.0 | 0.1 | ±0.5 | ok |
+| US test city | +0 h | temp °C | 16.2 | stored grid 16.2 | -0.1 | ±0.15 | ok |
+| US test city | +0 h | wind km/h | 9.2 | stored grid 9.6 | -0.3 | ±1 | ok |
+| US test city | +0 h | cloud % | 36 | stored grid 36 | -0 | ±1 | ok |
+| US test city | +0 h | pressure hPa | 1026.08 | stored grid 1026.06 | 0.02 | ±0.1 | ok |
+| US test city | +0 h | temp °C | 16.2 | gfs_global 18.4 | -2.2 | ±1 | **FAIL** |
+| US test city | +0 h | wind km/h | 9.2 | gfs_global 9.4 | -0.2 | ±3 | ok |
+| US test city | +0 h | wind from ° | 43 | gfs_global 40 | 3 | ±20 | ok |
+| US test city | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
+| US test city | +0 h | cloud % | 36 | gfs_global 11 | 25 | ±15 | **FAIL** |
+| US test city | +0 h | pressure hPa | 1026.1 | gfs_global 1026.0 | 0.1 | ±1 | ok |
+| US test city | +0 h | temp °C | 16.2 | gfs_seamless 19.2 | -3.0 | ±1 | **FAIL** |
+| US test city | +0 h | wind km/h | 9.2 | gfs_seamless 7.7 | 1.5 | ±3 | ok |
+| US test city | +0 h | wind from ° | 43 | gfs_seamless 46 | 3 | ±20 | ok |
+| US test city | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
+| US test city | +0 h | cloud % | 36 | gfs_seamless 0 | 36 | ±15 | **FAIL** |
+| US test city | +0 h | pressure hPa | 1026.1 | gfs_seamless 1024.7 | 1.4 | ±1 | **FAIL** |
+| US test city | +0 h | PM2.5 µg/m³ | 3.8 | cams_global 5.5 | -1.7 | ±3 | ok |
+| US test city | +0 h | temp °C | 16.2 | NWS 19.4 | -3.3 | ±3 | **FAIL** |
+| US test city | +0 h | wind km/h | 9.2 | NWS 9.3 | -0.0 | ±8 | ok |
+| US test city | +0 h | cloud % | 36 | NWS 7 | 29 | ±30 | ok |
+| US test city | +0 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
+| US test city | +24 h | temp °C | 15.3 | GFS 0.25° raw 15.8 | -0.5 | ±0.7 | ok |
+| US test city | +24 h | wind km/h | 14.8 | GFS 0.25° raw 13.6 | 1.2 | ±3 | ok |
+| US test city | +24 h | wind from ° | 109 | GFS 0.25° raw 111 | 2 | ±20 | ok |
+| US test city | +24 h | precip mm/h | 0.00 | GFS 0.25° raw 0.00 | 0.00 | ±0.3 | ok |
+| US test city | +24 h | cloud % | 100 | GFS 0.25° raw 100 | 0 | ±15 | ok |
+| US test city | +24 h | pressure hPa | 1027.4 | GFS 0.25° raw 1027.4 | 0.0 | ±0.5 | ok |
+| US test city | +24 h | temp °C | 15.3 | stored grid 15.3 | -0.0 | ±0.15 | ok |
+| US test city | +24 h | wind km/h | 14.8 | stored grid 14.8 | -0.0 | ±1 | ok |
+| US test city | +24 h | cloud % | 100 | stored grid 100 | 0 | ±1 | ok |
+| US test city | +24 h | pressure hPa | 1027.43 | stored grid 1027.45 | -0.02 | ±0.1 | ok |
+| US test city | +24 h | temp °C | 15.3 | gfs_global 17.2 | -1.9 | ±1 | **FAIL** |
+| US test city | +24 h | wind km/h | 14.8 | gfs_global 11.8 | 3.0 | ±3 | **FAIL** |
+| US test city | +24 h | wind from ° | 109 | gfs_global 110 | 1 | ±20 | ok |
+| US test city | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
+| US test city | +24 h | cloud % | 100 | gfs_global 100 | 0 | ±15 | ok |
+| US test city | +24 h | pressure hPa | 1027.4 | gfs_global 1027.0 | 0.4 | ±1 | ok |
+| US test city | +24 h | temp °C | 15.3 | gfs_seamless 18.0 | -2.7 | ±1 | **FAIL** |
+| US test city | +24 h | wind km/h | 14.8 | gfs_seamless 10.1 | 4.7 | ±3 | **FAIL** |
+| US test city | +24 h | wind from ° | 109 | gfs_seamless 96 | 13 | ±20 | ok |
+| US test city | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
+| US test city | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
+| US test city | +24 h | pressure hPa | 1027.4 | gfs_seamless 1027.5 | -0.1 | ±1 | ok |
+| US test city | +24 h | PM2.5 µg/m³ | 5.0 | cams_global 3.7 | 1.3 | ±3 | ok |
+| US test city | +24 h | temp °C | 15.3 | NWS 19.4 | -4.2 | ±3 | **FAIL** |
+| US test city | +24 h | wind km/h | 14.8 | NWS 14.8 | -0.0 | ±8 | ok |
+| US test city | +24 h | cloud % | 100 | NWS 91 | 9 | ±30 | ok |
+| US test city | +24 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
 | Miami | +0 h | temp °C | 27.7 | GFS 0.25° raw 28.0 | -0.3 | ±0.7 | ok |
 | Miami | +0 h | wind km/h | 16.4 | GFS 0.25° raw 19.0 | -2.6 | ±3 | ok |
 | Miami | +0 h | wind from ° | 90 | GFS 0.25° raw 98 | 8 | ±20 | ok |
@@ -279,8 +279,8 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 
 | City | Time | Temp grid | Temp 0.25° | Diff | Wind grid | Wind 0.25° | Diff | Cloud area avg | Cloud 0.25° point |
 |---|---|---|---|---|---|---|---|---|---|
-| Dayton OH | +0 h | 16.25 | 16.92 | -0.67 | 9.6 | 9.2 | 0.4 | 36 | 24 |
-| Dayton OH | +24 h | 15.32 | 15.81 | -0.48 | 14.8 | 13.6 | 1.2 | 100 | 100 |
+| US test city | +0 h | 16.25 | 16.92 | -0.67 | 9.6 | 9.2 | 0.4 | 36 | 24 |
+| US test city | +24 h | 15.32 | 15.81 | -0.48 | 14.8 | 13.6 | 1.2 | 100 | 100 |
 | Miami | +0 h | 27.70 | 27.97 | -0.27 | 16.6 | 19.0 | -2.5 | 10 | 12 |
 | Miami | +24 h | 27.14 | 27.28 | -0.13 | 23.2 | 25.0 | -1.8 | 96 | 100 |
 | Denver | +0 h | 18.89 | 19.20 | -0.31 | 10.5 | 10.7 | -0.2 | 31 | 11 |
@@ -300,18 +300,18 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 | Chile coast | +0 h | temp | 16.00 | 16.05 | -0.05 | ±0.5 | ok |
 | Chile coast | +0 h | pres | 1013.80 | 1013.80 | -0.00 | ±0.5 | ok |
 | Chile coast | +0 h | cloud | 75.00 | 75.12 | -0.12 | ±1 | ok |
-| Dayton | +0 h | temp | 15.80 | 15.85 | -0.05 | ±0.5 | ok |
-| Dayton | +0 h | pres | 1026.30 | 1026.25 | 0.05 | ±0.5 | ok |
-| Dayton | +0 h | cloud | 30.00 | 29.68 | 0.32 | ±1 | ok |
+| US test city | +0 h | temp | 15.80 | 15.85 | -0.05 | ±0.5 | ok |
+| US test city | +0 h | pres | 1026.30 | 1026.25 | 0.05 | ±0.5 | ok |
+| US test city | +0 h | cloud | 30.00 | 29.68 | 0.32 | ±1 | ok |
 | Tokyo Bay | +24 h | temp | 15.60 | 15.55 | 0.05 | ±0.5 | ok |
 | Tokyo Bay | +24 h | pres | 1019.70 | 1019.70 | 0.00 | ±0.5 | ok |
 | Tokyo Bay | +24 h | cloud | 72.00 | 71.63 | 0.38 | ±1 | ok |
 | Chile coast | +24 h | temp | 16.00 | 15.95 | 0.05 | ±0.5 | ok |
 | Chile coast | +24 h | pres | 1014.80 | 1014.78 | 0.02 | ±0.5 | ok |
 | Chile coast | +24 h | cloud | 44.00 | 44.44 | -0.44 | ±1 | ok |
-| Dayton | +24 h | temp | 15.00 | 15.05 | -0.05 | ±0.5 | ok |
-| Dayton | +24 h | pres | 1027.70 | 1027.74 | -0.04 | ±0.5 | ok |
-| Dayton | +24 h | cloud | 100.00 | 100.00 | 0.00 | ±1 | ok |
+| US test city | +24 h | temp | 15.00 | 15.05 | -0.05 | ±0.5 | ok |
+| US test city | +24 h | pres | 1027.70 | 1027.74 | -0.04 | ±0.5 | ok |
+| US test city | +24 h | cloud | 100.00 | 100.00 | 0.00 | ±1 | ok |
 
 ## Air quality at 4° grid nodes (page vs Open-Meteo cams_global at the node)
 
@@ -327,7 +327,7 @@ Open-Meteo us_aqi vs AQI computed here from Open-Meteo's own PM2.5 (hourly value
 
 | Point | PM2.5 now | PM2.5 24-h mean | Open-Meteo us_aqi | 2024 hourly | 2024 24-h | 2012 hourly | 2012 24-h |
 |---|---|---|---|---|---|---|---|
-| Dayton OH | 5.5 | 5.4 | 32 | 31 | 30 | 23 | 23 |
+| US test city | 5.5 | 5.4 | 32 | 31 | 30 | 23 | 23 |
 | Miami | 6.2 | 6.5 | 36 | 34 | 36 | 26 | 27 |
 | Denver | 12.7 | 17.1 | 65 | 58 | 66 | 52 | 61 |
 | London | 9.3 | 10.2 | 53 | 51 | 53 | 39 | 43 |
@@ -340,7 +340,7 @@ Open-Meteo us_aqi vs AQI computed here from Open-Meteo's own PM2.5 (hourly value
 
 | City | temp | wind | rain | cloud | pres | aq |
 |---|---|---|---|---|---|---|
-| Dayton OH | 16 °Cat 2 m·39.7°N 84.1°W | 9 km/hfrom NE·39.7°N 84.1°W | Drypast hour · area avg·39.7°N 84.1°W | 36 %area average·39.7°N 84.1°W | 1026 hPasea level·39.7°N 84.1°W | 3.8 µg/m³Good · AQI 36 (24 h)·39.7°N 84.1°W |
+| US test city | 16 °Cat 2 m·US test city | 9 km/hfrom NE·US test city | Drypast hour · area avg·US test city | 36 %area average·US test city | 1026 hPasea level·US test city | 3.8 µg/m³Good · AQI 36 (24 h)·US test city |
 | Miami | 28 °Cat 2 m·25.7°N 80.1°W | 16 km/hfrom E·25.7°N 80.1°W | 0.1 mm/hpast hour · area avg·25.7°N 80.1°W | 10 %area average·25.7°N 80.1°W | 1013 hPasea level·25.7°N 80.1°W | 7.8 µg/m³Good · AQI 41 (24 h)·25.7°N 80.1°W |
 | Denver | 19 °Cat 2 m·39.7°N 104.9°W | 11 km/hfrom NE·39.7°N 104.9°W | Drypast hour · area avg·39.7°N 104.9°W | 31 %area average·39.7°N 104.9°W | 1011 hPasea level·39.7°N 104.9°W | 5.8 µg/m³Good · AQI 51 (24 h)·39.7°N 104.9°W |
 | London | 12 °Cat 2 m·51.5°N 0.1°W | 10 km/hfrom E·51.5°N 0.1°W | Drypast hour · area avg·51.5°N 0.1°W | 77 %area average·51.5°N 0.1°W | 1030 hPasea level·51.5°N 0.1°W | 13 µg/m³Moderate · AQI 51 (24 h)·51.5°N 0.1°W |

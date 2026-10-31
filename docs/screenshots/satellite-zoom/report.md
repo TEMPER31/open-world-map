@@ -6,8 +6,10 @@ layer. It renders one image per 512 px tile through its `exportImage` endpoint. 
 AL the real detail goes to about **map zoom 17** (0.6 m NAIP imagery). Zoom 18 is a 2×
 enlargement, but still far sharper than before. No Esri or keyed source was added.
 
-Before/after at z16, z17 and z18 (left before, right after): `before-after.png`. The full
-screenshots are in `before/` and `after/` (`satellite-brantley-z16/17/18.png`).
+Before/after at z16, z17 and z18 (left before, right after): `before-after.png`, with the full
+screenshots in `before/` and `after/` (`satellite-brantley-z16/17/18.png`). Screenshots are no
+longer kept in the repository (repo-cleanup PR); these are in git history at commit 1325c5f
+(`git show 1325c5f:docs/screenshots/satellite-zoom/before-after.png > before-after.png`).
 
 **Where the numbers come from:**
 
@@ -87,7 +89,8 @@ Notes on these numbers:
 **Teal tiles: found and avoided.** In 4 of the 5 CI screenshot runs that used `format=jpgpng`,
 one tile at z16 drew teal (no red).
 
-* Tile logging traced it (commit 65397d0, `after/naip-tiles/satellite-brantley-z16-3.png`):
+* Tile logging traced it (commit 65397d0, `after/naip-tiles/satellite-brantley-z16-3.png`, in git
+  history at commit 1325c5f):
   * USGS answered `format=jpgpng` with a 262 KB RGBA PNG instead of a ~60 KB JPEG.
   * Inside that PNG, one side of a source-image seam had no red.
 * The same tile requested again came back correct in every format. So it is intermittent and
@@ -111,7 +114,7 @@ one tile at z16 drew teal (no red).
 * **Within NAIP: no date seam.** A 5 × 5 grid of lookups over 4.8 km found two source images,
   `m_3108630_ne` (15 of 25 points) and `m_3108631_nw` (10 of 25), both **28 May 2023**, both
   0.6 m. Brantley sits close to the line between them. No visible seam in the 4.8 km export
-  (`after/probe/USGSNAIPPlus-brantley-wide.jpg`).
+  (`after/probe/USGSNAIPPlus-brantley-wide.jpg`, in git history at commit 1325c5f).
 * **Between the old and new layers: a clear mismatch.**
   * The cached layer, shown up to map zoom 15, is a different acquisition from NAIP 2023.
   * Its colours are drier and browner: the same z16 area averages RGB 137/136/114 cached vs
@@ -119,7 +122,8 @@ one tile at z16 drew teal (no red).
   * The cached layer's date can't be read from the service (point lookup returns NoData; its
     description only says "Data refreshed June, 2024").
   * Zooming from 15 to 15.5 therefore visibly changes season and some features. Compare
-    `before/` and `after/` at z16, or the two `*-brantley-wide.jpg` files.
+    `before/` and `after/` at z16, or the two `*-brantley-wide.jpg` files (git history, commit
+    1325c5f).
 * **Teal tiles** (section 1): a defect in USGS's PNG output at a seam, now avoided with
   JPEG.
 

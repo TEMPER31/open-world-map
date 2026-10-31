@@ -270,10 +270,10 @@ def fetch_aws(run, f):
 
 # Grid-alignment test nodes: on the 0.5 deg grid, with strong gradients nearby, so a shifted
 # or flipped grid would show up as large errors. Raw GFS values here go into the run report.
-ALIGN_POINTS = [("Tokyo Bay", 35.5, 139.5), ("Chile coast", -33.5, -71.5), ("Dayton", 40.0, -84.0)]
+ALIGN_POINTS = [("Tokyo Bay", 35.5, 139.5), ("Chile coast", -33.5, -71.5), ("Kansas City", 39.0, -95.0)]
 # Accuracy-check cities: raw GFS 0.25 deg values, bilinear from the four surrounding native
 # grid points, are recorded every hour so the page can be compared with NOAA's own numbers.
-CITY_POINTS = [("Dayton OH", 39.76, -84.19), ("Miami", 25.76, -80.19), ("Denver", 39.74, -104.99),
+CITY_POINTS = [("Kansas City MO", 39.10, -94.58), ("Miami", 25.76, -80.19), ("Denver", 39.74, -104.99),
                ("London", 51.51, -0.13), ("Delhi", 28.61, 77.21)]
 
 

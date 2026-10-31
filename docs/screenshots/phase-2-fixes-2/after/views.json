@@ -32,8 +32,8 @@
  {
   "view": "place-panel",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "probe": "2 %area average·40.4°N 81.3°W",
-  "detail": "× PLACE · GFS FORECAST 39.76°N 84.19°W Now Fri 30 Oct · 02:00 UTC Wind speed 13km/h from SW Temperature 16°C at 2 m Precipitation Dry past hour · area avg Air quality 14µg/m³ Moderate · AQI 52 (24 h) Clouds 2% area average Pressure 1021hPa sea level FORECAST — TEMP · ▮ WIND Now +20 h +40 h NOAA GFS run 18Z 29 Oct · air quality CAMS Fri 30 Oct · 00:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 02:08 UTC",
+  "probe": "2 %area average·(position removed)",
+  "detail": "× PLACE · GFS FORECAST US test city Now Fri 30 Oct · 02:00 UTC Wind speed 13km/h from SW Temperature 16°C at 2 m Precipitation Dry past hour · area avg Air quality 14µg/m³ Moderate · AQI 52 (24 h) Clouds 2% area average Pressure 1021hPa sea level FORECAST — TEMP · ▮ WIND Now +20 h +40 h NOAA GFS run 18Z 29 Oct · air quality CAMS Fri 30 Oct · 00:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 02:08 UTC",
   "stale": null,
   "updated": "Updated 02:08 UTC",
   "sampleLabelsVisible": 0,

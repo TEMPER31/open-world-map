@@ -84,9 +84,7 @@
     "lon": -71.5
    },
    {
-    "name": "Dayton",
-    "lat": 40.0,
-    "lon": -84.0
+    "name": "US test city"
    }
   ],
   "hours": [
@@ -113,7 +111,7 @@
       "u": 2.537,
       "v": 1.043
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1025.85,
       "temp": 18.255,
       "prate_raw": 0.0,
@@ -146,7 +144,7 @@
       "u": 2.613,
       "v": 1.618
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1025.47,
       "temp": 18.777,
       "cloud_raw": 4.9,
@@ -178,7 +176,7 @@
       "u": 2.698,
       "v": 1.895
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1025.69,
       "temp": 18.893,
       "cloud_raw": 34.1,
@@ -210,7 +208,7 @@
       "u": 2.75,
       "v": 1.751
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1025.72,
       "temp": 18.315,
       "cloud_raw": 5.0,
@@ -242,7 +240,7 @@
       "u": 2.345,
       "v": 1.386
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1026.25,
       "temp": 15.849,
       "cloud_raw": 5.0,
@@ -274,7 +272,7 @@
       "u": 1.667,
       "v": 0.714
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.13,
       "temp": 13.572,
       "cloud_raw": 80.3,
@@ -306,7 +304,7 @@
       "u": 0.944,
       "v": 0.363
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.93,
       "temp": 12.841,
       "cloud_raw": 90.4,
@@ -338,7 +336,7 @@
       "u": 0.522,
       "v": 0.428
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.49,
       "temp": 11.983,
       "cloud_raw": 100.0,
@@ -370,7 +368,7 @@
       "u": 0.247,
       "v": 0.354
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.81,
       "temp": 11.259,
       "cloud_raw": 100.0,
@@ -402,7 +400,7 @@
       "u": 0.523,
       "v": 0.129
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.05,
       "temp": 10.715,
       "cloud_raw": 100.0,
@@ -434,7 +432,7 @@
       "u": 0.688,
       "v": -0.428
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.03,
       "temp": 10.064,
       "cloud_raw": 100.0,
@@ -466,7 +464,7 @@
       "u": 0.857,
       "v": -0.311
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.89,
       "temp": 9.798,
       "cloud_raw": 95.6,
@@ -498,7 +496,7 @@
       "u": 0.614,
       "v": -0.67
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.07,
       "temp": 9.232,
       "cloud_raw": 99.2,
@@ -530,7 +528,7 @@
       "u": 0.384,
       "v": -0.618
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.27,
       "temp": 9.317,
       "cloud_raw": 100.0,
@@ -562,7 +560,7 @@
       "u": 0.843,
       "v": -0.454
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.98,
       "temp": 9.412,
       "cloud_raw": 100.0,
@@ -594,7 +592,7 @@
       "u": 0.884,
       "v": -0.382
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.14,
       "temp": 9.556,
       "cloud_raw": 100.0,
@@ -626,7 +624,7 @@
       "u": 0.835,
       "v": -0.785
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.54,
       "temp": 9.268,
       "cloud_raw": 100.0,
@@ -658,7 +656,7 @@
       "u": 0.902,
       "v": -0.776
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.75,
       "temp": 9.041,
       "cloud_raw": 100.0,
@@ -690,7 +688,7 @@
       "u": 1.348,
       "v": -1.211
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1030.09,
       "temp": 9.074,
       "cloud_raw": 100.0,
@@ -722,7 +720,7 @@
       "u": 1.796,
       "v": -1.602
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1030.58,
       "temp": 9.635,
       "cloud_raw": 100.0,
@@ -754,7 +752,7 @@
       "u": 1.677,
       "v": -1.704
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1031.05,
       "temp": 10.87,
       "cloud_raw": 100.0,
@@ -786,7 +784,7 @@
       "u": 2.67,
       "v": -1.319
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1030.8,
       "temp": 12.587,
       "cloud_raw": 100.0,
@@ -818,7 +816,7 @@
       "u": 3.462,
       "v": -0.808
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1030.31,
       "temp": 13.506,
       "cloud_raw": 83.6,
@@ -850,7 +848,7 @@
       "u": 3.44,
       "v": -0.457
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1029.62,
       "temp": 15.501,
       "cloud_raw": 100.0,
@@ -882,7 +880,7 @@
       "u": 3.382,
       "v": -0.054
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.44,
       "temp": 16.185,
       "cloud_raw": 100.0,
@@ -914,7 +912,7 @@
       "u": 3.058,
       "v": 0.421
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.7,
       "temp": 16.406,
       "cloud_raw": 100.0,
@@ -946,7 +944,7 @@
       "u": 2.936,
       "v": 0.567
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.41,
       "temp": 16.606,
       "cloud_raw": 100.0,
@@ -978,7 +976,7 @@
       "u": 3.026,
       "v": 0.447
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.47,
       "temp": 16.301,
       "cloud_raw": 100.0,
@@ -1010,7 +1008,7 @@
       "u": 2.074,
       "v": 0.021
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.74,
       "temp": 15.05,
       "cloud_raw": 100.0,
@@ -1042,7 +1040,7 @@
       "u": 1.333,
       "v": 0.285
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.04,
       "temp": 14.308,
       "cloud_raw": 100.0,
@@ -1074,7 +1072,7 @@
       "u": 0.86,
       "v": -0.17
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.7,
       "temp": 14.036,
       "cloud_raw": 100.0,
@@ -1106,7 +1104,7 @@
       "u": 0.387,
       "v": -0.616
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.9,
       "temp": 13.549,
       "cloud_raw": 100.0,
@@ -1138,7 +1136,7 @@
       "u": 0.296,
       "v": -0.894
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.67,
       "temp": 13.325,
       "cloud_raw": 100.0,
@@ -1170,7 +1168,7 @@
       "u": 0.04,
       "v": -1.252
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.87,
       "temp": 13.13,
       "cloud_raw": 100.0,
@@ -1202,7 +1200,7 @@
       "u": -0.273,
       "v": -1.147
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.37,
       "temp": 13.07,
       "cloud_raw": 100.0,
@@ -1234,7 +1232,7 @@
       "u": -0.241,
       "v": -1.254
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.23,
       "temp": 12.847,
       "cloud_raw": 100.0,
@@ -1266,7 +1264,7 @@
       "u": -0.223,
       "v": -1.111
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.38,
       "temp": 12.774,
       "cloud_raw": 100.0,
@@ -1298,7 +1296,7 @@
       "u": 0.017,
       "v": -0.935
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.32,
       "temp": 12.694,
       "cloud_raw": 100.0,
@@ -1330,7 +1328,7 @@
       "u": 0.134,
       "v": -0.641
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.15,
       "temp": 12.54,
       "cloud_raw": 100.0,
@@ -1362,7 +1360,7 @@
       "u": 0.13,
       "v": -0.417
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.87,
       "temp": 12.297,
       "cloud_raw": 100.0,
@@ -1394,7 +1392,7 @@
       "u": -0.071,
       "v": -0.356
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.34,
       "temp": 11.943,
       "cloud_raw": 100.0,
@@ -1426,7 +1424,7 @@
       "u": -0.302,
       "v": 0.043
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.31,
       "temp": 11.973,
       "cloud_raw": 100.0,
@@ -1458,7 +1456,7 @@
       "u": 0.251,
       "v": 0.073
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.34,
       "temp": 11.743,
       "cloud_raw": 100.0,
@@ -1490,7 +1488,7 @@
       "u": 1.393,
       "v": 0.02
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.55,
       "temp": 12.222,
       "cloud_raw": 100.0,
@@ -1522,7 +1520,7 @@
       "u": 2.306,
       "v": 0.336
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.56,
       "temp": 14.118,
       "cloud_raw": 100.0,
@@ -1554,7 +1552,7 @@
       "u": 3.049,
       "v": 0.568
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1028.06,
       "temp": 16.157,
       "cloud_raw": 83.3,
@@ -1586,7 +1584,7 @@
       "u": 4.311,
       "v": 1.63
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.76,
       "temp": 17.746,
       "cloud_raw": 100.0,
@@ -1618,7 +1616,7 @@
       "u": 4.793,
       "v": 1.744
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1027.2,
       "temp": 18.856,
       "cloud_raw": 100.0,
@@ -1650,7 +1648,7 @@
       "u": 4.728,
       "v": 1.098
      },
-     "Dayton": {
+     "US test city": {
       "pres": 1026.57,
       "temp": 19.358,
       "cloud_raw": 100.0,
@@ -1666,9 +1664,7 @@
  "city_raw": {
   "cities": [
    {
-    "name": "Dayton OH",
-    "lat": 39.76,
-    "lon": -84.19
+    "name": "US test city"
    },
    {
     "name": "Miami",
@@ -1695,7 +1691,7 @@
    {
     "f": 0,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1025.72,
       "temp": 18.701,
       "cloud": 4.2704,
@@ -1785,7 +1781,7 @@
    {
     "f": 1,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1025.513,
       "temp": 19.357,
       "cloud": 4.0522,
@@ -1875,7 +1871,7 @@
    {
     "f": 2,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1025.455,
       "temp": 19.543,
       "cloud": 5.3979,
@@ -1965,7 +1961,7 @@
    {
     "f": 3,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1025.566,
       "temp": 19.087,
       "cloud": 5.7968,
@@ -2055,7 +2051,7 @@
    {
     "f": 4,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1025.984,
       "temp": 16.916,
       "cloud": 23.696,
@@ -2145,7 +2141,7 @@
    {
     "f": 5,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1026.748,
       "temp": 14.713,
       "cloud": 56.6166,
@@ -2235,7 +2231,7 @@
    {
     "f": 6,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.599,
       "temp": 13.739,
       "cloud": 78.7925,
@@ -2325,7 +2321,7 @@
    {
     "f": 7,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.043,
       "temp": 13.065,
       "cloud": 22.3974,
@@ -2415,7 +2411,7 @@
    {
     "f": 8,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.271,
       "temp": 12.437,
       "cloud": 99.9027,
@@ -2505,7 +2501,7 @@
    {
     "f": 9,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.542,
       "temp": 11.898,
       "cloud": 100.0,
@@ -2595,7 +2591,7 @@
    {
     "f": 10,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.572,
       "temp": 11.398,
       "cloud": 97.2698,
@@ -2685,7 +2681,7 @@
    {
     "f": 11,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.565,
       "temp": 11.139,
       "cloud": 99.9578,
@@ -2775,7 +2771,7 @@
    {
     "f": 12,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.721,
       "temp": 10.991,
       "cloud": 98.9891,
@@ -2865,7 +2861,7 @@
    {
     "f": 13,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.701,
       "temp": 11.138,
       "cloud": 100.0,
@@ -2955,7 +2951,7 @@
    {
     "f": 14,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.47,
       "temp": 10.695,
       "cloud": 100.0,
@@ -3045,7 +3041,7 @@
    {
     "f": 15,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.9,
       "temp": 10.305,
       "cloud": 87.8498,
@@ -3135,7 +3131,7 @@
    {
     "f": 16,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1029.163,
       "temp": 9.786,
       "cloud": 100.0,
@@ -3225,7 +3221,7 @@
    {
     "f": 17,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1029.348,
       "temp": 9.902,
       "cloud": 100.0,
@@ -3315,7 +3311,7 @@
    {
     "f": 18,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1029.766,
       "temp": 9.951,
       "cloud": 99.7082,
@@ -3405,7 +3401,7 @@
    {
     "f": 19,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1030.409,
       "temp": 10.234,
       "cloud": 99.5622,
@@ -3495,7 +3491,7 @@
    {
     "f": 20,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1030.678,
       "temp": 11.548,
       "cloud": 100.0,
@@ -3585,7 +3581,7 @@
    {
     "f": 21,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1030.333,
       "temp": 12.446,
       "cloud": 100.0,
@@ -3675,7 +3671,7 @@
    {
     "f": 22,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1030.021,
       "temp": 14.022,
       "cloud": 99.4656,
@@ -3765,7 +3761,7 @@
    {
     "f": 23,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1029.353,
       "temp": 15.251,
       "cloud": 99.7811,
@@ -3855,7 +3851,7 @@
    {
     "f": 24,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.37,
       "temp": 16.185,
       "cloud": 100.0,
@@ -3945,7 +3941,7 @@
    {
     "f": 25,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.505,
       "temp": 17.053,
       "cloud": 100.0,
@@ -4035,7 +4031,7 @@
    {
     "f": 26,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.297,
       "temp": 17.314,
       "cloud": 100.0,
@@ -4125,7 +4121,7 @@
    {
     "f": 27,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.35,
       "temp": 16.785,
       "cloud": 100.0,
@@ -4215,7 +4211,7 @@
    {
     "f": 28,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.392,
       "temp": 15.809,
       "cloud": 100.0,
@@ -4305,7 +4301,7 @@
    {
     "f": 29,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.921,
       "temp": 15.152,
       "cloud": 100.0,
@@ -4395,7 +4391,7 @@
    {
     "f": 30,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.422,
       "temp": 14.809,
       "cloud": 100.0,
@@ -4485,7 +4481,7 @@
    {
     "f": 31,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.518,
       "temp": 14.439,
       "cloud": 100.0,
@@ -4575,7 +4571,7 @@
    {
     "f": 32,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.551,
       "temp": 14.05,
       "cloud": 100.0,
@@ -4665,7 +4661,7 @@
    {
     "f": 33,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.386,
       "temp": 13.633,
       "cloud": 100.0,
@@ -4755,7 +4751,7 @@
    {
     "f": 34,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.108,
       "temp": 13.504,
       "cloud": 100.0,
@@ -4845,7 +4841,7 @@
    {
     "f": 35,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.122,
       "temp": 13.359,
       "cloud": 100.0,
@@ -4935,7 +4931,7 @@
    {
     "f": 36,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.873,
       "temp": 13.342,
       "cloud": 100.0,
@@ -5025,7 +5021,7 @@
    {
     "f": 37,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.182,
       "temp": 13.049,
       "cloud": 99.7362,
@@ -5115,7 +5111,7 @@
    {
     "f": 38,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.651,
       "temp": 12.968,
       "cloud": 100.0,
@@ -5205,7 +5201,7 @@
    {
     "f": 39,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.834,
       "temp": 12.858,
       "cloud": 100.0,
@@ -5295,7 +5291,7 @@
    {
     "f": 40,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.037,
       "temp": 12.651,
       "cloud": 100.0,
@@ -5385,7 +5381,7 @@
    {
     "f": 41,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.064,
       "temp": 12.688,
       "cloud": 100.0,
@@ -5475,7 +5471,7 @@
    {
     "f": 42,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.97,
       "temp": 12.966,
       "cloud": 100.0,
@@ -5565,7 +5561,7 @@
    {
     "f": 43,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.138,
       "temp": 13.424,
       "cloud": 100.0,
@@ -5655,7 +5651,7 @@
    {
     "f": 44,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.256,
       "temp": 14.839,
       "cloud": 99.997,
@@ -5745,7 +5741,7 @@
    {
     "f": 45,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1028.084,
       "temp": 16.03,
       "cloud": 93.5982,
@@ -5835,7 +5831,7 @@
    {
     "f": 46,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.632,
       "temp": 17.292,
       "cloud": 99.927,
@@ -5925,7 +5921,7 @@
    {
     "f": 47,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1027.459,
       "temp": 18.682,
       "cloud": 99.7005,
@@ -6015,7 +6011,7 @@
    {
     "f": 48,
     "cities": {
-     "Dayton OH": {
+     "US test city": {
       "pres": 1026.675,
       "temp": 18.684,
       "cloud": 100.0,
