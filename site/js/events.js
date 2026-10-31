@@ -56,7 +56,7 @@ const SRC = {
       const p = f.properties, [lon, lat] = f.geometry.coordinates;
       return { id: `ga:${p.eventtype}${p.eventid}`, k: 'ga', icon: 'alert-' + (/^(orange|red)$/i.test(p.alertlevel) ? p.alertlevel.toLowerCase() : 'green'), title: p.name || GT[p.eventtype], place: p.country || '', time: utc(p.fromdate), lon, lat, src: 'gdacs',
         link: http(p.url?.report, `https://www.gdacs.org/report.aspx?eventtype=${p.eventtype}&eventid=${p.eventid}`),
-        stats: () => [['Alert level', p.alertlevel || '—', '', 'GDACS'], ['Type', GT[p.eventtype] || p.eventtype, '', p.severitydata?.severitytext || ''], ['Last update', p.todate ? fmtBoth(utc(p.todate)) : '—', '', 'latest episode']] };
+        stats: () => [['Alert level', p.alertlevel || '—', '', 'GDACS'], ['Type', GT[p.eventtype] || p.eventtype, '', p.severitydata?.severitytext || ''], ['Last update', p.todate ? fmtBoth(utc(p.todate)) : '—', '', 'GDACS: indicative only, check other sources']] };
     }) };
   } },
   nhc: { types: ['st'], async load() {
