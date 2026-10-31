@@ -1,6 +1,6 @@
 # Accuracy check (layer-overlays)
 
-Generated 2026-10-31T21:42:12.637Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T12:00:00.000Z, timeline +0 h = 2026-10-31T22:00:00.000Z (f010); live data: true.
+Generated 2026-10-31T22:31:12.780Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T12:00:00.000Z, timeline +0 h = 2026-10-31T22:00:00.000Z (f010); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
@@ -42,7 +42,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Kansas City MO | +0 h | precip mm/h | 0.45 | gfs_seamless 0.00 | 0.45 | ±0.3 | **FAIL** |
 | Kansas City MO | +0 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
 | Kansas City MO | +0 h | pressure hPa | 1020.4 | gfs_seamless 1020.8 | -0.4 | ±1 | ok |
-| Kansas City MO | +0 h | PM2.5 µg/m³ | 9.3 | cams_global 10.2 | -0.9 | ±3 | ok |
+| Kansas City MO | +0 h | PM2.5 µg/m³ | 9.3 | cams_global 9.2 | 0.1 | ±3 | ok |
 | Kansas City MO | +0 h | temp °C | 17.8 | NWS 20.0 | -2.2 | ±3 | ok |
 | Kansas City MO | +0 h | wind km/h | 10.0 | NWS 9.3 | 0.7 | ±8 | ok |
 | Kansas City MO | +0 h | cloud % | 100 | NWS 92 | 8 | ±30 | ok |
@@ -69,7 +69,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Kansas City MO | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Kansas City MO | +24 h | cloud % | 99 | gfs_seamless 100 | -1 | ±15 | ok |
 | Kansas City MO | +24 h | pressure hPa | 1018.3 | gfs_seamless 1019.7 | -1.4 | ±1 | **FAIL** |
-| Kansas City MO | +24 h | PM2.5 µg/m³ | 4.4 | cams_global 5.5 | -1.1 | ±3 | ok |
+| Kansas City MO | +24 h | PM2.5 µg/m³ | 4.4 | cams_global 3.1 | 1.3 | ±3 | ok |
 | Kansas City MO | +24 h | temp °C | 19.1 | NWS 21.1 | -2.0 | ±3 | ok |
 | Kansas City MO | +24 h | wind km/h | 12.4 | NWS 7.4 | 5.0 | ±8 | ok |
 | Kansas City MO | +24 h | cloud % | 99 | NWS 42 | 57 | ±30 | **FAIL** |
@@ -106,7 +106,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Miami | +0 h | precip mm/h | 0.56 | gfs_seamless 0.00 | 0.56 | ±0.3 | **FAIL** |
 | Miami | +0 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
 | Miami | +0 h | pressure hPa | 1016.6 | gfs_seamless 1016.6 | -0.0 | ±1 | ok |
-| Miami | +0 h | PM2.5 µg/m³ | 8.4 | cams_global 5.4 | 3.0 | ±3 | ok |
+| Miami | +0 h | PM2.5 µg/m³ | 8.4 | cams_global 6.6 | 1.8 | ±3 | ok |
 | Miami | +0 h | temp °C | 27.3 | NWS 27.8 | -0.4 | ±3 | ok |
 | Miami | +0 h | wind km/h | 21.2 | NWS 24.1 | -2.9 | ±8 | ok |
 | Miami | +0 h | cloud % | 100 | NWS 68 | 32 | ±30 | **FAIL** |
@@ -133,7 +133,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Miami | +24 h | precip mm/h | 1.10 | gfs_seamless 0.70 | 0.40 | ±0.3 | **FAIL** |
 | Miami | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
 | Miami | +24 h | pressure hPa | 1015.7 | gfs_seamless 1018.3 | -2.6 | ±1 | **FAIL** |
-| Miami | +24 h | PM2.5 µg/m³ | 5.6 | cams_global 7.9 | -2.3 | ±3 | ok |
+| Miami | +24 h | PM2.5 µg/m³ | 5.6 | cams_global 8.9 | -3.3 | ±3 | **FAIL** |
 | Miami | +24 h | temp °C | 26.8 | NWS 26.7 | 0.1 | ±3 | ok |
 | Miami | +24 h | wind km/h | 29.1 | NWS 27.8 | 1.3 | ±8 | ok |
 | Miami | +24 h | cloud % | 100 | NWS 76 | 24 | ±30 | ok |
@@ -170,7 +170,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Denver | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Denver | +0 h | cloud % | 55 | gfs_seamless 7 | 48 | ±15 | **FAIL** |
 | Denver | +0 h | pressure hPa | 1011.3 | gfs_seamless 1011.0 | 0.3 | ±1 | ok |
-| Denver | +0 h | PM2.5 µg/m³ | 1.0 | cams_global 8.9 | -7.9 | ±3 | **FAIL** |
+| Denver | +0 h | PM2.5 µg/m³ | 1.0 | cams_global 9.5 | -8.5 | ±3 | **FAIL** |
 | Denver | +0 h | temp °C | 16.9 | NWS 16.1 | 0.7 | ±3 | ok |
 | Denver | +0 h | wind km/h | 10.4 | NWS 7.4 | 3.0 | ±8 | ok |
 | Denver | +0 h | cloud % | 55 | NWS 45 | 10 | ±30 | ok |
@@ -197,7 +197,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Denver | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Denver | +24 h | cloud % | 74 | gfs_seamless 100 | -26 | ±15 | **FAIL** |
 | Denver | +24 h | pressure hPa | 999.6 | gfs_seamless 1002.4 | -2.8 | ±1 | **FAIL** |
-| Denver | +24 h | PM2.5 µg/m³ | 0.9 | cams_global 2.3 | -1.4 | ±3 | ok |
+| Denver | +24 h | PM2.5 µg/m³ | 0.9 | cams_global 1.6 | -0.7 | ±3 | ok |
 | Denver | +24 h | temp °C | 18.8 | NWS 16.1 | 2.6 | ±3 | ok |
 | Denver | +24 h | wind km/h | 10.9 | NWS 11.1 | -0.2 | ±8 | ok |
 | Denver | +24 h | cloud % | 74 | NWS 61 | 13 | ±30 | ok |
@@ -234,7 +234,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | London | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | London | +0 h | cloud % | 70 | gfs_seamless 88 | -18 | ±15 | **FAIL** |
 | London | +0 h | pressure hPa | 1032.4 | gfs_seamless 1032.4 | 0.0 | ±1 | ok |
-| London | +0 h | PM2.5 µg/m³ | 21.3 | cams_global 26.7 | -5.4 | ±3 | **FAIL** |
+| London | +0 h | PM2.5 µg/m³ | 21.3 | cams_global 23.0 | -1.7 | ±3 | ok |
 | London | +24 h | temp °C | 11.7 | GFS 0.25° raw 11.7 | 0.0 | ±0.7 | ok |
 | London | +24 h | wind km/h | 20.0 | GFS 0.25° raw 16.8 | 3.2 | ±3 | **FAIL** |
 | London | +24 h | wind from ° | 17 | GFS 0.25° raw 21 | 3 | ±20 | ok |
@@ -257,7 +257,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | London | +24 h | precip mm/h | 0.01 | gfs_seamless 0.00 | 0.01 | ±0.3 | ok |
 | London | +24 h | cloud % | 99 | gfs_seamless 100 | -1 | ±15 | ok |
 | London | +24 h | pressure hPa | 1034.3 | gfs_seamless 1034.4 | -0.1 | ±1 | ok |
-| London | +24 h | PM2.5 µg/m³ | 12.5 | cams_global 23.6 | -11.1 | ±3 | **FAIL** |
+| London | +24 h | PM2.5 µg/m³ | 12.5 | cams_global 19.9 | -7.4 | ±3 | **FAIL** |
 | London | +110 h | temp °C | 10.7 | GFS 0.25° raw 10.7 | -0.0 | ±0.7 | ok |
 | London | +110 h | wind km/h | 20.4 | GFS 0.25° raw 15.8 | 4.6 | ±3 | **FAIL** |
 | London | +110 h | wind from ° | 78 | GFS 0.25° raw 75 | 3 | ±20 | ok |
@@ -290,7 +290,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Delhi | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Delhi | +0 h | cloud % | 0 | gfs_seamless 0 | 0 | ±15 | ok |
 | Delhi | +0 h | pressure hPa | 1015.7 | gfs_seamless 1015.6 | 0.1 | ±1 | ok |
-| Delhi | +0 h | PM2.5 µg/m³ | 63.7 | cams_global 66.6 | -2.9 | ±3 | ok |
+| Delhi | +0 h | PM2.5 µg/m³ | 63.7 | cams_global 63.3 | 0.4 | ±3 | ok |
 | Delhi | +24 h | temp °C | 23.0 | GFS 0.25° raw 24.4 | -1.4 | ±0.7 | **FAIL** |
 | Delhi | +24 h | wind km/h | 3.3 | GFS 0.25° raw 1.2 | 2.1 | ±3 | ok |
 | Delhi | +24 h | wind from ° | 220 | GFS 0.25° raw 261 | — | ±20 | calm |
@@ -313,7 +313,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Delhi | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Delhi | +24 h | cloud % | 0 | gfs_seamless 0 | 0 | ±15 | ok |
 | Delhi | +24 h | pressure hPa | 1014.4 | gfs_seamless 1014.2 | 0.2 | ±1 | ok |
-| Delhi | +24 h | PM2.5 µg/m³ | 58.4 | cams_global 99.7 | -41.3 | ±3 | **FAIL** |
+| Delhi | +24 h | PM2.5 µg/m³ | 58.4 | cams_global 100.4 | -42.0 | ±3 | **FAIL** |
 | Delhi | +110 h | temp °C | 29.9 | GFS 0.25° raw 31.3 | -1.5 | ±0.7 | **FAIL** |
 | Delhi | +110 h | wind km/h | 7.1 | GFS 0.25° raw 6.6 | 0.5 | ±3 | ok |
 | Delhi | +110 h | wind from ° | 312 | GFS 0.25° raw 316 | — | ±20 | calm |
@@ -381,28 +381,28 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 
 ## Air quality at 4° grid nodes
 
-Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T17:15:17Z (4.4 h before this check), valid hour 2026-10-31T22:00:00Z.
+Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T17:15:17Z (5.3 h before this check), valid hour 2026-10-31T22:00:00Z.
 
 | Node | Time | Page PM2.5 | Downloaded | Diff | Tol | | CAMS now | Page − now |
 |---|---|---|---|---|---|---|---|---|
-| node 28N 76E (Delhi) | +0 h | 63.80 | 63.80 | -0.00 | ±0.2 | ok | 63.80 | -0.00 |
-| node 52N 0E (London) | +0 h | 21.70 | 21.70 | 0.00 | ±0.2 | ok | 21.70 | 0.00 |
-| node 40N 116E (Beijing) | +0 h | 71.00 | 71.00 | 0.00 | ±0.2 | ok | 71.00 | 0.00 |
+| node 28N 76E (Delhi) | +0 h | 63.80 | 63.80 | -0.00 | ±0.2 | ok | 61.90 | 1.90 |
+| node 52N 0E (London) | +0 h | 21.70 | 21.70 | 0.00 | ±0.2 | ok | 16.40 | 5.30 |
+| node 40N 116E (Beijing) | +0 h | 71.00 | 71.00 | 0.00 | ±0.2 | ok | 66.80 | 4.20 |
 
 ## Which AQI table does Open-Meteo's us_aqi use?
 
-Open-Meteo us_aqi vs AQI computed here from Open-Meteo's own PM2.5 (hourly value, or the mean of the past 24 h) with the 2024 and the previous (2012) EPA tables. **Closest match: 2024 24-h mean** (total absolute difference {"2024 hourly":140,"2024 24-h mean":13,"2012 hourly":161,"2012 24-h mean":29}).
+Open-Meteo us_aqi vs AQI computed here from Open-Meteo's own PM2.5 (hourly value, or the mean of the past 24 h) with the 2024 and the previous (2012) EPA tables. **Closest match: 2024 24-h mean** (total absolute difference {"2024 hourly":122,"2024 24-h mean":8,"2012 hourly":142,"2012 24-h mean":35}).
 
 | Point | PM2.5 now | PM2.5 24-h mean | Open-Meteo us_aqi | 2024 hourly | 2024 24-h | 2012 hourly | 2012 24-h |
 |---|---|---|---|---|---|---|---|
-| Kansas City MO | 10.2 | 14.7 | 61 | 53 | 61 | 43 | 56 |
-| Miami | 5.4 | 5.4 | 35 | 30 | 30 | 23 | 23 |
-| Denver | 8.9 | 17.9 | 67 | 49 | 67 | 37 | 63 |
-| London | 26.7 | 15.2 | 60 | 84 | 62 | 82 | 58 |
-| Delhi | 66.6 | 63.6 | 155 | 159 | 157 | 157 | 155 |
-| node 28N 76E (Delhi) | 63.8 | 33.5 | 95 | 157 | 96 | 155 | 96 |
-| node 52N 0E (London) | 21.7 | 12.6 | 56 | 74 | 57 | 71 | 52 |
-| node 40N 116E (Beijing) | 71.0 | 72.6 | 161 | 162 | 163 | 159 | 160 |
+| Kansas City MO | 9.2 | 13.7 | 59 | 51 | 59 | 38 | 54 |
+| Miami | 6.6 | 5.9 | 34 | 37 | 32 | 28 | 24 |
+| Denver | 9.5 | 17.7 | 67 | 52 | 67 | 40 | 63 |
+| London | 23.0 | 12.2 | 55 | 77 | 57 | 74 | 51 |
+| Delhi | 63.3 | 63.3 | 155 | 156 | 156 | 155 | 155 |
+| node 28N 76E (Delhi) | 61.9 | 34.0 | 96 | 155 | 97 | 154 | 97 |
+| node 52N 0E (London) | 16.4 | 9.8 | 51 | 65 | 52 | 60 | 41 |
+| node 40N 116E (Beijing) | 66.8 | 69.0 | 159 | 159 | 160 | 157 | 158 |
 
 ## Probe text at +0 h (what a user sees when hovering)
 
