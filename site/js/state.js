@@ -2,7 +2,7 @@
 // Preferences persist in localStorage on this device only (no accounts, nothing sent).
 
 const STORE_KEY = 'owm:prefs:v1';
-const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed', 'events', 'evWin', 'photos'];
+const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed', 'events', 'evWin', 'photos', 'overlays'];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // First visit: US units (°F, mph, mi) for an en-US browser, metric everywhere else.
 const us = /^en-US$/i.test(navigator.language || '');
@@ -26,7 +26,8 @@ const state = {
   // natural events (Phase 5): one toggle per type, all off until chosen (no requests while off)
   events: { eq: false, fv: false, st: false, ga: false },
   evWin: '7d',            // observed events shown: '24h' | '7d'
-  photos: false           // street photos (Mapillary, Phase 4): off until chosen
+  photos: false,          // street photos (Mapillary, Phase 4): off until chosen
+  overlays: []            // up to 2 of 'cloud' | 'rain' | 'pres', drawn over the main field
 };
 
 try {

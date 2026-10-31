@@ -76,6 +76,15 @@ for (const phone of [false, true]) {
     { name: `p4-${d}-photo-brantley`, field: 'none', hash: `16/31.585/-86.255`, phone, photos: true, act: 'photo', snap: 'half' });
   else VIEWS.push({ name: `p4-${d}-unavailable`, field: 'temp', hash: phone ? '0.4/20/0' : '1.6/20/0', phone, photos: true, act: 'layers-photos' });
 }
+// Overlays: temperature + isobars + rain, wind + clouds (desktop and phone)
+for (const phone of [false, true]) {
+  const d = phone ? 'phone' : 'desktop', h = phone ? '0.8/40/-30' : '2.4/42/-35';
+  VIEWS.push(
+    { name: `ov-${d}-temp-isobars-rain`, field: 'temp', overlays: ['pres', 'rain'], hash: h, phone },
+    { name: `ov-${d}-wind-clouds`, field: 'wind', overlays: ['cloud'], particles: true, hash: h, phone },
+    { name: `ov-${d}-layers`, field: 'temp', overlays: ['pres', 'rain'], hash: h, phone, act: 'layers' }
+  );
+}
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -99,7 +108,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
   page.on('requestfailed', r => { if (/imagery\.nationalmap\.gov/.test(r.url())) naipFailed.push({ bbox: new URL(r.url()).searchParams.get('bbox'), failure: r.failure()?.errorText }); });
   if (v.samples) await eventSamples(page, { usgs: 'live', eonet: 'live', gdacs: 'live', ...v.samples });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { events: v.events || {}, photos: !!v.photos, field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
+    { events: v.events || {}, photos: !!v.photos, overlays: v.overlays || [], field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
   if (v.t != null) { // jump to a forecast time (snapped to a frame)
@@ -151,7 +160,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     legendMsg: document.querySelector('#legend')?.classList.contains('unavailable') ? document.querySelector('#legend').dataset.msg : null,
     stale: document.querySelector('#stale').hidden ? null : document.querySelector('#stale').textContent,
     updated: document.querySelector('[data-updated]')?.textContent,
-    events: document.querySelector('.layers [data-evnote]')?.textContent, photos: document.querySelector('.layers [data-phnote]')?.textContent, photoCredit: document.querySelector('[data-photo-credit]')?.textContent || null, eventCounts: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])),
+    overlays: [...document.querySelectorAll('#probe [data-pov]')].map(e => e.textContent).join(' | ') || null, events: document.querySelector('.layers [data-evnote]')?.textContent, photos: document.querySelector('.layers [data-phnote]')?.textContent, photoCredit: document.querySelector('[data-photo-credit]')?.textContent || null, eventCounts: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])),
     sampleLabelsVisible: [...document.querySelectorAll('[data-sample-only]')].filter(e => !e.hidden).length
   }));
   await page.screenshot({ path: `${out}/${v.name}.png` });

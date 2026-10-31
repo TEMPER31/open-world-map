@@ -14,6 +14,7 @@ import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
 import { initTimeline, relT, fmtUTC, fmtBoth } from './timeline.js';
 import { initPhotos, status as phStatus, credits as phCredits, hit as phHit, panelHTML as phPanel, photosTest } from './photos.js';
+import { OVERLAYS, overlaysHTML, toggle as toggleOverlay, renderOverlayUI, initOverlays } from './overlays.js';
 import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -134,6 +135,7 @@ function buildLayers() {
       <button class="row" type="button" role="radio" data-field="none"><span class="rad"></span><b>None</b><span class="v">map only</span></button>
       <div class="row" data-toggle><b>Wind particles</b><button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
     </div>
+    ${overlaysHTML()}
     ${eventsHTML()}
     ${photosHTML()}
     <div class="lfoot">${L.foot()}</div>`;
@@ -143,6 +145,7 @@ function buildLayers() {
     <div class="grp"><div class="kick"><span>Field</span><span>${meta.live ? 'GFS · CAMS' : 'sample data'}</span></div>
       <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span data-unit="${k}">${unitOf(k)}</span></button>`).join('')}<button class="ftile" type="button" role="radio" data-field="none"><b>None</b><div class="lg-bar"></div><span>map only</span></button></div>
       <div class="ls-lg"></div></div>
+    <div class="grp">${overlaysHTML()}</div>
     <div class="grp"><div class="kick"><span>Basemap</span><span></span></div>
       <div class="card"><div class="it">Map<div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div></div></div></div>
     <div class="grp"><div class="card">
@@ -193,6 +196,7 @@ function bindChrome(map) {
     else if (t.dataset.ev) S.set({ events: { ...S.get('events'), [t.dataset.ev]: !S.get('events')[t.dataset.ev] } });
     else if (t.dataset.evwin) S.set({ evWin: t.dataset.evwin });
     else if ('photos' in t.dataset) S.set({ photos: !S.get('photos') });
+    else if (t.dataset.ov) { if (!toggleOverlay(t.dataset.ov)) toast(t.dataset.ov === S.get('field') ? 'That layer is the main field.' : 'Up to 2 overlays: turn one off first.'); }
     else if (t.dataset.dens) S.set({ density: +t.dataset.dens });
     else if (t.dataset.tunit) S.set({ tempUnit: t.dataset.tunit });
     else if (t.dataset.sunit) S.set({ speedUnit: t.dataset.sunit });
@@ -245,6 +249,7 @@ function bindChrome(map) {
     $$('[data-evwin]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.evwin === s.evWin)));
     renderEvStatus();
   });
+  S.on(['overlays', 'field', 'basemap'], renderOverlayUI);
   S.on(['photos'], s => { $$('[data-photos]').forEach(el => { el.classList.toggle('on', s.photos); el.setAttribute('aria-checked', String(s.photos)); }); renderPhStatus(); });
   S.on(['basemap'], s => $$('[data-basemap]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.basemap === s.basemap))));
   // One units setting for the whole page: probe, place panel, chart, legends, scale bar, measure.
@@ -266,23 +271,24 @@ function bindChrome(map) {
     b.setAttribute('aria-label', s.layersMin ? 'Expand layers' : 'Minimise layers');
   });
   let legendKey = '';
-  S.on(['field', 'basemap', 'tempUnit', 'speedUnit', 't'], s => {
+  S.on(['field', 'basemap', 'tempUnit', 'speedUnit', 't', 'overlays'], s => {
     const light = s.basemap === 'light', f = FIELDS[s.field];
     // only rebuild when something shown changes (rain's span and the AQ end state follow t)
-    const key = [s.field, s.basemap, s.tempUnit, s.speedUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : ''].join();
+    const key = [s.field, s.basemap, s.tempUnit, s.speedUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : '', s.overlays].join();
     if (key === legendKey) return;
     legendKey = key;
+    const ovs = s.overlays.length ? `<div class="lg-ov mono">+ ${s.overlays.map(k => OVERLAYS.find(o => o[0] === k)[1]).join(' · ')}</div>` : '';
     if (!f) {
-      $('#legend').innerHTML = '<div class="lg-h"><span>No layer</span><span>map only</span></div>';
-      $('#mchip').innerHTML = 'No layer';
+      $('#legend').innerHTML = '<div class="lg-h"><span>No layer</span><span>map only</span></div>' + ovs;
+      $('#mchip').innerHTML = 'No layer' + (s.overlays.length ? ` +${s.overlays.length}` : '');
       return;
     }
-    $('#legend').innerHTML = legendHTML(s.field, light, L.legendMeta(s.field));
+    $('#legend').innerHTML = legendHTML(s.field, light, L.legendMeta(s.field)) + ovs;
     const ended = s.field === 'aq' && aqEnded(s.t);
     $('#legend').classList.toggle('ended', ended);
     $('#legend').dataset.msg = ended ? aqEndText() : 'No data for this hour';
     $('#legend').title = s.field === 'aq' ? 'PM2.5 categories use the US EPA breakpoints revised in May 2024. EPA defines them for 24-hour averages; this map applies them to hourly forecast values.' : '';
-    $('#mchip').innerHTML = `${f.short} ${unitOf(s.field)}${barHTML(s.field, light)}${rangeText(s.field)}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
+    $('#mchip').innerHTML = `${f.short} ${unitOf(s.field)}${barHTML(s.field, light)}${rangeText(s.field)}${s.overlays.length ? `<span class="mono">+${s.overlays.length}</span>` : ''}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
   });
 }
 
@@ -371,7 +377,7 @@ function renderDetail(s) {
   }
   const { lon, lat } = s.selection, t = s.t;
   const all = detailVals && ORDER.every(k => k in detailVals);
-  const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
+  const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : s.overlays.includes(k) ? ' ov' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}${s.overlays.includes(k) ? ' · overlay' : ''}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
   const note = meta.live
     ? `<div class="d-sec"><div class="src">NOAA GFS run ${runLabel(meta.run)} · air quality CAMS ${meta.aq ? fmtUTC(meta.aqGenerated) : 'unavailable'} </div><div class="src">Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days.</div></div>`
     : `<div class="d-sec"><div class="alert"><b>Sample data</b><span>Generated to test the layout. Not an observation or a forecast.</span></div></div>`;
@@ -441,14 +447,16 @@ function bindProbe(map) {
   async function show() {
     if (busy || !pending) return;
     const { lngLat: { lng, lat }, point } = pending; pending = null;
-    const k = S.get('field'), t = S.get('t');
-    if (k === 'none' || Math.abs(lat) > 85 || S.get('measuring')) { hide(); return; }
+    const k = S.get('field'), t = S.get('t'), ov = S.get('overlays'), ks = [k, ...ov].filter(x => FIELDS[x]);
+    if (!ks.length || Math.abs(lat) > 85 || S.get('measuring')) { hide(); return; }
     busy = true;
-    const p = await getPoint(t, [k], lng, lat).catch(() => null);
+    const p = await getPoint(t, ks, lng, lat).catch(() => null);
     busy = false;
-    if (p && S.get('field') === k && S.get('t') === t && !left) {
-      const [v, u, d] = readingOf(k, p[k]);
-      probe.innerHTML = `<b>${v}${u ? ' ' + u : ''}</b><span>${d}</span><small>${fmtLat(lat).replace(/(\.\d)\d/, '$1')} ${fmtLon(lng).replace(/(\.\d)\d/, '$1')} · ${fmtBoth(meta.base + t * 3600e3, undefined, { date: false })}</small>`;
+    if (p && S.get('field') === k && S.get('overlays') === ov && S.get('t') === t && !left) {
+      const [v, u, d] = FIELDS[k] ? readingOf(k, p[k]) : ['', '', ''];
+      // overlays: one short line each under the main value
+      const extra = ov.map(o => { const [a, b] = readingOf(o, p[o]); return `<em data-pov="${o}">${FIELDS[o].short} ${a}${b ? ' ' + b : ''}</em>`; }).join('');
+      probe.innerHTML = `${FIELDS[k] ? `<b>${v}${u ? ' ' + u : ''}</b><span>${d}</span>` : ''}${extra}<small>${fmtLat(lat).replace(/(\.\d)\d/, '$1')} ${fmtLon(lng).replace(/(\.\d)\d/, '$1')} · ${fmtBoth(meta.base + t * 3600e3, undefined, { date: false })}</small>`;
       probe.dataset.t = t;
       probe.style.left = point.x + 'px';
       probe.style.top = point.y + 'px';
@@ -463,7 +471,7 @@ function bindProbe(map) {
     pending = last = e;
     requestAnimationFrame(show);
   });
-  S.on(['t', 'field', 'tempUnit', 'speedUnit', 'timeFirst'], () => { if (last && !left) { pending = last; show(); } }, { now: false });
+  S.on(['t', 'field', 'overlays', 'tempUnit', 'speedUnit', 'timeFirst'], () => { if (last && !left) { pending = last; show(); } }, { now: false });
   map.getCanvas().addEventListener('mouseleave', () => { pending = null; left = true; hide(); });
   map.on('movestart', hide);
 }
@@ -524,7 +532,7 @@ async function boot() {
 
   await mapLoaded;
   field.addTo(map);
-  map.addLayer(wind, 'omt-road-minor'); // above the field, below roads, borders and labels
+  map.addLayer(wind, 'omt-road-minor'); // above the field and overlays, below roads, borders and labels
   window.owmWind = wind;
   // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
   const measure = initMeasure(map);
@@ -549,7 +557,7 @@ async function boot() {
   const updateField = latest(async () => {
     const t = S.get('t'), k = S.get('field');
     field.setVisible(k !== 'none');
-    if (k === 'none') { field.setOverlays(null, light()); field.setIsobars(null); for (const l of ['field', 'isobars', 'hl']) stamp(l, null); return; }
+    if (k === 'none') { field.setIsobars(null); for (const l of ['field', 'isobars']) stamp(l, null); return; }
     const tex = await getFieldTexture(t, k);
     if (S.get('field') !== k) return;
     field.setData(tex);
@@ -558,16 +566,22 @@ async function boot() {
     stamp('field', t); stamp('isobars', k === 'pres' ? t : null);
     if (!firstPaint) { firstPaint = true; map.once('render', () => performance.mark('owm:first-field')); }
     $('#legend').classList.toggle('unavailable', !!tex.missing);
-    // pressure H/L labels follow without holding up the colours
-    if (k === 'pres') stamp('hl', -1);
-    const ov = k === 'pres' ? await getPressureOverlays(t) : null;
-    if (S.get('field') !== k) return;
-    field.setOverlays(ov, light());
-    stamp('hl', k === 'pres' ? t : null);
     // prefetch the next 2 frames
     for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getFieldTexture(n, k).catch(() => {});
   });
   let firstPaint = false;
+  // Pressure H/L labels (main field or the isobars overlay) follow without holding up the colours.
+  const presShown = () => S.get('field') === 'pres' || S.get('overlays').includes('pres');
+  const updateHL = latest(async () => {
+    const t = S.get('t');
+    if (!presShown()) { field.setOverlays(null, light()); stamp('hl', null); return; }
+    stamp('hl', -1);
+    const ov = await getPressureOverlays(t);
+    if (!presShown()) return;
+    field.setOverlays(ov, light());
+    stamp('hl', t);
+  });
+  window.owmTest.overlays = initOverlays(map, { load: getFieldTexture, latest, stepTime, opacity: s => s.basemap === 'satellite' ? 0.7 : 1 });
   const updateWind = latest(async () => {
     if (!S.get('particles')) { stamp('wind', null); return; }
     const t = S.get('t'), tex = await getWindTexture(t);
@@ -580,6 +594,7 @@ async function boot() {
 
   S.on(['basemap'], s => { applyBasemap(map, s.basemap); renderCredits(map); });
   S.on(['t', 'field'], updateField);
+  S.on(['t', 'field', 'overlays', 'basemap'], updateHL);
   S.on(['field', 'basemap'], s => { if (FIELDS[s.field]) field.setLut(s.field, light()); windColour(); });
   S.on(['basemap'], () => updateField(), { now: false }); // isobar ink follows the theme
   S.on(['t', 'particles'], updateWind);
@@ -587,7 +602,7 @@ async function boot() {
   S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
   S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
   S.on(['selection', 't'], s => { loadDetail(s); renderDetail(s); });
-  S.on(['field', 'tempUnit', 'speedUnit', 'timeFirst'], s => { if (s.selection) renderDetail(s); }, { now: false });
+  S.on(['field', 'overlays', 'tempUnit', 'speedUnit', 'timeFirst'], s => { if (s.selection) renderDetail(s); }, { now: false });
   S.on(['distUnit'], () => renderScale(map), { now: false });
 
   // Selection marker + detail panel on click / tap.
