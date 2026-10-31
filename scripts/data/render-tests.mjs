@@ -386,6 +386,14 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
     perType[k] = { hosts: got, onlyOwn: got.length > 0 && got.every(h => re.test(h)), afterOff: evCount(hosts) };
   }
   check('Events off (default): 0 requests to USGS, NASA, GDACS or NOAA while stepping the timeline', off0 === 0, `${off0} requests`);
+  const style = () => page.evaluate(() => { const st = window.owmMap.getStyle(); return { sources: Object.keys(st.sources).filter(k => /^(events|nhc|nhc-now|ev-sel)$/.test(k)).length, layers: st.layers.filter(l => /^(ev-|nhc-)/.test(l.id)).length, images: window.owmMap.listImages().filter(i => i.startsWith('ev-')).length }; });
+  const offStyle = await style();
+  await page.click('.layers [data-ev="eq"]'); await evWait(page);
+  const onStyle = await style();
+  await page.click('.layers [data-ev="eq"]'); await page.waitForTimeout(300);
+  const offAgain = await style();
+  for (const h in hosts) delete hosts[h];
+  check('Events off cost nothing: no event sources, layers or icons on the map; added when a type is turned on, removed when the last is turned off', offStyle.sources + offStyle.layers + offStyle.images === 0 && onStyle.layers === 7 && onStyle.sources === 4 && offAgain.sources + offAgain.layers + offAgain.images === 0, JSON.stringify({ offStyle, onStyle, offAgain }));
   check('Each event toggle contacts only its own source, and 0 requests after it is turned off', Object.values(perType).every(x => x.onlyOwn && x.afterOff === 0), JSON.stringify(perType));
   await page.click('.layers [data-ev="eq"]'); await page.click('.layers [data-evwin="24h"]');
   await page.reload(); await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
@@ -523,12 +531,10 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
 const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).reduce((a, [, v]) => a + v.length, 0);
 // 14. No token (what PR builds get): clean "unavailable" state, 0 requests, no errors.
 {
-  const { page, errors, hosts } = await open({ field: 'temp', particles: false, photos: true }, '15/40.758/-73.9855');
+  const { page, errors, hosts } = await open({ field: 'temp', particles: false, photos: true }, '15/40.758/-73.9855', { photos: { token: false } });
   await page.waitForTimeout(1500);
   const r = await page.evaluate(() => ({ v: document.querySelector('.layers [data-phs]').textContent, note: document.querySelector('.layers [data-phnote]').textContent, layer: !!window.owmMap.getLayer('mly-img'), credits: document.querySelector('#credits').textContent }));
-  const live = await page.evaluate(() => window.owmTest.photos.getToken());
-  if (!live) check('Street photos without a token: "unavailable" state, no Mapillary requests, no page errors', r.v === 'unavailable' && /unavailable/.test(r.note) && !r.layer && mly(hosts) === 0 && !errors.length, `${JSON.stringify(r).slice(0, 300)}; Mapillary requests: ${mly(hosts)}`);
-  else check('Street photos without a token: not testable here (this build has a token)', true, 'skipped');
+  check('Street photos without a token: "unavailable" state, no Mapillary requests, no page errors', r.v === 'unavailable' && /unavailable/.test(r.note) && !r.layer && mly(hosts) === 0 && !errors.length, `${JSON.stringify(r).slice(0, 300)}; Mapillary requests: ${mly(hosts)}`);
   await page.close();
 }
 // 15. With stand-in tiles and Graph API (fake token): toggle on/off, off = 0 requests, click a dot
@@ -576,6 +582,20 @@ const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).
     check(`Photo panel state when the Graph API ${graph === 'error' ? 'fails' : 'has no thumbnail'}: "${graph === 'error' ? 'Photo unavailable' : 'No photo here.'}"`, graph === 'error' ? /^Photo unavailable/.test(msg || '') : msg === 'No photo here.', `${msg}; errors: ${errors.join(' | ') || 'none'}`);
     await page.close();
   }
+}
+// 16b. Mapillary refuses (daily tile limit reached: HTTP 429; token rejected: 403 / Graph code 190):
+// "Street photos: unavailable right now", source removed, no further requests, no page errors.
+for (const [name, opts] of [['tile limit reached (HTTP 429)', { tiles: 'limit' }], ['token rejected by the tiles (HTTP 403)', { tiles: 'rejected' }], ['tile refusal without CORS headers (request fails, no status)', { tiles: 'blocked' }], ['token rejected by the Graph API (code 190)', { graph: 'token' }]]) {
+  const { page, errors, hosts } = await open({ field: 'none', particles: false, photos: true }, '15.5/40.758/-73.9855', { photos: opts });
+  await page.waitForTimeout(2500);
+  if (opts.graph) { await page.mouse.click(640, 400); await page.waitForTimeout(1500); }
+  const r = await page.evaluate(() => ({ v: document.querySelector('.layers [data-phs]').textContent, note: document.querySelector('.layers [data-phnote]').textContent, source: !!window.owmMap.getSource('mly'), panel: document.querySelector('#detail .ph-msg')?.textContent || null, credits: /Mapillary/.test(document.querySelector('#credits').textContent) }));
+  const n = mly(hosts);
+  await page.evaluate(async () => { const m = window.owmMap; m.panBy([300, 0], { duration: 0 }); await new Promise(r => setTimeout(r, 800)); });
+  check(`Street photos when Mapillary refuses (${name}): "Street photos: unavailable right now", layer removed, no more requests, no page errors`,
+    r.v === 'unavailable' && /^Street photos: unavailable right now/.test(r.note) && !r.source && !r.credits && mly(hosts) === n && !errors.length && (!opts.graph || r.panel === 'Street photos: unavailable right now.'),
+    `${JSON.stringify(r)}; requests after: ${mly(hosts) - n}; errors: ${errors.join(' | ') || 'none'}`);
+  await page.close();
 }
 // 17. Live Mapillary (only when the optional MAPILLARY_CI_TOKEN secret is set): coverage at world
 // zoom, lines at city zoom, dots at street zoom, a photo at Times Square and at Brantley, AL.
