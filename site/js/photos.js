@@ -64,7 +64,8 @@ export const credits = () => S.get('photos') && token && !down ? [CREDIT] : [];
 // The photo under a click (image dot, or a sequence line's representative image), or null.
 export function hit({ point: p, lngLat }) {
   if (!map.getLayer('mly-img')) return null;
-  const f = map.queryRenderedFeatures([[p.x - 6, p.y - 6], [p.x + 6, p.y + 6]], { layers: ['mly-img', 'mly-seq'] })[0];
+  const fs = map.queryRenderedFeatures([[p.x - 6, p.y - 6], [p.x + 6, p.y + 6]], { layers: ['mly-img', 'mly-seq'] });
+  const f = fs.find(x => x.layer.id === 'mly-img') || fs[0]; // a dot wins over a line
   const id = f && String(f.layer.id === 'mly-img' ? f.properties.id : f.properties.image_id || '');
   return id ? { type: 'photo', id, lon: f.geometry.type === 'Point' ? f.geometry.coordinates[0] : lngLat.lng, lat: f.geometry.type === 'Point' ? f.geometry.coordinates[1] : lngLat.lat } : null;
 }
@@ -72,7 +73,8 @@ export function hit({ point: p, lngLat }) {
 async function load(id) {
   const p = photos[id] = { state: 'loading' };
   try {
-    const r = await fetch(`${GRAPH}${encodeURIComponent(id)}?fields=id,thumb_1024_url,captured_at,creator,geometry&access_token=${encodeURIComponent(token)}`, { signal: AbortSignal.timeout(20000) });
+    // the token goes in the Authorization header, the form Mapillary documents for Entity API calls
+    const r = await fetch(`${GRAPH}${encodeURIComponent(id)}?fields=id,thumb_1024_url,captured_at,creator,geometry`, { headers: { Authorization: `OAuth ${token}` }, signal: AbortSignal.timeout(20000) });
     const j = await r.json();
     // code 4 / 613: rate limit; 190: token rejected -> the whole layer is unavailable right now
     if ([4, 190, 613].includes(j.error?.code) || r.status === 429) giveUp();

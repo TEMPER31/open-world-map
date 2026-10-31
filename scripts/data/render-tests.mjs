@@ -605,12 +605,27 @@ if (process.env.MLY_CI === '1') {
   const world = await at('1.5/30/-40', 'mly-ov'), city = await at('11/40.758/-73.9855', 'mly-seq');
   const shots = {};
   for (const [name, hash] of [['Times Square', '17/40.758/-73.9855'], ['Brantley AL', '16/31.585/-86.255']]) {
-    const dots = await at(hash, 'mly-img');
+    // find the image dot nearest the place (at z14 if none is in view at street zoom), then go there
+    let dots = await at(hash, 'mly-img');
+    if (!dots) { const [, la, lo] = hash.split('/'); await at(`14/${la}/${lo}`, 'mly-img'); const n = await page.evaluate(() => { const m = window.owmMap, c = m.getCenter(), fs = m.queryRenderedFeatures({ layers: ['mly-img'] }); fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0]?.geometry.coordinates; }); if (n) dots = await at(`17/${n[1]}/${n[0]}`, 'mly-img'); }
     const f = await page.evaluate(() => { const c = window.owmMap.getCenter(), fs = window.owmMap.queryRenderedFeatures({ layers: ['mly-img'] }); fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0] && window.owmMap.project(fs[0].geometry.coordinates); });
     if (f) { await page.mouse.click(f.x, f.y); await page.waitForFunction(() => document.querySelector('#detail img.ph-img')?.complete || document.querySelector('#detail .ph-msg:not(:empty)') && !/Loading/.test(document.querySelector('#detail .ph-msg').textContent), null, { timeout: 15000 }).catch(() => {}); }
-    shots[name] = { dots, ...(await page.evaluate(() => ({ img: document.querySelector('#detail img.ph-img')?.naturalWidth || 0, credit: document.querySelector('[data-photo-credit]')?.textContent, msg: document.querySelector('#detail .ph-msg')?.textContent || null }))) };
+    shots[name] = { dots, ...(await page.evaluate(() => ({ at: window.owmMap.getCenter().toArray().map(v => +v.toFixed(4)), sel: window.owmTest.state.get('selection')?.id || null, open: !document.querySelector('#detail').hidden, img: document.querySelector('#detail img.ph-img')?.naturalWidth || 0, credit: document.querySelector('[data-photo-credit]')?.textContent, msg: document.querySelector('#detail:not([hidden]) .ph-msg')?.textContent || null }))) };
     await page.keyboard.press('Escape');
   }
+  // Diagnostics (no token printed): Graph API answers for a tile image id and for an id the API
+  // itself lists, with the token as ?access_token= and as the Authorization header.
+  const diag = await page.evaluate(async tileId => {
+    const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js'), G = 'https://graph.mapillary.com/', out = {};
+    const ask = async (u, h) => { try { const r = await fetch(u, h ? { headers: { Authorization: `OAuth ${t}` } } : {}); const j = await r.json(); return { status: r.status, ok: !!j.id || !!j.data, err: j.error ? `${j.error.code}: ${j.error.message}`.slice(0, 140) : null, id: j.id || j.data?.[0]?.id || null }; } catch (e) { return { error: String(e).slice(0, 100) }; } };
+    out.list = await ask(`${G}images?fields=id&limit=1&bbox=-73.99,40.75,-73.98,40.76&access_token=${encodeURIComponent(t)}`);
+    for (const [k, id] of [['tileId', tileId], ['listedId', out.list.id]]) if (id) {
+      out[k + 'Query'] = await ask(`${G}${id}?fields=id,thumb_1024_url&access_token=${encodeURIComponent(t)}`);
+      out[k + 'Header'] = await ask(`${G}${id}?fields=id,thumb_1024_url`, true);
+    }
+    out.tileId = tileId; return out;
+  }, shots['Times Square']?.sel || null);
+  check('Live Mapillary diagnostics: Graph API with the token as query parameter and as header (information)', true, JSON.stringify(diag));
   check('Live Mapillary: coverage at world zoom, lines at city zoom, dots at street zoom', world > 0 && city > 0 && Object.values(shots).every(x => x.dots > 0), JSON.stringify({ world, city, dots: Object.fromEntries(Object.entries(shots).map(([k, v]) => [k, v.dots])) }));
   check('Live Mapillary: click a dot at Times Square and at Brantley AL -> photo with "CC BY-SA 4.0 — Mapillary / {creator}"', Object.values(shots).every(x => x.img > 0 && /^CC BY-SA 4\.0 — Mapillary \/ \S/.test(x.credit || '')), JSON.stringify(shots));
   check('No page errors (live Mapillary)', !errors.length, errors.join(' | '));
