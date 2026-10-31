@@ -1,6 +1,6 @@
 # Accuracy check (phase-3-ux)
 
-Generated 2026-10-31T08:39:24.970Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T00:00:00.000Z, timeline +0 h = 2026-10-31T09:00:00.000Z (f009); live data: true.
+Generated 2026-10-31T09:03:22.786Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T00:00:00.000Z, timeline +0 h = 2026-10-31T09:00:00.000Z (f009); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
@@ -381,7 +381,7 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 
 ## Air quality at 4° grid nodes
 
-Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T05:23:18Z (3.3 h before this check), valid hour 2026-10-31T09:00:00Z.
+Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T05:23:18Z (3.7 h before this check), valid hour 2026-10-31T09:00:00Z.
 
 | Node | Time | Page PM2.5 | Downloaded | Diff | Tol | | CAMS now | Page − now |
 |---|---|---|---|---|---|---|---|---|

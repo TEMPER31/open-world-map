@@ -1,14 +1,14 @@
 # Rendering and behaviour tests
 
-Generated 2026-10-31T08:41:49.657Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
+Generated 2026-10-31T09:05:45.078Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
 
 | Test | Result | Detail |
 |---|---|---|
-| Westerly (+U only): particles move east | pass | {"dx":0.0208,"dy":0.0002} |
-| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0011,"dy":-0.0306} |
-| Easterly (-U only): particles move west | pass | {"dx":-0.017,"dy":0.0025} |
+| Westerly (+U only): particles move east | pass | {"dx":0.024,"dy":0.0011} |
+| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0025,"dy":-0.0283} |
+| Easterly (-U only): particles move west | pass | {"dx":-0.0173,"dy":-0.0011} |
 | Pressure: isobars drawn by the field shader and H/L labels are a WebGL symbol layer (no DOM markers) | pass | {"domMarkers":0,"hlFeatures":64,"isobarsInShader":true} |
-| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 9 of 9 pan frames rendered the H/L layer; DOM labels: 0 |
+| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 8 of 8 pan frames rendered the H/L layer; DOM labels: 0 |
 | No page errors (pressure) | pass |  |
 | None: field hidden and legend says "No layer" | pass | {"visible":false,"legend":"No layermap only","isobars":false,"hl":0} |
 | None + particles off: no data files fetched while stepping 4 hours | pass | 0 requests:  |
@@ -23,7 +23,7 @@ Generated 2026-10-31T08:41:49.657Z by `scripts/data/render-tests.mjs` (headless 
 | Air quality past its forecast end: legend dimmed with "Air quality forecast ends {date}", no stale data | pass | Air quality forecast ends Wed 4 Nov · 12:00 UTC (AQ files requested at that hour: 0) |
 | Place-panel chart covers the whole run with day boundaries | pass | {"days":6,"end":"+6 d 15 h","points":34} |
 | No page errors (7-day timeline) | pass |  |
-| One clock: after each step every layer reports the same valid time (8 steps, across f120 -> f123) | pass | 8/8 steps in sync; layers: timeline, wind, field, isobars, hl, panel, chart, probe; slowest sync 351 ms; t: 1, 2, 3, 4, 110, 111, 114, 117 |
+| One clock: after each step every layer reports the same valid time (8 steps, across f120 -> f123) | pass | 8/8 steps in sync; layers: timeline, field, isobars, hl, wind, panel, chart, probe; slowest sync 353 ms; t: 1, 2, 3, 4, 110, 111, 114, 117 |
 | Place panel, chart playhead and probe show the timeline hour (DOM) | pass | {"panel":"117","chart":"117","probe":"117","t":"117"} |
 | Time API for future layers: onTime() fires with {t, valid}; getValidTime() agrees | pass | {"got":{"t":5,"valid":1793455200000},"valid":1793455200000} |
 | Esc closes the place pop-up | pass |  |
@@ -32,7 +32,7 @@ Generated 2026-10-31T08:41:49.657Z by `scripts/data/render-tests.mjs` (headless 
 | Arrow keys and step buttons move one frame | pass | {"right":2,"left":1,"stepBtn":2} |
 | Speed 4x plays about 4x as many frames as 1x; the chip cycles 1x -> 2x | pass | 1×: 5 frames in 2 s, 4×: 22; chip 2 2× |
 | Local time is shown next to UTC (US Central), and the order can be switched | pass | "Sat 04:00 local · 09:00 UTC" / UTC first: "Sat 09:00 UTC · 04:00 local" (expected local hour 04) |
-| "Now" is the frame closest to the current time and says which forecast hour it is | pass | Now is 19 min from the clock; label "forecast hour 9" |
+| "Now" is the frame closest to the current time and says which forecast hour it is | pass | Now is 5 min from the clock; label "forecast hour 9" |
 | Prefetch: the next 2 frames of the visible field are fetched; no wind (particles off) or other fields | pass | gfs/temp/f020: fetched, gfs/temp/f021: fetched; other files: none |
 | No page errors (timeline controls) | pass |  |
 | US units everywhere: probe, place panel, chart, legend ticks, scale bar, measure tool | pass | {"probe":"7 mphfrom SE45.6°N 27.3°W · Sat 04:00 local · 09:00 UTC","panel":"Wind speed 2mph from NNW / Temperature 58°F at 2 m","chart":"Forecast— temp °F · ▮ wind mph","legend":"Wind speed · mph10 m · GFS 0.75°0122537506293+","scale":"200 mi","raw":["—","","loading"],"ticks":"0 12 25 37 50 62 93+","measure":"243 mi"} |
@@ -41,13 +41,13 @@ Generated 2026-10-31T08:41:49.657Z by `scripts/data/render-tests.mjs` (headless 
 | No page errors (units) | pass |  |
 | Measure: London -> New York within 0.5 % of 5,570 km, drawn as a GeoJSON layer, place panel not opened | pass | 5,569 km (5568.9 km, -0.02 %); place panel open: false; features: 11; DOM markers: 0 |
 | Measure km/mi toggle updates the page-wide unit (3,461 mi ± 0.5 %) | pass | 3,460 mi |
-| Undo removes the last point; Esc exits the measure tool | pass | after undo: —; after Esc: {"on":false,"hidden":true,"features":2} |
+| Undo removes the last point; Esc exits the measure tool | pass | after undo: —; after Esc: {"on":false,"hidden":true,"features":11} |
 | No page errors (measure) | pass |  |
 | Layers rail: only the selected field is expanded, with its legend; None collapses all; clicking the active row turns it off | pass | {"open1":["temp+legend"],"none":{"open":0,"legend":"No layermap only"},"toggled":"none"} |
 | No page errors (layers) | pass |  |
 | Phone: buttons and scrubber are at least 44 px; nothing covers the map centre | pass | [{"el":"m-search","w":258,"h":46},{"el":"m-btn","w":46,"h":46},{"el":"m-btn","w":46,"h":46},{"el":"step","w":44,"h":44},{"el":"play","w":44,"h":44},{"el":"step","w":44,"h":44},{"el":"track","w":332,"h":44}]; over the centre: none |
 | Phone layers sheet: half-open covers at most ~40 % of the map, with a drag handle | pass | 314 of 784 px (40.1 %) |
-| Phone place sheet: peek, half and full (tap the handle to step) | pass | {"peek":{"top":634,"h":150,"w":390,"bottom":784,"snap":"peek"},"half":{"top":470,"h":314,"w":390,"bottom":784,"snap":"half"},"full":{"top":64,"h":720,"w":390,"bottom":784,"snap":"full"}} |
+| Phone place sheet: peek, half and full (tap the handle to step) | pass | {"peek":{"top":634,"h":150,"w":390,"bottom":784,"snap":"peek"},"half":{"top":470,"h":314,"w":390,"bottom":784,"snap":"half"},"full":{"top":209,"h":575,"w":390,"bottom":784,"snap":"full"}} |
 | Phone place sheet: dragging the handle down snaps to peek | pass | peek |
 | No page errors (phone) | pass |  |
 
@@ -55,5 +55,5 @@ Generated 2026-10-31T08:41:49.657Z by `scripts/data/render-tests.mjs` (headless 
 
 | Field | Long tasks per hour step (ms) | Worst frame gap while stepping (ms) | Frames/s during a 2 s pan |
 |---|---|---|---|
-| pres | 0 | 438 | 7 |
-| temp | 0 | 396 | 8 |
+| pres | 0 | 336 | 8 |
+| temp | 0 | 434 | 9.5 |
