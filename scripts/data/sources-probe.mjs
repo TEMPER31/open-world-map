@@ -103,7 +103,7 @@ for (const [name, url] of ENDPOINTS) {
     log(`- Access-Control-Allow-Origin: **${H(r, 'access-control-allow-origin')}** · cache-control: ${H(r, 'cache-control')} · last-modified: ${H(r, 'last-modified')}`);
     const rl = [...r.headers].filter(([k]) => /rate|limit|retry/i.test(k)).map(([k, v]) => `${k}: ${v}`);
     if (rl.length) log(`- rate headers: ${rl.join('; ')}`);
-    try { for (const s of summarise(name, JSON.parse(body.replace(/^\uFEFF/, '')))) log(`- ${s}`); } catch { log(`- body: ${short(body.replace(/\s+/g, ' '), 400)}`); }
+    try { for (const s of summarise(name, JSON.parse(body.replace(/^\uFEFF/, '')))) log(`- ${s}`); } catch (e) { log(`- not JSON (${String(e.message).slice(0, 160)}); body: ${short(body.replace(/\s+/g, ' '), 300)}`); }
     // preflight (needed only for non-simple requests; recorded for the Graph API)
     if (/graph\.mapillary/.test(url)) {
       const p = await get(url, 'OPTIONS', { 'Access-Control-Request-Method': 'GET', 'Access-Control-Request-Headers': 'authorization' });
