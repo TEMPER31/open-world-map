@@ -12,7 +12,7 @@ const VIEWS = [
   { name: 'wind-atlantic', field: 'wind', hash: '2.6/42/-38', particles: true },
   { name: 'temperature', field: 'temp', hash: '1.6/30/0' },
   { name: 'temperature-f', field: 'temp', hash: '1.6/30/0', tempUnit: 'F' },
-  { name: 'place-panel', field: 'cloud', hash: '5/39.80/-89.64', click: true },
+  { name: 'place-panel', field: 'cloud', hash: '5/39.10/-94.58', click: true },
   { name: 'precipitation', field: 'rain', hash: '1.6/20/-30' },
   { name: 'clouds', field: 'cloud', hash: '1.6/20/30' },
   { name: 'pressure', field: 'pres', hash: '1.6/35/-20' },
@@ -30,7 +30,7 @@ VIEWS.push(
   { name: 'forecast-7d', field: 'temp', hash: '1.6/30/0', t: 'end' },
   { name: 'rain-7d', field: 'rain', hash: '1.6/20/-30', t: 'end' },
   { name: 'aq-7d', field: 'aq', hash: '1.6/25/70', t: 'end' },
-  { name: 'place-panel-7d', field: 'temp', hash: '4/39.80/-89.64', t: 96, click: true },
+  { name: 'place-panel-7d', field: 'temp', hash: '4/39.10/-94.58', t: 96, click: true },
   { name: 'phone-4d', field: 'temp', hash: '0.4/30/10', t: 96, phone: true }
 );
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;

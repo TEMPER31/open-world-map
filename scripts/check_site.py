@@ -11,6 +11,8 @@ Checks:
   3. No keyed or unclear-terms map providers are referenced from site/.
   4. Every local src/href in site/*.html exists, and every JSON / GeoJSON file parses.
   5. No hourly data files are committed (site/data/live/ is deploy output only).
+  6. No CI screenshots or probe output under docs/screenshots/ (they are a workflow
+     artifact; only the small text reports are committed).
 """
 import base64
 import hashlib
@@ -125,6 +127,8 @@ def check_no_live_data(errors):
         rel = p.relative_to(ROOT).as_posix()
         if rel.startswith("site/data/live/"):
             errors.append(f"{rel}: hourly data must not be committed (deploy output only)")
+        elif rel.startswith("docs/screenshots/") and (rel.lower().endswith((".png", ".jpg", ".jpeg")) or "/probe/" in rel):
+            errors.append(f"{rel}: CI images and probe output belong in the workflow artifact, not the repository")
 
 
 def main():
