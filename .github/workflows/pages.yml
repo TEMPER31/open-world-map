@@ -36,6 +36,8 @@ jobs:
         run: |
           for f in site/js/*.js scripts/data/*.mjs; do cp "$f" "$RUNNER_TEMP/check.mjs" && node --check "$RUNNER_TEMP/check.mjs" || exit 1; done
           python3 -m py_compile scripts/*.py scripts/data/*.py
+      - name: Unit tests (display-unit conversions, great-circle distance)
+        run: node scripts/data/unit-tests.mjs
 
   data:
     needs: check
@@ -177,6 +179,13 @@ jobs:
       - name: Rendering and behaviour tests (direction, pressure sync, None layer, profiling)
         continue-on-error: true
         run: node scripts/data/render-tests.mjs http://127.0.0.1:8123/ "$RAW/render-tests.md"
+      - name: Performance before/after (main vs this branch, same data, same machine)
+        continue-on-error: true
+        run: |
+          git fetch --depth=1 origin main && git worktree add base FETCH_HEAD
+          cp -r built/site/data/live base/site/data/live
+          (cd base/site && python3 -m http.server 8124 --bind 127.0.0.1 &) ; sleep 2
+          node scripts/data/perf.mjs "$RAW/perf.md" "main=http://127.0.0.1:8124/" "${LABEL}=http://127.0.0.1:8123/"
       - name: Satellite imagery probe (USGS services, keyless zoom 16+ over the US)
         continue-on-error: true
         run: node scripts/data/satellite-probe.mjs "$RAW/probe"
@@ -190,7 +199,7 @@ jobs:
       - name: Commit the text reports to the PR branch (no images)
         run: |
           mkdir -p "$OUT"
-          for f in accuracy.md render-tests.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
+          for f in accuracy.md render-tests.md perf.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
           sizes=""
           for f in views.json run-report.json; do
             [ -f "$RAW/$f" ] || continue

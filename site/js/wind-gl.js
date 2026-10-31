@@ -259,7 +259,7 @@ export class WindGL {
     gl.bindTexture(gl.TEXTURE_2D, this.stateA);
     gl.uniform1i(d.u.u_particles, 0);
     gl.uniform1f(d.u.u_res, this.res);
-    gl.uniform1f(d.u.u_size, Math.max(1, Math.round(window.devicePixelRatio || 1)));
+    gl.uniform1f(d.u.u_size, Math.max(1, (window.devicePixelRatio || 1) * 0.75)); // thin: 1 px, 1.5 px on 2x screens
     const [r, g, b, a] = this.color;
     gl.uniform4f(d.u.u_color, r * a, g * a, b * a, a);
     gl.drawArrays(gl.POINTS, 0, this.count);
