@@ -39,26 +39,35 @@
   <div class="stale" id="stale" role="status" hidden></div>
   <aside class="panel layers" id="layers" aria-label="Layers"></aside>
   <div class="legend glass" id="legend" aria-live="polite"></div>
-  <aside class="detail glass lift" id="detail" aria-label="Details" hidden></aside>
+  <aside class="detail glass lift" id="detail" aria-label="Place details" hidden><button class="grab" type="button" data-grab></button><div class="d-body"></div></aside>
+  <section class="measure glass lift" id="measure" aria-label="Measure distance" hidden>
+    <div class="m-hd"><span class="kick">Distance · great circle</span><button class="d-x" type="button" data-mdone aria-label="Exit measuring (Esc)">×</button></div>
+    <div class="m-total"><b class="mono" data-mtotal>—</b><div class="seg" role="radiogroup" aria-label="Distance unit"><button type="button" role="radio" data-dunit="km">km</button><button type="button" role="radio" data-dunit="mi">mi</button></div></div>
+    <div class="src" data-mhint></div>
+    <ol class="m-legs mono" data-mlegs></ol>
+    <div class="d-btns"><button class="btn" type="button" data-mundo>Undo</button><button class="btn" type="button" data-mclear>Clear</button><button class="btn pri" type="button" data-mdone>Done</button></div>
+  </section>
 
   <div class="timeline glass lift">
     <div class="tl-ctrl">
       <div class="tl-btns"><button class="tl-step" type="button" data-step="-1" aria-label="Previous frame">‹</button><button class="play" type="button" data-play aria-label="Play"></button><button class="tl-step" type="button" data-step="1" aria-label="Next frame">›</button></div>
-      <div><div class="tl-now" data-rel>Now</div><div class="mono tl-date" data-abs></div></div>
+      <div class="tl-label"><div class="tl-now"><span data-rel>Now</span><span class="tl-fh mono" data-fh></span></div><div class="mono tl-date" data-abs></div></div>
     </div>
     <div class="tl-track" data-track="full"></div>
-    <div class="tl-side"><span class="chip" title="Playback speed">1×</span><span class="chip" title="Time between frames here" data-stepsize>1 h step</span><span class="chip" title="Range" data-range>48 h</span><span class="chip on" title="Times are shown in UTC">UTC</span></div>
+    <div class="tl-side"><button class="chip" type="button" data-speed title="Playback speed (1×, 2×, 4×)">1×</button><span class="chip" title="Time between frames here" data-stepsize>1 h step</span><button class="chip" type="button" data-tfirst>Local first</button></div>
   </div>
 
   <div class="zoom glass" role="group" aria-label="Zoom">
     <button type="button" data-zoom="1" aria-label="Zoom in">+</button>
     <button type="button" data-zoom="-1" aria-label="Zoom out">−</button>
+    <button type="button" data-measure aria-pressed="false" aria-label="Measure distance" title="Measure distance"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 14 14 2l4 4L6 18z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6 10l2 2M9 7l2 2M12 4l2 2" stroke="currentColor" stroke-width="1.5"/></svg></button>
   </div>
   <div class="scale" id="scale" aria-hidden="true"><span></span><i></i></div>
 
   <!-- Mobile chrome (shown below 1024 px) -->
   <div class="m-top">
     <button class="m-search glass" type="button" data-soon="Search">Search places, events</button>
+    <button class="m-btn glass" type="button" data-measure aria-pressed="false" aria-label="Measure distance">MSR</button>
     <button class="m-btn glass" type="button" data-lyr aria-expanded="false" aria-controls="lsheet">LYR</button>
   </div>
   <div class="m-field glass" id="mchip"></div>
@@ -67,7 +76,7 @@
     <button class="play" type="button" data-play aria-label="Play"></button>
     <button class="tl-step" type="button" data-step="1" aria-label="Next frame">›</button>
     <div class="m-track" data-track="mini"></div>
-    <div class="m-time mono"><b data-rel>Now</b><span data-abs-short></span></div>
+    <div class="m-time mono"><b data-rel>Now</b><span data-abs-short></span><i data-fh></i></div>
   </div>
   <section class="sheet lsheet" id="lsheet" aria-label="Map layers" hidden></section>
   <nav class="tabs" aria-label="Sections">
@@ -81,7 +90,7 @@
   <section class="pop panel" id="pop-data" aria-label="Data" hidden>
     <div class="pop-hd"><b>Data</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
     <div data-live-only hidden>
-      <p>Weather: <b>NOAA GFS</b> 0.25° forecast, run <b data-run></b>, shown hourly for 48 hours (0.5° grid; wind 0.75°).</p>
+      <p>Weather: <b>NOAA GFS</b> 0.25° forecast, run <b data-run></b>, shown hourly to 5 days, then every 3 hours to 7 days (0.5° grid; wind 0.75°).</p>
       <p>Air quality: <b>CAMS</b> global forecast via Open-Meteo (CC BY 4.0), updated <b data-aq-run></b>, 4° grid.</p>
       <p>Downloads of the processed files arrive in a later phase.</p>
     </div>
@@ -93,7 +102,12 @@
   <section class="pop panel" id="pop-settings" aria-label="Settings" hidden>
     <div class="pop-hd"><b>Settings</b><button class="d-x" type="button" data-close aria-label="Close">×</button></div>
     <div class="it"><label for="set-opacity">Field opacity</label><input id="set-opacity" type="range" min="30" max="100" step="5"></div>
+    <div class="it">Units<div class="seg" role="radiogroup" aria-label="Unit preset" data-presets></div></div>
     <div class="it">Temperature<div class="seg" role="radiogroup" aria-label="Temperature unit" data-tunits></div></div>
+    <div class="it">Wind<div class="seg" role="radiogroup" aria-label="Wind speed unit" data-sunits></div></div>
+    <div class="it">Distance<div class="seg" role="radiogroup" aria-label="Distance unit" data-dunits></div></div>
+    <div class="it">Time shown first<div class="seg" role="radiogroup" aria-label="Time shown first" data-tfirsts></div></div>
+    <div class="it">Playback speed<div class="seg" role="radiogroup" aria-label="Playback speed" data-speeds></div></div>
     <div class="it">Wind particles<div class="seg" role="radiogroup" aria-label="Particle density" data-density></div></div>
     <p class="note">Wind particles start off if your device asks for reduced motion. Settings are stored on this device only.</p>
     <p class="note"><a href="https://github.com/TEMPER31/open-world-map" rel="noopener">Source code · MIT</a></p>

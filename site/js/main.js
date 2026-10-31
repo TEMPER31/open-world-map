@@ -2,13 +2,17 @@
 
 import { CREDITS, SAMPLE_GRID_DEG } from './config.js';
 import * as S from './state.js';
-import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024, setTempUnit, toTemp, unitOf } from './scales.js';
+import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024, toTemp, unitOf } from './scales.js';
+import { setUnits, conv, label, PRESETS, presetOf, scaleBar } from './units.js';
+import { initClock, stamp, layerTimes, getValidTime, onTime } from './clock.js';
+import { sheet } from './sheet.js';
+import { initMeasure } from './measure.js';
 import { sample } from './grid.js';
 import { initData, meta, stepTime, getGrid, getPoint, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
 import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
 import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
-import { initTimeline, relT, fmtUTC } from './timeline.js';
+import { initTimeline, relT, fmtUTC, fmtBoth } from './timeline.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -19,6 +23,24 @@ const runLabel = ms => `${new Date(ms).toISOString().slice(11, 13)}Z ${new Date(
 
 const BASEMAPS = [['dark', 'Dark'], ['light', 'Light'], ['satellite', 'Satellite']];
 const DENSITY = [[0.5, 'Low'], [1, 'Normal'], [1.6, 'High']];
+const SEGS = {
+  presets: ['preset', [['metric', 'Metric'], ['us', 'US'], ['custom', 'Custom']]],
+  tunits: ['tunit', [['C', '°C'], ['F', '°F']]],
+  sunits: ['sunit', [['kmh', 'km/h'], ['mph', 'mph'], ['ms', 'm/s'], ['kn', 'kn']]],
+  dunits: ['dunit', [['km', 'km'], ['mi', 'mi']]],
+  tfirsts: ['settfirst', [['local', 'Local'], ['utc', 'UTC']]],
+  speeds: ['setspeed', [['1', '1×'], ['2', '2×'], ['4', '4×']]]
+};
+const segHTML = ([attr, opts]) => opts.map(([v, n]) => `<button type="button" role="radio" data-${attr}="${v}">${n}</button>`).join('');
+// What each field's expanded section in the Layers rail says under its legend.
+const FIELD_NOTE = {
+  wind: () => 'Colours: speed at 10 m. Particles move with the wind.',
+  temp: () => 'Air temperature 2 m above ground.',
+  rain: () => 'Mean rate over the past hour (past 3 h after +5 days). Area average, about 50 km.',
+  aq: () => `PM2.5, US EPA 2024 bands on hourly values.${meta.aqEnd ? ` ${aqEndText()}.` : ''}`,
+  cloud: () => 'Total cloud cover, area average (about 50 km).',
+  pres: () => 'Sea-level pressure. Isobars every 4 hPa; H and L mark highs and lows.'
+};
 const EVENTS = [['eq', 'Earthquakes M2.5+'], ['fi', 'Wildfires'], ['cy', 'Tropical cyclones'], ['st', 'Severe storms']];
 
 // Labels that depend on whether real data is loaded.
@@ -58,7 +80,7 @@ function readingOf(k, p) {
   const v = p ? p.v : NaN;
   if (v !== v) return ['—', '', k === 'aq' ? (aqEnded() ? `forecast ends ${fmtUTC(meta.aqEnd, { weekday: false })}` : 'no data') : ''];
   switch (k) {
-    case 'wind': return [Math.round(v), 'km/h', `from ${dirFrom(p.u, p.w)}`];
+    case 'wind': return [Math.round(conv('speed', v)), label('speed'), `from ${dirFrom(p.u, p.w)}`];
     case 'temp': return [Math.round(toTemp(v)), unitOf('temp'), 'at 2 m'];
     case 'rain': return v < 0.1 ? ['Dry', '', `${rainSpan()} · area avg`] : [v.toFixed(1), 'mm/h', `${rainSpan()} · area avg`];
     case 'aq': {
@@ -98,7 +120,7 @@ function buildLayers() {
   $('#layers').innerHTML = `
     <div class="l-hd"><b>Layers</b><span class="l-sum" data-lsum></span><button class="l-min" type="button" data-lmin aria-label="Minimise layers" aria-expanded="true"></button></div>
     <div class="lsec" role="radiogroup" aria-label="Weather field"><div class="kick"><span>Field</span><span>${L.fieldMeta()}</span></div>
-      ${ORDER.map(k => `<button class="row" type="button" role="radio" data-field="${k}"><span class="rad"></span><b>${FIELDS[k].label}</b><span class="v">${levelShort(FIELDS[k])}</span></button>`).join('')}
+      ${ORDER.map(k => `<button class="row" type="button" role="radio" data-field="${k}"><span class="rad"></span><b>${FIELDS[k].label}</b><span class="v">${levelShort(FIELDS[k])}</span></button><div class="lx" data-lx="${k}" hidden><div class="lx-lg"></div>${k === 'temp' ? `<div class="seg" role="radiogroup" aria-label="Temperature unit">${segHTML(SEGS.tunits)}</div>` : k === 'wind' ? `<div class="seg" role="radiogroup" aria-label="Wind speed unit">${segHTML(SEGS.sunits)}</div>` : ''}<p class="lx-note">${FIELD_NOTE[k]()}</p></div>`).join('')}
       <button class="row" type="button" role="radio" data-field="none"><span class="rad"></span><b>None</b><span class="v">map only</span></button>
       <div class="row" data-toggle><b>Wind particles</b><button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
     </div>
@@ -113,7 +135,8 @@ function buildLayers() {
   $('#lsheet').innerHTML = `
     <div class="ls-hd"><b>Map layers</b><button class="d-x" type="button" data-lyr-close aria-label="Close">×</button></div>
     <div class="grp"><div class="kick"><span>Field</span><span>${meta.live ? 'GFS · CAMS' : 'sample data'}</span></div>
-      <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span data-unit="${k}">${unitOf(k)}</span></button>`).join('')}<button class="ftile" type="button" role="radio" data-field="none"><b>None</b><div class="lg-bar"></div><span>map only</span></button></div></div>
+      <div class="ftiles" role="radiogroup" aria-label="Weather field">${ORDER.map(k => `<button class="ftile" type="button" role="radio" data-field="${k}"><b>${FIELDS[k].short}</b>${barHTML(k, false)}<span data-unit="${k}">${unitOf(k)}</span></button>`).join('')}<button class="ftile" type="button" role="radio" data-field="none"><b>None</b><div class="lg-bar"></div><span>map only</span></button></div>
+      <div class="ls-lg"></div></div>
     <div class="grp"><div class="kick"><span>Basemap</span><span></span></div>
       <div class="card"><div class="it">Map<div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div></div></div></div>
     <div class="grp"><div class="card">
@@ -124,7 +147,7 @@ function buildLayers() {
 
   $$('[data-basemaps]').forEach(g => g.innerHTML = BASEMAPS.map(([v, n]) => `<button type="button" role="radio" data-basemap="${v}">${n}</button>`).join(''));
   $('[data-density]').innerHTML = DENSITY.map(([v, n]) => `<button type="button" role="radio" data-dens="${v}">${n}</button>`).join('');
-  $('[data-tunits]').innerHTML = [['C', '°C'], ['F', '°F']].map(([v, n]) => `<button type="button" role="radio" data-tunit="${v}">${n}</button>`).join('');
+  for (const k in SEGS) $$(`[data-${k}]`).forEach(el => el.innerHTML = segHTML(SEGS[k]));
 }
 
 // Header, banner and data popover copy for live vs sample data.
@@ -163,6 +186,12 @@ function bindChrome(map) {
     else if (t.dataset.basemap) S.set({ basemap: t.dataset.basemap });
     else if (t.dataset.dens) S.set({ density: +t.dataset.dens });
     else if (t.dataset.tunit) S.set({ tempUnit: t.dataset.tunit });
+    else if (t.dataset.sunit) S.set({ speedUnit: t.dataset.sunit });
+    else if (t.dataset.dunit) S.set({ distUnit: t.dataset.dunit });
+    else if (t.dataset.preset) { const p = PRESETS[t.dataset.preset]; if (p) S.set({ tempUnit: p.temp, speedUnit: p.speed, distUnit: p.dist }); }
+    else if (t.dataset.settfirst) S.set({ timeFirst: t.dataset.settfirst });
+    else if (t.dataset.setspeed) S.set({ speed: +t.dataset.setspeed });
+    else if ('measure' in t.dataset) S.set({ measuring: !S.get('measuring'), selection: null });
     else if ('particles' in t.dataset) S.set({ particles: !S.get('particles') });
     else if ('lmin' in t.dataset) S.set({ layersMin: !S.get('layersMin') });
     else if (t.dataset.soon) toast(`${t.dataset.soon} arrives in a later phase.`);
@@ -173,13 +202,26 @@ function bindChrome(map) {
     else if (t.dataset.zoom) t.dataset.zoom > 0 ? map.zoomIn() : map.zoomOut();
   });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closePops(); toggleLayersSheet(false); S.set({ selection: null }); }
+    if (e.key === 'Escape') { closePops(); toggleLayersSheet(false); S.set({ selection: null }); $('#probe').hidden = true; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toast('Search arrives in a later phase.'); }
   });
   const op = $('#set-opacity');
   op.value = Math.round(S.get('opacity') * 100);
   op.addEventListener('input', () => S.set({ opacity: op.value / 100 }));
 
+  // The legend is one element, shown where it is read: inside the selected field's section of the
+  // Layers rail, floating over the map when the rail is minimised, in the layers sheet on phones.
+  const placeLegend = () => {
+    const lg = $('#legend'), k = S.get('field');
+    const host = mobile.matches ? $('.ls-lg') : S.get('layersMin') || !FIELDS[k] ? $('#app') : $(`[data-lx="${k}"] .lx-lg`);
+    if (lg.parentNode !== host) host.prepend(lg);
+    lg.classList.toggle('docked', host !== $('#app'));
+  };
+  mobile.addEventListener('change', placeLegend);
+  S.on(['field', 'layersMin'], s => {
+    $$('[data-lx]').forEach(el => el.hidden = el.dataset.lx !== s.field);
+    placeLegend();
+  });
   S.on(['field'], s => {
     $$('[data-field]').forEach(el => {
       const on = el.dataset.field === s.field;
@@ -189,11 +231,16 @@ function bindChrome(map) {
     $$('[data-lsum]').forEach(el => el.textContent = s.field === 'none' ? 'No layer' : `${FIELDS[s.field].short} · ${meta.live ? 'GFS' : 'sample'}`);
   });
   S.on(['basemap'], s => $$('[data-basemap]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.basemap === s.basemap))));
-  S.on(['tempUnit'], s => {
-    setTempUnit(s.tempUnit);
-    $$('[data-tunit]').forEach(el => el.closest('[data-tunits]') && el.setAttribute('aria-checked', String(el.dataset.tunit === s.tempUnit)));
-    $$('[data-unit="temp"]').forEach(el => el.textContent = unitOf('temp'));
+  // One units setting for the whole page: probe, place panel, chart, legends, scale bar, measure.
+  S.on(['tempUnit', 'speedUnit', 'distUnit'], s => {
+    const u = { temp: s.tempUnit, speed: s.speedUnit, dist: s.distUnit };
+    setUnits(u);
+    const radio = (attr, v) => $$(`[data-${attr}]`).forEach(el => el.closest('.seg') && el.setAttribute('aria-checked', String(el.dataset[attr] === v)));
+    radio('tunit', s.tempUnit); radio('sunit', s.speedUnit); radio('dunit', s.distUnit); radio('preset', presetOf(u));
+    $$('[data-unit]').forEach(el => el.textContent = unitOf(el.dataset.unit));
   });
+  S.on(['timeFirst'], s => $$('[data-settfirst]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.settfirst === s.timeFirst))));
+  S.on(['speed'], s => $$('[data-setspeed]').forEach(el => el.setAttribute('aria-checked', String(+el.dataset.setspeed === s.speed))));
   S.on(['density'], s => $$('[data-dens]').forEach(el => el.setAttribute('aria-checked', String(+el.dataset.dens === s.density))));
   S.on(['particles'], s => $$('[data-particles]').forEach(el => { el.classList.toggle('on', s.particles); el.setAttribute('aria-checked', String(s.particles)); }));
   S.on(['layersMin'], s => {
@@ -203,10 +250,10 @@ function bindChrome(map) {
     b.setAttribute('aria-label', s.layersMin ? 'Expand layers' : 'Minimise layers');
   });
   let legendKey = '';
-  S.on(['field', 'basemap', 'tempUnit', 't'], s => {
+  S.on(['field', 'basemap', 'tempUnit', 'speedUnit', 't'], s => {
     const light = s.basemap === 'light', f = FIELDS[s.field];
     // only rebuild when something shown changes (rain's span and the AQ end state follow t)
-    const key = [s.field, s.basemap, s.tempUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : ''].join();
+    const key = [s.field, s.basemap, s.tempUnit, s.speedUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : ''].join();
     if (key === legendKey) return;
     legendKey = key;
     if (!f) {
@@ -238,9 +285,11 @@ function toggleLayersSheet(force) {
 }
 
 // ---- detail panel (clicked place) ------------------------------------------------
-function chartSVG(series, t) {
+// t: playhead; nowTemp: the panel's own temperature at t (°C, 0.5° grid) so the chart's playhead
+// dot shows the same number as the panel (the line itself comes from a coarser 3° file).
+function chartSVG(series, t, nowTemp) {
   if (!series?.length) return '<p class="src">Chart loading…</p>';
-  const w = 310, h = 64, n = meta.hours || 1, x = t => (t / n * w).toFixed(1);
+  const w = 310, h = 74, L = 26, n = meta.hours || 1, x = t => (L + t / n * (w - L)).toFixed(1);
   // day boundaries (UTC midnight) with short day names
   let days = '';
   for (let d = 1; d < n; d++) {
@@ -249,26 +298,28 @@ function chartSVG(series, t) {
     days += `<line x1="${x(d)}" x2="${x(d)}" y1="2" y2="${h - 14}" stroke="var(--line2)" stroke-width="1"/>`;
     if (d > 6 && d < n - 10) days += `<text x="${(+x(d) + 2).toFixed(1)}" y="9" font-family="IBM Plex Mono" font-size="8.5" fill="var(--faint)">${at.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' })}</text>`;
   }
-  series = series.map(p => ({ ...p, temp: toTemp(p.temp) }));
+  series = series.map(p => ({ ...p, temp: toTemp(p.temp), wind: conv('speed', p.wind) }));
   const T = series.map(p => p.temp), W = series.map(p => p.wind);
-  const tMin = Math.min(...T) - 1, tMax = Math.max(...T) + 1, wMax = Math.max(40, ...W);
+  const tMin = Math.floor(Math.min(...T) - 1), tMax = Math.ceil(Math.max(...T) + 1), wMax = Math.max(conv('speed', 40), ...W);
   const y = v => (6 + (tMax - v) / (tMax - tMin) * (h - 26)).toFixed(1);
-  const bw = Math.max(2.8, w / series.length - 2);
-  const bars = series.map(p => `<rect x="${(p.t / n * w - bw / 2).toFixed(1)}" y="${(h - 14 - p.wind / wMax * 18).toFixed(1)}" width="${bw.toFixed(1)}" height="${(p.wind / wMax * 18).toFixed(1)}" fill="var(--mute)" opacity=".45"/>`).join('');
+  const bw = Math.max(2.8, (w - L) / series.length - 2);
+  const bars = series.map(p => `<rect x="${(+x(p.t) - bw / 2).toFixed(1)}" y="${(h - 14 - p.wind / wMax * 18).toFixed(1)}" width="${bw.toFixed(1)}" height="${(p.wind / wMax * 18).toFixed(1)}" fill="var(--mute)" opacity=".45"/>`).join('');
   const line = series.map((p, i) => `${i ? 'L' : 'M'}${x(p.t)} ${y(p.temp)}`).join('');
-  // temperature at the playhead, interpolated between series points
+  // temperature at the playhead: the panel's value, else interpolated between series points
   const k = series.findIndex(p => p.t >= t), a = series[Math.max(0, k - 1)], b = series[Math.max(0, k)];
-  const tt = k <= 0 ? series[k < 0 ? series.length - 1 : 0].temp : a.temp + (b.temp - a.temp) * (t - a.t) / ((b.t - a.t) || 1);
-  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Temperature and wind for the forecast period">${days}${bars}
+  const tt = nowTemp != null && nowTemp === nowTemp ? toTemp(nowTemp) : k <= 0 ? series[k < 0 ? series.length - 1 : 0].temp : a.temp + (b.temp - a.temp) * (t - a.t) / ((b.t - a.t) || 1);
+  const ax = (v, yy, anchor = 'end', fill = 'var(--mute)') => `<text x="${L - 4}" y="${yy}" text-anchor="${anchor}" font-family="IBM Plex Mono" font-size="8.5" fill="${fill}">${v}</text>`;
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Temperature (${label('temp')}) and wind (${label('speed')}) for the forecast period" data-chart-t="${t}">${days}${bars}
+    ${ax(tMax + '°', 12)}${ax(tMin + '°', h - 20)}
     <path d="${line}" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
     <line x1="${x(t)}" x2="${x(t)}" y1="0" y2="${h - 12}" stroke="var(--accent)" stroke-width="1.5"/>
-    <circle cx="${x(t)}" cy="${y(tt)}" r="3.5" fill="var(--accent)"/>
-    <text x="0" y="${h - 1}" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink)">Now</text>
-    <text x="${w / 2}" y="${h - 1}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">${relT(Math.round(n / 2))}</text>
+    <circle cx="${x(t)}" cy="${Math.max(2, Math.min(h - 14, y(tt)))}" r="3.5" fill="var(--accent)"/>
+    <text x="${L}" y="${h - 1}" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink)">Now</text>
+    <text x="${(L + w) / 2}" y="${h - 1}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">${relT(Math.round(n / 2))}</text>
     <text x="${w}" y="${h - 1}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">${relT(n)}</text></svg>`;
 }
 
-let detailVals = null, detailSeries = null, detailKey = '';
+let detailVals = null, detailSeries = null, detailKey = '', placeSheet = null;
 // Each value appears as soon as its own file is ready (the field on screen is already loaded,
 // so it shows at once) instead of waiting for all six downloads.
 let detailFrame = 0;
@@ -293,25 +344,29 @@ function loadDetail(s) {
 }
 
 function renderDetail(s) {
-  const el = $('#detail');
+  const el = $('#detail'), body = $('#detail .d-body');
   document.body.classList.toggle('has-detail', !!s.selection);
-  if (!s.selection) { el.hidden = true; detailKey = ''; return; }
+  if (!s.selection) { el.hidden = true; detailKey = ''; stamp('panel', null); stamp('chart', null); return; }
   const { lon, lat } = s.selection, t = s.t;
+  const all = detailVals && ORDER.every(k => k in detailVals);
   const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
   const note = meta.live
     ? `<div class="d-sec"><div class="src">NOAA GFS run ${runLabel(meta.run)} · air quality CAMS ${meta.aq ? fmtUTC(meta.aqGenerated) : 'unavailable'} </div><div class="src">Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days.</div></div>`
     : `<div class="d-sec"><div class="alert"><b>Sample data</b><span>Generated to test the layout. Not an observation or a forecast.</span></div></div>`;
-  el.innerHTML = `
-    <div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close">×</button>
+  body.innerHTML = `
+    <div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close (Esc)" title="Close (Esc)">×</button>
       <div class="kick">Place · ${meta.live ? 'GFS forecast' : 'sample data'}</div>
       <div class="d-title">${fmtCoord(lon, lat)}</div>
-      <div class="d-sub"><span class="tag">${relT(t)}</span>${fmtUTC(meta.base + t * 3600e3)}</div></div>
+      <div class="d-name">Place name <span class="soon">Coming soon</span></div>
+      <div class="d-sub" data-panel-t="${t}"><span class="tag">${relT(t)}</span><span class="mono">${fmtBoth(meta.base + t * 3600e3)}</span></div></div>
     <div class="stats">${ORDER.map(stat).join('')}</div>
-    <div class="d-sec"><div class="kick"><span>Forecast</span><span>— temp · ▮ wind</span></div>${chartSVG(detailSeries, t)}</div>
+    <div class="d-sec"><div class="kick"><span>Forecast</span><span>— temp ${label('temp')} · ▮ wind ${label('speed')}</span></div>${chartSVG(detailSeries, t, detailVals?.temp?.v)}</div>
     ${note}
     <div class="d-ft"><div class="d-btns"><button class="btn pri" type="button" data-center>Centre map here</button><button class="btn" type="button" data-soon="Point download">Data ↓</button></div>
       <div class="src">${meta.live ? 'NOAA GFS · CAMS via Open-Meteo (CC BY 4.0)' : `Sample generator · ${SAMPLE_GRID_DEG}° grid`} · Updated ${hhmm(meta.generated)} UTC</div></div>`;
   el.hidden = false;
+  // the panel counts as drawn for this hour once every value has arrived
+  stamp('panel', all ? t : -1); stamp('chart', detailSeries ? t : -1);
 }
 
 // ---- credits strip -------------------------------------------------------------------
@@ -328,44 +383,47 @@ function renderCredits(map) {
 // ---- scale bar -----------------------------------------------------------------------
 function renderScale(map) {
   const lat = map.getCenter().lat, mpp = 40075016.686 * Math.cos(lat * Math.PI / 180) / (512 * Math.pow(2, map.getZoom()));
-  const max = mpp * 100, pow = Math.pow(10, Math.floor(Math.log10(max))), d = max / pow;
-  const nice = (d >= 5 ? 5 : d >= 2 ? 2 : 1) * pow, px = nice / mpp;
-  $('#scale span').textContent = nice >= 1000 ? `${nice / 1000} km` : `${nice} m`;
+  const [text, px] = scaleBar(mpp);
+  $('#scale span').textContent = text;
   $('#scale i').style.width = px.toFixed(0) + 'px';
 }
 
 // ---- probe (desktop hover) -------------------------------------------------------------
 function bindProbe(map) {
   // Values come from the worker (a few bytes per move); one lookup is in flight at a time and
-  // the newest mouse position runs next.
+  // the newest mouse position runs next. It also refreshes when the hour or field changes, so
+  // the probe never shows another hour than the map.
   const probe = $('#probe');
-  let pending = null, busy = false;
+  let pending = null, last = null, busy = false, left = true;
+  const hide = () => { probe.hidden = true; stamp('probe', null); };
   async function show() {
     if (busy || !pending) return;
     const { lngLat: { lng, lat }, point } = pending; pending = null;
     const k = S.get('field'), t = S.get('t');
-    if (k === 'none' || Math.abs(lat) > 85) { probe.hidden = true; return; }
+    if (k === 'none' || Math.abs(lat) > 85 || S.get('measuring')) { hide(); return; }
     busy = true;
     const p = await getPoint(t, [k], lng, lat).catch(() => null);
     busy = false;
     if (p && S.get('field') === k && S.get('t') === t && !left) {
       const [v, u, d] = readingOf(k, p[k]);
-      probe.innerHTML = `<b>${v}${u ? ' ' + u : ''}</b><span>${d}</span><span>·</span><span>${fmtLat(lat).replace(/(\.\d)\d/, '$1')} ${fmtLon(lng).replace(/(\.\d)\d/, '$1')}</span>`;
+      probe.innerHTML = `<b>${v}${u ? ' ' + u : ''}</b><span>${d}</span><small>${fmtLat(lat).replace(/(\.\d)\d/, '$1')} ${fmtLon(lng).replace(/(\.\d)\d/, '$1')} · ${fmtBoth(meta.base + t * 3600e3, undefined, { date: false })}</small>`;
+      probe.dataset.t = t;
       probe.style.left = point.x + 'px';
       probe.style.top = point.y + 'px';
       probe.hidden = false;
+      stamp('probe', t);
     }
     if (pending) requestAnimationFrame(show);
   }
-  let left = false;
   map.on('mousemove', e => {
     if (mobile.matches) return;
     left = false;
-    pending = e;
+    pending = last = e;
     requestAnimationFrame(show);
   });
-  map.getCanvas().addEventListener('mouseleave', () => { pending = null; left = true; probe.hidden = true; });
-  map.on('movestart', () => { probe.hidden = true; });
+  S.on(['t', 'field', 'tempUnit', 'speedUnit', 'timeFirst'], () => { if (last && !left) { pending = last; show(); } }, { now: false });
+  map.getCanvas().addEventListener('mouseleave', () => { pending = null; left = true; hide(); });
+  map.on('movestart', hide);
 }
 
 // ---- boot ------------------------------------------------------------------------------
@@ -389,16 +447,31 @@ async function boot() {
   const mapLoaded = new Promise(r => map.once('load', r));
   await dataReady;
   window.owmMap = map; // handy for debugging in the console and used by the test scripts
-  setTempUnit(S.get('tempUnit'));
+  performance.mark('owm:data-ready');
+  setUnits({ temp: S.get('tempUnit'), speed: S.get('speedUnit'), dist: S.get('distUnit') });
   buildLayers();
   renderStatus();
 
   bindChrome(map);
+  initClock({ base: meta.base, snap: stepTime });
   S.set({ t: stepTime(Math.min(S.get('t'), meta.hours), 0) });
   // last hourly frame: from here on frames are 3 hours apart
   const ci = meta.times.findIndex((t, i) => i && t - meta.times[i - 1] > 1);
-  initTimeline({ base: meta.base, times: meta.times, stepTime, coarseFrom: ci > 0 ? meta.times[ci - 1] : null, zone: L.zone(), uncertainFrom: meta.hours > 72 ? 72 : null });
-  $('[data-range]').textContent = relT(meta.hours).replace('+', '');
+  initTimeline({ base: meta.base, times: meta.times, stepTime, coarseFrom: ci > 0 ? meta.times[ci - 1] : null, zone: L.zone(), uncertainFrom: meta.hours > 72 ? 72 : null,
+    fh: t => meta.live ? meta.first + t : null });
+  // phone sheets: place panel peek / half / full; layers half / full (half <= 40 % of the map)
+  placeSheet = sheet($('#detail'), ['peek', 'half', 'full'], s => {
+    document.body.dataset.place = s;
+    // phones: keep the chosen place in view above the sheet and the scrubber
+    const sel = S.get('selection');
+    if (!mobile.matches || !sel || s === 'full') return;
+    requestAnimationFrame(() => {
+      const top = $('.m-scrub').getBoundingClientRect().top, y = map.project([sel.lon, sel.lat]).y;
+      if (y > top - 40) map.panBy([0, y - top / 2]);
+    });
+  });
+  const layersSheet = sheet($('#lsheet'), ['half', 'full']);
+  const sheets = { place: placeSheet, layers: layersSheet };
   S.on(['t'], s => { const nx = stepTime(s.t, 1); $$('[data-stepsize]').forEach(el => el.textContent = `${nx > s.t ? nx - s.t : (s.t - stepTime(s.t, -1)) || 1} h step`); });
   bindProbe(map);
 
@@ -412,7 +485,10 @@ async function boot() {
   map.addLayer(wind, 'omt-road-minor'); // above the field, below roads, borders and labels
   window.owmWind = wind;
   // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
-  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime };
+  const measure = initMeasure(map);
+  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets };
+  // Public time API for future layers (events, Phase 5): see clock.js.
+  window.owmClock = { onTime, getValidTime, layerTimes };
 
   // Each part updates as soon as its own data is ready. One request per part is in flight;
   // while scrubbing, the newest wanted state runs next. Hidden parts do no work at all.
@@ -428,26 +504,34 @@ async function boot() {
   const updateField = latest(async () => {
     const t = S.get('t'), k = S.get('field');
     field.setVisible(k !== 'none');
-    if (k === 'none') { field.setOverlays(null, light()); field.setIsobars(null); return; }
+    if (k === 'none') { field.setOverlays(null, light()); field.setIsobars(null); for (const l of ['field', 'isobars', 'hl']) stamp(l, null); return; }
     const tex = await getFieldTexture(t, k);
     if (S.get('field') !== k) return;
     field.setData(tex);
     field.setIsobars(k === 'pres' ? FIELDS.pres : null, light());
+    // the field shader draws the isobars from the same texture, so they share its time
+    stamp('field', t); stamp('isobars', k === 'pres' ? t : null);
+    if (!firstPaint) { firstPaint = true; map.once('render', () => performance.mark('owm:first-field')); }
     $('#legend').classList.toggle('unavailable', !!tex.missing);
     // pressure H/L labels follow without holding up the colours
+    if (k === 'pres') stamp('hl', -1);
     const ov = k === 'pres' ? await getPressureOverlays(t) : null;
     if (S.get('field') !== k) return;
     field.setOverlays(ov, light());
+    stamp('hl', k === 'pres' ? t : null);
     // prefetch the next 2 frames
     for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getFieldTexture(n, k).catch(() => {});
   });
+  let firstPaint = false;
   const updateWind = latest(async () => {
-    if (!S.get('particles')) return;
+    if (!S.get('particles')) { stamp('wind', null); return; }
     const t = S.get('t'), tex = await getWindTexture(t);
     wind.setWind(tex.rgba, tex.grid, tex.u, tex.v);
+    stamp('wind', t);
     for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getWindTexture(n).catch(() => {});
   });
-  const windColour = () => wind.setColor(light() ? [0.08, 0.09, 0.1, 0.55] : S.get('field') === 'cloud' ? [1, 0.84, 0.59, 0.7] : [1, 1, 1, 0.75]);
+  // Particles are thin and partly transparent so the field and labels read through them.
+  const windColour = () => wind.setColor(light() ? [0.08, 0.09, 0.1, 0.42] : S.get('field') === 'cloud' ? [1, 0.84, 0.59, 0.55] : [1, 1, 1, 0.58]);
 
   S.on(['basemap'], s => { applyBasemap(map, s.basemap); renderCredits(map); });
   S.on(['t', 'field'], updateField);
@@ -458,13 +542,14 @@ async function boot() {
   S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
   S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
   S.on(['selection', 't'], s => { loadDetail(s); renderDetail(s); });
-  S.on(['field', 'tempUnit'], s => { if (s.selection) renderDetail(s); }, { now: false });
+  S.on(['field', 'tempUnit', 'speedUnit', 'timeFirst'], s => { if (s.selection) renderDetail(s); }, { now: false });
+  S.on(['distUnit'], () => renderScale(map), { now: false });
 
   // Selection marker + detail panel on click / tap.
   let pin = null;
   map.on('click', e => {
     const { lng, lat } = e.lngLat;
-    if (Math.abs(lat) > 85) return;
+    if (Math.abs(lat) > 85 || S.get('measuring')) return; // the measure tool owns clicks while on
     S.set({ selection: { type: 'place', lon: lng, lat } });
   });
   S.on(['selection'], s => {
@@ -473,9 +558,11 @@ async function boot() {
     const el = document.createElement('div'); el.className = 'pin';
     pin = new maplibregl.Marker({ element: el }).setLngLat([s.selection.lon, s.selection.lat]).addTo(map);
     toggleLayersSheet(false); closePops();
+    placeSheet.set('peek');
   });
   $('#detail').addEventListener('click', e => {
     if (e.target.closest('[data-deselect]')) S.set({ selection: null });
+    else if (e.target.closest('.d-hd') && !e.target.closest('button') && placeSheet.get() === 'peek') placeSheet.set('half');
     if (e.target.closest('[data-center]')) { const s = S.get('selection'); map.easeTo({ center: [s.lon, s.lat] }); }
   });
 
