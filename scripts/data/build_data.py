@@ -57,6 +57,9 @@ AQ_FORMAT = "rg16-v2"               # bump when the AQ file format changes (forc
 AQ_BATCH = 100                      # locations per request
 AQ_MAX_PER_MIN = 500                # stay under Open-Meteo's 600/minute
 AQ_REFRESH_HOURS = 11               # CAMS updates every 12 h
+# Grid nodes whose downloaded pm2_5 is kept (aq/nodes.json) so CI can check the page against
+# exactly what this build received, even when the air-quality files are reused hours later.
+AQ_CHECK_NODES = [("node 28N 76E (Delhi)", 28, 76), ("node 52N 0E (London)", 52, 0), ("node 40N 116E (Beijing)", 40, 116)]
 
 GFS_CREDIT = "NOAA/NCEP Global Forecast System (GFS) 0.25°"
 GFS_LICENSE = "Public domain (U.S. Government work); NOAA requests attribution"
@@ -639,6 +642,11 @@ def build_aq(args, out, generated, report, gfs_run):
              "units": "µg/m³ (pm), index (us_aqi)"}
         put(adir / name, png(nx, ny * 3, 3, rows, m, 1), sizes)
         files.append({"valid_utc": iso(valid), "file": name})
+    idx = [AQ_LATS.index(la) * len(AQ_LONS) + AQ_LONS.index(lo) for _, la, lo in AQ_CHECK_NODES]
+    unix = lambda v: int(dt.datetime.strptime(v, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc).timestamp())
+    nodes = {"generated_utc": iso(generated), "field": "pm2_5", "nodes": [{"name": n, "lat": la, "lon": lo} for n, la, lo in AQ_CHECK_NODES],
+             "hours": {f["valid_utc"]: [(series[unix(f["valid_utc"])][i] or (None,))[0] for i in idx] for f in files}}
+    (adir / "nodes.json").write_text(json.dumps(nodes, separators=(",", ":")))
     cover = round(min(nonnull) * 100, 1) if nonnull else 0
     report["aq_seconds"] = round(time.time() - t0, 1)
     report["aq_sizes"] = {"files": len(sizes), "max": max(sizes) if sizes else 0}
@@ -649,7 +657,7 @@ def build_aq(args, out, generated, report, gfs_run):
     return {"generated_utc": iso(generated), "credit": AQ_CREDIT, "license": AQ_LICENSE, "stale": False,
             "format": AQ_FORMAT, "encoding": {"blocks": ["pm2_5", "pm10", "us_aqi"], "step": [0.1, 0.1, 1], "nodata": 65535},
             "grid": {"nx": len(AQ_LONS), "ny": len(AQ_LATS), "deg": AQ_DEG, "lon0": AQ_LONS[0], "lat0": AQ_LATS[0]},
-            "files": files, "end_utc": files[-1]["valid_utc"] if files else None, "calls": STATS["aq_locations"]}
+            "files": files, "end_utc": files[-1]["valid_utc"] if files else None, "nodes_file": "nodes.json", "calls": STATS["aq_locations"]}
 
 
 def aq_range_probe(report):
@@ -717,7 +725,8 @@ def load_previous(prev_url, out, part):
         if not entry:
             return None
         names = ([f"gfs/{k}/f{fr['f']:03d}.png" for fr in entry["frames"] for k in ("wind", "temp", "rain", "cloud", "pres")]
-                 + ["gfs/series.png"] if part == "gfs" else [f"aq/{x['file']}" for x in entry["files"]])
+                 + ["gfs/series.png"] if part == "gfs" else [f"aq/{x['file']}" for x in entry["files"]]
+                 + ([f"aq/{entry['nodes_file']}"] if entry.get("nodes_file") else []))
         for n in names:
             _, _, data = get(prev_url.rstrip("/") + "/" + n, retries=2)
             (out / n).parent.mkdir(parents=True, exist_ok=True)
