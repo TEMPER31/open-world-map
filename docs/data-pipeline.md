@@ -208,7 +208,7 @@ coordinates used by `scripts/data/accuracy.mjs`.
 
 | City | f006: 0.25° | f006: 0.5° grid | diff | f030: 0.25° | f030: 0.5° grid | diff |
 |---|---|---|---|---|---|---|
-| Dayton OH | 18.02 | 17.48 | −0.54 | 13.68 | 12.86 | −0.83 |
+| US test city | 18.02 | 17.48 | −0.54 | 13.68 | 12.86 | −0.83 |
 | Miami | 27.50 | 26.87 | −0.62 | 26.82 | 26.44 | −0.38 |
 | Denver | 16.64 | 13.08 | −3.56 | 17.42 | 14.20 | −3.22 |
 | London | 11.22 | 11.12 | −0.10 | 10.81 | 10.73 | −0.09 |
@@ -220,7 +220,7 @@ coordinates used by `scripts/data/accuracy.mjs`.
 * It is **not a global bias**: over 20,000 random points (60° S to 70° N) the 0.5° grid minus
   the 0.25° value averages **+0.001 °C** (f006) and **−0.001 °C** (f030).
 * It is one-sided at these cities because the 0.25° points next to each city are warmer than
-  the 0.5° nodes around it. Dayton's nearest 0.25° points are 18.2 and 18.5 °C, but the 0.5°
+  the 0.5° nodes around it. The US test city's nearest 0.25° points are 18.2 and 18.5 °C, but the 0.5°
   nodes are 16.9–18.0. Miami's point at 26.00° N 80.25° W (Fort Lauderdale) is 28.6 °C, but
   the 0.5° nodes inland are 25.9 and 26.6. Delhi's 0.25° points are 21.4–22.4 °C, but the
   0.5° nodes at 29° N are 19.1–19.6. Thinning the grid to every second point drops exactly
@@ -230,7 +230,7 @@ coordinates used by `scripts/data/accuracy.mjs`.
 * **Not fixed in this PR.** 0.25° temperature measured **427 KB/hour** (16-bit, 0.2 °C) or
   **266 KB/hour** (8-bit, ~0.35 °C steps), both over the ~150 KB budget. The handoff's 560 KB
   figure was an earlier estimate. A least-squares fit of the 0.5° nodes, so that
-  interpolation best matches all 0.25° points, was tested. It brought Dayton to −0.34/−0.70
+  interpolation best matches all 0.25° points, was tested. It brought the US test city to −0.34/−0.70
   and Miami to −0.35/−0.31. But it made London worse (−0.60) and moved node values by up
   to 7 °C, which breaks the exact-NOAA-at-nodes guarantee, so it was rejected.
 
@@ -239,7 +239,7 @@ coordinates used by `scripts/data/accuracy.mjs`.
 | City | f006: 0.25° | 0.5° | 0.75° (page grid) | 1° | f030: 0.25° | 0.5° | 0.75° | 1° |
 |---|---|---|---|---|---|---|---|---|
 | Miami | 21.9 | 18.9 | 16.7 | 23.0 | 23.2 | 22.9 | 19.5 | 27.1 |
-| Dayton OH | 11.0 | 12.2 | 11.4 | 12.3 | 11.3 | 12.0 | 12.0 | 12.3 |
+| US test city | 11.0 | 12.2 | 11.4 | 12.3 | 11.3 | 12.0 | 12.0 | 12.3 |
 | Denver | 10.9 | 9.6 | 10.7 | 9.7 | 9.8 | 8.5 | 9.5 | 8.9 |
 | London | 5.7 | 5.7 | 7.4 | 7.9 | 5.8 | 5.7 | 8.1 | 7.7 |
 | Delhi | 6.8 | 7.1 | 5.2 | 7.0 | 2.4 | 2.3 | 2.3 | 3.7 |
@@ -274,6 +274,16 @@ that disagrees with the map beneath it.
   long-term fix is the full CAMS grid from the **Copernicus Atmosphere Data Store**, with a
   free account key stored as a GitHub **Actions secret** and used only by the data job,
   never in the site or the repository.
+* **Air quality at cities: larger than the ~10 µg/m³ above.** In the aq-node-check CI run
+  (air-quality files 0.7 h old, so not a stale-cache effect; the 4° nodes matched CAMS exactly),
+  **Denver read −23.0 µg/m³** against Open-Meteo `cams_global` at the city at +0 h and −28.9 at
+  +24 h; Delhi read −15.8 / −16.7. The cause is the 4° grid plus smoothing between nodes, which
+  cannot hold a local plume (Denver sits in a basin against the mountains). Same long-term fix
+  as above: the full CAMS grid.
+* **Wind frame size.** Wind (8-bit U+V, 0.75°) is the one field that goes over ~150 KB per
+  frame on some frames: **max 153.7 KB** in the forecast-7day run (12 of 137 frames between 150
+  and 154 KB) and 152.9 KB in the aq-node-check run. Accepted; a tighter encoding is possible
+  if needed.
 * **Place-panel chart.** The 48-hour chart line comes from a 3° grid, every 3 h, 8-bit (one
   file, loaded on the first click), so it can differ from the panel's own numbers, which use
   the 0.5° grid. Found during this review; the fix belongs to Phase 3 (shared time state).

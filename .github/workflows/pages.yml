@@ -136,16 +136,19 @@ jobs:
 
   verify:
     # Pull requests: screenshot the site with the freshly built real data, check its values
-    # against independent references, and commit only the screenshots, the accuracy table and
-    # the run report (no data files) to the PR branch for review.
+    # against independent references and run the rendering tests. Images and probe output go
+    # to a workflow artifact (kept 30 days; GitHub allows 1-90 for public repositories); only
+    # the small text reports are committed to the PR branch, in docs/screenshots/<branch>/.
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
-      OUT: docs/screenshots/aq-node-check
-      LABEL: aq-node-check
+      RAW: ci-out
+      OUT: docs/screenshots/${{ github.head_ref }}
+      LABEL: ${{ github.head_ref }}
+      MAX_JSON_BYTES: 204800
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -161,26 +164,52 @@ jobs:
       - name: Screenshots
         run: |
           (cd built/site && python3 -m http.server 8123 --bind 127.0.0.1 &) ; sleep 2
-          node scripts/data/screenshots.mjs http://127.0.0.1:8123/ "$OUT"
-          cp built/run-report.json "$OUT/run-report.json"
+          node scripts/data/screenshots.mjs http://127.0.0.1:8123/ "$RAW"
+          cp built/run-report.json "$RAW/run-report.json"
           python3 - <<'EOF'
           import json, os
-          for v in json.load(open(os.environ["OUT"] + "/views.json")):
+          for v in json.load(open(os.environ["RAW"] + "/views.json")):
               print(f"::notice title=View {v['view']}::legend={v['legend']} | probe={v['probe']} | stale={v['stale']} | sample labels visible={v['sampleLabelsVisible']} | errors={len(v['errors'])}")
           EOF
       - name: Accuracy check (page values vs Open-Meteo GFS / CAMS and NWS)
         continue-on-error: true
-        run: node scripts/data/accuracy.mjs http://127.0.0.1:8123/ built/run-report.json "$OUT/accuracy.md" "$LABEL"
+        run: node scripts/data/accuracy.mjs http://127.0.0.1:8123/ built/run-report.json "$RAW/accuracy.md" "$LABEL"
       - name: Rendering and behaviour tests (direction, pressure sync, None layer, profiling)
         continue-on-error: true
-        run: node scripts/data/render-tests.mjs http://127.0.0.1:8123/ "$OUT/render-tests.md"
+        run: node scripts/data/render-tests.mjs http://127.0.0.1:8123/ "$RAW/render-tests.md"
       - name: Satellite imagery probe (USGS services, keyless zoom 16+ over the US)
         continue-on-error: true
-        run: node scripts/data/satellite-probe.mjs "$OUT/probe"
-      - name: Commit screenshots, accuracy table and run report to the PR branch
+        run: node scripts/data/satellite-probe.mjs "$RAW/probe"
+      - name: Upload screenshots and probe output (artifact, 30 days)
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-screenshots
+          path: ci-out
+          retention-days: 30
+      - name: Commit the text reports to the PR branch (no images)
         run: |
+          mkdir -p "$OUT"
+          for f in accuracy.md render-tests.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
+          sizes=""
+          for f in views.json run-report.json; do
+            [ -f "$RAW/$f" ] || continue
+            n=$(stat -c %s "$RAW/$f"); sizes="$sizes $f $((n / 1024)) KB;"
+            if [ "$n" -le "$MAX_JSON_BYTES" ]; then cp "$RAW/$f" "$OUT/$f"
+            else
+              git rm -q --ignore-unmatch "${OUT:?}/${f:?}"
+              echo "::notice title=Artifact only::$f is $((n / 1024)) KB (over $((MAX_JSON_BYTES / 1024)) KB)"
+            fi
+          done
+          {
+            echo "# CI output for this branch"
+            echo
+            echo "Screenshots, probe output and any report over $((MAX_JSON_BYTES / 1024)) KB are in the workflow artifact"
+            echo "**ci-screenshots** of run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID (kept 30 days)."
+            echo "Sizes this run:$sizes"
+          } > "$OUT/ci-artifact.md"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$OUT"
-          git commit -m "CI: screenshots, accuracy table and run report ($LABEL) [skip ci]" || exit 0
+          git commit -m "CI: accuracy table, render tests and small reports ($LABEL) [skip ci]" || exit 0
           git push

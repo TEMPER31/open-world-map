@@ -28,7 +28,7 @@
 The CI "page vs raw NOAA 0.25°" results are **47 ok / 9 outside / 4 n/a**, both before and
 after. The 9 outside in CI after (f008 / f032):
 
-* **Temperature:** Dayton +24 h (−0.7, i.e. −0.71), Miami +0 h (−0.9), Delhi +24 h (−0.7,
+* **Temperature:** the US test city +24 h (−0.7, i.e. −0.71), Miami +0 h (−0.9), Delhi +24 h (−0.7,
   i.e. −0.73), and Denver +0 h (−3.3) and +24 h (−3.9).
 * **Wind:** Miami +24 h (−4.9). Miami +0 h is −2.8, just inside ±3.
 * **Rain:** Miami +24 h (0.55 vs 1.20 mm/h).
@@ -47,7 +47,7 @@ differences come from grid resolution, not from the PNG files or the browser cod
 
     | City | CI after (f008 / f032) | CI before (f007 / f031) |
     |---|---|---|
-    | Dayton OH | −0.59 / −0.71 | −0.5 / −0.6 |
+    | US test city | −0.59 / −0.71 | −0.5 / −0.6 |
     | Miami | −0.93 / −0.22 | −0.7 / −0.3 |
     | Delhi | −0.25 / −0.73 | −0.8 / −0.9 |
     | London | −0.10 / −0.09 | −0.1 / −0.1 |
@@ -59,7 +59,7 @@ differences come from grid resolution, not from the PNG files or the browser cod
     +0.001 °C (local, f006) and −0.001 °C (local, f030).
   * It is one-sided at these cities because the 0.25° points next to each city are warmer
     than the surrounding 0.5° nodes (local, f006).
-    * Dayton: 18.2 and 18.5 °C, against nodes of 16.9–18.0.
+    * The US test city: 18.2 and 18.5 °C, against nodes of 16.9–18.0.
     * Miami: 28.6 °C at 26.00° N 80.25° W, against inland nodes of 25.9 and 26.6.
     * Delhi: 21.4–22.4 °C, against nodes at 29° N of 19.1–19.6.
   * *Theory, not verified:* GFS has these cities as warm spots because of urban land use in
@@ -67,14 +67,14 @@ differences come from grid resolution, not from the PNG files or the browser cod
 * **Fix.** None. Two options were measured locally (f006) and rejected:
   * **0.25° temperature:** 427 KB/hour at 16-bit / 0.2 °C, or 266 KB/hour at 8-bit. Both are
     over the ~150 KB budget. The handoff's "560 KB" was an older estimate; 427 KB is measured.
-  * **Least-squares fitted 0.5° nodes:** Dayton improved to −0.34 / −0.70 and Miami to
+  * **Least-squares fitted 0.5° nodes:** the US test city improved to −0.34 / −0.70 and Miami to
     −0.35 / −0.31. But London got worse (−0.60), and node values moved by up to 7 °C, which
     breaks "exact NOAA value at every node".
 * **Verified.**
   * CI encoding-only rows: 10 of 10 temperature rows within ±0.15 °C.
   * CI resolution table.
   * Grid alignment at nodes: 18 ok / 0 outside.
-* **Unresolved.** Dayton, Miami and Delhi can read 0.2–0.9 °C cold, and Denver 3.3–3.9 °C.
+* **Unresolved.** The US test city, Miami and Delhi can read 0.2–0.9 °C cold, and Denver 3.3–3.9 °C.
   This is documented in `docs/data-pipeline.md` → "Grid resolution".
 
 ## 2. Miami wind
@@ -113,7 +113,7 @@ Why not show the point value:
 
 **Verified (CI after):**
 
-* Probe text at Dayton: "2 %area average", "Drypast hour · area avg" (accuracy table →
+* Probe text at the US test city: "2 %area average", "Drypast hour · area avg" (accuracy table →
   Probe text).
 * `views.json` → `place-panel`: "Clouds 2% area average".
 * Encoding-only cloud rows: 10 of 10 within ±1 %.
@@ -123,7 +123,7 @@ Why not show the point value:
 All from the PR #4 table, run 18Z 29 Oct, +0 h = f006, +24 h = f030.
 
 * **Delhi air quality +24 h** was **+9.7 µg/m³** (page 50.9 vs CAMS 41.2), not +6.3.
-* **Dayton temperature +0 h** was **17.5 °C on the page vs 18.0 °C raw NOAA**, not 20.7. The
+* **The US test city's temperature at +0 h** was **17.5 °C on the page vs 18.0 °C raw NOAA**, not 20.7. The
   only 20.7 in that table is Delhi's raw NOAA temperature at +24 h, which is probably where
   the mix-up came from.
 * **Hours.** Every PR #4 number was from run 18Z 29 Oct at f006 or f030. This PR's CI tables
@@ -135,7 +135,8 @@ All from the PR #4 table, run 18Z 29 Oct, +0 h = f006, +24 h = f030.
 The panel now says: "Model values on a ~50 km grid; mountains and coasts can differ from local
 conditions." It replaced the old "model values on a 0.5° grid, not local observations".
 
-**Verified:** CI `after/place-panel.png` and `views.json` → `place-panel.detail`.
+**Verified:** CI `after/place-panel.png` (in git history at commit bef3107; screenshots are no
+longer kept in the repository) and `views.json` → `place-panel.detail`.
 
 ## 6. Known limits (documented, not built)
 
@@ -159,7 +160,8 @@ These are in `docs/data-pipeline.md` → "Known limits":
 * **What doesn't:** data and colours stay in °C.
 * **Verified:**
   * Temperature colours are pixel-identical in °C and °F: 0 of 131,120 sampled map pixels
-    differ (CI `after/temperature.png` vs `after/temperature-f.png`).
+    differ (CI `after/temperature.png` vs `after/temperature-f.png`, in git history at commit
+    bef3107).
   * They are also identical before vs after this PR, with the same data: 0 of 131,120.
     * Checked twice: CI `before/temperature.png` vs the first CI after run (both f007,
       commit 19d4da9), and locally (`main` vs this branch).
