@@ -24,6 +24,9 @@ const ENDPOINTS = [
   ['NHC CurrentStorms.json', 'https://www.nhc.noaa.gov/CurrentStorms.json'],
   ['NHC JSON sample', 'https://www.nhc.noaa.gov/productexamples/NHC_JSON_Sample.json'],
   ['NHC ArcGIS MapServer', 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer?f=json'],
+  ['NHC AT1 Forecast Points layer', 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/6?f=json'],
+  ['NHC AT1 Forecast Points query', 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/6/query?where=1%3D1&outFields=*&f=geojson'],
+  ['NHC AT1 Forecast Cone layer', 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/8?f=json'],
   ['Mapillary tiles (no token)', 'https://tiles.mapillary.com/maps/vtp/mly1_public/2/2/1/1'],
   ['Mapillary Graph API (no token)', 'https://graph.mapillary.com/images?limit=1&bbox=-73.99,40.75,-73.98,40.76']
 ];
@@ -33,7 +36,8 @@ const PAGES = [
   ['USGS copyrights and credits', 'https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits'],
   ['EONET v3 docs', 'https://eonet.gsfc.nasa.gov/docs/v3'],
   ['EONET home', 'https://eonet.gsfc.nasa.gov/'],
-  ['GDACS terms of use', 'https://www.gdacs.org/About/termsofuse.aspx'],
+  ['GDACS disclaimer', 'https://www.gdacs.org/About/disclaimer.aspx'],
+  ['GDACS about', 'https://www.gdacs.org/About/overview.aspx'],
   ['GDACS feed reference', 'https://www.gdacs.org/feed_reference.aspx'],
   ['GDACS home', 'https://www.gdacs.org/'],
   ['NHC GIS', 'https://www.nhc.noaa.gov/gis/'],
@@ -42,9 +46,10 @@ const PAGES = [
   ['Mapillary API docs', 'https://www.mapillary.com/developer/api-documentation'],
   ['Mapillary terms', 'https://www.mapillary.com/terms'],
   ['Mapillary licence help', 'https://help.mapillary.com/hc/en-us/articles/115001770409'],
+  ['Mapillary help home', 'https://help.mapillary.com/hc/en-us'],
   ['Mapillary attribution help', 'https://help.mapillary.com/hc/en-us/search?query=attribution']
 ];
-const KEYS = /licen[cs]|copyright|attribut|public domain|credit|cite|citation|terms|commercial|rate.?limit|requests per|cors|cross-origin|access-control|cc[ -]by|creative commons|update[sd]? every|thumb_|captured_at|creator|access_token|client token|mly1_public|overview|sequence|zoom/i;
+const KEYS = /thumb_1024|days|status|limit|licen[cs]|copyright|attribut|public domain|credit|cite|citation|terms|commercial|rate.?limit|requests per|cors|cross-origin|access-control|cc[ -]by|creative commons|update[sd]? every|thumb_|captured_at|creator|access_token|client token|mly1_public|overview|sequence|zoom/i;
 
 async function get(url, method = 'GET', headers = {}) {
   const t0 = Date.now();
@@ -77,7 +82,9 @@ function summarise(name, j) {
     o.push(`activeStorms: ${j.activeStorms.length}`);
     for (const s of j.activeStorms) o.push(`storm: ${short(s, 2500)}`);
   } else if (j?.layers) {
-    o.push(`layers: ${j.layers.map(l => `${l.id} ${l.name}`).join(' | ')}`.slice(0, 6000));
+    o.push(`forecast layers: ${j.layers.filter(l => /Forecast (Points|Track|Cone)$|^[A-Z]{2}\d$/.test(l.name)).map(l => `${l.id} ${l.name}`).join(' | ')}`);
+  } else if (j?.fields) {
+    o.push(`layer ${j.id} ${j.name}: fields ${j.fields.map(f => `${f.name} (${f.type.replace('esriFieldType', '')})`).join(', ')}`);
   } else if (j?.paths) {
     o.push(`paths: ${Object.keys(j.paths).join(' | ')}`);
     const p = Object.entries(j.paths).find(([k]) => /geteventlist/i.test(k));
@@ -115,6 +122,8 @@ for (const [name, url] of PAGES) {
     log(`- HTTP ${r.status} · ${text.length.toLocaleString('en-US')} chars of text · final URL ${r.url}`);
     const hits = [...new Set(text.split(/(?<=[.!?])\s+/).filter(s => KEYS.test(s) && s.length > 20).map(s => s.trim().slice(0, 400)))];
     for (const s of hits.slice(0, 40)) log(`  - ${s}`);
+    const links = [...body.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi)].map(m => [m[1], m[2].replace(/<[^>]+>/g, '').trim()]).filter(([h, t]) => /disclaim|copyright|terms|licen|legal|attribut|about/i.test(h + ' ' + t));
+    if (links.length) log(`  - links: ${[...new Set(links.map(([h, t]) => `${t} -> ${h}`))].slice(0, 15).join(' | ')}`);
     if (!hits.length) log('  - (no matching sentences; page may be rendered by JavaScript)');
   } catch (e) { log(`- **failed**: ${String(e).slice(0, 200)}`); }
   log('');
