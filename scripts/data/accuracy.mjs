@@ -84,10 +84,16 @@ for (const t of times) {
   }, [t, CITIES, FIELDS]);
 }
 
-const aqNodes = await page.evaluate(async ([t, nodes]) => {
+// Page values at the AQ grid nodes, plus what the data job downloaded there for the same hour
+// (aq/nodes.json, written by the build that produced these files, so it travels with them when
+// they are reused from a cache hours later).
+const aqCheck = await page.evaluate(async ([t, nodes]) => {
   const T = window.owmTest, g = await T.getGrid(t, 'aq').catch(() => null);
-  return g ? nodes.map(n => T.sample(g.grid, g.data, n.lon, n.lat)) : nodes.map(() => null);
+  const j = await fetch('data/live/aq/nodes.json').then(r => r.ok ? r.json() : null).catch(() => null);
+  return { page: g ? nodes.map(n => T.sample(g.grid, g.data, n.lon, n.lat)) : nodes.map(() => null), validUtc: g?.valid_utc ?? null,
+    built: T.meta.aq?.generated_utc ?? null, downloaded: j && g?.valid_utc ? j.hours[g.valid_utc] ?? null : null, recorded: !!j };
 }, [0, AQ_NODES]);
+const aqNodes = aqCheck.page;
 
 // Probe text (what a user sees) at each city for t = 0, one field at a time.
 const probe = {};
@@ -229,13 +235,16 @@ const alignRows = align.map(a => {
   return `| ${a.node} | +${a.t} h | ${a.field} | ${fmt(a.page, 2)} | ${fmt(a.raw, 2)} | ${fmt(d, 2)} | ±${tol} | ${d == null ? 'n/a' : ok ? 'ok' : '**FAIL**'} |`;
 });
 
-// AQ nodes: exact reproduction expected (16-bit, 0.1 ug/m3 steps).
+// AQ nodes. Pass/fail: the page must reproduce exactly what the data job downloaded (16-bit,
+// 0.1 ug/m3 steps). For information: the difference from the CAMS run Open-Meteo serves now,
+// which is a newer forecast whenever the air-quality files were reused from an earlier build.
+const aqAgeH = aqCheck.built ? (Date.now() - Date.parse(aqCheck.built)) / 3600e3 : null;
 const aqNodeRows = AQ_NODES.map((n, j) => {
-  const ref = aqAt(CITIES.length + j, 'pm2_5', validS[0]), our = aqNodes[j];
-  const d = our == null || ref == null ? null : our - ref, ok = d != null && Math.abs(d) <= 0.2;
+  const dl = aqCheck.downloaded?.[j] ?? null, now = aqAt(CITIES.length + j, 'pm2_5', validS[0]), our = aqNodes[j];
+  const d = our == null || dl == null ? null : our - dl, ok = d != null && Math.abs(d) <= 0.2;
   const sm = summaries.aqnode ||= { pass: 0, fail: 0, na: 0 };
   sm[d == null ? 'na' : ok ? 'pass' : 'fail']++;
-  return `| ${n.name} | +0 h | ${fmt(our, 2)} | ${fmt(ref, 2)} | ${d == null ? '—' : fmt(d, 2)} | ±0.2 | ${d == null ? 'n/a' : ok ? 'ok' : '**FAIL**'} |`;
+  return `| ${n.name} | +0 h | ${fmt(our, 2)} | ${fmt(dl, 2)} | ${d == null ? '—' : fmt(d, 2)} | ±0.2 | ${d == null ? (aqCheck.recorded ? 'n/a' : 'not recorded by this build') : ok ? 'ok' : '**FAIL**'} | ${fmt(now, 2)} | ${our == null || now == null ? '—' : fmt(our - now, 2)} |`;
 });
 // Which table does Open-Meteo's us_aqi follow? Compare with AQI computed from its PM2.5.
 const aqiRows = [], aqiScore = { '2024 hourly': 0, '2024 24-h mean': 0, '2012 hourly': 0, '2012 24-h mean': 0 };
@@ -257,7 +266,7 @@ Values are read through the page's own code (\`getGrid\` + \`sample\` + \`readin
 References: Open-Meteo \`gfs_global\` / \`gfs_seamless\` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo \`cams_global\`.
 
 **Summary** (within tolerance / outside / not comparable):
-${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding), +0 h and +24 h', grid: 'Page vs the stored grid before encoding (encoding only), +0 h and +24 h', raw120: 'f120 (+5 d): page vs raw NOAA GFS 0.25°', grid120: 'f120 (+5 d): page vs the stored grid (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs CAMS', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
+${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding), +0 h and +24 h', grid: 'Page vs the stored grid before encoding (encoding only), +0 h and +24 h', raw120: 'f120 (+5 d): page vs raw NOAA GFS 0.25°', grid120: 'f120 (+5 d): page vs the stored grid (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs the values the job downloaded', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
 ${refErr.length ? `\nReference errors: ${refErr.join('; ')}\n` : ''}
 ## Point values
 
@@ -279,10 +288,12 @@ ${resRows.join('\n') || '| (no stored-grid values in run report) | | | | | | | |
 |---|---|---|---|---|---|---|---|
 ${alignRows.join('\n') || '| (no alignment data in run report) | | | | | | | |'}
 
-## Air quality at 4° grid nodes (page vs Open-Meteo cams_global at the node)
+## Air quality at 4° grid nodes
 
-| Node | Time | Page PM2.5 | CAMS | Diff | Tol | |
-|---|---|---|---|---|---|---|
+Pass/fail: page vs the pm2_5 the data job downloaded for that hour (\`aq/nodes.json\`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built ${aqCheck.built || 'n/a'} (${aqAgeH == null ? 'n/a' : aqAgeH.toFixed(1) + ' h'} before this check), valid hour ${aqCheck.validUtc || 'n/a'}.
+
+| Node | Time | Page PM2.5 | Downloaded | Diff | Tol | | CAMS now | Page − now |
+|---|---|---|---|---|---|---|---|---|
 ${aqNodeRows.join('\n')}
 
 ## Which AQI table does Open-Meteo's us_aqi use?
