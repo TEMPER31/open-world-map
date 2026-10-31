@@ -152,31 +152,71 @@ jobs:
           git add "$f"
           git commit -m "Data archive: $(basename "$f" .json)" && git push
 
-  verify:
-    # Pull requests: screenshot the site with the freshly built real data, check its values
-    # against independent references and run the rendering tests. Images and probe output go
-    # to a workflow artifact (kept 30 days; GitHub allows 1-90 for public repositories); only
-    # the small text reports are committed to the PR branch, in docs/screenshots/<branch>/.
+  # Pull requests: screenshot the site with the freshly built real data, check its values
+  # against independent references and run the rendering tests. The work is split into jobs
+  # that run side by side (render tests in 3 parts, screenshots + accuracy + perf + probes);
+  # a last job commits the small text reports to docs/screenshots/<branch>/. Images and probe
+  # output go to the ci-screenshots artifact (30 days).
+  verify-tests:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      RAW: ci-out
-      OUT: docs/screenshots/${{ github.head_ref }}
-      LABEL: ${{ github.head_ref }}
-      MAX_JSON_BYTES: 204800
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.head_ref }}
+          persist-credentials: false
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site
           path: built
-      # Optional CI-only token so PR screenshots can show photos; without it they show the
+      # Optional CI-only token so PR tests can show photos; without it they show the
       # "unavailable" state. Written into the downloaded build only, never committed.
+      - name: Street photos token for the PR tests (optional MAPILLARY_CI_TOKEN secret)
+        env:
+          MLY: ${{ secrets.MAPILLARY_CI_TOKEN }}
+        run: |
+          t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
+          printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > built/site/js/secrets.js
+          echo "MLY_CI=$([ -n "$t" ] && echo 1 || echo 0)" >> "$GITHUB_ENV"
+      - name: Install Playwright 1.63.0 + Chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+      - name: Rendering and behaviour tests, part ${{ matrix.part }} of 3
+        continue-on-error: true
+        env:
+          RT_PART: ${{ matrix.part }}
+        run: |
+          (cd built/site && python3 -m http.server 8123 --bind 127.0.0.1 &) ; sleep 2
+          mkdir -p ci-out && node scripts/data/render-tests.mjs http://127.0.0.1:8123/ "ci-out/render-tests-${{ matrix.part }}.md"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: render-tests-${{ matrix.part }}
+          path: ci-out
+          retention-days: 2
+
+  verify-shots:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: data
+    runs-on: ubuntu-latest
+    env:
+      RAW: ci-out
+      LABEL: ${{ github.head_ref }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: built
       - name: Street photos token for the PR screenshots (optional MAPILLARY_CI_TOKEN secret)
         env:
           MLY: ${{ secrets.MAPILLARY_CI_TOKEN }}
@@ -202,9 +242,6 @@ jobs:
       - name: Accuracy check (page values vs Open-Meteo GFS / CAMS and NWS)
         continue-on-error: true
         run: node scripts/data/accuracy.mjs http://127.0.0.1:8123/ built/run-report.json "$RAW/accuracy.md" "$LABEL"
-      - name: Rendering and behaviour tests (direction, pressure sync, None layer, profiling)
-        continue-on-error: true
-        run: node scripts/data/render-tests.mjs http://127.0.0.1:8123/ "$RAW/render-tests.md"
       - name: Performance before/after (main vs this branch, same data, same machine)
         continue-on-error: true
         run: |
@@ -215,9 +252,16 @@ jobs:
       - name: Sources probe (events and street-photo hosts; report committed with the others)
         continue-on-error: true
         run: node scripts/data/sources-probe.mjs "$RAW/sources-probe.md" > /dev/null
-      - name: Satellite imagery probe (USGS services, keyless zoom 16+ over the US)
+      # The satellite probe (Phase 2 diagnostics) takes ~45 minutes: run it only when the
+      # satellite code or the probe itself differs from main.
+      - name: Satellite imagery probe (only when satellite code changed)
         continue-on-error: true
-        run: node scripts/data/satellite-probe.mjs "$RAW/probe"
+        run: |
+          if git diff --quiet FETCH_HEAD HEAD -- site/js/basemaps.js site/js/config.js scripts/data/satellite-probe.mjs; then
+            echo "Satellite code unchanged from main: probe skipped."
+          else
+            node scripts/data/satellite-probe.mjs "$RAW/probe"
+          fi
       - name: Upload screenshots and probe output (artifact, 30 days)
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -225,10 +269,38 @@ jobs:
           name: ci-screenshots
           path: ci-out
           retention-days: 30
+
+  verify:
+    # Collects the text reports of the jobs above and commits them (no images).
+    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.data.result == 'success'
+    needs: [data, verify-tests, verify-shots]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RAW: ci-out
+      OUT: docs/screenshots/${{ github.head_ref }}
+      LABEL: ${{ github.head_ref }}
+      MAX_JSON_BYTES: 204800
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ci-screenshots
+          path: ci-out
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: render-tests-*
+          path: ci-out
+          merge-multiple: true
       - name: Commit the text reports to the PR branch (no images)
         run: |
           mkdir -p "$OUT"
-          for f in accuracy.md render-tests.md perf.md sources-probe.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
+          # one render-tests.md from the 3 parts
+          { for p in 1 2 3; do [ -f "$RAW/render-tests-$p.md" ] && { echo "<!-- part $p of 3 -->"; cat "$RAW/render-tests-$p.md"; echo; }; done; } > "$RAW/render-tests.md"
+          for f in accuracy.md render-tests.md perf.md sources-probe.md bandwidth.md; do [ -s "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
           sizes=""
           for f in views.json run-report.json; do
             [ -f "$RAW/$f" ] || continue
