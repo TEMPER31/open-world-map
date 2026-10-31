@@ -98,8 +98,8 @@ function plateImage(light) {
 }
 
 export class FieldGL {
-  constructor() {
-    this.id = 'field';
+  constructor(id = 'field') {
+    this.id = id;
     this.type = 'custom';
     this.renderingMode = '2d';
     this.opacity = 1;
@@ -142,7 +142,8 @@ export class FieldGL {
     });
   }
 
-  setLut(field, light) {
+  // clear: a fully transparent LUT (pressure as an overlay: isobars only, no colours)
+  setLut(field, light, clear) {
     const gl = this.gl, L = lut(field, light);
     gl.bindTexture(gl.TEXTURE_2D, this.lutTex);
     const f = L.banded ? gl.NEAREST : gl.LINEAR; // banded fields keep hard band edges
@@ -152,6 +153,7 @@ export class FieldGL {
     // design: non-veil fields at 90 % alpha on the Light basemap
     const rgba = new Uint8Array(L.rgba);
     if (light && field !== 'cloud') for (let i = 3; i < rgba.length; i += 4) rgba[i] = Math.round(rgba[i] * 0.9);
+    if (clear) rgba.fill(0);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, LUT_N, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
     this.map.triggerRepaint();
   }

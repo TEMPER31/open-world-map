@@ -211,7 +211,10 @@ jobs:
           git fetch --depth=1 origin main && git worktree add base FETCH_HEAD
           cp -r built/site/data/live base/site/data/live
           (cd base/site && python3 -m http.server 8124 --bind 127.0.0.1 &) ; sleep 2
-          node scripts/data/perf.mjs "$RAW/perf.md" "main=http://127.0.0.1:8124/" "${LABEL}=http://127.0.0.1:8123/"
+          node scripts/data/perf.mjs "$RAW/perf.md" "main=http://127.0.0.1:8124/" "${LABEL}=http://127.0.0.1:8123/" "${LABEL} + isobars + rain=http://127.0.0.1:8123/|pres,rain"
+      - name: Bandwidth per frame and per 7-day play (0, 1 and 2 overlays)
+        continue-on-error: true
+        run: node scripts/data/bandwidth.mjs built/site/data/live "$RAW/bandwidth.md" > /dev/null
       - name: Sources probe (events and street-photo hosts; report committed with the others)
         continue-on-error: true
         run: node scripts/data/sources-probe.mjs "$RAW/sources-probe.md" > /dev/null
@@ -228,7 +231,7 @@ jobs:
       - name: Commit the text reports to the PR branch (no images)
         run: |
           mkdir -p "$OUT"
-          for f in accuracy.md render-tests.md perf.md sources-probe.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
+          for f in accuracy.md render-tests.md perf.md sources-probe.md bandwidth.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
           sizes=""
           for f in views.json run-report.json; do
             [ -f "$RAW/$f" ] || continue
