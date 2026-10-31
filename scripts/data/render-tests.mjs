@@ -10,6 +10,11 @@ import { routePhotos, IMAGE_ID } from './photo-fixtures.mjs';
 
 const [, , site = 'http://127.0.0.1:8123/', out = 'render-tests.md'] = process.argv;
 const results = [];
+// RT_PART=1|2|3 runs one part (CI runs the 3 parts side by side): 1 = Phase 2/3, 2 = events,
+// 3 = street photos and overlays. Without RT_PART every part runs.
+const PART = +(process.env.RT_PART || 0);
+let section = 1;
+const part = () => !PART || PART === section;
 const check = (name, ok, info = '') => results.push({ name, ok, info: String(info) });
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -42,7 +47,7 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, ...ctx } = {}) 
 }
 
 // 1. Wind direction: uniform synthetic fields; particles must move with the wind (towards).
-{
+if (part()) {
   const { page } = await open({ field: 'wind', particles: true }, '3/30/-30');
   const run = (u, v) => page.evaluate(async ([u, v]) => {
     const w = window.owmWind, nx = 480, ny = 241, rgba = new Uint8Array(nx * ny * 4);
@@ -64,7 +69,7 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, ...ctx } = {}) 
 
 // 2. Pressure: isobars and H/L drawn by MapLibre (WebGL), no DOM markers that could lag.
 const perf = {};
-{
+if (part()) {
   const { page, errors } = await open({ field: 'pres', particles: true });
   await page.waitForTimeout(1500);
   const st = await page.evaluate(() => ({
@@ -88,7 +93,7 @@ const perf = {};
   check('No page errors (pressure)', errors.length === 0, errors.slice(0, 3).join(' | '));
   await page.close();
 }
-{
+if (part()) {
   const { page } = await open({ field: 'temp', particles: true });
   perf.temp = await profile(page);
   await page.close();
@@ -113,7 +118,7 @@ async function profile(page) {
 }
 
 // 3. "None": field hidden, no field data fetched; particles off: no wind fetched either.
-{
+if (part()) {
   const { page, reqs, errors } = await open({ field: 'temp', particles: false });
   await page.click('.layers .row[data-field="none"]');
   await page.waitForTimeout(500);
@@ -133,7 +138,7 @@ async function profile(page) {
 // 4. 7-day timeline: frames to f168 (hourly to f120, then 3-hourly), step/keys/play move frame
 // to frame, the chart spans the run, rain says "past 3 h" where it applies, and air quality
 // shows where its forecast ends.
-{
+if (part()) {
   const { page, errors, reqs } = await open({ field: 'temp', particles: false });
   const m = await page.evaluate(() => { const M = window.owmTest.meta; return { live: M.live, first: M.first, times: M.times, hours: M.hours, aqEnd: M.aqEnd, base: M.base }; });
   const lastF = m.first + m.times[m.times.length - 1];
@@ -198,7 +203,7 @@ const synced = page => page.evaluate(async () => {
 });
 // 5. Every layer shows the same valid time while stepping (pressure: field, isobars, H/L; wind
 // particles; probe; place panel; chart), including the step from f120 to f123.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'pres', particles: true }, '3/45/-30');
   const m = await page.evaluate(() => ({ first: window.owmTest.meta.first, times: window.owmTest.meta.times }));
   await page.mouse.click(700, 350); // place panel
@@ -231,7 +236,7 @@ const synced = page => page.evaluate(async () => {
   await page.close();
 }
 // 6. Timeline controls: buttons, Space and arrows, speed, local time next to UTC, "Now".
-{
+if (part()) {
   const { page, errors, reqs } = await open({ field: 'none', particles: false });
   const r = await page.evaluate(async () => {
     const S = window.owmTest.state, M = window.owmTest.meta, o = {}, wait = ms => new Promise(r => setTimeout(r, ms));
@@ -271,7 +276,7 @@ const synced = page => page.evaluate(async () => {
   await page.close();
 }
 // 7. Units: one setting everywhere, converted for display only, remembered after reload.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'wind', particles: false, tempUnit: 'C' }, '4/45/-30');
   await page.mouse.click(640, 400); await page.waitForTimeout(2500);
   await page.click('[data-open="settings"]'); await page.click('#pop-settings [data-preset="us"]'); await page.keyboard.press('Escape');
@@ -301,7 +306,7 @@ const synced = page => page.evaluate(async () => {
   await page.close();
 }
 // 8. Measure tool: London -> New York by clicking, within 0.5 % of 5,570 km; no place panel.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: false }, '3/45/-45');
   await page.click('.zoom [data-measure]');
   const pts = await page.evaluate(() => [window.owmMap.project([-0.1278, 51.5074]), window.owmMap.project([-74.006, 40.7128])]);
@@ -322,7 +327,7 @@ const synced = page => page.evaluate(async () => {
   await page.close();
 }
 // 9. Layers rail: only the selected field is expanded (legend + options); None collapses all.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: false });
   const open1 = await page.evaluate(() => [...document.querySelectorAll('[data-lx]')].filter(e => !e.hidden).map(e => e.dataset.lx + (e.querySelector('#legend') ? '+legend' : '')));
   await page.click('.layers .row[data-field="none"]');
@@ -335,7 +340,7 @@ const synced = page => page.evaluate(async () => {
 }
 // 10. Phone: 44 px targets, sheets (place: peek/half/full; layers half <= 40 % of the map), and
 // nothing over the map's centre in the default view.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const box = s => page.$eval(s, e => { const r = e.getBoundingClientRect(); return { top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), bottom: Math.round(r.bottom) }; });
   const targets = await page.evaluate(() => [...document.querySelectorAll('.m-scrub button, .m-top button, [data-track="mini"]')].map(e => { const r = e.getBoundingClientRect(); return { el: e.dataset.step ? 'step' : e.dataset.track ? 'track' : e.className.split(' ')[0], w: Math.round(r.width), h: Math.round(r.height) }; }));
@@ -367,11 +372,12 @@ const synced = page => page.evaluate(async () => {
 }
 
 // ---- Phase 5: natural events --------------------------------------------------------------
+section = 2;
 const evCount = hosts => Object.values(hosts).reduce((a, b) => a + b.length, 0);
 const evWait = page => page.waitForFunction(() => { const C = window.owmTest.events.cache; return Object.keys(C).length && Object.values(C).every(c => c.at); }, null, { timeout: 30000 }).catch(() => {});
 // 11. Privacy: all event types off by default = no request to any event host, while stepping
 // and after a reload; each toggle contacts only its own source; off again = no more requests.
-{
+if (part()) {
   const { page, errors, hosts } = await open({ field: 'temp', particles: false });
   for (let i = 0; i < 3; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); }
   const off0 = evCount(hosts);
@@ -402,7 +408,7 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
   await page.close();
 }
 // 12. Live sources: each type shows real events (CI has network); counts and update times.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'none', particles: false, events: { eq: true, fv: true, st: true, ga: true } }, '1.6/20/0');
   await evWait(page); await page.waitForTimeout(1500);
   const live = await page.evaluate(() => ({ rows: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])), note: document.querySelector('.layers [data-evnote]').textContent,
@@ -429,7 +435,7 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
 }
 // 13. Saved samples: panel rule with places and the measure tool, storm follows the slider,
 // one clock includes the event layers, "unavailable" and "no active storms" states.
-{
+if (part()) {
   const { page, errors } = await open({ field: 'pres', particles: true, events: { eq: true, fv: true, st: true, ga: true } }, '3/22/-66', { samples: { nhc: 'storm' } });
   await evWait(page); await page.waitForTimeout(800);
   const P = pt => page.evaluate(([lo, la]) => window.owmMap.project([lo, la]), pt);
@@ -467,7 +473,7 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
   check('No page errors (event samples)', !errors.length, errors.join(' | '));
   await page.close();
 }
-{
+if (part()) {
   const { page, errors } = await open({ field: 'none', particles: false, events: { eq: true, fv: true, st: true, ga: true } }, '2/20/0', { samples: { usgs: 'down', eonet: 'down', gdacs: 'empty', nhc: 'none' } });
   await evWait(page); await page.waitForTimeout(500);
   const r = await page.evaluate(() => ({ rows: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])), note: document.querySelector('.layers [data-evnote]').textContent }));
@@ -477,8 +483,9 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
 }
 
 // ---- Overlays: main field + up to 2 overlays --------------------------------------------
+section = 3;
 // 18. Overlays on/off, max 2, same-as-main blocked, off = no files, one clock, probe values, reload.
-{
+if (part()) {
   const { page, errors, reqs } = await open({ field: 'temp', particles: false, overlays: [] }, '3/45/-30');
   const files = () => reqs.filter(r => /gfs\/(pres|rain|cloud)\//.test(r)).length;
   for (let i = 0; i < 3; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); }
@@ -517,7 +524,7 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
   await page.close();
 }
 // 19. Overlays over "None" and on the phone sheet (44 px rows).
-{
+if (part()) {
   const { page, errors } = await open({ field: 'none', particles: false, overlays: ['cloud', 'pres'] }, '1/30/-30', { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   await page.waitForTimeout(1500);
   await page.tap('[data-lyr]'); await page.waitForTimeout(400);
@@ -528,9 +535,10 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
 }
 
 // ---- Phase 4: street photos (Mapillary) ---------------------------------------------------
+section = 3;
 const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).reduce((a, [, v]) => a + v.length, 0);
 // 14. No token (what PR builds get): clean "unavailable" state, 0 requests, no errors.
-{
+if (part()) {
   const { page, errors, hosts } = await open({ field: 'temp', particles: false, photos: true }, '15/40.758/-73.9855', { photos: { token: false } });
   await page.waitForTimeout(1500);
   const r = await page.evaluate(() => ({ v: document.querySelector('.layers [data-phs]').textContent, note: document.querySelector('.layers [data-phnote]').textContent, layer: !!window.owmMap.getLayer('mly-img'), credits: document.querySelector('#credits').textContent }));
@@ -539,7 +547,7 @@ const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).
 }
 // 15. With stand-in tiles and Graph API (fake token): toggle on/off, off = 0 requests, click a dot
 // -> photo with credit and link, Esc closes, panel rule with events and the measure tool.
-{
+if (part()) {
   const { page, errors, hosts } = await open({ field: 'none', particles: false, photos: false, events: { eq: true } }, '15.5/40.758/-73.9855', { photos: { at: [-73.9855, 40.758] }, samples: {} });
   await page.waitForTimeout(800);
   const off0 = mly(hosts);
@@ -574,7 +582,7 @@ const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).
   await page.close();
 }
 // 16. Graph API failure and "no photo here": clear states, no errors.
-{
+if (part()) {
   for (const graph of ['error', 'none']) {
     const { page, errors } = await open({ field: 'none', particles: false, photos: true }, '15.5/40.758/-73.9855', { photos: { graph } });
     await page.waitForTimeout(2500); await page.mouse.click(640, 400); await page.waitForTimeout(1200);
@@ -585,7 +593,7 @@ const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).
 }
 // 16b. Mapillary refuses (daily tile limit reached: HTTP 429; token rejected: 403 / Graph code 190):
 // "Street photos: unavailable right now", source removed, no further requests, no page errors.
-for (const [name, opts] of [['tile limit reached (HTTP 429)', { tiles: 'limit' }], ['token rejected by the tiles (HTTP 403)', { tiles: 'rejected' }], ['tile refusal without CORS headers (request fails, no status)', { tiles: 'blocked' }], ['token rejected by the Graph API (code 190)', { graph: 'token' }]]) {
+if (part()) for (const [name, opts] of [['tile limit reached (HTTP 429)', { tiles: 'limit' }], ['token rejected by the tiles (HTTP 403)', { tiles: 'rejected' }], ['tile refusal without CORS headers (request fails, no status)', { tiles: 'blocked' }], ['token rejected by the Graph API (code 190)', { graph: 'token' }]]) {
   const { page, errors, hosts } = await open({ field: 'none', particles: false, photos: true }, '15.5/40.758/-73.9855', { photos: opts });
   await page.waitForTimeout(2500);
   if (opts.graph) { await page.mouse.click(640, 400); await page.waitForTimeout(1500); }
@@ -599,7 +607,7 @@ for (const [name, opts] of [['tile limit reached (HTTP 429)', { tiles: 'limit' }
 }
 // 17. Live Mapillary (only when the optional MAPILLARY_CI_TOKEN secret is set): coverage at world
 // zoom, lines at city zoom, dots at street zoom, a photo at Times Square and at Brantley, AL.
-if (process.env.MLY_CI === '1') {
+if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1') {
   const { page, errors } = await open({ field: 'none', particles: false, photos: true }, '1.5/30/-40');
   const at = async (hash, layer) => { await page.evaluate(h => { const [z, la, lo] = h.split('/').map(Number); window.owmMap.jumpTo({ zoom: z, center: [lo, la] }); }, hash); await page.evaluate(() => new Promise(r => window.owmMap.once('idle', r))); await page.waitForTimeout(800); return page.evaluate(l => window.owmMap.queryRenderedFeatures({ layers: [l] }).length, layer); };
   const world = await at('1.5/30/-40', 'mly-ov'), city = await at('11/40.758/-73.9855', 'mly-seq');
