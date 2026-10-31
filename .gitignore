@@ -5,3 +5,4 @@ site/data/live/
 node_modules/
 __pycache__/
 .aq-cache/
+site/js/secrets.js

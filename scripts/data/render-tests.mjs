@@ -6,6 +6,7 @@ import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { route as eventSamples } from './event-fixtures.mjs';
+import { routePhotos, IMAGE_ID } from './photo-fixtures.mjs';
 
 const [, , site = 'http://127.0.0.1:8123/', out = 'render-tests.md'] = process.argv;
 const results = [];
@@ -14,7 +15,7 @@ const check = (name, ok, info = '') => results.push({ name, ok, info: String(inf
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 // Local time zone US Central, so local time and UTC differ in the time label.
 const TZ = 'America/Chicago';
-async function open(prefs, hash = '2/35/-20', { samples, ...ctx } = {}) {
+async function open(prefs, hash = '2/35/-20', { samples, photos, ...ctx } = {}) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, timezoneId: TZ, ...ctx });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     await page.route('https://cdn.jsdelivr.net/npm/maplibre-gl@*/dist/*', r => {
@@ -29,6 +30,7 @@ async function open(prefs, hash = '2/35/-20', { samples, ...ctx } = {}) {
   const hosts = {};
   page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
   if (samples) await eventSamples(page, samples);
+  if (photos) await routePhotos(page, photos);
   const reqs = [];
   page.on('request', r => { const m = r.url().match(/data\/live\/(gfs\/\w+\/f\d+|aq\/\d+)\.png/); if (m) reqs.push(m[1]); });
   // seed preferences once per tab (a reload must keep what the page saved)
@@ -465,6 +467,84 @@ const evWait = page => page.waitForFunction(() => { const C = window.owmTest.eve
     r.rows.eq === 'unavailable' && r.rows.fv === 'unavailable' && r.rows.ga === 'none' && r.rows.st === 'none active' && /Earthquakes: unavailable/.test(r.note) && /No active storms/.test(r.note) && !errors.length, JSON.stringify(r) + (errors.length ? ' errors: ' + errors.join(' | ') : ''));
   await page.close();
 }
+
+// ---- Phase 4: street photos (Mapillary) ---------------------------------------------------
+const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).reduce((a, [, v]) => a + v.length, 0);
+// 14. No token (what PR builds get): clean "unavailable" state, 0 requests, no errors.
+{
+  const { page, errors, hosts } = await open({ field: 'temp', particles: false, photos: true }, '15/40.758/-73.9855');
+  await page.waitForTimeout(1500);
+  const r = await page.evaluate(() => ({ v: document.querySelector('.layers [data-phs]').textContent, note: document.querySelector('.layers [data-phnote]').textContent, layer: !!window.owmMap.getLayer('mly-img'), credits: document.querySelector('#credits').textContent }));
+  const live = await page.evaluate(() => window.owmTest.photos.getToken());
+  if (!live) check('Street photos without a token: "unavailable" state, no Mapillary requests, no page errors', r.v === 'unavailable' && /unavailable/.test(r.note) && !r.layer && mly(hosts) === 0 && !errors.length, `${JSON.stringify(r).slice(0, 300)}; Mapillary requests: ${mly(hosts)}`);
+  else check('Street photos without a token: not testable here (this build has a token)', true, 'skipped');
+  await page.close();
+}
+// 15. With stand-in tiles and Graph API (fake token): toggle on/off, off = 0 requests, click a dot
+// -> photo with credit and link, Esc closes, panel rule with events and the measure tool.
+{
+  const { page, errors, hosts } = await open({ field: 'none', particles: false, photos: false, events: { eq: true } }, '15.5/40.758/-73.9855', { photos: { at: [-73.9855, 40.758] }, samples: {} });
+  await page.waitForTimeout(800);
+  const off0 = mly(hosts);
+  await page.click('.layers [data-photos]'); await page.waitForTimeout(2500);
+  const on = { tiles: mly(hosts), drawn: await page.evaluate(() => window.owmMap.queryRenderedFeatures({ layers: ['mly-img', 'mly-seq'] }).length) };
+  await page.mouse.click(640, 400);
+  await page.waitForFunction(() => document.querySelector('#detail img.ph-img')?.complete, null, { timeout: 10000 }).catch(() => {});
+  const ph = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection'), credit: document.querySelector('[data-photo-credit]')?.textContent, link: [...document.querySelectorAll('#detail a.btn')].map(a => a.href)[0], img: document.querySelector('#detail img.ph-img')?.naturalWidth, title: document.querySelector('#detail .d-title')?.textContent }));
+  check('Photo layer: toggle on draws coverage (stand-in tiles); off before = 0 Mapillary requests', off0 === 0 && on.tiles > 0 && on.drawn > 0, JSON.stringify({ off0, ...on }));
+  check('Click a photo dot: photo, capture date, credit "CC BY-SA 4.0 — Mapillary / {creator}" and "Open on Mapillary" link', ph.sel?.type === 'photo' && ph.sel.id === IMAGE_ID && ph.credit === 'CC BY-SA 4.0 — Mapillary / test_mapper' && ph.link === `https://www.mapillary.com/app/?pKey=${IMAGE_ID}` && ph.img > 0, JSON.stringify(ph));
+  await page.keyboard.press('Escape');
+  check('Esc closes the photo', await page.evaluate(() => document.querySelector('#detail').hidden && !window.owmTest.state.get('selection')));
+  // panel rule: a photo, then an event (sample quake), then the photo again; the measure tool blocks both
+  const q = await page.evaluate(() => window.owmMap.project([-73.9855 + 0.002, 40.758]));
+  await page.evaluate(() => { const C = window.owmTest.events.cache.usgs; C.items.push({ ...C.items[0], id: 'us:near', lon: -73.9855 + 0.002, lat: 40.758 }); window.owmTest.state.set({ evWin: '7d', events: { eq: true, st: false, fv: false, ga: false } }); });
+  await page.evaluate(() => window.owmTest.state.set({ events: { ...window.owmTest.state.get('events') } }));
+  await page.waitForTimeout(400);
+  await page.mouse.click(640, 400); await page.waitForTimeout(300);
+  const a = await page.evaluate(() => window.owmTest.state.get('selection')?.type);
+  await page.mouse.click(q.x, q.y); await page.waitForTimeout(300);
+  const b = await page.evaluate(() => window.owmTest.state.get('selection')?.type);
+  await page.click('.zoom [data-measure]');
+  await page.mouse.click(640, 400); await page.waitForTimeout(300);
+  const c = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection')?.type ?? null, pts: document.querySelector('[data-mhint]').textContent }));
+  await page.keyboard.press('Escape');
+  check('Panel rule: photo then event replace each other (last click wins); measure tool on: clicks only add points', a === 'photo' && b === 'event' && /^1 point/.test(c.pts), JSON.stringify({ a, b, c }));
+  await page.click('.layers [data-photos]'); await page.waitForTimeout(300);
+  const n0 = mly(hosts);
+  await page.evaluate(async () => { const m = window.owmMap; m.panBy([400, 200], { duration: 0 }); m.zoomTo(13, { duration: 0 }); await new Promise(r => m.once('idle', r)); });
+  check('Photo layer off: source removed, 0 Mapillary requests while panning and zooming', mly(hosts) === n0 && !(await page.evaluate(() => !!window.owmMap.getSource('mly'))), `${mly(hosts) - n0} requests`);
+  check('No page errors (street photos)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 16. Graph API failure and "no photo here": clear states, no errors.
+{
+  for (const graph of ['error', 'none']) {
+    const { page, errors } = await open({ field: 'none', particles: false, photos: true }, '15.5/40.758/-73.9855', { photos: { graph } });
+    await page.waitForTimeout(2500); await page.mouse.click(640, 400); await page.waitForTimeout(1200);
+    const msg = await page.evaluate(() => document.querySelector('#detail .ph-msg')?.textContent);
+    check(`Photo panel state when the Graph API ${graph === 'error' ? 'fails' : 'has no thumbnail'}: "${graph === 'error' ? 'Photo unavailable' : 'No photo here.'}"`, graph === 'error' ? /^Photo unavailable/.test(msg || '') : msg === 'No photo here.', `${msg}; errors: ${errors.join(' | ') || 'none'}`);
+    await page.close();
+  }
+}
+// 17. Live Mapillary (only when the optional MAPILLARY_CI_TOKEN secret is set): coverage at world
+// zoom, lines at city zoom, dots at street zoom, a photo at Times Square and at Brantley, AL.
+if (process.env.MLY_CI === '1') {
+  const { page, errors } = await open({ field: 'none', particles: false, photos: true }, '1.5/30/-40');
+  const at = async (hash, layer) => { await page.evaluate(h => { const [z, la, lo] = h.split('/').map(Number); window.owmMap.jumpTo({ zoom: z, center: [lo, la] }); }, hash); await page.evaluate(() => new Promise(r => window.owmMap.once('idle', r))); await page.waitForTimeout(800); return page.evaluate(l => window.owmMap.queryRenderedFeatures({ layers: [l] }).length, layer); };
+  const world = await at('1.5/30/-40', 'mly-ov'), city = await at('11/40.758/-73.9855', 'mly-seq');
+  const shots = {};
+  for (const [name, hash] of [['Times Square', '17/40.758/-73.9855'], ['Brantley AL', '16/31.585/-86.255']]) {
+    const dots = await at(hash, 'mly-img');
+    const f = await page.evaluate(() => { const c = window.owmMap.getCenter(), fs = window.owmMap.queryRenderedFeatures({ layers: ['mly-img'] }); fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0] && window.owmMap.project(fs[0].geometry.coordinates); });
+    if (f) { await page.mouse.click(f.x, f.y); await page.waitForFunction(() => document.querySelector('#detail img.ph-img')?.complete || document.querySelector('#detail .ph-msg:not(:empty)') && !/Loading/.test(document.querySelector('#detail .ph-msg').textContent), null, { timeout: 15000 }).catch(() => {}); }
+    shots[name] = { dots, ...(await page.evaluate(() => ({ img: document.querySelector('#detail img.ph-img')?.naturalWidth || 0, credit: document.querySelector('[data-photo-credit]')?.textContent, msg: document.querySelector('#detail .ph-msg')?.textContent || null }))) };
+    await page.keyboard.press('Escape');
+  }
+  check('Live Mapillary: coverage at world zoom, lines at city zoom, dots at street zoom', world > 0 && city > 0 && Object.values(shots).every(x => x.dots > 0), JSON.stringify({ world, city, dots: Object.fromEntries(Object.entries(shots).map(([k, v]) => [k, v.dots])) }));
+  check('Live Mapillary: click a dot at Times Square and at Brantley AL -> photo with "CC BY-SA 4.0 — Mapillary / {creator}"', Object.values(shots).every(x => x.img > 0 && /^CC BY-SA 4\.0 — Mapillary \/ \S/.test(x.credit || '')), JSON.stringify(shots));
+  check('No page errors (live Mapillary)', !errors.length, errors.join(' | '));
+  await page.close();
+} else check('Live Mapillary (Times Square, Brantley AL): not run, no MAPILLARY_CI_TOKEN secret in CI', true, 'skipped: the owner can add a CI-only token to run it');
 
 await browser.close();
 

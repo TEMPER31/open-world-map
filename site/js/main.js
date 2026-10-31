@@ -13,6 +13,7 @@ import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
 import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
 import { initTimeline, relT, fmtUTC, fmtBoth } from './timeline.js';
+import { initPhotos, status as phStatus, credits as phCredits, hit as phHit, panelHTML as phPanel, photosTest } from './photos.js';
 import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -47,6 +48,10 @@ const EV_SW = { eq: 'eq', fv: 'fi', st: 'st', ga: 'ga' };
 const eventsHTML = () => `<div class="lsec ev" data-events><div class="kick"><span>Events</span><div class="seg" role="radiogroup" aria-label="Events shown">${[['24h', '24 h'], ['7d', '7 d']].map(([v, n]) => `<button type="button" role="radio" data-evwin="${v}">${n}</button>`).join('')}</div></div>
   ${EV_TYPES.map(([k, n, v]) => `<div class="row" data-toggle><span class="sw ${EV_SW[k]}"></span><b>${n}</b><span class="v" data-evs="${k}">${v}</span><button class="tg" type="button" role="switch" data-ev="${k}" aria-label="${n}"></button></div>`).join('')}
   <p class="lx-note" data-evnote></p></div>`;
+
+const photosHTML = () => `<div class="lsec ev"><div class="kick"><span>Imagery</span><span>Mapillary</span></div>
+  <div class="row" data-toggle><span class="gdot"></span><b>Street photos</b><span class="v" data-phs>CC BY-SA</span><button class="tg" type="button" role="switch" data-photos aria-label="Street photos"></button></div>
+  <p class="lx-note" data-phnote>Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.</p></div>`;
 
 // Labels that depend on whether real data is loaded.
 const L = {
@@ -130,9 +135,7 @@ function buildLayers() {
       <div class="row" data-toggle><b>Wind particles</b><button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
     </div>
     ${eventsHTML()}
-    <div class="lsec"><div class="kick"><span>Imagery</span><span>Phase 4</span></div>
-      <div class="row off" aria-disabled="true"><span class="gdot"></span><b>Street photos</b><span class="v soon">Soon</span><button class="tg" type="button" role="switch" aria-checked="false" aria-label="Street photos (coming soon)" disabled></button></div>
-    </div>
+    ${photosHTML()}
     <div class="lfoot">${L.foot()}</div>`;
 
   $('#lsheet').innerHTML = `
@@ -144,9 +147,9 @@ function buildLayers() {
       <div class="card"><div class="it">Map<div class="seg" role="radiogroup" aria-label="Basemap" data-basemaps></div></div></div></div>
     <div class="grp"><div class="card">
       <div class="it">Wind particles<button class="tg" type="button" role="switch" data-particles aria-label="Wind particles"></button></div>
-      <div class="it"><span><span class="gdot"></span> Street photos</span><span class="soon">Coming soon</span></div>
     </div></div>
-    <div class="grp">${eventsHTML()}</div>`;
+    <div class="grp">${eventsHTML()}</div>
+    <div class="grp">${photosHTML()}</div>`;
 
   $$('[data-basemaps]').forEach(g => g.innerHTML = BASEMAPS.map(([v, n]) => `<button type="button" role="radio" data-basemap="${v}">${n}</button>`).join(''));
   $('[data-density]').innerHTML = DENSITY.map(([v, n]) => `<button type="button" role="radio" data-dens="${v}">${n}</button>`).join('');
@@ -189,6 +192,7 @@ function bindChrome(map) {
     else if (t.dataset.basemap) S.set({ basemap: t.dataset.basemap });
     else if (t.dataset.ev) S.set({ events: { ...S.get('events'), [t.dataset.ev]: !S.get('events')[t.dataset.ev] } });
     else if (t.dataset.evwin) S.set({ evWin: t.dataset.evwin });
+    else if ('photos' in t.dataset) S.set({ photos: !S.get('photos') });
     else if (t.dataset.dens) S.set({ density: +t.dataset.dens });
     else if (t.dataset.tunit) S.set({ tempUnit: t.dataset.tunit });
     else if (t.dataset.sunit) S.set({ speedUnit: t.dataset.sunit });
@@ -241,6 +245,7 @@ function bindChrome(map) {
     $$('[data-evwin]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.evwin === s.evWin)));
     renderEvStatus();
   });
+  S.on(['photos'], s => { $$('[data-photos]').forEach(el => { el.classList.toggle('on', s.photos); el.setAttribute('aria-checked', String(s.photos)); }); renderPhStatus(); });
   S.on(['basemap'], s => $$('[data-basemap]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.basemap === s.basemap))));
   // One units setting for the whole page: probe, place panel, chart, legends, scale bar, measure.
   S.on(['tempUnit', 'speedUnit', 'distUnit'], s => {
@@ -358,8 +363,8 @@ function renderDetail(s) {
   const el = $('#detail'), body = $('#detail .d-body');
   document.body.classList.toggle('has-detail', !!s.selection);
   if (!s.selection) { el.hidden = true; detailKey = ''; stamp('panel', null); stamp('chart', null); return; }
-  if (s.selection.type === 'event') { // event panel: same panel / sheet, last click wins
-    const html = evPanel(s.selection.id);
+  if (s.selection.type !== 'place') { // event or photo: same panel / sheet, last click wins
+    const html = s.selection.type === 'photo' ? phPanel(s.selection.id) : evPanel(s.selection.id);
     if (!html) { S.set({ selection: null }); return; }
     body.innerHTML = html; el.hidden = false; detailKey = ''; stamp('panel', null); stamp('chart', null);
     return;
@@ -399,10 +404,16 @@ function renderEvStatus() {
   $$('[data-evnote]').forEach(el => el.textContent = on ? [`Events from the past ${S.get('evWin') === '24h' ? '24 hours' : '7 days'}; storm forecasts follow the timeline.`, ...notes].join(' ') : 'Events from the past 7 days. Turn a type on to load it.');
 }
 
+function renderPhStatus() {
+  const st = phStatus();
+  $$('[data-phs]').forEach(el => { el.textContent = st === 'unavailable' ? 'unavailable' : st === '…' ? '…' : 'CC BY-SA'; el.classList.toggle('bad', st === 'unavailable'); });
+  $$('[data-phnote]').forEach(el => el.textContent = st === 'unavailable' ? 'Street photos: unavailable (no Mapillary access token is configured for this site).' : 'Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.');
+}
+
 // ---- credits strip -------------------------------------------------------------------
 function renderCredits(map) {
   const parts = meta.live ? [CREDITS.gfs, CREDITS.cams] : [CREDITS.sample];
-  parts.push(...evCredits());
+  parts.push(...evCredits(), ...phCredits());
   if (S.get('basemap') === 'satellite') parts.push(...activeSatellite(map).map(x => x.credit));
   parts.push(CREDITS.vector, CREDITS.naturalEarth, CREDITS.maplibre);
   const el = $('#credits');
@@ -517,8 +528,10 @@ async function boot() {
   window.owmWind = wind;
   // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
   const measure = initMeasure(map);
-  initEvents(map, () => { renderEvStatus(); renderCredits(map); const s = S.get(); if (s.selection?.type === 'event') renderDetail(s); });
-  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets, events: eventsTest };
+  const changed = () => { renderEvStatus(); renderPhStatus(); renderCredits(map); const s = S.get(); if (s.selection && s.selection.type !== 'place') renderDetail(s); };
+  initEvents(map, changed);
+  initPhotos(map, changed);
+  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets, events: eventsTest, photos: photosTest };
   // Public time API for future layers (events, Phase 5): see clock.js.
   window.owmClock = { onTime, getValidTime, layerTimes };
 
@@ -582,7 +595,7 @@ async function boot() {
   map.on('click', e => {
     const { lng, lat } = e.lngLat;
     if (S.get('measuring')) return; // the measure tool owns clicks while on
-    const ev = evHit(e.point); // an event under the click wins over the place
+    const ev = phHit(e) || evHit(e.point); // a photo or event under the click wins over the place
     if (ev) return S.set({ selection: ev });
     if (Math.abs(lat) > 85) return;
     S.set({ selection: { type: 'place', lon: lng, lat } });
