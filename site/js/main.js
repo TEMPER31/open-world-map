@@ -4,7 +4,7 @@ import { CREDITS, SAMPLE_GRID_DEG } from './config.js';
 import * as S from './state.js';
 import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024, setTempUnit, toTemp, unitOf } from './scales.js';
 import { sample } from './grid.js';
-import { initData, meta, getGrid, getPoint, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
+import { initData, meta, stepTime, getGrid, getPoint, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
 import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
 import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
@@ -28,7 +28,7 @@ const L = {
     const f = FIELDS[k];
     if (!meta.live) return f.mode === 'banded' ? `US EPA bands · sample · ${SAMPLE_GRID_DEG}° grid` : `${f.level} · sample · ${SAMPLE_GRID_DEG}° grid`;
     if (k === 'aq') return `US EPA 2024 bands · hourly · CAMS ${meta.aq?.grid?.deg ?? 4}°`;
-    if (k === 'rain') return `past hour · GFS ${meta.gfs.grid.deg}°`;
+    if (k === 'rain') return `${rainSpan()} · GFS ${meta.gfs.grid.deg}°`;
     return `${f.level} · GFS ${k === 'wind' ? meta.gfs.wind_grid.deg : meta.gfs.grid.deg}°`;
   },
   foot: () => meta.live ? 'Weather: NOAA GFS · Air quality: CAMS via Open-Meteo<br>Basemap OpenFreeMap · OpenStreetMap · Natural Earth'
@@ -37,6 +37,11 @@ const L = {
 };
 
 // ---- formatting ----------------------------------------------------------------
+// Rain is the mean rate over the hour before each frame, or the 3 hours before after f120.
+const rainSpan = (t = S.get('t')) => meta.rainHours(t) >= 3 ? 'past 3 h' : 'past hour';
+// Air quality (CAMS) ends ~5 days out, before the weather does.
+const aqEnded = (t = S.get('t')) => meta.live && meta.aqEnd != null && meta.base + t * 3600e3 > meta.aqEnd + 90 * 60e3;
+const aqEndText = () => `Air quality forecast ends ${fmtUTC(meta.aqEnd)}`;
 const DIRS = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
 // GFS U/V give where the air moves TO; "from" is the opposite direction (meteorological convention).
 const dirFrom = (u, v) => DIRS[Math.round(((Math.atan2(-u, -v) * 180 / Math.PI + 360) % 360) / 22.5) % 16];
@@ -51,11 +56,11 @@ const fmtCoord = (lo, la) => `${fmtLat(la)} ${fmtLon(lo)}`;
 function readingOf(k, p) {
   if (p === undefined) return ['—', '', 'loading'];
   const v = p ? p.v : NaN;
-  if (v !== v) return ['—', '', k === 'aq' ? 'no data' : ''];
+  if (v !== v) return ['—', '', k === 'aq' ? (aqEnded() ? `forecast ends ${fmtUTC(meta.aqEnd, { weekday: false })}` : 'no data') : ''];
   switch (k) {
     case 'wind': return [Math.round(v), 'km/h', `from ${dirFrom(p.u, p.w)}`];
     case 'temp': return [Math.round(toTemp(v)), unitOf('temp'), 'at 2 m'];
-    case 'rain': return v < 0.1 ? ['Dry', '', 'past hour · area avg'] : [v.toFixed(1), 'mm/h', 'past hour · area avg'];
+    case 'rain': return v < 0.1 ? ['Dry', '', `${rainSpan()} · area avg`] : [v.toFixed(1), 'mm/h', `${rainSpan()} · area avg`];
     case 'aq': {
       // Category from the hourly PM2.5 (what the colours show). The AQI number follows EPA's
       // definition (24-hour mean): Open-Meteo's us_aqi, which the CI check matched to the 2024
@@ -197,14 +202,22 @@ function bindChrome(map) {
     b.setAttribute('aria-expanded', String(!s.layersMin));
     b.setAttribute('aria-label', s.layersMin ? 'Expand layers' : 'Minimise layers');
   });
-  S.on(['field', 'basemap', 'tempUnit'], s => {
+  let legendKey = '';
+  S.on(['field', 'basemap', 'tempUnit', 't'], s => {
     const light = s.basemap === 'light', f = FIELDS[s.field];
+    // only rebuild when something shown changes (rain's span and the AQ end state follow t)
+    const key = [s.field, s.basemap, s.tempUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : ''].join();
+    if (key === legendKey) return;
+    legendKey = key;
     if (!f) {
       $('#legend').innerHTML = '<div class="lg-h"><span>No layer</span><span>map only</span></div>';
       $('#mchip').innerHTML = 'No layer';
       return;
     }
     $('#legend').innerHTML = legendHTML(s.field, light, L.legendMeta(s.field));
+    const ended = s.field === 'aq' && aqEnded(s.t);
+    $('#legend').classList.toggle('ended', ended);
+    $('#legend').dataset.msg = ended ? aqEndText() : 'No data for this hour';
     $('#legend').title = s.field === 'aq' ? 'PM2.5 categories use the US EPA breakpoints revised in May 2024. EPA defines them for 24-hour averages; this map applies them to hourly forecast values.' : '';
     $('#mchip').innerHTML = `${f.short} ${unitOf(s.field)}${barHTML(s.field, light)}${rangeText(s.field)}${meta.live ? '' : '<span class="sample-badge">Sample</span>'}`;
   });
@@ -228,6 +241,14 @@ function toggleLayersSheet(force) {
 function chartSVG(series, t) {
   if (!series?.length) return '<p class="src">Chart loading…</p>';
   const w = 310, h = 64, n = meta.hours || 1, x = t => (t / n * w).toFixed(1);
+  // day boundaries (UTC midnight) with short day names
+  let days = '';
+  for (let d = 1; d < n; d++) {
+    const at = new Date(meta.base + d * 3600e3);
+    if (at.getUTCHours()) continue;
+    days += `<line x1="${x(d)}" x2="${x(d)}" y1="2" y2="${h - 14}" stroke="var(--line2)" stroke-width="1"/>`;
+    if (d > 6 && d < n - 10) days += `<text x="${(+x(d) + 2).toFixed(1)}" y="9" font-family="IBM Plex Mono" font-size="8.5" fill="var(--faint)">${at.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' })}</text>`;
+  }
   series = series.map(p => ({ ...p, temp: toTemp(p.temp) }));
   const T = series.map(p => p.temp), W = series.map(p => p.wind);
   const tMin = Math.min(...T) - 1, tMax = Math.max(...T) + 1, wMax = Math.max(40, ...W);
@@ -238,13 +259,13 @@ function chartSVG(series, t) {
   // temperature at the playhead, interpolated between series points
   const k = series.findIndex(p => p.t >= t), a = series[Math.max(0, k - 1)], b = series[Math.max(0, k)];
   const tt = k <= 0 ? series[k < 0 ? series.length - 1 : 0].temp : a.temp + (b.temp - a.temp) * (t - a.t) / ((b.t - a.t) || 1);
-  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Temperature and wind for the forecast period">${bars}
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Temperature and wind for the forecast period">${days}${bars}
     <path d="${line}" fill="none" stroke="var(--ink)" stroke-width="1.6"/>
     <line x1="${x(t)}" x2="${x(t)}" y1="0" y2="${h - 12}" stroke="var(--accent)" stroke-width="1.5"/>
     <circle cx="${x(t)}" cy="${y(tt)}" r="3.5" fill="var(--accent)"/>
     <text x="0" y="${h - 1}" font-family="IBM Plex Mono" font-size="9.5" fill="var(--ink)">Now</text>
-    <text x="${w / 2}" y="${h - 1}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">+${Math.round(n / 2)} h</text>
-    <text x="${w}" y="${h - 1}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">+${n} h</text></svg>`;
+    <text x="${w / 2}" y="${h - 1}" text-anchor="middle" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">${relT(Math.round(n / 2))}</text>
+    <text x="${w}" y="${h - 1}" text-anchor="end" font-family="IBM Plex Mono" font-size="9.5" fill="var(--mute)">${relT(n)}</text></svg>`;
 }
 
 let detailVals = null, detailSeries = null, detailKey = '';
@@ -278,7 +299,7 @@ function renderDetail(s) {
   const { lon, lat } = s.selection, t = s.t;
   const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
   const note = meta.live
-    ? `<div class="d-sec"><div class="src">NOAA GFS run ${runLabel(meta.run)} · air quality CAMS ${meta.aq ? fmtUTC(meta.aqGenerated) : 'unavailable'} </div><div class="src">Model values on a ~50 km grid; mountains and coasts can differ from local conditions.</div></div>`
+    ? `<div class="d-sec"><div class="src">NOAA GFS run ${runLabel(meta.run)} · air quality CAMS ${meta.aq ? fmtUTC(meta.aqGenerated) : 'unavailable'} </div><div class="src">Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days.</div></div>`
     : `<div class="d-sec"><div class="alert"><b>Sample data</b><span>Generated to test the layout. Not an observation or a forecast.</span></div></div>`;
   el.innerHTML = `
     <div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close">×</button>
@@ -373,9 +394,12 @@ async function boot() {
   renderStatus();
 
   bindChrome(map);
-  S.set({ t: Math.min(S.get('t'), meta.hours) });
-  initTimeline(meta.base, meta.hours, L.zone());
-  $('[data-range]').textContent = `${meta.hours} h`;
+  S.set({ t: stepTime(Math.min(S.get('t'), meta.hours), 0) });
+  // last hourly frame: from here on frames are 3 hours apart
+  const ci = meta.times.findIndex((t, i) => i && t - meta.times[i - 1] > 1);
+  initTimeline({ base: meta.base, times: meta.times, stepTime, coarseFrom: ci > 0 ? meta.times[ci - 1] : null, zone: L.zone(), uncertainFrom: meta.hours > 72 ? 72 : null });
+  $('[data-range]').textContent = relT(meta.hours).replace('+', '');
+  S.on(['t'], s => { const nx = stepTime(s.t, 1); $$('[data-stepsize]').forEach(el => el.textContent = `${nx > s.t ? nx - s.t : (s.t - stepTime(s.t, -1)) || 1} h step`); });
   bindProbe(map);
 
   const field = new FieldGL();
@@ -388,7 +412,7 @@ async function boot() {
   map.addLayer(wind, 'omt-road-minor'); // above the field, below roads, borders and labels
   window.owmWind = wind;
   // Read-only hooks for the accuracy and rendering tests (scripts/data/*.mjs).
-  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field };
+  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime };
 
   // Each part updates as soon as its own data is ready. One request per part is in flight;
   // while scrubbing, the newest wanted state runs next. Hidden parts do no work at all.
@@ -414,14 +438,14 @@ async function boot() {
     const ov = k === 'pres' ? await getPressureOverlays(t) : null;
     if (S.get('field') !== k) return;
     field.setOverlays(ov, light());
-    const n = t + 1;
-    if (n <= meta.hours) getFieldTexture(n, k).catch(() => {}); // prefetch the next hour
+    // prefetch the next 2 frames
+    for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getFieldTexture(n, k).catch(() => {});
   });
   const updateWind = latest(async () => {
     if (!S.get('particles')) return;
     const t = S.get('t'), tex = await getWindTexture(t);
     wind.setWind(tex.rgba, tex.grid, tex.u, tex.v);
-    if (t + 1 <= meta.hours) getWindTexture(t + 1).catch(() => {});
+    for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getWindTexture(n).catch(() => {});
   });
   const windColour = () => wind.setColor(light() ? [0.08, 0.09, 0.1, 0.55] : S.get('field') === 'cloud' ? [1, 0.84, 0.59, 0.7] : [1, 1, 1, 0.75]);
 

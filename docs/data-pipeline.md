@@ -20,11 +20,30 @@ times on the AWS Open Data mirror (`noaa-gfs-bdp-pds`) for 15 cycles, 26 to 29 O
 | f000 `.idx` | cycle + 3 h 32 m | cycle + 3 h 49 m | + 3 h 33 m |
 | f048 `.idx` | cycle + 3 h 45 m | cycle + 4 h 01 m | + 3 h 46 m |
 
-The cron runs at **cycle + 4 h 17 m** (`17 4,10,16,22 * * *`). Each run also logs the
-publish times of the cycle it used, as a run annotation and in `manifest.json` → `history[].publish`.
-The job takes the newest cycle whose **f048** index exists, so an early or delayed run never
-picks a half-published cycle. The first Actions run (18Z 29 Oct, NOMADS) recorded f000 at
-**+3 h 34 m** and f048 at **+3 h 46 m** on NOMADS, the same as on the AWS mirror.
+### 7-day forecast (from the forecast-7day PR): f168 and the cron
+
+The job now needs **f168**. I measured the same mirror for 16 cycles, 27 to 30 Oct 2026
+(`Last-Modified` of the `.idx` files, minutes after the cycle):
+
+| File | Earliest | Latest | Typical |
+|---|---|---|---|
+| f000 `.idx` | + 211 min (3 h 31 m) | + 229 min (3 h 49 m) | + 213 min |
+| f048 `.idx` | + 225 min (3 h 45 m) | + 241 min (4 h 01 m) | + 227 min |
+| f120 `.idx` | + 243 min (4 h 03 m) | + 261 min (4 h 21 m) | + 246 min |
+| **f168 `.idx`** | **+ 256 min (4 h 16 m)** | **+ 273 min (4 h 33 m)** | **+ 258 min** |
+
+The old schedule (cycle + 4 h 17 m = 257 min) would usually have found f168 missing and fallen
+back to the previous cycle (6 h older data). The cron now runs at **cycle + 4 h 47 m**
+(`47 4,10,16,22 * * *`), 14 min after the latest f168 measured. Each run also logs the publish
+times of the cycle it used, as a run annotation and in `manifest.json` → `history[].publish`.
+The job takes the newest cycle whose **f168** index exists, so an early or delayed run never
+picks a half-published cycle.
+
+Which forecast hours exist was checked against the real `.idx` files (12Z 30 Oct 2026, AWS):
+the 0.25° files are **hourly to f120** (f118, f119, f120 exist; f121, f122 do not) and
+**3-hourly after** (f123, f126, f129 … f165, f168, f171 exist; f124, f125, f166 do not). All six
+variables the job uses are in every file. So a cycle is **137 frames**: f000–f120 (121) plus
+f123–f168 (16).
 
 ## Sources and fetching
 
@@ -47,8 +66,12 @@ picks a half-published cycle. The first Actions run (18Z 29 Oct, NOMADS) recorde
 Messages used per field:
 * **Wind, temperature, pressure, clouds:** the instantaneous messages (`anl` or `N hour fcst`).
   The "N-M hour ave" messages are skipped, so each frame is a snapshot at its valid time.
-* **Precipitation:** the amount that fell **in the hour before the valid time**, from the
-  running total: `APCP(0→f) − APCP(0→f−1)`. GFS's own `ave`/`acc` windows reset every 6 h
+* **Precipitation:** the mean rate over the time **since the previous frame**: the hour before
+  the valid time to f120, then the **3 hours** before it (labelled "past 3 h" on the map). It
+  comes from the running total, `(APCP(0→f) − APCP(0→previous frame)) / hours`, which equals
+  GFS's own 3-hour window there (`APCP 120-123 hour acc` at f123, checked in the `.idx`). The
+  running total's name changes past 4 days (`0-5 day acc` at f120, `0-7 day acc` at f168) and
+  still matches the job's pattern. GFS's own `ave`/`acc` windows reset every 6 h
   (checked against the `.idx` files: `6-7 hour ave` at f007, `42-48 hour ave` at f048); the
   `0-N hour acc` running total does not. Only f000 (no accumulation yet) uses the instantaneous
   `PRATE`. This replaces the earlier instantaneous `PRATE`, which made showers spiky and
@@ -125,6 +148,46 @@ Re-measured in phase-2-fixes-2 (GFS 18Z 29 Oct, f006): adaptive per-row filters 
 Paeth, PNG's own heuristic) saved nothing (temperature 141 KB adaptive vs 140 KB Sub, wind 138 vs
 137 KB), so
 the fixed filters stay.
+
+## 7-day forecast: sizes, run time and budgets (forecast-7day PR)
+
+Measured in the PR's CI run (GFS **18Z 30 Oct 2026**, from **NOMADS**; air quality reused from
+the CI cache), unless marked otherwise.
+
+| Field | Grid | Mean / max KB per frame (137 frames) | Frames over 150 KB |
+|---|---|---|---|
+| wind (U+V) | 0.75° | 142.4 / **153.7** | 12 of 137 (all ≤ 153.7 KB) |
+| temperature | 0.5° | 142.6 / 145.0 | 0 |
+| pressure | 0.5° | 142.1 / 147.4 | 0 |
+| precipitation | 0.5° | 104.0 / 113.2 | 0 |
+| clouds | 0.5° | 129.7 / 132.9 | 0 |
+| series (place chart, loaded on first click) | 3°, 3-hourly to 48 h then 6-hourly (37 steps) | **404.8 KB** (one file; 187.3 KB at 48 h) | — |
+| manifest.json | — | 34.7 KB (17.6 KB at 48 h) | — |
+
+| Measure | 48 h (before) | 7 days (this PR) |
+|---|---|---|
+| GFS frames | 49 | **137** (f000–f120 hourly + f123–f168 every 3 h) |
+| Data-build step | 197 s GFS only (satellite-zoom PR run) / 10 min 34 s with an air-quality refresh (main, 30 Oct 16:54) | **9 min 01 s** GFS only (job 9 min 18 s); with a refresh ≈ 15–16 min (estimate: + ~6.5 min for 3,870 AQ locations) |
+| HTTP requests per cycle (NOMADS) | 55 | **144 HTTP requests** in all (137 grib-filter requests, 1 s apart, + checks) |
+| Downloaded per cycle | 0.39 GB | **1.11 GB** from NOMADS (the AWS fallback measured 790 MB locally) |
+| Output per cycle (site/data/live) | 33 MB | **93.1 MB** (local build of the same run) |
+| Pages artifact upload (data job) | 3 s | 4 s |
+| Pages deploy | 16 s job, 7 s deploy step (33 MB, run 30 Oct 16:54) | measured on the first main run after merge |
+
+**Air quality range** (Open-Meteo `cams_global`, `past_days=1&forecast_days=6`, probed every
+run at 3 points): the API returns **168 hours** (7 days of data = 1 call per location under
+Open-Meteo's > 7-day weighting) and **pm2_5 is non-null to about 4 d 18 h after the GFS run**
+(18Z 30 Oct run: last non-null 12Z 4 Nov; 157 of 168 hours), the end of CAMS's 5-day forecast.
+Hours that are mostly empty are not written; the manifest records `aq.end_utc` and the map
+shows "Air quality forecast ends {date}" after it, with the legend dimmed and nothing drawn.
+Calls per day stay at **~7,740** (2 refreshes × 3,870) + 3 spot-check + 3 range-probe
+location-calls per run.
+
+**Pages limits** (GitHub Docs: 1 GB site, 100 GB/month soft bandwidth, 10 min deploy): the site
+is ~95 MB. Bandwidth per visitor, estimated from the file sizes: opening the map ≈ 1 MB (one
+field + wind + the next 2 frames + manifest); a typical visit (scrub ~20 frames, one place
+click) ≈ 7 MB; playing one field with wind through all ~131 frames ≈ 37 MB. So 100 GB/month is
+roughly **14,000 typical visits or 2,700 full plays**. Today's traffic is far below that.
 
 ## Grid resolution: what it costs at a point (phase-2-fixes-2)
 

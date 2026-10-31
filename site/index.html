@@ -43,11 +43,11 @@
 
   <div class="timeline glass lift">
     <div class="tl-ctrl">
-      <button class="play" type="button" data-play aria-label="Play"></button>
+      <div class="tl-btns"><button class="tl-step" type="button" data-step="-1" aria-label="Previous frame">‹</button><button class="play" type="button" data-play aria-label="Play"></button><button class="tl-step" type="button" data-step="1" aria-label="Next frame">›</button></div>
       <div><div class="tl-now" data-rel>Now</div><div class="mono tl-date" data-abs></div></div>
     </div>
     <div class="tl-track" data-track="full"></div>
-    <div class="tl-side"><span class="chip" title="Playback speed">1×</span><span class="chip" title="Step">1 h step</span><span class="chip" title="Range" data-range>48 h</span><span class="chip on" title="Times are shown in UTC">UTC</span></div>
+    <div class="tl-side"><span class="chip" title="Playback speed">1×</span><span class="chip" title="Time between frames here" data-stepsize>1 h step</span><span class="chip" title="Range" data-range>48 h</span><span class="chip on" title="Times are shown in UTC">UTC</span></div>
   </div>
 
   <div class="zoom glass" role="group" aria-label="Zoom">
@@ -63,7 +63,9 @@
   </div>
   <div class="m-field glass" id="mchip"></div>
   <div class="m-scrub glass">
+    <button class="tl-step" type="button" data-step="-1" aria-label="Previous frame">‹</button>
     <button class="play" type="button" data-play aria-label="Play"></button>
+    <button class="tl-step" type="button" data-step="1" aria-label="Next frame">›</button>
     <div class="m-track" data-track="mini"></div>
     <div class="m-time mono"><b data-rel>Now</b><span data-abs-short></span></div>
   </div>

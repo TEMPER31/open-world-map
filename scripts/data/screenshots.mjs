@@ -23,12 +23,22 @@ const VIEWS = [
   // the teal strip seen in the NAIP Plus layer at z16 (31.588 N, ~86.258 W), centred
   { name: 'satellite-strip-z17', field: 'none', basemap: 'satellite', hash: '17/31.588/-86.262', wait: 6000 }
 ];
+// 7-day forecast: the same view at Now, +4 days and the end of the run (t: hours from Now, or 'end')
+VIEWS.push(
+  { name: 'forecast-now', field: 'temp', hash: '1.6/30/0', t: 0 },
+  { name: 'forecast-4d', field: 'temp', hash: '1.6/30/0', t: 96 },
+  { name: 'forecast-7d', field: 'temp', hash: '1.6/30/0', t: 'end' },
+  { name: 'rain-7d', field: 'rain', hash: '1.6/20/-30', t: 'end' },
+  { name: 'aq-7d', field: 'aq', hash: '1.6/25/70', t: 'end' },
+  { name: 'place-panel-7d', field: 'temp', hash: '4/39.76/-84.19', t: 96, click: true },
+  { name: 'phone-4d', field: 'temp', hash: '0.4/30/10', t: 96, phone: true }
+);
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const report = [];
 for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))) {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+  const page = await browser.newPage(v.phone ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 800 } });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     const { readFileSync } = await import('node:fs');
     await page.route('https://cdn.jsdelivr.net/npm/maplibre-gl@*/dist/*', r => {
@@ -48,6 +58,10 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     { field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
+  if (v.t != null) { // jump to a forecast time (snapped to a frame)
+    await page.evaluate(t => { const T = window.owmTest; T.state.set({ t: t === 'end' ? T.meta.hours : T.stepTime(t, 0) }); }, v.t);
+    await page.waitForTimeout(1500);
+  }
   await page.waitForTimeout(v.wait || (v.particles ? 5000 : 2500));
   const box = await page.$('#map').then(e => e.boundingBox());
   if (v.click) { // open the place panel at the map centre
@@ -60,6 +74,8 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     legend: document.querySelector('#legend .lg-h')?.textContent,
     probe: document.querySelector('#probe')?.textContent,
     detail: document.querySelector('#detail:not([hidden])')?.innerText.replace(/\s+/g, ' ').trim() || null,
+    time: [...document.querySelectorAll('[data-rel]')].map(e => e.textContent).find(Boolean) + ' · ' + ([...document.querySelectorAll('[data-abs]')].map(e => e.textContent).find(Boolean) || ''),
+    legendMsg: document.querySelector('#legend')?.classList.contains('unavailable') ? document.querySelector('#legend').dataset.msg : null,
     stale: document.querySelector('#stale').hidden ? null : document.querySelector('#stale').textContent,
     updated: document.querySelector('[data-updated]')?.textContent,
     sampleLabelsVisible: [...document.querySelectorAll('[data-sample-only]')].filter(e => !e.hidden).length

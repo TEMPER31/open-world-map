@@ -3,10 +3,11 @@ name: Data and deploy
 # Every deploy rebuilds the data, so a code-only deploy never publishes the site without it.
 on:
   schedule:
-    # GFS cycles 00/06/12/18 UTC. Measured on the AWS mirror (Oct 2026, 15 cycles): f000 lands
-    # 3 h 32 m to 3 h 49 m after the cycle, f048 3 h 45 m to 4 h 01 m. Run at cycle + 4 h 17 m;
-    # the job also picks the newest cycle whose f048 exists, so an early run is harmless.
-    - cron: '17 4,10,16,22 * * *'
+    # GFS cycles 00/06/12/18 UTC. The job needs f168 (7 days). Measured on the AWS mirror
+    # (16 cycles, 27-30 Oct 2026): f168 lands 4 h 16 m to 4 h 33 m after the cycle. Run at
+    # cycle + 4 h 47 m; the job also picks the newest cycle whose f168 exists, so an early or
+    # late run never mixes cycles (docs/data-pipeline.md).
+    - cron: '47 4,10,16,22 * * *'
   push:
     branches: [main]
   pull_request:
@@ -143,8 +144,8 @@ jobs:
     permissions:
       contents: write
     env:
-      OUT: docs/screenshots/satellite-zoom/after
-      LABEL: after
+      OUT: docs/screenshots/forecast-7day
+      LABEL: 7-day
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

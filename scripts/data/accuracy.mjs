@@ -52,8 +52,11 @@ if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk wh
 await page.addInitScript(() => localStorage.setItem('owm:prefs:v1', JSON.stringify({ field: 'temp', basemap: 'dark', particles: false, opacity: 1, density: 1, tempUnit: 'C' })));
 await page.goto(site);
 await page.waitForFunction(() => window.owmTest?.meta && window.owmMap?.loaded(), null, { timeout: 60000 });
-const meta = await page.evaluate(() => ({ live: window.owmTest.meta.live, base: window.owmTest.meta.base, hours: window.owmTest.meta.hours, first: window.owmTest.meta.first, run: window.owmTest.meta.run }));
-const times = [0, Math.min(24, meta.hours)];
+const meta = await page.evaluate(() => ({ live: window.owmTest.meta.live, base: window.owmTest.meta.base, hours: window.owmTest.meta.hours, first: window.owmTest.meta.first, run: window.owmTest.meta.run, times: window.owmTest.meta.times }));
+// +0 h and +24 h against every reference; f120 (end of the hourly part, ~5 days out) against
+// raw NOAA only: pipeline fidelity, since the other references are other model runs/blends.
+const T120 = meta.live && meta.times?.includes(120 - meta.first) ? 120 - meta.first : null;
+const times = [0, Math.min(24, meta.hours), ...(T120 != null ? [T120] : [])];
 const FIELDS = ['temp', 'wind', 'rain', 'cloud', 'pres', 'aq'];
 
 const ours = {};
@@ -107,7 +110,7 @@ const report = reportPath ? JSON.parse(readFileSync(reportPath, 'utf8')) : {};
 const align = [];
 const ap = report.align_points;
 if (ap) {
-  for (const hour of ap.hours.filter(h => h.f === meta.first || h.f === meta.first + 24)) {
+  for (const hour of ap.hours.filter(h => h.f === meta.first || h.f === meta.first + 24 || h.f === 120)) {
     const t = hour.f - meta.first;
     const vals = await page.evaluate(async ([t, nodes]) => {
       const T = window.owmTest, o = {};
@@ -178,26 +181,28 @@ const rawAt = (f, name) => report.city_raw?.hours.find(h => h.f === f)?.cities[n
 CITIES.forEach((c, i) => times.forEach((t, k) => {
   const o = ours[t][c.name], ts = validS[k];
   const raw = rawAt(meta.first + t, c.name);
+  const g120 = t === T120 ? '120' : '';   // f120 rows get their own summary lines
   if (raw) {
     // Primary: the page vs NOAA's own GFS 0.25 deg values (bilinear) for the same run and hour.
     // The difference is what our 0.5 deg grid + encoding adds.
-    row(c.name, t, 'temp °C', o.temp.value, raw.temp, 'GFS 0.25° raw', 0.7, { group: 'raw' });
-    row(c.name, t, 'wind km/h', o.wind.value, raw.wind_kmh, 'GFS 0.25° raw', TOL.wind, { group: 'raw' });
-    row(c.name, t, 'wind from °', o.wind.dirFrom, raw.wind_from_deg, 'GFS 0.25° raw', TOL.dir, { group: 'raw', angle: true, d: 0, calm: Math.max(o.wind.value, raw.wind_kmh) < CALM_KMH });
-    row(c.name, t, 'precip mm/h', o.rain.value, raw.rain, 'GFS 0.25° raw', TOL.rain, { group: 'raw', d: 2 });
-    row(c.name, t, 'cloud %', o.cloud.value, raw.cloud, 'GFS 0.25° raw', TOL.cloud, { group: 'raw', d: 0 });
-    row(c.name, t, 'pressure hPa', o.pres.value, raw.pres, 'GFS 0.25° raw', 0.5, { group: 'raw' });
+    row(c.name, t, 'temp °C', o.temp.value, raw.temp, 'GFS 0.25° raw', 0.7, { group: 'raw' + g120 });
+    row(c.name, t, 'wind km/h', o.wind.value, raw.wind_kmh, 'GFS 0.25° raw', TOL.wind, { group: 'raw' + g120 });
+    row(c.name, t, 'wind from °', o.wind.dirFrom, raw.wind_from_deg, 'GFS 0.25° raw', TOL.dir, { group: 'raw' + g120, angle: true, d: 0, calm: Math.max(o.wind.value, raw.wind_kmh) < CALM_KMH });
+    row(c.name, t, 'precip mm/h', o.rain.value, raw.rain, 'GFS 0.25° raw', TOL.rain, { group: 'raw' + g120, d: 2 });
+    row(c.name, t, 'cloud %', o.cloud.value, raw.cloud, 'GFS 0.25° raw', TOL.cloud, { group: 'raw' + g120, d: 0 });
+    row(c.name, t, 'pressure hPa', o.pres.value, raw.pres, 'GFS 0.25° raw', 0.5, { group: 'raw' + g120 });
   }
   const gv = raw?.grid;
   if (gv) {
     // Page vs the data job's own grid before PNG encoding (same sampling): what encoding and
     // decoding add. Tolerances: half a step of each encoding plus float noise.
-    row(c.name, t, 'temp °C', o.temp.value, gv.temp, 'stored grid', 0.15, { group: 'grid' });
-    row(c.name, t, 'wind km/h', o.wind.value, gv.wind_kmh, 'stored grid', 1, { group: 'grid' });
-    row(c.name, t, 'cloud %', o.cloud.value, gv.cloud, 'stored grid', 1, { group: 'grid', d: 0 });
-    row(c.name, t, 'pressure hPa', o.pres.value, gv.pres, 'stored grid', 0.1, { group: 'grid', d: 2 });
-    resRows.push(`| ${c.name} | +${t} h | ${fmt(gv.temp, 2)} | ${fmt(raw.temp, 2)} | ${fmt(gv.temp - raw.temp, 2)} | ${fmt(gv.wind_kmh)} | ${fmt(raw.wind_kmh)} | ${fmt(gv.wind_kmh - raw.wind_kmh)} | ${fmt(gv.cloud, 0)} | ${fmt(raw.cloud, 0)} |`);
+    row(c.name, t, 'temp °C', o.temp.value, gv.temp, 'stored grid', 0.15, { group: 'grid' + g120 });
+    row(c.name, t, 'wind km/h', o.wind.value, gv.wind_kmh, 'stored grid', 1, { group: 'grid' + g120 });
+    row(c.name, t, 'cloud %', o.cloud.value, gv.cloud, 'stored grid', 1, { group: 'grid' + g120, d: 0 });
+    row(c.name, t, 'pressure hPa', o.pres.value, gv.pres, 'stored grid', 0.1, { group: 'grid' + g120, d: 2 });
+    resRows.push(`| ${c.name} | +${t} h${g120 ? ' (f120)' : ''} | ${fmt(gv.temp, 2)} | ${fmt(raw.temp, 2)} | ${fmt(gv.temp - raw.temp, 2)} | ${fmt(gv.wind_kmh)} | ${fmt(raw.wind_kmh)} | ${fmt(gv.wind_kmh - raw.wind_kmh)} | ${fmt(gv.cloud, 0)} | ${fmt(raw.cloud, 0)} |`);
   }
+  if (g120) return;
   for (const model of ['gfs_global', 'gfs_seamless']) {
     const omW = omAt(i, `wind_speed_10m_${model}`, ts);
     row(c.name, t, 'temp °C', o.temp.value, omAt(i, `temperature_2m_${model}`, ts), model, TOL.temp);
@@ -252,7 +257,7 @@ Values are read through the page's own code (\`getGrid\` + \`sample\` + \`readin
 References: Open-Meteo \`gfs_global\` / \`gfs_seamless\` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo \`cams_global\`.
 
 **Summary** (within tolerance / outside / not comparable):
-${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding)', grid: 'Page vs the stored grid before encoding (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs CAMS', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
+${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding), +0 h and +24 h', grid: 'Page vs the stored grid before encoding (encoding only), +0 h and +24 h', raw120: 'f120 (+5 d): page vs raw NOAA GFS 0.25°', grid120: 'f120 (+5 d): page vs the stored grid (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs CAMS', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
 ${refErr.length ? `\nReference errors: ${refErr.join('; ')}\n` : ''}
 ## Point values
 
