@@ -49,7 +49,7 @@ if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk wh
     r.fulfill({ body: rf(`${process.env.OWM_ML_DIR}/${f}`), contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', headers: { 'access-control-allow-origin': '*' } });
   });
 }
-await page.addInitScript(() => localStorage.setItem('owm:prefs:v1', JSON.stringify({ field: 'temp', basemap: 'dark', particles: false, opacity: 1, density: 1, tempUnit: 'C' })));
+await page.addInitScript(() => localStorage.setItem('owm:prefs:v1', JSON.stringify({ field: 'temp', basemap: 'dark', particles: false, opacity: 1, density: 1, tempUnit: 'C', speedUnit: 'kmh', distUnit: 'km' })));
 await page.goto(site);
 await page.waitForFunction(() => window.owmTest?.meta && window.owmMap?.loaded(), null, { timeout: 60000 });
 const meta = await page.evaluate(() => ({ live: window.owmTest.meta.live, base: window.owmTest.meta.base, hours: window.owmTest.meta.hours, first: window.owmTest.meta.first, run: window.owmTest.meta.run, times: window.owmTest.meta.times }));
