@@ -42,25 +42,32 @@ async function run(url) {
   }, firstField).finally(() => page.close());
 }
 
-const rows = [];
-for (const s of sites) {
-  const [label, url] = s.split('=');
-  const runs = [];
-  for (let i = 0; i < 3; i++) runs.push(await run(url).catch(e => ({ error: String(e).slice(0, 120) })));
-  const ok = runs.filter(r => !r.error), k = key => med(ok.map(r => r[key]));
-  rows.push({ label, n: ok.length, errors: runs.filter(r => r.error).map(r => r.error), fcp: k('fcp'), firstField: k('firstField'), syncMs: k('syncMs'), longTaskMs: k('longTaskMs'), stepToDrawnMs: k('stepToDrawnMs'), worstGapMs: k('worstGapMs'), panFps: k('panFps') });
-}
+// Runs alternate between the sites (A, B, A, B, ...), so drift on the shared runner (other
+// jobs, thermal state) hits every site alike. PERF_RUNS sets the number of loads per site.
+const N = +(process.env.PERF_RUNS || 3), SITES = sites.map(x => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1)]);
+const all = Object.fromEntries(SITES.map(([l]) => [l, []]));
+for (let i = 0; i < N; i++) for (const [label, url] of SITES) all[label].push(await run(url).catch(e => ({ error: String(e).slice(0, 120) })));
+const rows = SITES.map(([label]) => {
+  const runs = all[label], ok = runs.filter(r => !r.error), k = key => med(ok.map(r => r[key]));
+  return { label, runs, n: ok.length, errors: runs.filter(r => r.error).map(r => r.error), fcp: k('fcp'), firstField: k('firstField'), syncMs: k('syncMs'), longTaskMs: k('longTaskMs'), stepToDrawnMs: k('stepToDrawnMs'), worstGapMs: k('worstGapMs'), panFps: k('panFps') };
+});
 await browser.close();
 const f = (v, d = 0) => v == null || v !== v ? 'n/a' : v.toFixed(d);
 const md = `# Performance before / after (same machine, same data)
 
 Generated ${new Date().toISOString()} by \`scripts/data/perf.mjs\`. Headless Chromium with software WebGL (SwiftShader):
 compare the rows with each other only; real-laptop numbers are higher and are for the owner to check.
-Medians of 3 page loads; per-step values are medians of 10 hour steps (temperature field, wind particles on).
+Medians of ${N} page loads per site, run alternately (site A, site B, A, B, ...); per-step values are medians of 10 hour steps (temperature field, wind particles on).
 
 | Site | Loads | First contentful paint (ms) | First weather field drawn (ms) | Main-thread work per hour step (ms, synchronous) | Long tasks per step (ms) | Step -> new field on screen (ms) | Worst frame gap while stepping (ms) | Frames/s during a 2 s pan |
 |---|---|---|---|---|---|---|---|---|
 ${rows.map(r => `| ${r.label} | ${r.n} | ${f(r.fcp)} | ${f(r.firstField)} | ${f(r.syncMs, 1)} | ${f(r.longTaskMs, 1)} | ${f(r.stepToDrawnMs)} | ${f(r.worstGapMs)} | ${f(r.panFps, 1)} |`).join('\n')}
+
+Every run (in the order they ran), frames/s during the pan · first field drawn (ms) · worst frame gap (ms):
+
+| Site | ${Array.from({ length: N }, (_, i) => `Run ${i + 1}`).join(' | ')} |
+|---|${'---|'.repeat(N)}
+${rows.map(r => `| ${r.label} | ${r.runs.map(x => x.error ? 'error' : `${f(x.panFps, 1)} · ${f(x.firstField)} · ${f(x.worstGapMs)}`).join(' | ')} |`).join('\n')}
 ${rows.some(r => r.errors.length) ? '\nErrors: ' + rows.map(r => r.errors.join(' / ')).join(' | ') : ''}`;
 writeFileSync(out, md);
 console.log(md);
