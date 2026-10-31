@@ -11,20 +11,23 @@ const results = [];
 const check = (name, ok, info = '') => results.push({ name, ok, info: String(info) });
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-async function open(prefs, hash = '2/35/-20') {
-  const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+// Local time zone US Central, so local time and UTC differ in the time label.
+const TZ = 'America/Chicago';
+async function open(prefs, hash = '2/35/-20', ctx = {}) {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, timezoneId: TZ, ...ctx });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     await page.route('https://cdn.jsdelivr.net/npm/maplibre-gl@*/dist/*', r => {
       const f = new URL(r.request().url()).pathname.split('/').pop();
       r.fulfill({ body: readFileSync(`${process.env.OWM_ML_DIR}/${f}`), contentType: f.endsWith('.css') ? 'text/css' : 'application/javascript', headers: { 'access-control-allow-origin': '*' } });
     });
+    await page.route('https://tiles.openfreemap.org/**', r => r.abort()); // offline: fail fast instead of hanging
   }
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   const reqs = [];
   page.on('request', r => { const m = r.url().match(/data\/live\/(gfs\/\w+\/f\d+|aq\/\d+)\.png/); if (m) reqs.push(m[1]); });
   // seed preferences once per tab (a reload must keep what the page saved)
-  await page.addInitScript(p => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('owm:prefs:v1', JSON.stringify(p)); sessionStorage.setItem('seeded', '1'); } }, { basemap: 'dark', opacity: 1, density: 1, tempUnit: 'C', ...prefs });
+  await page.addInitScript(p => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('owm:prefs:v1', JSON.stringify(p)); sessionStorage.setItem('seeded', '1'); } }, { basemap: 'dark', opacity: 1, density: 1, tempUnit: 'C', speedUnit: 'kmh', distUnit: 'km', ...prefs });
   await page.goto(`${site}#map=${hash}`);
   await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
   await page.waitForTimeout(1500);
@@ -152,7 +155,7 @@ async function profile(page) {
   const played = await page.evaluate(async t => {
     const S = window.owmTest.state, seen = [];
     S.set({ t }); const off = S.on(['t'], s => seen.push(s.t), { now: false }); S.set({ playing: true });
-    await new Promise(r => setTimeout(r, 2300)); S.set({ playing: false });
+    await new Promise(r => setTimeout(r, 3000)); S.set({ playing: false }); off();
     return seen;
   }, t120 - 3);
   check('Play moves frame to frame across f120 (same speed per frame)', played.length >= 4 && played.every(t => m.times.includes(t)) && played.slice(0, 4).join() === [t120 - 2, t120 - 1, t120, t120 + 3].join(), played.slice(0, 8).join(', '));
@@ -171,6 +174,188 @@ async function profile(page) {
   const chart = await page.evaluate(() => { const svg = document.querySelector('#detail svg'); return svg ? { days: svg.querySelectorAll('line[stroke="var(--line2)"]').length, end: [...svg.querySelectorAll('text')].pop().textContent, points: (svg.querySelector('path').getAttribute('d').match(/[ML]/g) || []).length } : null; });
   check('Place-panel chart covers the whole run with day boundaries', chart && chart.days >= 6 && chart.points >= 30, JSON.stringify(chart));
   check('No page errors (7-day timeline)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+
+// ---- Phase 3: one clock, timeline controls, units, pop-up, layers, measure, phone sheets ----
+// Waits until every visible layer reports the page's valid time (or 8 s), and returns them.
+const synced = page => page.evaluate(async () => {
+  const T = window.owmTest, t0 = performance.now();
+  let lt, want;
+  for (;;) {
+    want = new Date(T.getValidTime()).toISOString(); lt = T.layerTimes();
+    if (Object.values(lt).every(v => v === want) || performance.now() - t0 > 8000) break;
+    await new Promise(r => setTimeout(r, 50));
+  }
+  return { want, lt, ms: Math.round(performance.now() - t0), ok: Object.values(lt).every(v => v === want) };
+});
+// 5. Every layer shows the same valid time while stepping (pressure: field, isobars, H/L; wind
+// particles; probe; place panel; chart), including the step from f120 to f123.
+{
+  const { page, errors } = await open({ field: 'pres', particles: true }, '3/45/-30');
+  const m = await page.evaluate(() => ({ first: window.owmTest.meta.first, times: window.owmTest.meta.times }));
+  await page.mouse.click(700, 350); // place panel
+  await page.mouse.move(640, 300); // probe
+  const rows = [];
+  const starts = [0, 120 - m.first - 2];
+  for (const start of starts) {
+    await page.evaluate(t => window.owmTest.state.set({ t }), start);
+    await page.mouse.move(641, 301);
+    await page.waitForFunction(() => !document.querySelector('#probe').hidden, null, { timeout: 10000 }).catch(() => {});
+    for (let i = 0; i < 4; i++) {
+      // step with the arrow key so the pointer stays on the map: the probe must follow the hour
+      // without a mouse move (clicking the step button would take the pointer off the map)
+      await page.keyboard.press('ArrowRight');
+      const r = await synced(page);
+      rows.push({ t: await page.evaluate(() => window.owmTest.state.get('t')), ...r });
+    }
+  }
+  const layers = [...new Set(rows.flatMap(r => Object.keys(r.lt)))];
+  const need = ['field', 'isobars', 'hl', 'wind', 'probe', 'panel', 'chart', 'timeline'];
+  check('One clock: after each step every layer reports the same valid time (8 steps, across f120 -> f123)', rows.every(r => r.ok) && need.every(k => layers.includes(k)),
+    `${rows.filter(r => r.ok).length}/${rows.length} steps in sync; layers: ${layers.join(', ')}; slowest sync ${Math.max(...rows.map(r => r.ms))} ms; t: ${rows.map(r => r.t).join(', ')}`);
+  const dom = await page.evaluate(() => ({ panel: document.querySelector('[data-panel-t]')?.dataset.panelT, chart: document.querySelector('[data-chart-t]')?.dataset.chartT, probe: document.querySelector('#probe').dataset.t, t: String(window.owmTest.state.get('t')) }));
+  check('Place panel, chart playhead and probe show the timeline hour (DOM)', dom.panel === dom.t && dom.chart === dom.t && dom.probe === dom.t, JSON.stringify(dom));
+  const api = await page.evaluate(() => { const C = window.owmClock; let got = null; const off = C.onTime(x => { got = x; }); window.owmTest.state.set({ t: window.owmTest.stepTime(5, 0) }); off(); return { got, valid: C.getValidTime() }; });
+  check('Time API for future layers: onTime() fires with {t, valid}; getValidTime() agrees', api.got && api.got.valid === api.valid, JSON.stringify(api));
+  await page.keyboard.press('Escape');
+  check('Esc closes the place pop-up', await page.evaluate(() => document.querySelector('#detail').hidden && !window.owmTest.state.get('selection')));
+  check('No page errors (one clock)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 6. Timeline controls: buttons, Space and arrows, speed, local time next to UTC, "Now".
+{
+  const { page, errors, reqs } = await open({ field: 'none', particles: false });
+  const r = await page.evaluate(async () => {
+    const S = window.owmTest.state, M = window.owmTest.meta, o = {}, wait = ms => new Promise(r => setTimeout(r, ms));
+    const key = k => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+    document.activeElement?.blur();
+    o.t0 = S.get('t');
+    document.querySelector('.timeline [data-play]').click(); o.playBtn = S.get('playing');
+    document.querySelector('.timeline [data-play]').click(); o.pauseBtn = S.get('playing');
+    key(' '); o.space = S.get('playing'); key(' '); o.space2 = S.get('playing');
+    S.set({ t: 0 }); key('ArrowRight'); key('ArrowRight'); o.right = S.get('t'); key('ArrowLeft'); o.left = S.get('t');
+    document.querySelector('.timeline [data-step="1"]').click(); o.stepBtn = S.get('t');
+    // speed: frames advanced in 2 s at 1x and at 4x
+    const count = async sp => { S.set({ t: 0, speed: sp }); let n = 0; const off = S.on(['t'], () => n++, { now: false }); S.set({ playing: true }); await wait(2000); S.set({ playing: false }); off(); return n; };
+    o.at1 = await count(1); o.at4 = await count(4);
+    S.set({ speed: 1 }); document.querySelector('[data-speed]').click(); o.chip = [S.get('speed'), document.querySelector('[data-speed]').textContent];
+    S.set({ speed: 1, t: 0 });
+    o.label = document.querySelector('[data-abs]').textContent; o.fh = document.querySelector('[data-fh]').textContent;
+    o.base = M.base; o.nowGapMin = Math.round(Math.abs(M.base - Date.now()) / 60000); o.first = M.first;
+    document.querySelector('[data-tfirst]').click(); o.utcFirst = document.querySelector('[data-abs]').textContent;
+    document.querySelector('[data-tfirst]').click();
+    return o;
+  });
+  const localH = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: TZ }).format(new Date(r.base));
+  check('Play/pause button and Space toggle playing', r.playBtn === true && r.pauseBtn === false && r.space === true && r.space2 === false, JSON.stringify({ playBtn: r.playBtn, pauseBtn: r.pauseBtn, space: r.space, space2: r.space2 }));
+  check('Arrow keys and step buttons move one frame', r.right === 2 && r.left === 1 && r.stepBtn === 2, JSON.stringify({ right: r.right, left: r.left, stepBtn: r.stepBtn }));
+  check('Speed 4x plays about 4x as many frames as 1x; the chip cycles 1x -> 2x', r.at4 >= r.at1 * 3 && r.chip[0] === 2 && r.chip[1] === '2×', `1×: ${r.at1} frames in 2 s, 4×: ${r.at4}; chip ${r.chip.join(' ')}`);
+  check('Local time is shown next to UTC (US Central), and the order can be switched', new RegExp(`^\\w+ ${localH}:00 local · .*\\d\\d:00 UTC$`).test(r.label) && /^\w+ \d\d:00 UTC · /.test(r.utcFirst),
+    `"${r.label}" | UTC first: "${r.utcFirst}" (expected local hour ${localH})`);
+  check('"Now" is the frame closest to the current time and says which forecast hour it is', r.nowGapMin <= 30 && r.fh === `forecast hour ${r.first}`, `Now is ${r.nowGapMin} min from the clock; label "${r.fh}"`);
+  // prefetch: stepping with a field on fetches the next 2 frames, and nothing for hidden layers
+  await page.evaluate(() => window.owmTest.state.set({ field: 'temp', t: 10 }));
+  await page.waitForTimeout(2500);
+  const f10 = await page.evaluate(() => window.owmTest.meta.first + 10);
+  const got = [1, 2].map(k => `gfs/temp/f${String(f10 + k).padStart(3, '0')}`);
+  check('Prefetch: the next 2 frames of the visible field are fetched; no wind (particles off) or other fields', got.every(g => reqs.includes(g)) && !reqs.some(q => /gfs\/(wind|rain|cloud|pres)\//.test(q)), `${got.map(g => `${g}: ${reqs.includes(g) ? 'fetched' : 'missing'}`).join(', ')}; other files: ${reqs.filter(q => !q.includes('/temp/')).join(', ') || 'none'}`);
+  check('No page errors (timeline controls)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 7. Units: one setting everywhere, converted for display only, remembered after reload.
+{
+  const { page, errors } = await open({ field: 'wind', particles: false, tempUnit: 'C' }, '4/45/-30');
+  await page.mouse.click(640, 400); await page.waitForTimeout(2500);
+  await page.click('[data-open="settings"]'); await page.click('#pop-settings [data-preset="us"]'); await page.keyboard.press('Escape');
+  await page.mouse.click(640, 400); await page.waitForTimeout(2500);
+  await page.mouse.move(700, 380); await page.waitForTimeout(1200);
+  const us = await page.evaluate(() => ({
+    probe: document.querySelector('#probe').textContent,
+    panel: [...document.querySelectorAll('.stat')].slice(0, 2).map(e => e.innerText.replace(/\s+/g, ' ')).join(' | '),
+    chart: document.querySelector('#detail .d-sec .kick')?.textContent,
+    legend: document.querySelector('#legend').textContent,
+    scale: document.querySelector('#scale span').textContent,
+    raw: window.owmTest.reading(null, 'wind'), // data stays metric
+    ticks: [...document.querySelectorAll('#legend .lg-t span')].map(e => e.textContent).join(' ')
+  }));
+  await page.click('.zoom [data-measure]');
+  const [a, b] = await page.evaluate(() => [window.owmMap.project([-30, 45]), window.owmMap.project([-25, 45])]);
+  await page.mouse.click(a.x, a.y); await page.mouse.click(b.x, b.y);
+  us.measure = await page.evaluate(() => document.querySelector('[data-mtotal]').textContent);
+  await page.keyboard.press('Escape');
+  check('US units everywhere: probe, place panel, chart, legend ticks, scale bar, measure tool', /mph/.test(us.probe) && /mph/.test(us.panel) && /°F/.test(us.panel) && /°F/.test(us.chart) && /mph/.test(us.chart) && /mph/.test(us.legend) && / (mi|ft)$/.test(us.scale) && / mi$/.test(us.measure) && /^0 12 25 37 50 62 93\+$/.test(us.ticks), JSON.stringify(us));
+  await page.reload(); await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
+  const kept = await page.evaluate(() => ({ t: window.owmTest.state.get('tempUnit'), s: window.owmTest.state.get('speedUnit'), d: window.owmTest.state.get('distUnit'), preset: document.querySelector('[data-preset][aria-checked="true"]')?.dataset.preset }));
+  check('Units are remembered after reload', kept.t === 'F' && kept.s === 'mph' && kept.d === 'mi' && kept.preset === 'us', JSON.stringify(kept));
+  await page.evaluate(() => { document.querySelector('[data-open="settings"]').click(); document.querySelector('#pop-settings [data-sunit="kn"]').click(); });
+  check('Custom mix (knots with °F) shows the "Custom" preset', await page.evaluate(() => document.querySelector('[data-preset][aria-checked="true"]')?.dataset.preset === 'custom'));
+  check('No page errors (units)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 8. Measure tool: London -> New York by clicking, within 0.5 % of 5,570 km; no place panel.
+{
+  const { page, errors } = await open({ field: 'temp', particles: false }, '3/45/-45');
+  await page.click('.zoom [data-measure]');
+  const pts = await page.evaluate(() => [window.owmMap.project([-0.1278, 51.5074]), window.owmMap.project([-74.006, 40.7128])]);
+  for (const p of pts) await page.mouse.click(p.x, p.y);
+  await page.waitForTimeout(300);
+  const m = await page.evaluate(() => ({ km: +document.querySelector('[data-mtotal]').dataset.km, text: document.querySelector('[data-mtotal]').textContent, panel: !document.querySelector('#detail').hidden, legs: document.querySelectorAll('[data-mlegs] li').length, drawn: window.owmMap.querySourceFeatures('measure').length, dom: document.querySelectorAll('.maplibregl-marker').length }));
+  check('Measure: London -> New York within 0.5 % of 5,570 km, drawn as a GeoJSON layer, place panel not opened', Math.abs(m.km - 5570) / 5570 <= 0.005 && !m.panel && m.legs === 1 && m.drawn > 0 && m.dom === 0,
+    `${m.text} (${m.km.toFixed(1)} km, ${((m.km - 5570) / 5570 * 100).toFixed(2)} %); place panel open: ${m.panel}; features: ${m.drawn}; DOM markers: ${m.dom}`);
+  await page.click('#measure [data-dunit="mi"]');
+  const mi = await page.evaluate(() => document.querySelector('[data-mtotal]').textContent);
+  check('Measure km/mi toggle updates the page-wide unit (3,461 mi ± 0.5 %)', /mi$/.test(mi) && Math.abs(parseFloat(mi.replace(/,/g, '')) - 3461) / 3461 <= 0.005 && await page.evaluate(() => window.owmTest.state.get('distUnit') === 'mi'), mi);
+  await page.click('[data-mundo]');
+  const undo = await page.evaluate(() => document.querySelector('[data-mtotal]').textContent);
+  await page.keyboard.press('Escape');
+  const off = await page.evaluate(() => ({ on: window.owmTest.state.get('measuring'), hidden: document.querySelector('#measure').hidden, features: window.owmMap.querySourceFeatures('measure').length }));
+  check('Undo removes the last point; Esc exits the measure tool', undo === '—' && !off.on && off.hidden, `after undo: ${undo}; after Esc: ${JSON.stringify(off)}`);
+  check('No page errors (measure)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 9. Layers rail: only the selected field is expanded (legend + options); None collapses all.
+{
+  const { page, errors } = await open({ field: 'temp', particles: false });
+  const open1 = await page.evaluate(() => [...document.querySelectorAll('[data-lx]')].filter(e => !e.hidden).map(e => e.dataset.lx + (e.querySelector('#legend') ? '+legend' : '')));
+  await page.click('.layers .row[data-field="none"]');
+  const none = await page.evaluate(() => ({ open: [...document.querySelectorAll('[data-lx]')].filter(e => !e.hidden).length, legend: document.querySelector('#legend').textContent }));
+  await page.click('.layers .row[data-field="pres"]'); await page.click('.layers .row[data-field="pres"]');
+  const toggled = await page.evaluate(() => window.owmTest.state.get('field'));
+  check('Layers rail: only the selected field is expanded, with its legend; None collapses all; clicking the active row turns it off', open1.join() === 'temp+legend' && none.open === 0 && /No layer/.test(none.legend) && toggled === 'none', JSON.stringify({ open1, none, toggled }));
+  check('No page errors (layers)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 10. Phone: 44 px targets, sheets (place: peek/half/full; layers half <= 40 % of the map), and
+// nothing over the map's centre in the default view.
+{
+  const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const box = s => page.$eval(s, e => { const r = e.getBoundingClientRect(); return { top: Math.round(r.top), h: Math.round(r.height), w: Math.round(r.width), bottom: Math.round(r.bottom) }; });
+  const targets = await page.evaluate(() => [...document.querySelectorAll('.m-scrub button, .m-top button, [data-track="mini"]')].map(e => { const r = e.getBoundingClientRect(); return { el: e.dataset.step ? 'step' : e.dataset.track ? 'track' : e.className.split(' ')[0], w: Math.round(r.width), h: Math.round(r.height) }; }));
+  const centre = await page.evaluate(() => { const els = [...document.querySelectorAll('.m-top, .m-field, .m-scrub, .credits, .tabs')]; const cx = innerWidth / 2, cy = (innerHeight - document.querySelector('.tabs').offsetHeight) / 2; return els.filter(e => { const r = e.getBoundingClientRect(); return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom; }).map(e => e.className); });
+  check('Phone: buttons and scrubber are at least 44 px; nothing covers the map centre', targets.every(t => t.h >= 44 && (t.el === 'track' ? t.w > 300 : t.w >= 44)) && !centre.length, `${JSON.stringify(targets)}; over the centre: ${centre.join(', ') || 'none'}`);
+  const mapH = 844 - (await box('.tabs')).h;
+  await page.tap('[data-lyr]'); await page.waitForTimeout(400);
+  const ls = await box('#lsheet');
+  await page.tap('[data-lyr-close]');
+  check('Phone layers sheet: half-open covers at most ~40 % of the map, with a drag handle', ls.h / mapH <= 0.41 && await page.$('#lsheet .grab') != null, `${ls.h} of ${mapH} px (${(ls.h / mapH * 100).toFixed(1)} %)`);
+  await page.touchscreen.tap(200, 380); await page.waitForTimeout(1500);
+  const snaps = {};
+  for (const s of ['peek', 'half', 'full']) { await page.evaluate(s => document.querySelector('#detail').dataset.snap !== s && 0, s); snaps[s] = { ...(await box('#detail')), snap: await page.$eval('#detail', e => e.dataset.snap) }; await page.tap('#detail .grab'); await page.waitForTimeout(400); }
+  check('Phone place sheet: peek, half and full (tap the handle to step)', snaps.peek.snap === 'peek' && snaps.half.snap === 'half' && snaps.full.snap === 'full' && snaps.peek.h < snaps.half.h && snaps.half.h < snaps.full.h, JSON.stringify(snaps));
+  // drag the handle down from full to peek
+  const g = await box('#detail .grab');
+  await page.evaluate(() => document.querySelector('#detail').dataset.snap = 'full');
+  await page.waitForTimeout(300);
+  const g2 = await box('#detail .grab');
+  const cdp = await page.context().newCDPSession(page);
+  const tp = y => [{ x: 195, y }];
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: tp(g2.top + 10) });
+  for (let y = g2.top + 30; y < 780; y += 40) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: tp(y) });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await page.waitForTimeout(400);
+  check('Phone place sheet: dragging the handle down snaps to peek', await page.$eval('#detail', e => e.dataset.snap) === 'peek', await page.$eval('#detail', e => e.dataset.snap));
+  check('No page errors (phone)', !errors.length, errors.join(' | '));
   await page.close();
 }
 

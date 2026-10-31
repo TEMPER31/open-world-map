@@ -58,17 +58,18 @@ export async function initData() {
   if (!(await startWorker(url, manifest, scales))) { worker = null; await core.init(url, manifest, scales); }
 
   if (!manifest) {
-    const base = Math.floor(now / 3600e3) * 3600e3;
+    const base = Math.round(now / 3600e3) * 3600e3;
     meta = { live: false, error, first: 0, hours: HOURS, base, run: base, generated: base, stale: false,
       times: Array.from({ length: HOURS + 1 }, (_, t) => t), rainHours: () => 1, aqEnd: null };
     return meta;
   }
   // Frames are hourly to f120 and 3-hourly after (f123 ... f168). t counts hours from the
-  // first frame shown ("Now": the latest frame at or before the current hour), so the
+  // first frame shown ("Now": the frame closest to the current time), so the
   // timeline stays a true time axis and the 3-hourly part simply has wider steps.
   const run = Date.parse(manifest.gfs.run), fs = manifest.gfs.frames.map(x => x.f).sort((a, b) => a - b), last = fs[fs.length - 1];
-  const hourNow = Math.floor((now - run) / 3600e3);
-  const first = fs.filter(x => x <= hourNow).pop() ?? fs[0];
+  // "Now" is the frame closest to the current time (07:40 -> the 08:00 frame).
+  const hourNow = (now - run) / 3600e3;
+  const first = fs.reduce((a, b) => Math.abs(b - hourNow) < Math.abs(a - hourNow) ? b : a, fs[0]);
   const generated = Date.parse(manifest.generated_utc);
   const aqGen = manifest.aq ? Date.parse(manifest.aq.generated_utc) : null;
   meta = {

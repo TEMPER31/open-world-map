@@ -284,9 +284,11 @@ that disagrees with the map beneath it.
   frame on some frames: **max 153.7 KB** in the forecast-7day run (12 of 137 frames between 150
   and 154 KB) and 152.9 KB in the aq-node-check run. Accepted; a tighter encoding is possible
   if needed.
-* **Place-panel chart.** The 48-hour chart line comes from a 3° grid, every 3 h, 8-bit (one
-  file, loaded on the first click), so it can differ from the panel's own numbers, which use
-  the 0.5° grid. Found during this review; the fix belongs to Phase 3 (shared time state).
+* **Place-panel chart.** The chart line comes from a 3° grid, 3-hourly then 6-hourly, 8-bit
+  (one file, loaded on the first click), so between points it can differ from the panel's own
+  numbers, which use the 0.5° grid. **Phase 3:** the chart's playhead dot now shows the panel's
+  own temperature for the hour on the timeline, so the highlighted point and the number agree;
+  the rest of the line is still the coarse series (a finer series file would cost more data).
 
 ## US air quality index
 

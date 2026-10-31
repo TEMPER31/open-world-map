@@ -7,7 +7,7 @@ window.OWM_FIELDS = {
     label: 'Wind speed', short: 'Wind', unit: 'km/h', level: '10 m', source: 'GFS 0.25°',
     mode: 'continuous', particles: true,
     render: 'Continuous colour field. Animated particles follow the u/v vectors and can be overlaid on any field.',
-    stops: [[0,'#24304f'],[8,'#2a5a86'],[16,'#2b8a96'],[26,'#3aa57a'],[36,'#8cc256'],[48,'#e3c54e'],[62,'#e98b3b'],[80,'#d44a45'],[105,'#9c3a7e'],[150,'#5e2a6e']],
+    stops: [[0,'#24304f'],[8,'#2a5a86'],[16,'#2b8a96'],[26,'#3aa57a'],[36,'#8cc256'],[48,'#e3c54e'],[62,'#e98b3b'],[80,'#d44a45'],[105,'#b44c90'],[150,'#f0c4ee']],
     stopsLight: [[0,'#d7e4ea'],[8,'#b3d2dd'],[16,'#93c7c4'],[26,'#a6d1a2'],[36,'#d3dd93'],[48,'#f0cd7d'],[62,'#efa06b'],[80,'#e06b57'],[105,'#c24f7a'],[150,'#8a3f78']],
     ticks: [0, 20, 40, 60, 80, 100, '150+']
   },

@@ -1,14 +1,17 @@
 // Timeline: Now -> the end of the forecast run. Frames are hourly to f120 and 3-hourly after
 // (live data); t is hours from "Now", so the 3-hourly part keeps its true width and shows
 // wider tick spacing behind a divider. Scrub by clicking or dragging the track (snaps to the
-// nearest frame), step with the buttons or arrow keys (next / previous frame), play advances
-// one frame every 350 ms and loops.
+// nearest frame), step with the buttons or the arrow keys (next / previous frame), Space plays
+// and pauses. Play shows one frame per tick (350 ms at 1x, 175 at 2x, 88 at 4x) and waits for a
+// frame to be drawn before moving on, so a slow download holds the playhead instead of skipping.
 
 import * as S from './state.js';
+import { stamp, layerTimes, validOf } from './clock.js';
 
-const STEP_MS = 350;
-let HOURS = 48, TIMES = [], step = (t, d) => t;
+const STEP_MS = 350, SPEEDS = [1, 2, 4];
+let HOURS = 48, TIMES = [], step = (t, d) => t, fhOf = t => t;
 const pct = t => (t / HOURS * 100).toFixed(3) + '%';
+const pad = n => String(n).padStart(2, '0');
 
 // "+5 h", "+2 d", "+3 d 6 h"
 export const relT = t => t === 0 ? 'Now' : t < 48 ? '+' + (t % 24 === 0 ? t / 24 + ' d' : t + ' h') : `+${Math.floor(t / 24)} d${t % 24 ? ` ${t % 24} h` : ''}`;
@@ -16,47 +19,80 @@ export const relT = t => t === 0 ? 'Now' : t < 48 ? '+' + (t % 24 === 0 ? t / 24
 export function fmtUTC(ms, { weekday = true } = {}) {
   const d = new Date(ms);
   const day = d.toLocaleDateString('en-GB', { weekday: weekday ? 'short' : undefined, day: 'numeric', month: 'short', timeZone: 'UTC' }).replace(',', '');
-  return `${day} · ${String(d.getUTCHours()).padStart(2, '0')}:00 UTC`;
+  return `${day} · ${pad(d.getUTCHours())}:00 UTC`;
+}
+
+// "Sat 31 Oct 02:00 local · 07:00 UTC" (or UTC first). The second clock carries its weekday
+// only when it falls on another day.
+export function fmtBoth(ms, first = S.get('timeFirst'), { date = true } = {}) {
+  const d = new Date(ms), opt = { weekday: 'short', ...(date ? { day: 'numeric', month: 'short' } : {}) };
+  const L = [d.toLocaleDateString('en-GB', opt).replace(',', ''), `${pad(d.getHours())}:${pad(d.getMinutes())}`, 'local'];
+  const U = [d.toLocaleDateString('en-GB', { ...opt, timeZone: 'UTC' }).replace(',', ''), `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`, 'UTC'];
+  const [a, b] = first === 'utc' ? [U, L] : [L, U];
+  return `${a.join(' ')} · ${(b[0] === a[0] ? b.slice(1) : b.map((x, i) => i ? x : x.split(' ')[0])).join(' ')}`;
 }
 
 // base: valid time (ms) of t = 0; times: the frame times (hours from base); stepTime(t, dir):
 // next/previous/nearest frame; coarseFrom: t where 3-hourly frames start (or null); zone:
-// label on the track; uncertainFrom: t after which a "less certain" note is shown.
-export function initTimeline({ base, times, stepTime, coarseFrom, zone, uncertainFrom }) {
-  TIMES = times; HOURS = times[times.length - 1] || 1; step = stepTime;
+// label on the track; uncertainFrom: t after which a "less certain" note is shown; fh(t):
+// forecast hour of the run at t (null for sample data).
+export function initTimeline({ base, times, stepTime, coarseFrom, zone, uncertainFrom, fh }) {
+  TIMES = times; HOURS = times[times.length - 1] || 1; step = stepTime; fhOf = fh;
   const tracks = document.querySelectorAll('[data-track]');
   tracks.forEach(el => buildTrack(el, base, el.dataset.track === 'mini', zone, coarseFrom, uncertainFrom));
   tracks.forEach(bindTrack);
 
-  let timer = null;
+  const go = dir => S.set({ playing: false, t: step(S.get('t'), dir) });
   document.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => S.set({ playing: !S.get('playing') })));
-  document.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => S.set({ playing: false, t: step(S.get('t'), +b.dataset.step) })));
-  S.on(['playing'], s => {
+  document.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => go(+b.dataset.step)));
+  document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => S.set({ speed: SPEEDS[(SPEEDS.indexOf(S.get('speed')) + 1) % SPEEDS.length] })));
+  document.querySelectorAll('[data-tfirst]').forEach(b => b.addEventListener('click', () => S.set({ timeFirst: S.get('timeFirst') === 'utc' ? 'local' : 'utc' })));
+  // Space plays/pauses and Left/Right step anywhere on the page, except in form fields and on
+  // buttons (Space presses those). On the map, Up/Down still pan; Left/Right move in time.
+  const typing = el => el.closest?.('input, textarea, select, [contenteditable="true"]');
+  document.addEventListener('keydown', e => {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || typing(e.target) || e.target.closest?.('[data-track]')) return;
+    if (e.key === ' ' && !e.target.closest('button, a')) { e.preventDefault(); S.set({ playing: !S.get('playing') }); }
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); e.stopPropagation(); go(e.key === 'ArrowRight' ? 1 : -1); }
+  }, true);
+
+  let timer = null, waited = 0;
+  // the frame on screen is drawn when every visible layer reports the current time
+  const drawn = () => { const want = new Date(validOf(S.get('t'))).toISOString(); return Object.values(layerTimes()).every(v => v === want); };
+  const tick = () => {
+    const ms = STEP_MS / S.get('speed');
+    if (!drawn() && (waited += ms) < 1500) return;
+    waited = 0;
+    S.set({ t: S.get('t') >= HOURS ? 0 : step(S.get('t'), 1) });
+  };
+  S.on(['playing', 'speed'], s => {
     clearInterval(timer);
     document.querySelectorAll('[data-play]').forEach(b => {
       b.classList.toggle('on', s.playing);
-      b.setAttribute('aria-label', s.playing ? 'Pause' : 'Play');
+      b.setAttribute('aria-label', s.playing ? 'Pause (Space)' : 'Play (Space)');
       b.setAttribute('aria-pressed', String(s.playing));
     });
+    document.querySelectorAll('[data-speed]').forEach(b => { b.textContent = s.speed + '×'; b.setAttribute('aria-label', `Playback speed ${s.speed}×`); });
     // one frame per tick, so the 3-hourly part plays through time 3x faster
-    if (s.playing) timer = setInterval(() => S.set({ t: S.get('t') >= HOURS ? 0 : step(S.get('t'), 1) }), STEP_MS);
+    if (s.playing) timer = setInterval(tick, STEP_MS / s.speed);
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden) S.set({ playing: false }); });
 
-  S.on(['t'], s => {
-    const t = s.t, abs = base + t * 3600e3;
+  S.on(['t', 'timeFirst'], s => {
+    const t = s.t, abs = base + t * 3600e3, f = fhOf(t);
+    stamp('timeline', t);
     document.querySelectorAll('.tl-head').forEach(e => e.style.left = pct(t));
     document.querySelectorAll('[data-track]').forEach(e => {
       e.setAttribute('aria-valuenow', t);
-      e.setAttribute('aria-valuetext', `${relT(t)}, ${fmtUTC(abs)}`);
+      e.setAttribute('aria-valuetext', `${relT(t)}, ${fmtBoth(abs)}`);
     });
     document.querySelectorAll('[data-step]').forEach(b => { b.disabled = +b.dataset.step < 0 ? t <= TIMES[0] : t >= HOURS; });
     document.querySelectorAll('[data-rel]').forEach(e => e.textContent = relT(t));
-    // UTC is the reference; local time is shown too so the hour is easy to compare with
-    // local forecasts (skipped when the browser itself is on UTC).
-    const local = new Date().getTimezoneOffset() ? ` · ${new Date(abs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} local` : '';
-    document.querySelectorAll('[data-abs]').forEach(e => e.textContent = fmtUTC(abs) + local);
-    document.querySelectorAll('[data-abs-short]').forEach(e => e.textContent = fmtUTC(abs).replace(/ \d+ \w+ ·/, '').replace(' UTC', ''));
+    // which forecast hour of the model run this frame is
+    document.querySelectorAll('[data-fh]').forEach(e => { e.textContent = f == null ? 'sample' : `forecast hour ${f}`; e.title = f == null ? 'Generated sample data' : `Hour ${f} of the GFS run`; });
+    document.querySelectorAll('[data-abs]').forEach(e => { e.textContent = fmtBoth(abs, s.timeFirst, { date: false }); e.title = fmtBoth(abs); });
+    document.querySelectorAll('[data-abs-short]').forEach(e => e.textContent = fmtBoth(abs, s.timeFirst, { date: false }));
+    document.querySelectorAll('[data-tfirst]').forEach(b => { b.textContent = s.timeFirst === 'utc' ? 'UTC · local' : 'Local · UTC'; b.title = 'Switch which clock is shown first'; });
   });
 }
 
@@ -107,6 +143,7 @@ function bindTrack(el) {
   el.addEventListener('keydown', e => {
     const t = S.get('t');
     const next = { ArrowRight: step(t, 1), ArrowUp: step(t, 1), ArrowLeft: step(t, -1), ArrowDown: step(t, -1), PageUp: step(t + 23, 1), PageDown: step(t - 23, -1), Home: TIMES[0], End: HOURS }[e.key];
+    if (e.key === ' ') { e.preventDefault(); S.set({ playing: !S.get('playing') }); return; }
     if (next == null) return;
     e.preventDefault();
     S.set({ playing: false, t: next });

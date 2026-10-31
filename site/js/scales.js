@@ -2,6 +2,8 @@
 // docs/design/field-scales.json). This module turns them into legend markup and
 // colour lookup tables for the field renderer.
 
+import { conv, label, units } from './units.js';
+
 export let FIELDS = {};
 export let ORDER = [];
 let loaded = null;
@@ -13,13 +15,12 @@ export function loadScales(json) {
   return loaded;
 }
 
-// Display unit for temperature: 'C' or 'F'. Data, colour scales and the GPU field stay in
-// degC; only labels and numbers shown to people are converted.
-let tempUnit = 'C';
-export const setTempUnit = u => { tempUnit = u === 'F' ? 'F' : 'C'; };
-export const toTemp = c => tempUnit === 'F' ? c * 9 / 5 + 32 : c;
-export const unitOf = k => k === 'temp' ? (tempUnit === 'F' ? '°F' : '°C') : FIELDS[k].unit;
-const tick = (k, x) => k === 'temp' ? Math.round(toTemp(+x)) : x;
+// Display units (units.js): data, colour scales and the GPU field stay metric (°C, km/h); only
+// labels and numbers shown to people are converted.
+export const toTemp = c => conv('temp', c);
+const KIND = { temp: 'temp', wind: 'speed' };
+export const unitOf = k => KIND[k] ? label(KIND[k]) : FIELDS[k].unit;
+const tick = (k, x) => KIND[k] ? Math.round(conv(KIND[k], parseFloat(x))) + String(x).replace(/^[-\d.]+/, '') : x; // '150+' keeps its '+'
 
 // "light" = the Light basemap: use stopsLight where provided (design README).
 const stopsFor = (f, light) => (light && f.stopsLight) || f.stops;
@@ -115,7 +116,8 @@ export function legendHTML(k, light, meta) {
     const a = tf(raw[0][0]), b = tf(raw[raw.length - 1][0]), p = v => ((tf(parseFloat(v)) - a) / (b - a) * 100).toFixed(1);
     ticks = `<div class="lg-t">${f.ticks.map(x => `<span style="left:${p(x)}%">${tick(k, x)}</span>`).join('')}</div>`;
   }
-  const unit = k === 'temp' ? `<button class="lg-u" type="button" data-tunit="${tempUnit === 'F' ? 'C' : 'F'}" title="Show temperature in ${tempUnit === 'F' ? '°C' : '°F'}">${unitOf(k)}</button>` : f.unit;
+  const F = units().temp === 'F';
+  const unit = k === 'temp' ? `<button class="lg-u" type="button" data-tunit="${F ? 'C' : 'F'}" title="Show temperature in ${F ? '°C' : '°F'}">${unitOf(k)}</button>` : unitOf(k);
   return `<div class="lg-h"><span>${f.label} · ${unit}</span><span>${meta}</span></div>${barHTML(k, light)}${ticks}`;
 }
 

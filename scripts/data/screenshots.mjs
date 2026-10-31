@@ -33,12 +33,30 @@ VIEWS.push(
   { name: 'place-panel-7d', field: 'temp', hash: '4/39.10/-94.58', t: 96, click: true },
   { name: 'phone-4d', field: 'temp', hash: '0.4/30/10', t: 96, phone: true }
 );
+// Phase 3 (usability): desktop and phone. act: what to do before the screenshot.
+for (const phone of [false, true]) {
+  const d = phone ? 'phone' : 'desktop', h = phone ? '0.6/30/-20' : '2/35/-30';
+  VIEWS.push(
+    { name: `p3-${d}-default`, field: 'wind', hash: h, particles: true, phone, units: 'metric' },
+    { name: `p3-${d}-us-units`, field: 'temp', hash: phone ? '3/39.1/-94.6' : '4/39.1/-94.6', phone, units: 'us', click: true, snap: 'half' },
+    { name: `p3-${d}-popup`, field: 'pres', hash: phone ? '3/50/-20' : '4/50/-20', phone, click: true, snap: 'half' },
+    { name: `p3-${d}-place-peek`, field: 'temp', hash: phone ? '3/51.5/-0.1' : '5/51.5/-0.1', phone, click: true, snap: 'peek' },
+    { name: `p3-${d}-place-full`, field: 'temp', hash: phone ? '3/51.5/-0.1' : '5/51.5/-0.1', phone, click: true, snap: 'full' },
+    { name: `p3-${d}-layers`, field: 'aq', hash: h, phone, act: 'layers' },
+    { name: `p3-${d}-measure`, field: 'none', hash: phone ? '1.2/45/-40' : '3/45/-45', phone, act: 'measure' },
+    { name: `p3-${d}-light`, field: 'wind', basemap: 'light', hash: h, particles: true, phone },
+    // 7-day features: +0 h, +5 d (past the air-quality end), +7 d (3-hourly, rain "past 3 h")
+    { name: `p3-${d}-t0`, field: 'temp', hash: h, t: 0, phone },
+    { name: `p3-${d}-5d-aq`, field: 'aq', hash: phone ? '1/25/70' : '1.6/25/70', t: 120, phone },
+    { name: `p3-${d}-7d-rain`, field: 'rain', hash: h, t: 'end', phone }
+  );
+}
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const report = [];
 for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))) {
-  const page = await browser.newPage(v.phone ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 800 } });
+  const page = await browser.newPage({ timezoneId: 'America/Chicago', ...(v.phone ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 800 } }) });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     const { readFileSync } = await import('node:fs');
     await page.route('https://cdn.jsdelivr.net/npm/maplibre-gl@*/dist/*', r => {
@@ -55,7 +73,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
   page.on('response', r => { if (/imagery\.nationalmap\.gov\/.*exportImage/.test(r.url())) naip.push(r.body().then(body => ({ url: r.url(), status: r.status(), type: r.headers()['content-type'] || '', body }), e => ({ url: r.url(), status: r.status(), error: String(e).slice(0, 120) }))); });
   page.on('requestfailed', r => { if (/imagery\.nationalmap\.gov/.test(r.url())) naipFailed.push({ bbox: new URL(r.url()).searchParams.get('bbox'), failure: r.failure()?.errorText }); });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.tempUnit || 'C' });
+    { field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
   if (v.t != null) { // jump to a forecast time (snapped to a frame)
@@ -67,11 +85,21 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
   if (v.click) { // open the place panel at the map centre
     await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
     await page.waitForTimeout(1500);
+    if (v.snap) { await page.evaluate(s => window.owmTest.sheets?.place.set(s), v.snap); await page.waitForTimeout(800); }
   }
-  await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.45);
-  await page.waitForTimeout(400);
+  if (v.act === 'layers') { await page.evaluate(() => document.querySelector(matchMedia('(max-width: 1023px)').matches ? '[data-lyr]' : '.layers .row.on')?.scrollIntoView()); if (v.phone) { await page.tap('[data-lyr]'); await page.waitForTimeout(600); } }
+  if (v.act === 'measure') {
+    await page.click(v.phone ? '.m-top [data-measure]' : '.zoom [data-measure]');
+    const pts = await page.evaluate(() => [[-0.1278, 51.5074], [-74.006, 40.7128], [-43.2, -22.9]].map(p => window.owmMap.project(p)));
+    for (const p of pts) await page.mouse.click(box.x + p.x, box.y + p.y);
+    await page.waitForTimeout(800);
+  }
+  if (!v.phone && !v.act) { await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.45); await page.waitForTimeout(400); }
   const info = await page.evaluate(() => ({
     legend: document.querySelector('#legend .lg-h')?.textContent,
+    fh: document.querySelector('[data-fh]')?.textContent,
+    measure: document.querySelector('#measure:not([hidden]) [data-mtotal]')?.textContent || null,
+    layerTimes: window.owmTest?.layerTimes(), snap: document.querySelector('#detail:not([hidden])')?.dataset.snap || null,
     probe: document.querySelector('#probe')?.textContent,
     detail: document.querySelector('#detail:not([hidden])')?.innerText.replace(/\s+/g, ' ').trim() || null,
     time: [...document.querySelectorAll('[data-rel]')].map(e => e.textContent).find(Boolean) + ' · ' + ([...document.querySelectorAll('[data-abs]')].map(e => e.textContent).find(Boolean) || ''),
