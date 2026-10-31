@@ -2,10 +2,10 @@
 // Preferences persist in localStorage on this device only (no accounts, nothing sent).
 
 const STORE_KEY = 'owm:prefs:v1';
-const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit'];
+const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed'];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// First visit: °F where it is the everyday unit (US and a few others), else °C.
-const fahrenheit = /-(US|LR|BS|BZ|KY|PW|FM|MH)$/i.test(navigator.language || '');
+// First visit: US units (°F, mph, mi) for an en-US browser, metric everywhere else.
+const us = /^en-US$/i.test(navigator.language || '');
 
 const state = {
   field: 'wind',          // wind | temp | rain | aq | cloud | pres
@@ -13,7 +13,12 @@ const state = {
   particles: !reduceMotion,
   opacity: 1,             // field opacity multiplier (Settings)
   density: 1,             // particle density multiplier (Settings)
-  tempUnit: fahrenheit ? 'F' : 'C', // display unit for temperature (Settings, legend)
+  tempUnit: us ? 'F' : 'C',   // display units (Settings): C | F
+  speedUnit: us ? 'mph' : 'kmh', // kmh | mph | ms | kn
+  distUnit: us ? 'mi' : 'km',  // km | mi
+  timeFirst: 'local',     // which clock the timeline shows first: local | utc
+  speed: 1,               // playback speed: 1, 2 or 4 frames per 350 ms
+  measuring: false,       // distance tool on
   t: 0,                   // hours from Now (a frame time: hourly to f120, then every 3 h)
   playing: false,
   selection: null,        // {type: 'place', lon, lat}
@@ -40,7 +45,10 @@ export function set(patch) {
 }
 
 // on(['field', 't'], fn) calls fn(state) now and whenever one of those keys changes.
+// Returns a function that unsubscribes.
 export function on(keys, fn, { now = true } = {}) {
-  subs.add({ keys, fn });
+  const s = { keys, fn };
+  subs.add(s);
   if (now) fn(state);
+  return () => subs.delete(s);
 }
