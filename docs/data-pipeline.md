@@ -183,6 +183,14 @@ shows "Air quality forecast ends {date}" after it, with the legend dimmed and no
 Calls per day stay at **~7,740** (2 refreshes × 3,870) + 3 spot-check + 3 range-probe
 location-calls per run.
 
+Each air-quality build also writes `aq/nodes.json`: the pm2_5 it downloaded at three check
+nodes (Delhi, London, Beijing) for every hour. It travels with the files when they are reused
+from a cache or the previous deployment, so the CI accuracy check compares the page with
+exactly what that build received (pass/fail, ±0.2 µg/m³) and shows the difference from the CAMS
+forecast served at test time separately. Before this, the check compared reused files (built up
+to 11 h earlier from an older CAMS run) with the current CAMS run, which showed as failures
+(forecast-7day PR: Delhi −6.1, London +4.5, Beijing −0.9 with files 7.4 h old).
+
 **Pages limits** (GitHub Docs: 1 GB site, 100 GB/month soft bandwidth, 10 min deploy): the site
 is ~95 MB. Bandwidth per visitor, estimated from the file sizes: opening the map ≈ 1 MB (one
 field + wind + the next 2 frames + manifest); a typical visit (scrub ~20 frames, one place
