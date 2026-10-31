@@ -1,8 +1,9 @@
 # Phase 3 report: usability (`phase-3-ux`)
 
-PR: TEMPER31/open-world-map#10. CI run with real GFS + CAMS data:
-https://github.com/TEMPER31/open-world-map/actions/runs/41181444121 (first run; numbers below
-come from it unless marked "local"). Local runs used a synthetic 7-day dataset in the real file
+PR: TEMPER31/open-world-map#10. CI runs with real GFS + CAMS data: run 1
+https://github.com/TEMPER31/open-world-map/actions/runs/41181444121 and run 2 (after the test
+fix) https://github.com/TEMPER31/open-world-map/actions/runs/41184151882. Numbers are from run 1
+unless marked "run 2" or "local". Local runs used a synthetic 7-day dataset in the real file
 format (the build container cannot reach NOAA, Open-Meteo, the tile server or the CDN).
 
 ## Inventory: what existed before this PR
@@ -20,9 +21,8 @@ format (the build container cannot reach NOAA, Open-Meteo, the tile server or th
 
 ## Summary
 
-All eight items are built. In CI with real data, **45 of 46 render checks passed** on the first
-run. The one failure was the test, not the page (explained under item 1); with the fix, the local
-run passes 46 of 46 (CI re-run pending at the time of writing; see "CI re-run" below). The
+All eight items are built. In CI with real data, **46 of 46 render checks pass** (run 2). Run 1
+had 45 of 46: the one failure was the test, not the page (explained under item 1). The
 accuracy check matches the previous runs: encoding-only 40/0/0 and 20/0/0, grid alignment 27/0/0,
 and the raw-GFS misses are the documented known limits. **Air-quality grid nodes: not yet
 checked** (0/0/3 "not recorded"): the deployed air-quality files are from 05:23Z, built before the
@@ -45,7 +45,8 @@ the 3° series).
 | Check | Result |
 |---|---|
 | Layers stamped while stepping 8 times, including f119 -> f120 -> f123 -> f126 (pressure, particles on, panel open, pointer on the map) | local: 8/8 steps in sync; layers timeline, field, isobars, hl, wind, panel, chart, probe; slowest 160 ms |
-| Same, CI first run | 8/8 steps in sync but **probe missing from the list** -> test FAIL (see below) |
+| Same, CI run 1 | 8/8 steps in sync but **probe missing from the list** -> test FAIL (see below) |
+| Same, CI run 2 (arrow-key steps) | **pass**: 8/8 in sync; layers timeline, wind, field, isobars, hl, panel, chart, probe; slowest 351 ms |
 | Panel, chart and probe DOM show the timeline hour | CI pass (`panel 118 = chart 118 = probe 118 = t 118`) |
 | `onTime()` fires with `{t, valid}`; `getValidTime()` agrees | CI pass |
 | All 42 screenshot views (real data): distinct valid times reported by the visible layers | 1 in every view |
@@ -186,16 +187,20 @@ judge.
 
 Same runner, same data, medians of 3 loads and 10 hour steps (`perf.md`; software WebGL):
 
-| Site | FCP (ms) | First field drawn (ms) | Main-thread work per step (ms) | Long tasks per step (ms) | Step -> field on screen (ms) | Worst frame gap stepping (ms) | Pan frames/s |
-|---|---|---|---|---|---|---|---|
-| main | 88 | 1,824 | 1.1 | 0 | 3 | 583 | 8.5 |
-| phase-3-ux | 100 | 1,685 | 1.8 | 0 | 4 | 588 | 7.0 |
+| Run | Site | FCP (ms) | First field drawn (ms) | Main-thread work per step (ms) | Long tasks per step (ms) | Step -> field on screen (ms) | Worst frame gap stepping (ms) | Pan frames/s |
+|---|---|---|---|---|---|---|---|---|
+| 1 | main | 88 | 1,824 | 1.1 | 0 | 3 | 583 | 8.5 |
+| 1 | phase-3-ux | 100 | 1,685 | 1.8 | 0 | 4 | 588 | 7.0 |
+| 2 | main | 96 | 1,482 | 0.9 | 0 | 3 | 441 | 10.0 |
+| 2 | phase-3-ux | 88 | 1,479 | 1.3 | 0 | 3 | 470 | 9.5 |
 
-The main-thread work per step grew by 0.7 ms (more labels update per step) and stays far below a
-frame. First field and frame gaps are within noise. Pan frames per second is 18 % lower in this run
-(8.5 vs 7.0); with software WebGL a single run is noisy (the branch-only profile in the same run
-measured 5.5-7.0), so this is **unresolved, not established**: the owner's real-laptop check below
-decides it. No new libraries. Added JavaScript: **21.4 KB** unminified (budget ~25 KB); CSS +5.3
+Main-thread work per step grew by 0.4-0.7 ms (more labels update per step), far below one frame.
+First paint and first field are within noise (each is faster on one run and slower on the other).
+**Pan frames per second was lower on this branch in both runs (−18 % and −5 %).** The cause is not
+identified: particles are hidden while panning, and the only new map work during a pan is three
+empty measure layers. With software WebGL the spread between runs (8.5 vs 10.0 for the same main
+code) is as large as the difference, so it is **not established either way**; the owner's
+real-laptop check below decides it. No new libraries. Added JavaScript: **21.4 KB** unminified (budget ~25 KB); CSS +5.3
 KB, HTML +2.1 KB.
 
 | File | main (bytes) | branch | added |
@@ -226,7 +231,7 @@ KB, HTML +2.1 KB.
 | Page vs stored grid (encoding only), +0/+24 h | 40 / 0 / 0 | 40 / 0 / 0 | **40 / 0 / 0** |
 | f120 encoding only | — | 20 / 0 / 0 | **20 / 0 / 0** |
 | Grid alignment at 0.5° nodes | 18 / 0 / 0 | 27 / 0 / 0 | **27 / 0 / 0** |
-| Page vs raw NOAA GFS 0.25°, +0/+24 h | 47 / 9 / 4 | 52 / 4 / 4 | **52 / 5 / 3** |
+| Page vs raw NOAA GFS 0.25°, +0/+24 h | 47 / 9 / 4 | 52 / 4 / 4 | **52 / 5 / 3** (run 2: 51 / 5 / 4) |
 | f120 page vs raw GFS | — | 22 / 5 / 3 | **22 / 5 / 3** |
 
 The raw-GFS misses are the known limits (Denver temperature −2.8 to −3.8 °C and pressure +0.5 to
@@ -257,8 +262,8 @@ download is the scheduled 16:47Z run (cache 11 h old); this PR's check is re-run
 - Data file sizes and Open-Meteo calls: unchanged (data job not modified).
 - MapLibre 5.24.0 with SRI (hash re-checked against the npm package locally; CI `--verify-sri`
   passes). No keys. No build step. `check_site.py` passes.
-- CI: green on run 41181444121 (check, data 10 min 43 s, verify; deploy and archive are skipped on
-  pull requests). Render tests and accuracy are report steps, so their results are read from the
+- CI: green on both runs (check, data 10 min 43 s on run 1, verify; deploy and archive are skipped
+  on pull requests). Render tests and accuracy are report steps, so their results are read from the
   reports, not the job status.
 
 ## Screenshots (artifact `ci-screenshots`)
@@ -285,7 +290,8 @@ place panel has no snaps; `place-peek` / `place-full` there show the same panel.
 ## Unresolved
 
 1. Air-quality grid-node check: pending the 16:47Z download (above).
-2. Pan frames per second 8.5 -> 7.0 in one software-WebGL run: not established either way.
+2. Pan frames per second lower on this branch in both software-WebGL runs (−18 %, −5 %), within the
+   run-to-run spread; cause not identified; needs the real-laptop check.
 3. Real-laptop fps and real-phone touch feel: not measurable in CI.
 4. Desktop click pop-up is the side panel, not an anchored pop-up (ask if wanted).
 
