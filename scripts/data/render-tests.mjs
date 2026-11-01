@@ -562,11 +562,24 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
   const shots = {};
   for (const [name, hash] of [['Times Square', '17/40.758/-73.9855'], ['Brantley AL', '16/31.585/-86.255']]) {
     // find the image dot nearest the place (at z14 if none is in view at street zoom), then go there
-    let dots = await at(hash, 'mly-img');
-    if (!dots) { const [, la, lo] = hash.split('/'); await at(`14/${la}/${lo}`, 'mly-img'); const n = await page.evaluate(() => { const m = window.owmMap, c = m.getCenter(), fs = m.queryRenderedFeatures({ layers: ['mly-img'] }); fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0]?.geometry.coordinates; }); if (n) dots = await at(`17/${n[1]}/${n[0]}`, 'mly-img'); }
+    let dots = await at(hash, 'mly-img'), near = null;
+    if (!dots) { const [, la, lo] = hash.split('/'); await at(`14/${la}/${lo}`, 'mly-img'); const n = await page.evaluate(() => { const m = window.owmMap, c = m.getCenter(), fs = m.queryRenderedFeatures({ layers: ['mly-img'] }); fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0]?.geometry.coordinates; }); if (n) dots = await at(`17/${n[1]}/${n[0]}`, 'mly-img'); 
+    // still none in view: ask Mapillary for the images nearest the place (bbox about 10 km)
+    if (!dots) {
+      const [, la, lo] = hash.split('/').map(Number);
+      near = await page.evaluate(async ([lo, la]) => {
+        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js');
+        const r = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=20&bbox=${lo - 0.1},${la - 0.1},${lo + 0.1},${la + 0.1}`, { headers: { Authorization: `OAuth ${t}` } });
+        const j = await r.json(), d = (j.data || []).map(x => ({ id: x.id, c: x.geometry.coordinates, km: Math.hypot((x.geometry.coordinates[0] - lo) * 111 * Math.cos(la * Math.PI / 180), (x.geometry.coordinates[1] - la) * 111) }));
+        d.sort((a, b) => a.km - b.km);
+        return { status: r.status, found: d.length, nearest: d[0] ? { id: d[0].id, km: +d[0].km.toFixed(2), at: d[0].c } : null, err: j.error?.message?.slice(0, 120) || null };
+      }, [lo, la]);
+      if (near.nearest) dots = await at(`17/${near.nearest.at[1]}/${near.nearest.at[0]}`, 'mly-img');
+    }
+  }
     const f = await page.evaluate(() => { const c = window.owmMap.getCenter(), fs = window.owmMap.queryRenderedFeatures({ layers: ['mly-img'] }); fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0] && window.owmMap.project(fs[0].geometry.coordinates); });
     if (f) { await page.mouse.click(f.x, f.y); await page.waitForFunction(() => document.querySelector('#detail img.ph-img')?.complete || document.querySelector('#detail .ph-msg:not(:empty)') && !/Loading/.test(document.querySelector('#detail .ph-msg').textContent), null, { timeout: 15000 }).catch(() => {}); }
-    shots[name] = { dots, ...(await page.evaluate(() => ({ at: window.owmMap.getCenter().toArray().map(v => +v.toFixed(4)), sel: window.owmTest.state.get('selection')?.id || null, open: !document.querySelector('#detail').hidden, img: document.querySelector('#detail img.ph-img')?.naturalWidth || 0, credit: document.querySelector('[data-photo-credit]')?.textContent, msg: document.querySelector('#detail:not([hidden]) .ph-msg')?.textContent || null }))) };
+    shots[name] = { dots, near, ...(await page.evaluate(() => ({ at: window.owmMap.getCenter().toArray().map(v => +v.toFixed(4)), sel: window.owmTest.state.get('selection')?.id || null, open: !document.querySelector('#detail').hidden, img: document.querySelector('#detail:not([hidden]) img.ph-img')?.naturalWidth || 0, credit: document.querySelector('#detail:not([hidden]) [data-photo-credit]')?.textContent || null, msg: document.querySelector('#detail:not([hidden]) .ph-msg')?.textContent || null }))) };
     await page.keyboard.press('Escape');
   }
   // Diagnostics (no token printed): Graph API answers for a tile image id and for an id the API
@@ -583,7 +596,7 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
   }, shots['Times Square']?.sel || null);
   check('Live Mapillary diagnostics: Graph API with the token as query parameter and as header (information)', true, JSON.stringify(diag));
   check('Live Mapillary: coverage at world zoom, lines at city zoom, dots at street zoom', world > 0 && city > 0 && Object.values(shots).every(x => x.dots > 0), JSON.stringify({ world, city, dots: Object.fromEntries(Object.entries(shots).map(([k, v]) => [k, v.dots])) }));
-  check('Live Mapillary: click a dot at Times Square and at Brantley AL -> photo with "CC BY-SA 4.0 — Mapillary / {creator}"', Object.values(shots).every(x => x.img > 0 && /^CC BY-SA 4\.0 — Mapillary \/ \S/.test(x.credit || '')), JSON.stringify(shots));
+  check('Live Mapillary: click a dot at Times Square and at Brantley AL -> photo with "CC BY-SA 4.0 — Mapillary / {creator}"', Object.values(shots).every(x => x.open && x.img > 0 && /^CC BY-SA 4\.0 — Mapillary \/ \S/.test(x.credit || '') && !/…$/.test(x.credit)), JSON.stringify(shots));
   check('No page errors (live Mapillary)', !errors.length, errors.join(' | '));
   await page.close();
 } else check('Live Mapillary (Times Square, Brantley AL): not run, no MAPILLARY_CI_TOKEN secret in CI', true, 'skipped: the owner can add a CI-only token to run it');
