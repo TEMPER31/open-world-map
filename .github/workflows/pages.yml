@@ -154,17 +154,18 @@ jobs:
 
   # Pull requests: screenshot the site with the freshly built real data, check its values
   # against independent references and run the rendering tests. The work is split into jobs
-  # that run side by side (render tests in 3 parts, screenshots + accuracy + perf + probes);
+  # that run side by side (render tests in 4 parts, screenshots + accuracy + perf + probes);
   # a last job commits the small text reports to docs/screenshots/<branch>/. Images and probe
   # output go to the ci-screenshots artifact (30 days).
   verify-tests:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        part: [1, 2, 3]
+        part: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -183,11 +184,13 @@ jobs:
           t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
           printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > built/site/js/secrets.js
           echo "MLY_CI=$([ -n "$t" ] && echo 1 || echo 0)" >> "$GITHUB_ENV"
+      # A stalled download once hung this step for 30+ minutes: bounded, with retries.
       - name: Install Playwright 1.63.0 + Chromium
+        timeout-minutes: 12
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0
-          npx playwright install --with-deps chromium
-      - name: Rendering and behaviour tests, part ${{ matrix.part }} of 3
+          for i in 1 2 3; do timeout 180 npx playwright install --with-deps chromium && exit 0; echo "::warning::Playwright install attempt $i stalled or failed; retrying"; done; exit 1
+      - name: Rendering and behaviour tests, part ${{ matrix.part }} of 4
         continue-on-error: true
         env:
           RT_PART: ${{ matrix.part }}
@@ -205,6 +208,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       RAW: ci-out
       LABEL: ${{ github.head_ref }}
@@ -225,10 +229,12 @@ jobs:
           printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > built/site/js/secrets.js
           echo "MLY_CI=$([ -n "$t" ] && echo 1 || echo 0)" >> "$GITHUB_ENV"
           echo "CI Mapillary token configured: $([ -n "$t" ] && echo yes || echo no)"
+      # A stalled download once hung this step for 30+ minutes: bounded, with retries.
       - name: Install Playwright 1.63.0 + Chromium
+        timeout-minutes: 12
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0
-          npx playwright install --with-deps chromium
+          for i in 1 2 3; do timeout 180 npx playwright install --with-deps chromium && exit 0; echo "::warning::Playwright install attempt $i stalled or failed; retrying"; done; exit 1
       - name: Screenshots
         run: |
           (cd built/site && python3 -m http.server 8123 --bind 127.0.0.1 &) ; sleep 2
@@ -301,8 +307,8 @@ jobs:
       - name: Commit the text reports to the PR branch (no images)
         run: |
           mkdir -p "$OUT"
-          # one render-tests.md from the 3 parts
-          { for p in 1 2 3; do [ -f "$RAW/render-tests-$p.md" ] && { echo "<!-- part $p of 3 -->"; cat "$RAW/render-tests-$p.md"; echo; }; done; } > "$RAW/render-tests.md"
+          # one render-tests.md from the 4 parts
+          { for p in 1 2 3 4; do [ -f "$RAW/render-tests-$p.md" ] && { echo "<!-- part $p of 4 -->"; cat "$RAW/render-tests-$p.md"; echo; }; done; } > "$RAW/render-tests.md"
           for f in accuracy.md render-tests.md perf.md sources-probe.md bandwidth.md; do [ -s "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
           sizes=""
           for f in views.json run-report.json; do

@@ -10,8 +10,8 @@ import { routePhotos, IMAGE_ID } from './photo-fixtures.mjs';
 
 const [, , site = 'http://127.0.0.1:8123/', out = 'render-tests.md'] = process.argv;
 const results = [];
-// RT_PART=1|2|3 runs one part (CI runs the 3 parts side by side): 1 = Phase 2/3, 2 = events,
-// 3 = street photos and overlays. Without RT_PART every part runs.
+// RT_PART=1..4 runs one part (CI runs the parts side by side): 1 = Phase 2/3, 2 = events,
+// 3 = street photos, 4 = overlays. Without RT_PART every part runs.
 const PART = +(process.env.RT_PART || 0);
 let section = 1;
 const part = () => !PART || PART === section;
