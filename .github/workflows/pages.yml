@@ -120,7 +120,10 @@ jobs:
         env:
           MLY: ${{ secrets.MAPILLARY_CLIENT_TOKEN }}
         run: |
-          t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
+          t=$(printf %s "$MLY" | tr -d '[:space:]')
+          # shape only, never the value: helps tell a wrong paste from a missing secret
+          echo "Mapillary secret: ${#t} chars, starts with MLY|: $([[ "$t" == MLY\|* ]] && echo yes || echo no), parts: $(awk -F'|' '{print NF}' <<<"$t"), only letters/digits/_-|: $([[ "$t" =~ ^[A-Za-z0-9_|-]*$ ]] && echo yes || echo no)"
+          [[ "$t" =~ ^MLY\|[0-9]+\|[A-Za-z0-9_-]+$ ]] || t=""
           printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > site/js/secrets.js
           echo "Mapillary token configured: $([ -n "$t" ] && echo yes || echo 'no (Street photos will show unavailable)')"
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
@@ -181,7 +184,10 @@ jobs:
         env:
           MLY: ${{ secrets.MAPILLARY_CI_TOKEN }}
         run: |
-          t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
+          t=$(printf %s "$MLY" | tr -d '[:space:]')
+          # shape only, never the value: helps tell a wrong paste from a missing secret
+          echo "Mapillary secret: ${#t} chars, starts with MLY|: $([[ "$t" == MLY\|* ]] && echo yes || echo no), parts: $(awk -F'|' '{print NF}' <<<"$t"), only letters/digits/_-|: $([[ "$t" =~ ^[A-Za-z0-9_|-]*$ ]] && echo yes || echo no)"
+          [[ "$t" =~ ^MLY\|[0-9]+\|[A-Za-z0-9_-]+$ ]] || t=""
           printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > built/site/js/secrets.js
           echo "MLY_CI=$([ -n "$t" ] && echo 1 || echo 0)" >> "$GITHUB_ENV"
       # A stalled download once hung this step for 30+ minutes: bounded, with retries.
@@ -225,7 +231,10 @@ jobs:
         env:
           MLY: ${{ secrets.MAPILLARY_CI_TOKEN }}
         run: |
-          t="$MLY"; [[ "$t" =~ ^MLY\|[0-9]+\|[0-9a-f]+$ ]] || t=""
+          t=$(printf %s "$MLY" | tr -d '[:space:]')
+          # shape only, never the value: helps tell a wrong paste from a missing secret
+          echo "Mapillary secret: ${#t} chars, starts with MLY|: $([[ "$t" == MLY\|* ]] && echo yes || echo no), parts: $(awk -F'|' '{print NF}' <<<"$t"), only letters/digits/_-|: $([[ "$t" =~ ^[A-Za-z0-9_|-]*$ ]] && echo yes || echo no)"
+          [[ "$t" =~ ^MLY\|[0-9]+\|[A-Za-z0-9_-]+$ ]] || t=""
           printf "export const MAPILLARY_TOKEN = '%s';\n" "$t" > built/site/js/secrets.js
           echo "MLY_CI=$([ -n "$t" ] && echo 1 || echo 0)" >> "$GITHUB_ENV"
           echo "CI Mapillary token configured: $([ -n "$t" ] && echo yes || echo no)"

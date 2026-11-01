@@ -2,21 +2,21 @@
  {
   "view": "wind-atlantic",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "wind": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "wind": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "32 km/hfrom ENE45.3°N 23.1°W · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "33 km/hfrom ENE45.3°N 23.1°W · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -32,20 +32,20 @@
  {
   "view": "temperature",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "10 °Cat 2 m37.6°N 29.6°E · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "10 °Cat 2 m37.6°N 29.6°E · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -61,20 +61,20 @@
  {
   "view": "temperature-f",
   "legend": "Temperature · °F2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "50 °Fat 2 m37.6°N 29.6°E · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "50 °Fat 2 m37.6°N 29.6°E · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -90,22 +90,22 @@
  {
   "view": "place-panel",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": "peek",
-  "probe": "100 %area average39.7°N 91.7°W · Sat 20:00 local · Sun 01:00 UTC",
-  "detail": "× PLACE · GFS FORECAST 39.10°N 94.58°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 8km/h from ENE Temperature 17°C at 2 m Precipitation Dry past hour · area avg Air quality 9.0µg/m³ Good · AQI 49 (24 h) Clouds 100% area average Pressure 1021hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 24° 6° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "100 %area average39.7°N 91.7°W · Sat 21:00 local · Sun 02:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 39.10°N 94.58°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 12km/h from ENE Temperature 17°C at 2 m Precipitation 0.1mm/h past hour · area avg Air quality 8.9µg/m³ Good · AQI 50 (24 h) Clouds 100% area average Pressure 1021hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 24° 6° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -121,20 +121,20 @@
  {
   "view": "precipitation",
   "legend": "Precipitation · mm/hpast hour · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "Drypast hour · area avg28.4°N 0.3°W · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "Drypast hour · area avg28.4°N 0.3°W · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -150,20 +150,20 @@
  {
   "view": "clouds",
   "legend": "Clouds · %total cover · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "0 %area average28.4°N 59.6°E · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "0 %area average28.4°N 59.6°E · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -179,22 +179,22 @@
  {
   "view": "pressure",
   "legend": "Pressure · hPamean sea level · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "isobars": "2026-11-01T01:00:00.000Z",
-   "hl": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "isobars": "2026-11-01T02:00:00.000Z",
+   "hl": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "1018 hPasea level42.2°N 9.6°E · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "1017 hPasea level42.2°N 9.6°E · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -210,20 +210,20 @@
  {
   "view": "air-quality",
   "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "3.5 µg/m³Good · AQI 33 (24 h)33.1°N 99.6°E · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "3.7 µg/m³Good · AQI 34 (24 h)33.1°N 99.6°E · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -239,19 +239,19 @@
  {
   "view": "none",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "wind": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "wind": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -267,18 +267,18 @@
  {
   "view": "satellite-brantley-z16",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -348,20 +348,6 @@
     "teal": false
    },
    {
-    "bbox": "-9601714,3708113,-9601102,3708725",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 59,
-    "w": 512,
-    "rgba": [
-     128,
-     138,
-     105,
-     255
-    ],
-    "teal": false
-   },
-   {
     "bbox": "-9602937,3708725,-9602325,3709336",
     "status": 200,
     "type": "image/jpeg",
@@ -371,6 +357,20 @@
      142,
      148,
      112,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708113,-9601102,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 59,
+    "w": 512,
+    "rgba": [
+     128,
+     138,
+     105,
      255
     ],
     "teal": false
@@ -404,20 +404,6 @@
     "teal": false
    },
    {
-    "bbox": "-9601102,3708725,-9600491,3709336",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 60,
-    "w": 512,
-    "rgba": [
-     88,
-     106,
-     80,
-     255
-    ],
-    "teal": false
-   },
-   {
     "bbox": "-9602937,3709336,-9602325,3709948",
     "status": 200,
     "type": "image/jpeg",
@@ -427,6 +413,20 @@
      135,
      142,
      106,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601102,3708725,-9600491,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 60,
+    "w": 512,
+    "rgba": [
+     88,
+     106,
+     80,
      255
     ],
     "teal": false
@@ -465,18 +465,18 @@
  {
   "view": "satellite-brantley-z17",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -489,90 +489,6 @@
   "sampleLabelsVisible": 0,
   "errors": [],
   "naip": [
-   {
-    "bbox": "-9602325,3709030,-9602019,3709336",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 53,
-    "w": 512,
-    "rgba": [
-     131,
-     142,
-     109,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9602019,3708419,-9601714,3708725",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 54,
-    "w": 512,
-    "rgba": [
-     127,
-     138,
-     104,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9601714,3708419,-9601408,3708725",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 47,
-    "w": 512,
-    "rgba": [
-     151,
-     155,
-     123,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9601714,3709030,-9601408,3709336",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 50,
-    "w": 512,
-    "rgba": [
-     125,
-     136,
-     100,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9602325,3708725,-9602019,3709030",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 51,
-    "w": 512,
-    "rgba": [
-     137,
-     147,
-     114,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9601714,3708725,-9601408,3709030",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 38,
-    "w": 512,
-    "rgba": [
-     144,
-     152,
-     112,
-     255
-    ],
-    "teal": false
-   },
    {
     "bbox": "-9602019,3708725,-9601714,3709030",
     "status": 200,
@@ -602,6 +518,62 @@
     "teal": false
    },
    {
+    "bbox": "-9602325,3708725,-9602019,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 51,
+    "w": 512,
+    "rgba": [
+     137,
+     147,
+     114,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3709030,-9601408,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 50,
+    "w": 512,
+    "rgba": [
+     125,
+     136,
+     100,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602019,3708419,-9601714,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 54,
+    "w": 512,
+    "rgba": [
+     127,
+     138,
+     104,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708725,-9601408,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 38,
+    "w": 512,
+    "rgba": [
+     144,
+     152,
+     112,
+     255
+    ],
+    "teal": false
+   },
+   {
     "bbox": "-9602325,3708419,-9602019,3708725",
     "status": 200,
     "type": "image/jpeg",
@@ -614,6 +586,34 @@
      255
     ],
     "teal": false
+   },
+   {
+    "bbox": "-9602325,3709030,-9602019,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 53,
+    "w": 512,
+    "rgba": [
+     131,
+     142,
+     109,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3708419,-9601408,3708725",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 47,
+    "w": 512,
+    "rgba": [
+     151,
+     155,
+     123,
+     255
+    ],
+    "teal": false
    }
   ],
   "naipFailed": []
@@ -621,18 +621,18 @@
  {
   "view": "satellite-brantley-z18",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -646,15 +646,15 @@
   "errors": [],
   "naip": [
    {
-    "bbox": "-9602172,3708725,-9602019,3708877",
+    "bbox": "-9601867,3709030,-9601714,3709183",
     "status": 200,
     "type": "image/jpeg",
-    "kb": 40,
+    "kb": 39,
     "w": 512,
     "rgba": [
-     137,
-     145,
-     119,
+     144,
+     155,
+     113,
      255
     ],
     "teal": false
@@ -683,34 +683,6 @@
      164,
      172,
      131,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9601867,3709030,-9601714,3709183",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 39,
-    "w": 512,
-    "rgba": [
-     144,
-     155,
-     113,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9602019,3708877,-9601867,3709030",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 37,
-    "w": 512,
-    "rgba": [
-     144,
-     154,
-     112,
      255
     ],
     "teal": false
@@ -758,20 +730,6 @@
     "teal": false
    },
    {
-    "bbox": "-9602172,3709030,-9602019,3709183",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 41,
-    "w": 512,
-    "rgba": [
-     133,
-     143,
-     113,
-     255
-    ],
-    "teal": false
-   },
-   {
     "bbox": "-9601714,3708725,-9601561,3708877",
     "status": 200,
     "type": "image/jpeg",
@@ -781,6 +739,20 @@
      143,
      152,
      111,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9601714,3709030,-9601561,3709183",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 39,
+    "w": 512,
+    "rgba": [
+     113,
+     128,
+     91,
      255
     ],
     "teal": false
@@ -800,15 +772,43 @@
     "teal": false
    },
    {
-    "bbox": "-9601714,3709030,-9601561,3709183",
+    "bbox": "-9602172,3709030,-9602019,3709183",
     "status": 200,
     "type": "image/jpeg",
-    "kb": 39,
+    "kb": 41,
     "w": 512,
     "rgba": [
+     133,
+     143,
      113,
-     128,
-     91,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602172,3708725,-9602019,3708877",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 40,
+    "w": 512,
+    "rgba": [
+     137,
+     145,
+     119,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602019,3708877,-9601867,3709030",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 37,
+    "w": 512,
+    "rgba": [
+     144,
+     154,
+     112,
      255
     ],
     "teal": false
@@ -819,18 +819,18 @@
  {
   "view": "satellite-strip-z17",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -844,20 +844,6 @@
   "errors": [],
   "naip": [
    {
-    "bbox": "-9602325,3709336,-9602019,3709642",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 49,
-    "w": 512,
-    "rgba": [
-     144,
-     151,
-     121,
-     255
-    ],
-    "teal": false
-   },
-   {
     "bbox": "-9602325,3709030,-9602019,3709336",
     "status": 200,
     "type": "image/jpeg",
@@ -866,6 +852,20 @@
     "rgba": [
      131,
      142,
+     109,
+     255
+    ],
+    "teal": false
+   },
+   {
+    "bbox": "-9602631,3709336,-9602325,3709642",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 47,
+    "w": 512,
+    "rgba": [
+     139,
+     146,
      109,
      255
     ],
@@ -886,29 +886,15 @@
     "teal": false
    },
    {
-    "bbox": "-9602631,3709336,-9602325,3709642",
+    "bbox": "-9602631,3709030,-9602325,3709336",
     "status": 200,
     "type": "image/jpeg",
     "kb": 47,
     "w": 512,
     "rgba": [
-     139,
-     146,
-     109,
-     255
-    ],
-    "teal": false
-   },
-   {
-    "bbox": "-9602937,3709030,-9602631,3709336",
-    "status": 200,
-    "type": "image/jpeg",
-    "kb": 49,
-    "w": 512,
-    "rgba": [
-     117,
-     129,
-     90,
+     152,
+     158,
+     121,
      255
     ],
     "teal": false
@@ -928,6 +914,20 @@
     "teal": false
    },
    {
+    "bbox": "-9602937,3709030,-9602631,3709336",
+    "status": 200,
+    "type": "image/jpeg",
+    "kb": 49,
+    "w": 512,
+    "rgba": [
+     117,
+     129,
+     90,
+     255
+    ],
+    "teal": false
+   },
+   {
     "bbox": "-9603242,3709030,-9602937,3709336",
     "status": 200,
     "type": "image/jpeg",
@@ -942,14 +942,14 @@
     "teal": false
    },
    {
-    "bbox": "-9602631,3709030,-9602325,3709336",
+    "bbox": "-9602325,3709336,-9602019,3709642",
     "status": 200,
     "type": "image/jpeg",
-    "kb": 47,
+    "kb": 49,
     "w": 512,
     "rgba": [
-     152,
-     158,
+     144,
+     151,
      121,
      255
     ],
@@ -961,20 +961,20 @@
  {
   "view": "forecast-now",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "10 °Cat 2 m37.6°N 29.6°E · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "10 °Cat 2 m37.6°N 29.6°E · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -990,20 +990,20 @@
  {
   "view": "forecast-4d",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 103",
+  "fh": "forecast hour 104",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-05T01:00:00.000Z",
-   "field": "2026-11-05T01:00:00.000Z",
-   "probe": "2026-11-05T01:00:00.000Z"
+   "timeline": "2026-11-05T02:00:00.000Z",
+   "field": "2026-11-05T02:00:00.000Z",
+   "probe": "2026-11-05T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "9 °Cat 2 m37.6°N 29.6°E · Wed 19:00 local · Thu 01:00 UTC",
+  "probe": "8 °Cat 2 m37.6°N 29.6°E · Wed 20:00 local · Thu 02:00 UTC",
   "detail": null,
-  "time": "+4 d · Wed 19:00 local · Thu 01:00 UTC",
+  "time": "+4 d · Wed 20:00 local · Thu 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1029,10 +1029,10 @@
   "snap": null,
   "probe": "6 °Cat 2 m37.6°N 29.6°E · Sat 12:00 local · 18:00 UTC",
   "detail": null,
-  "time": "+6 d 17 h · Sat 12:00 local · 18:00 UTC",
+  "time": "+6 d 16 h · Sat 12:00 local · 18:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1058,10 +1058,10 @@
   "snap": null,
   "probe": "Drypast 3 h · area avg28.4°N 0.3°W · Sat 12:00 local · 18:00 UTC",
   "detail": null,
-  "time": "+6 d 17 h · Sat 12:00 local · 18:00 UTC",
+  "time": "+6 d 16 h · Sat 12:00 local · 18:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1087,10 +1087,10 @@
   "snap": null,
   "probe": "—forecast ends 5 Nov · 00:00 UTC33.1°N 99.6°E · Sat 12:00 local · 18:00 UTC",
   "detail": null,
-  "time": "+6 d 17 h · Sat 12:00 local · 18:00 UTC",
+  "time": "+6 d 16 h · Sat 12:00 local · 18:00 UTC",
   "legendMsg": "Air quality forecast ends Thu 5 Nov · 00:00 UTC",
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1106,22 +1106,22 @@
  {
   "view": "place-panel-7d",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 103",
+  "fh": "forecast hour 104",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-05T01:00:00.000Z",
-   "field": "2026-11-05T01:00:00.000Z",
-   "panel": "2026-11-05T01:00:00.000Z",
-   "chart": "2026-11-05T01:00:00.000Z",
-   "probe": "2026-11-05T01:00:00.000Z"
+   "timeline": "2026-11-05T02:00:00.000Z",
+   "field": "2026-11-05T02:00:00.000Z",
+   "panel": "2026-11-05T02:00:00.000Z",
+   "chart": "2026-11-05T02:00:00.000Z",
+   "probe": "2026-11-05T02:00:00.000Z"
   },
   "snap": "peek",
-  "probe": "14 °Cat 2 m40.4°N 88.9°W · Wed 19:00 local · Thu 01:00 UTC",
-  "detail": "× PLACE · GFS FORECAST 39.10°N 94.58°W Place name COMING SOON +4 d Wed 4 Nov 19:00 local · Thu 01:00 UTC Wind speed 11km/h from NNE Temperature 12°C at 2 m Precipitation Dry past hour · area avg Air quality 3.4µg/m³ Good · AQI 24 (24 h) Clouds 72% area average Pressure 1011hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 24° 6° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "+4 d · Wed 19:00 local · Thu 01:00 UTC",
+  "probe": "14 °Cat 2 m40.4°N 88.9°W · Wed 20:00 local · Thu 02:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 39.10°N 94.58°W Place name COMING SOON +4 d Wed 4 Nov 20:00 local · Thu 02:00 UTC Wind speed 13km/h from NNE Temperature 11°C at 2 m Precipitation Dry past hour · area avg Air quality — forecast ends 5 Nov · 00:00 UTC Clouds 72% area average Pressure 1011hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 24° 6° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "+4 d · Wed 20:00 local · Thu 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1137,19 +1137,19 @@
  {
   "view": "phone-4d",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 103",
+  "fh": "forecast hour 104",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-05T01:00:00.000Z",
-   "field": "2026-11-05T01:00:00.000Z"
+   "timeline": "2026-11-05T02:00:00.000Z",
+   "field": "2026-11-05T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "+4 d · Wed 19:00 local · Thu 01:00 UTC",
+  "time": "+4 d · Wed 20:00 local · Thu 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1165,21 +1165,21 @@
  {
   "view": "p3-desktop-default",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "wind": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "wind": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "7 km/hfrom E40.5°N 7.5°W · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "7 km/hfrom E40.5°N 7.5°W · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1195,22 +1195,22 @@
  {
   "view": "p3-desktop-us-units",
   "legend": "Temperature · °F2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": "half",
-  "probe": "60 °Fat 2 m40.4°N 88.9°W · Sat 20:00 local · Sun 01:00 UTC",
-  "detail": "× PLACE · GFS FORECAST 39.10°N 94.60°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 5mph from ENE Temperature 63°F at 2 m Precipitation Dry past hour · area avg Air quality 9.0µg/m³ Good · AQI 49 (24 h) Clouds 100% area average Pressure 1021hPa sea level FORECAST — TEMP °F · ▮ WIND MPH Mon Tue Wed Thu Fri Sat 75° 44° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "60 °Fat 2 m40.4°N 88.9°W · Sat 21:00 local · Sun 02:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 39.10°N 94.60°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 7mph from ENE Temperature 62°F at 2 m Precipitation 0.1mm/h past hour · area avg Air quality 8.9µg/m³ Good · AQI 49 (24 h) Clouds 100% area average Pressure 1021hPa sea level FORECAST — TEMP °F · ▮ WIND MPH Mon Tue Wed Thu Fri Sat 75° 44° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1226,24 +1226,24 @@
  {
   "view": "p3-desktop-popup",
   "legend": "Pressure · hPamean sea level · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "isobars": "2026-11-01T01:00:00.000Z",
-   "hl": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "isobars": "2026-11-01T02:00:00.000Z",
+   "hl": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": "half",
-  "probe": "1037 hPasea level51.1°N 14.3°W · Sat 20:00 local · Sun 01:00 UTC",
-  "detail": "× PLACE · GFS FORECAST 50.00°N 20.00°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 10km/h from ENE Temperature 12°C at 2 m Precipitation Dry past hour · area avg Air quality 4.8µg/m³ Good · AQI 40 (24 h) Clouds 0% area average Pressure 1038hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 16° 11° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "1037 hPasea level51.1°N 14.3°W · Sat 21:00 local · Sun 02:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 50.00°N 20.00°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 12km/h from ENE Temperature 12°C at 2 m Precipitation Dry past hour · area avg Air quality 4.9µg/m³ Good · AQI 40 (24 h) Clouds 0% area average Pressure 1038hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 16° 11° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1259,22 +1259,22 @@
  {
   "view": "p3-desktop-place-peek",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": "peek",
-  "probe": "12 °Cat 2 m52.0°N 2.7°E · Sat 20:00 local · Sun 01:00 UTC",
-  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 4km/h from NE Temperature 10°C at 2 m Precipitation Dry past hour · area avg Air quality 30µg/m³ Moderate · AQI 59 (24 h) Clouds 40% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "12 °Cat 2 m52.0°N 2.7°E · Sat 21:00 local · Sun 02:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 5km/h from NNE Temperature 9°C at 2 m Precipitation Dry past hour · area avg Air quality 33µg/m³ Moderate · AQI 60 (24 h) Clouds 8% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1290,22 +1290,22 @@
  {
   "view": "p3-desktop-place-full",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": "full",
-  "probe": "12 °Cat 2 m52.0°N 2.7°E · Sat 20:00 local · Sun 01:00 UTC",
-  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 4km/h from NE Temperature 10°C at 2 m Precipitation Dry past hour · area avg Air quality 30µg/m³ Moderate · AQI 59 (24 h) Clouds 40% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "12 °Cat 2 m52.0°N 2.7°E · Sat 21:00 local · Sun 02:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 5km/h from NNE Temperature 9°C at 2 m Precipitation Dry past hour · area avg Air quality 33µg/m³ Moderate · AQI 60 (24 h) Clouds 8% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1321,19 +1321,19 @@
  {
   "view": "p3-desktop-layers",
   "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1349,18 +1349,18 @@
  {
   "view": "p3-desktop-measure",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": "5,569 km",
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1376,21 +1376,21 @@
  {
   "view": "p3-desktop-light",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "wind": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "wind": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "7 km/hfrom E40.5°N 7.5°W · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "7 km/hfrom E40.5°N 7.5°W · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1406,20 +1406,20 @@
  {
   "view": "p3-desktop-t0",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "probe": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "probe": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
-  "probe": "11 °Cat 2 m40.5°N 7.5°W · Sat 20:00 local · Sun 01:00 UTC",
+  "probe": "10 °Cat 2 m40.5°N 7.5°W · Sat 21:00 local · Sun 02:00 UTC",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1435,20 +1435,20 @@
  {
   "view": "p3-desktop-5d-aq",
   "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
-  "fh": "forecast hour 126",
+  "fh": "forecast hour 129",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-06T00:00:00.000Z",
-   "field": "2026-11-06T00:00:00.000Z",
-   "probe": "2026-11-06T00:00:00.000Z"
+   "timeline": "2026-11-06T03:00:00.000Z",
+   "field": "2026-11-06T03:00:00.000Z",
+   "probe": "2026-11-06T03:00:00.000Z"
   },
   "snap": null,
-  "probe": "—forecast ends 5 Nov · 00:00 UTC33.1°N 99.6°E · Thu 18:00 local · Fri 00:00 UTC",
+  "probe": "—forecast ends 5 Nov · 00:00 UTC33.1°N 99.6°E · Thu 21:00 local · Fri 03:00 UTC",
   "detail": null,
-  "time": "+4 d 23 h · Thu 18:00 local · Fri 00:00 UTC",
+  "time": "+5 d 1 h · Thu 21:00 local · Fri 03:00 UTC",
   "legendMsg": "Air quality forecast ends Thu 5 Nov · 00:00 UTC",
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1474,10 +1474,10 @@
   "snap": null,
   "probe": "Drypast 3 h · area avg40.5°N 7.5°W · Sat 12:00 local · 18:00 UTC",
   "detail": null,
-  "time": "+6 d 17 h · Sat 12:00 local · 18:00 UTC",
+  "time": "+6 d 16 h · Sat 12:00 local · 18:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1493,20 +1493,20 @@
  {
   "view": "p3-phone-default",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "wind": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "wind": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1522,21 +1522,21 @@
  {
   "view": "p3-phone-us-units",
   "legend": "Temperature · °F2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z"
   },
   "snap": "half",
   "probe": "",
-  "detail": "× PLACE · GFS FORECAST 39.10°N 94.60°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 5mph from ENE Temperature 63°F at 2 m Precipitation Dry past hour · area avg Air quality 9.0µg/m³ Good · AQI 49 (24 h) Clouds 100% area average Pressure 1021hPa sea level FORECAST — TEMP °F · ▮ WIND MPH Mon Tue Wed Thu Fri Sat 75° 44° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 39.10°N 94.60°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 7mph from ENE Temperature 62°F at 2 m Precipitation 0.1mm/h past hour · area avg Air quality 8.9µg/m³ Good · AQI 49 (24 h) Clouds 100% area average Pressure 1021hPa sea level FORECAST — TEMP °F · ▮ WIND MPH Mon Tue Wed Thu Fri Sat 75° 44° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1552,23 +1552,23 @@
  {
   "view": "p3-phone-popup",
   "legend": "Pressure · hPamean sea level · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "isobars": "2026-11-01T01:00:00.000Z",
-   "hl": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "isobars": "2026-11-01T02:00:00.000Z",
+   "hl": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z"
   },
   "snap": "half",
   "probe": "",
-  "detail": "× PLACE · GFS FORECAST 50.00°N 20.00°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 10km/h from ENE Temperature 12°C at 2 m Precipitation Dry past hour · area avg Air quality 4.8µg/m³ Good · AQI 40 (24 h) Clouds 0% area average Pressure 1038hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 16° 11° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 50.00°N 20.00°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 12km/h from ENE Temperature 12°C at 2 m Precipitation Dry past hour · area avg Air quality 4.9µg/m³ Good · AQI 40 (24 h) Clouds 0% area average Pressure 1038hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 16° 11° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1584,21 +1584,21 @@
  {
   "view": "p3-phone-place-peek",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z"
   },
   "snap": "peek",
   "probe": "",
-  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 4km/h from NE Temperature 10°C at 2 m Precipitation Dry past hour · area avg Air quality 30µg/m³ Moderate · AQI 59 (24 h) Clouds 40% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 5km/h from NNE Temperature 9°C at 2 m Precipitation Dry past hour · area avg Air quality 33µg/m³ Moderate · AQI 60 (24 h) Clouds 8% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1614,21 +1614,21 @@
  {
   "view": "p3-phone-place-full",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z",
-   "panel": "2026-11-01T01:00:00.000Z",
-   "chart": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z",
+   "panel": "2026-11-01T02:00:00.000Z",
+   "chart": "2026-11-01T02:00:00.000Z"
   },
   "snap": "full",
   "probe": "",
-  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 20:00 local · Sun 01:00 UTC Wind speed 4km/h from NE Temperature 10°C at 2 m Precipitation Dry past hour · area avg Air quality 30µg/m³ Moderate · AQI 59 (24 h) Clouds 40% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 9 h +6 d 17 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 00:22 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "detail": "× PLACE · GFS FORECAST 51.50°N 0.10°W Place name COMING SOON Now Sat 31 Oct 21:00 local · Sun 02:00 UTC Wind speed 5km/h from NNE Temperature 9°C at 2 m Precipitation Dry past hour · area avg Air quality 33µg/m³ Moderate · AQI 60 (24 h) Clouds 8% area average Pressure 1032hPa sea level FORECAST — TEMP °C · ▮ WIND KM/H Mon Tue Wed Thu Fri Sat 14° 6° Now +3 d 8 h +6 d 16 h NOAA GFS run 18Z 31 Oct · air quality CAMS Sat 31 Oct · 17:00 UTC Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days. Centre map here Data ↓ NOAA GFS · CAMS via Open-Meteo (CC BY 4.0) · Updated 01:30 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1644,19 +1644,19 @@
  {
   "view": "p3-phone-layers",
   "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1672,18 +1672,18 @@
  {
   "view": "p3-phone-measure",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": "13,319 km",
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1699,20 +1699,20 @@
  {
   "view": "p3-phone-light",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "wind": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "wind": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1728,19 +1728,19 @@
  {
   "view": "p3-phone-t0",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1756,19 +1756,19 @@
  {
   "view": "p3-phone-5d-aq",
   "legend": "Air quality · µg/m³US EPA 2024 bands · hourly · CAMS 4°",
-  "fh": "forecast hour 126",
+  "fh": "forecast hour 129",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-06T00:00:00.000Z",
-   "field": "2026-11-06T00:00:00.000Z"
+   "timeline": "2026-11-06T03:00:00.000Z",
+   "field": "2026-11-06T03:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "+4 d 23 h · Thu 18:00 local · Fri 00:00 UTC",
+  "time": "+5 d 1 h · Thu 21:00 local · Fri 03:00 UTC",
   "legendMsg": "Air quality forecast ends Thu 5 Nov · 00:00 UTC",
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1793,10 +1793,10 @@
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "+6 d 17 h · Sat 12:00 local · 18:00 UTC",
+  "time": "+6 d 16 h · Sat 12:00 local · 18:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
@@ -1812,25 +1812,25 @@
  {
   "view": "p5-desktop-events-world",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "events": "2026-11-01T01:00:00.000Z",
-   "storms": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "events": "2026-11-01T02:00:00.000Z",
+   "storms": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 00:36 UTC · EONET checked 00:36 UTC · GDACS updated 00:29 UTC · NHC checked 00:36 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 01:46 UTC · EONET checked 01:46 UTC · GDACS updated 00:29 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
-   "eq": "337",
+   "eq": "336",
    "fv": "4",
    "st": "4",
    "ga": "64"
@@ -1841,25 +1841,25 @@
  {
   "view": "p5-desktop-event-panel",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "events": "2026-11-01T01:00:00.000Z",
-   "storms": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "events": "2026-11-01T02:00:00.000Z",
+   "storms": "2026-11-01T02:00:00.000Z"
   },
   "snap": "peek",
   "probe": "",
-  "detail": "× EVENT · EARTHQUAKES M 6.5 earthquake Bonin Islands, Japan region 7 d ago Sat 24 Oct 21:09 local · Sun 02:09 UTC Magnitude 6.5 mww Depth 492 km below the surface PAGER alert green USGS impact estimate Open source page ↗ Centre map here Earthquakes: USGS · updated Sat 31 Oct 19:36 local · Sun 00:36 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "detail": "× EVENT · EARTHQUAKES M 6.5 earthquake Bonin Islands, Japan region 7 d ago Sat 24 Oct 21:09 local · Sun 02:09 UTC Magnitude 6.5 mww Depth 492 km below the surface PAGER alert green USGS impact estimate Open source page ↗ Centre map here Earthquakes: USGS · updated Sat 31 Oct 20:46 local · Sun 01:46 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 00:36 UTC · EONET checked 00:36 UTC · GDACS updated 00:29 UTC · NHC checked 00:36 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 01:46 UTC · EONET checked 01:46 UTC · GDACS updated 00:29 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
-   "eq": "337",
+   "eq": "336",
    "fv": "4",
    "st": "4",
    "ga": "64"
@@ -1870,22 +1870,22 @@
  {
   "view": "p5-desktop-storm-track",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 37",
+  "fh": "forecast hour 38",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-02T07:00:00.000Z",
-   "events": "2026-11-02T07:00:00.000Z",
-   "storms": "2026-11-02T07:00:00.000Z",
-   "field": "2026-11-02T07:00:00.000Z"
+   "timeline": "2026-11-02T08:00:00.000Z",
+   "events": "2026-11-02T08:00:00.000Z",
+   "storms": "2026-11-02T08:00:00.000Z",
+   "field": "2026-11-02T08:00:00.000Z"
   },
   "snap": "peek",
   "probe": "",
-  "detail": "× EVENT · STORMS Tropical Storm Testa NHC advisory 7 · 500 AM AST Sat Oct 31 2026 forecast +30 h Mon 2 Nov 01:00 local · 07:00 UTC Max wind 115km/h gusts 144 km/h Pressure 994hPa centre Type Hurricane at that point Moving 22km/h towards 290° NHC forecast point nearest this time: +36 h from advisory 7. The cone shows where the centre will probably track, not the storm's size. Open source page ↗ Centre map here Storm forecasts: NOAA NHC · checked Sat 31 Oct 19:37 local · Sun 00:37 UTC",
-  "time": "+30 h · Mon 01:00 local · 07:00 UTC",
+  "detail": "× EVENT · STORMS Tropical Storm Testa NHC advisory 7 · 500 AM AST Sat Oct 31 2026 forecast +30 h Mon 2 Nov 02:00 local · 08:00 UTC Max wind 115km/h gusts 144 km/h Pressure 994hPa centre Type Hurricane at that point Moving 22km/h towards 290° NHC forecast point nearest this time: +36 h from advisory 7. The cone shows where the centre will probably track, not the storm's size. Open source page ↗ Centre map here Storm forecasts: NOAA NHC · checked Sat 31 Oct 20:46 local · Sun 01:46 UTC",
+  "time": "+30 h · Mon 02:00 local · 08:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. EONET checked 00:37 UTC · NHC checked 00:37 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. EONET checked 01:46 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
@@ -1900,26 +1900,26 @@
  {
   "view": "p5-desktop-layers-events",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "events": "2026-11-01T01:00:00.000Z",
-   "storms": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "events": "2026-11-01T02:00:00.000Z",
+   "storms": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 00:37 UTC · EONET checked 00:37 UTC · GDACS updated 00:29 UTC · NHC checked 00:37 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 01:46 UTC · EONET checked 01:46 UTC · GDACS updated 00:29 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
-   "eq": "337",
+   "eq": "335",
    "fv": "4",
    "st": "4",
    "ga": "64"
@@ -1930,25 +1930,25 @@
  {
   "view": "p5-phone-events-world",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "events": "2026-11-01T01:00:00.000Z",
-   "storms": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "events": "2026-11-01T02:00:00.000Z",
+   "storms": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 00:37 UTC · EONET checked 00:37 UTC · GDACS updated 00:29 UTC · NHC checked 00:37 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 01:46 UTC · EONET checked 01:46 UTC · GDACS updated 00:29 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
-   "eq": "337",
+   "eq": "335",
    "fv": "4",
    "st": "4",
    "ga": "64"
@@ -1959,25 +1959,25 @@
  {
   "view": "p5-phone-event-panel",
   "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "events": "2026-11-01T01:00:00.000Z",
-   "storms": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "events": "2026-11-01T02:00:00.000Z",
+   "storms": "2026-11-01T02:00:00.000Z"
   },
   "snap": "half",
   "probe": "",
-  "detail": "× EVENT · EARTHQUAKES M 6.5 earthquake Bonin Islands, Japan region 7 d ago Sat 24 Oct 21:09 local · Sun 02:09 UTC Magnitude 6.5 mww Depth 492 km below the surface PAGER alert green USGS impact estimate Open source page ↗ Centre map here Earthquakes: USGS · updated Sat 31 Oct 19:37 local · Sun 00:37 UTC",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "detail": "× EVENT · EARTHQUAKES M 6.5 earthquake Bonin Islands, Japan region 7 d ago Sat 24 Oct 21:09 local · Sun 02:09 UTC Magnitude 6.5 mww Depth 492 km below the surface PAGER alert green USGS impact estimate Open source page ↗ Centre map here Earthquakes: USGS · updated Sat 31 Oct 20:46 local · Sun 01:46 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 00:37 UTC · EONET checked 00:37 UTC · GDACS updated 00:29 UTC · NHC checked 00:37 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 01:46 UTC · EONET checked 01:46 UTC · GDACS updated 00:29 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
-   "eq": "337",
+   "eq": "335",
    "fv": "4",
    "st": "4",
    "ga": "64"
@@ -1988,22 +1988,22 @@
  {
   "view": "p5-phone-storm-track",
   "legend": "Wind speed · km/h10 m · GFS 0.75°",
-  "fh": "forecast hour 37",
+  "fh": "forecast hour 38",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-02T07:00:00.000Z",
-   "events": "2026-11-02T07:00:00.000Z",
-   "storms": "2026-11-02T07:00:00.000Z",
-   "field": "2026-11-02T07:00:00.000Z"
+   "timeline": "2026-11-02T08:00:00.000Z",
+   "events": "2026-11-02T08:00:00.000Z",
+   "storms": "2026-11-02T08:00:00.000Z",
+   "field": "2026-11-02T08:00:00.000Z"
   },
   "snap": "half",
   "probe": "",
-  "detail": "× EVENT · STORMS Tropical Storm Testa NHC advisory 7 · 500 AM AST Sat Oct 31 2026 forecast +30 h Mon 2 Nov 01:00 local · 07:00 UTC Max wind 115km/h gusts 144 km/h Pressure 994hPa centre Type Hurricane at that point Moving 22km/h towards 290° NHC forecast point nearest this time: +36 h from advisory 7. The cone shows where the centre will probably track, not the storm's size. Open source page ↗ Centre map here Storm forecasts: NOAA NHC · checked Sat 31 Oct 19:37 local · Sun 00:37 UTC",
-  "time": "+30 h · Mon 01:00 local · 07:00 UTC",
+  "detail": "× EVENT · STORMS Tropical Storm Testa NHC advisory 7 · 500 AM AST Sat Oct 31 2026 forecast +30 h Mon 2 Nov 02:00 local · 08:00 UTC Max wind 115km/h gusts 144 km/h Pressure 994hPa centre Type Hurricane at that point Moving 22km/h towards 290° NHC forecast point nearest this time: +36 h from advisory 7. The cone shows where the centre will probably track, not the storm's size. Open source page ↗ Centre map here Storm forecasts: NOAA NHC · checked Sat 31 Oct 20:46 local · Sun 01:46 UTC",
+  "time": "+30 h · Mon 02:00 local · 08:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. EONET checked 00:37 UTC · NHC checked 00:37 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. EONET checked 01:46 UTC · NHC checked 01:46 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
@@ -2018,26 +2018,26 @@
  {
   "view": "p5-phone-layers-events",
   "legend": "Temperature · °C2 m · GFS 0.5°",
-  "fh": "forecast hour 7",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z",
-   "events": "2026-11-01T01:00:00.000Z",
-   "storms": "2026-11-01T01:00:00.000Z",
-   "field": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "events": "2026-11-01T02:00:00.000Z",
+   "storms": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 00:37 UTC · EONET checked 00:37 UTC · GDACS updated 00:29 UTC · NHC checked 00:37 UTC.",
+  "updated": "Updated 01:30 UTC",
+  "events": "Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 01:46 UTC · EONET checked 01:47 UTC · GDACS updated 00:29 UTC · NHC checked 01:47 UTC.",
   "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
   "photoCredit": null,
   "eventCounts": {
-   "eq": "337",
+   "eq": "335",
    "fv": "4",
    "st": "4",
    "ga": "64"
@@ -2046,22 +2046,23 @@
   "errors": []
  },
  {
-  "view": "p4-desktop-coverage-world",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "view": "p4-desktop-unavailable",
+  "legend": "Temperature · °C2 m · GFS 0.5°",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
+  "photos": "Street photos: unavailable (no Mapillary access token is configured for this site).",
   "photoCredit": null,
   "eventCounts": {
    "eq": "M2.5+",
@@ -2073,242 +2074,23 @@
   "errors": []
  },
  {
-  "view": "p4-desktop-lines-city",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
+  "view": "p4-phone-unavailable",
+  "legend": "Temperature · °C2 m · GFS 0.5°",
+  "fh": "forecast hour 8",
   "measure": null,
   "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
+   "timeline": "2026-11-01T02:00:00.000Z",
+   "field": "2026-11-01T02:00:00.000Z"
   },
   "snap": null,
   "probe": "",
   "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
+  "time": "Now · Sat 21:00 local · Sun 02:00 UTC",
   "legendMsg": null,
   "stale": null,
-  "updated": "Updated 00:22 UTC",
+  "updated": "Updated 01:30 UTC",
   "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": null,
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": []
- },
- {
-  "view": "p4-desktop-dots-times-square",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": null,
-  "probe": "",
-  "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": null,
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": []
- },
- {
-  "view": "p4-desktop-photo-times-square",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": "peek",
-  "probe": "",
-  "detail": "× STREET PHOTO · MAPILLARY Street photo Photo unavailable (Unsupported get request. Object with ID '583651899278955' does not exist, cannot be loaded due to missing permissions, or does not support this operation). Open on Mapillary ↗ Centre map here CC BY-SA 4.0 — Mapillary / …",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": "CC BY-SA 4.0 — Mapillary / …",
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": [
-   "Failed to load resource: the server responded with a status of 400 ()"
-  ]
- },
- {
-  "view": "p4-desktop-photo-brantley",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": null,
-  "probe": "",
-  "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": null,
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": []
- },
- {
-  "view": "p4-phone-coverage-world",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": null,
-  "probe": "",
-  "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": null,
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": []
- },
- {
-  "view": "p4-phone-lines-city",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": null,
-  "probe": "",
-  "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": null,
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": []
- },
- {
-  "view": "p4-phone-dots-times-square",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": null,
-  "probe": "",
-  "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": null,
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": []
- },
- {
-  "view": "p4-phone-photo-times-square",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": "half",
-  "probe": "",
-  "detail": "× STREET PHOTO · MAPILLARY Street photo Photo unavailable (Unsupported get request. Object with ID '583651899278955' does not exist, cannot be loaded due to missing permissions, or does not support this operation). Open on Mapillary ↗ Centre map here CC BY-SA 4.0 — Mapillary / …",
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
-  "photoCredit": "CC BY-SA 4.0 — Mapillary / …",
-  "eventCounts": {
-   "eq": "M2.5+",
-   "fv": "EONET",
-   "st": "NHC · EONET",
-   "ga": "GDACS"
-  },
-  "sampleLabelsVisible": 0,
-  "errors": [
-   "Failed to load resource: the server responded with a status of 400 ()"
-  ]
- },
- {
-  "view": "p4-phone-photo-brantley",
-  "legend": "No layermap only",
-  "fh": "forecast hour 7",
-  "measure": null,
-  "layerTimes": {
-   "timeline": "2026-11-01T01:00:00.000Z"
-  },
-  "snap": null,
-  "probe": "",
-  "detail": null,
-  "time": "Now · Sat 20:00 local · Sun 01:00 UTC",
-  "legendMsg": null,
-  "stale": null,
-  "updated": "Updated 00:22 UTC",
-  "events": "Events from the past 7 days. Turn a type on to load it.",
-  "photos": "Green lines and dots: places with street-level photos. Zoom in and click a dot to see one.",
+  "photos": "Street photos: unavailable (no Mapillary access token is configured for this site).",
   "photoCredit": null,
   "eventCounts": {
    "eq": "M2.5+",
