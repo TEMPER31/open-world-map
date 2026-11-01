@@ -482,6 +482,58 @@ if (part()) {
   await page.close();
 }
 
+// ---- Overlays: main field + up to 2 overlays --------------------------------------------
+section = 4;
+// 18. Overlays on/off, max 2, same-as-main blocked, off = no files, one clock, probe values, reload.
+if (part()) {
+  const { page, errors, reqs } = await open({ field: 'temp', particles: false, overlays: [] }, '3/45/-30');
+  const files = () => reqs.filter(r => /gfs\/(pres|rain|cloud)\//.test(r)).length;
+  for (let i = 0; i < 3; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); }
+  const off0 = files();
+  await page.click('.layers [data-ov="pres"]'); await page.click('.layers [data-ov="rain"]'); await page.waitForTimeout(1500);
+  const third = await page.evaluate(() => { const b = document.querySelector('.layers [data-ov="cloud"]'); b.click(); return { ov: window.owmTest.state.get('overlays'), disabled: b.getAttribute('aria-disabled'), why: b.title, toast: document.querySelector('#toast').textContent }; });
+  check('Overlays: 0 overlay files fetched while none is on', off0 === 0, `${off0} files`);
+  check('Overlays: max 2; a third is disabled with a note why', third.ov.join() === 'pres,rain' && third.disabled === 'true' && /Up to 2/.test(third.why) && /Up to 2/.test(third.toast), JSON.stringify(third));
+  const same = await page.evaluate(() => { const S = window.owmTest.state; S.set({ overlays: ['rain'] }); S.set({ field: 'pres' }); const b = document.querySelector('.layers [data-ov="pres"]'); b.click(); return { ov: S.get('overlays'), disabled: b.getAttribute('aria-disabled'), label: document.querySelector('.layers [data-ovv="pres"]').textContent }; });
+  const drop = await page.evaluate(() => { const S = window.owmTest.state; S.set({ field: 'rain' }); return S.get('overlays'); });
+  check('Overlay same as the main field is blocked ("main field"), and choosing it as the main field drops it from the overlays', same.ov.join() === 'rain' && same.disabled === 'true' && same.label === 'main field' && drop.length === 0, JSON.stringify({ same, drop }));
+  await page.evaluate(() => window.owmTest.state.set({ field: 'temp', overlays: ['pres', 'rain'] }));
+  await page.mouse.move(640, 300); await page.waitForTimeout(1500);
+  const rows = [];
+  for (let i = 0; i < 4; i++) { await page.keyboard.press('ArrowRight'); rows.push(await synced(page)); }
+  const layers = [...new Set(rows.flatMap(r => Object.keys(r.lt)))];
+  check('One clock includes the overlays (ov-pres, ov-rain, H/L) with the field, probe and timeline', rows.every(r => r.ok) && ['ov-pres', 'ov-rain', 'hl', 'field', 'probe'].every(k => layers.includes(k)), `${rows.filter(r => r.ok).length}/4 in sync; slowest ${Math.max(...rows.map(r => r.ms))} ms; layers: ${layers.join(', ')}`);
+  const probe = await page.evaluate(() => ({ text: document.querySelector('#probe').innerText.replace(/\n/g, ' | '), ov: [...document.querySelectorAll('#probe [data-pov]')].map(e => e.dataset.pov) }));
+  await page.mouse.click(640, 300); await page.waitForTimeout(2500);
+  const panel = await page.evaluate(() => [...document.querySelectorAll('#detail .stat')].map(e => e.innerText.replace(/\s+/g, ' ')));
+  check('Probe and place panel show the main field and every overlay', probe.ov.join() === 'pres,rain' && /°C/.test(probe.text) && /hPa/.test(probe.text) && panel.some(t => /Pressure · overlay \d/.test(t)) && panel.some(t => /Precipitation · overlay/.test(t)), JSON.stringify({ probe, panel }));
+  await page.keyboard.press('Escape');
+  // prefetch: next 2 frames of each active overlay; turning them off stops their files
+  const t0 = await page.evaluate(() => window.owmTest.state.get('t')), f0 = await page.evaluate(() => window.owmTest.meta.first);
+  await page.waitForTimeout(1500);
+  const want = ['pres', 'rain'].flatMap(l => [1, 2].map(k => `gfs/${l}/f${String(f0 + t0 + k).padStart(3, '0')}`));
+  const prefetched = want.filter(w => reqs.includes(w));
+  await page.evaluate(() => window.owmTest.state.set({ overlays: [] }));
+  const n1 = files();
+  for (let i = 0; i < 3; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); }
+  check('Overlays prefetch their next 2 frames; turned off they fetch nothing', prefetched.length === want.length && files() === n1, `prefetched ${prefetched.length}/${want.length}; after off: ${files() - n1} files`);
+  await page.evaluate(() => window.owmTest.state.set({ overlays: ['cloud'] }));
+  await page.reload(); await page.waitForFunction(() => window.owmTest?.overlays && window.owmMap?.loaded(), null, { timeout: 60000 });
+  check('Overlays are remembered across reloads', await page.evaluate(() => window.owmTest.state.get('overlays').join() === 'cloud' && !!document.querySelector('.layers [data-ov="cloud"][aria-checked="true"]')));
+  check('No page errors (overlays)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 19. Overlays over "None" and on the phone sheet (44 px rows).
+if (part()) {
+  const { page, errors } = await open({ field: 'none', particles: false, overlays: ['cloud', 'pres'] }, '1/30/-30', { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  await page.waitForTimeout(1500);
+  await page.tap('[data-lyr]'); await page.waitForTimeout(400);
+  const r = await page.evaluate(() => ({ chip: document.querySelector('#mchip').textContent, rows: [...document.querySelectorAll('#lsheet [data-ov]')].map(e => Math.round(e.getBoundingClientRect().height)), lt: Object.keys(window.owmTest.layerTimes()) }));
+  check('Phone: overlays section in the layers sheet (44 px rows); overlays draw over "None"; chip shows "+2"', r.rows.every(h => h >= 44) && /\+2/.test(r.chip) && r.lt.includes('ov-cloud') && r.lt.includes('ov-pres') && !r.lt.includes('field'), JSON.stringify(r));
+  check('No page errors (overlays, phone)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+
 // ---- Phase 4: street photos (Mapillary) ---------------------------------------------------
 section = 3;
 const mly = hosts => Object.entries(hosts).filter(([h]) => /mapillary/.test(h)).reduce((a, [, v]) => a + v.length, 0);
