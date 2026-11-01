@@ -483,7 +483,7 @@ if (part()) {
 }
 
 // ---- Overlays: main field + up to 2 overlays --------------------------------------------
-section = 3;
+section = 4;
 // 18. Overlays on/off, max 2, same-as-main blocked, off = no files, one clock, probe values, reload.
 if (part()) {
   const { page, errors, reqs } = await open({ field: 'temp', particles: false, overlays: [] }, '3/45/-30');
