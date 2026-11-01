@@ -38,6 +38,10 @@ jobs:
           python3 -m py_compile scripts/*.py scripts/data/*.py
       - name: Unit tests (display-unit conversions, great-circle distance)
         run: node scripts/data/unit-tests.mjs
+      - name: Sources probe (events and street-photo hosts, CORS headers, terms text)
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+        run: node scripts/data/sources-probe.mjs sources-probe.md && cat sources-probe.md >> "$GITHUB_STEP_SUMMARY"
 
   data:
     needs: check
@@ -186,6 +190,9 @@ jobs:
           cp -r built/site/data/live base/site/data/live
           (cd base/site && python3 -m http.server 8124 --bind 127.0.0.1 &) ; sleep 2
           node scripts/data/perf.mjs "$RAW/perf.md" "main=http://127.0.0.1:8124/" "${LABEL}=http://127.0.0.1:8123/"
+      - name: Sources probe (events and street-photo hosts; report committed with the others)
+        continue-on-error: true
+        run: node scripts/data/sources-probe.mjs "$RAW/sources-probe.md" > /dev/null
       - name: Satellite imagery probe (USGS services, keyless zoom 16+ over the US)
         continue-on-error: true
         run: node scripts/data/satellite-probe.mjs "$RAW/probe"
@@ -199,7 +206,7 @@ jobs:
       - name: Commit the text reports to the PR branch (no images)
         run: |
           mkdir -p "$OUT"
-          for f in accuracy.md render-tests.md perf.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
+          for f in accuracy.md render-tests.md perf.md sources-probe.md; do [ -f "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
           sizes=""
           for f in views.json run-report.json; do
             [ -f "$RAW/$f" ] || continue
