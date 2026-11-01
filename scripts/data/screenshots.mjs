@@ -137,12 +137,18 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     let n = await nearest();
     if (!n) { const z = await page.evaluate(() => { const z = window.owmMap.getZoom(); window.owmMap.jumpTo({ zoom: 14 }); return z; }); await page.waitForTimeout(2500); n = await nearest(); if (n) { await page.evaluate(([c, z]) => window.owmMap.jumpTo({ center: c, zoom: z }), [n, z]); await page.waitForTimeout(2500); } }
     if (!n) { // none in view even at z14: the image Mapillary lists nearest the place (bbox about 10 km)
-      const c = await page.evaluate(async () => {
-        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js'), { lng: lo, lat: la } = window.owmMap.getCenter();
-        const j = await (await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=20&bbox=${lo - 0.1},${la - 0.1},${lo + 0.1},${la + 0.1}`, { headers: { Authorization: `OAuth ${t}` } })).json();
-        const d = (j.data || []).map(x => x.geometry.coordinates).sort((a, b) => Math.hypot(a[0] - lo, a[1] - la) - Math.hypot(b[0] - lo, b[1] - la));
-        return d[0] || null;
-      }).catch(() => null);
+      const c = await page.evaluate(() => { const { lng, lat } = window.owmMap.getCenter(); return (async (lo, la) => { // nearest image Mapillary lists around lo/la: boxes of 0.098 deg (API max 0.01 sq deg), centre then the 8 around it
+        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js'), h = 0.049, out = { boxes: 0, errors: [] };
+        for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+          const x = lo + dx * 2 * h, y = la + dy * 2 * h; out.boxes++;
+          const r = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=50&bbox=${x - h},${y - h},${x + h},${y + h}`, { headers: { Authorization: `OAuth ${t}` } });
+          const j = await r.json();
+          if (j.error) { out.errors.push(`${r.status} ${j.error.message}`.slice(0, 100)); continue; }
+          const d = (j.data || []).map(i => ({ id: i.id, at: i.geometry.coordinates, km: +Math.hypot((i.geometry.coordinates[0] - lo) * 111.32 * Math.cos(la * Math.PI / 180), (i.geometry.coordinates[1] - la) * 110.57).toFixed(2) })).sort((a, b) => a.km - b.km);
+          if (d.length) return { ...out, found: d.length, nearest: d[0] };
+        }
+        return { ...out, found: 0, nearest: null };
+      })(lng, lat); }).then(r => r.nearest?.at || null, () => null);
       if (c) { await page.evaluate(c => window.owmMap.jumpTo({ center: c, zoom: 17 }), c); await page.waitForTimeout(3000); n = await nearest(); }
     }
     const f = n && await page.evaluate(c => window.owmMap.project(c), n);

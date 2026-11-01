@@ -567,13 +567,18 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
     // still none in view: ask Mapillary for the images nearest the place (bbox about 10 km)
     if (!dots) {
       const [, la, lo] = hash.split('/').map(Number);
-      near = await page.evaluate(async ([lo, la]) => {
-        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js');
-        const r = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=20&bbox=${lo - 0.1},${la - 0.1},${lo + 0.1},${la + 0.1}`, { headers: { Authorization: `OAuth ${t}` } });
-        const j = await r.json(), d = (j.data || []).map(x => ({ id: x.id, c: x.geometry.coordinates, km: Math.hypot((x.geometry.coordinates[0] - lo) * 111 * Math.cos(la * Math.PI / 180), (x.geometry.coordinates[1] - la) * 111) }));
-        d.sort((a, b) => a.km - b.km);
-        return { status: r.status, found: d.length, nearest: d[0] ? { id: d[0].id, km: +d[0].km.toFixed(2), at: d[0].c } : null, err: j.error?.message?.slice(0, 120) || null };
-      }, [lo, la]);
+      near = await page.evaluate(([lo, la]) => (async (lo, la) => { // nearest image Mapillary lists around lo/la: boxes of 0.098 deg (API max 0.01 sq deg), centre then the 8 around it
+        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js'), h = 0.049, out = { boxes: 0, errors: [] };
+        for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+          const x = lo + dx * 2 * h, y = la + dy * 2 * h; out.boxes++;
+          const r = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=50&bbox=${x - h},${y - h},${x + h},${y + h}`, { headers: { Authorization: `OAuth ${t}` } });
+          const j = await r.json();
+          if (j.error) { out.errors.push(`${r.status} ${j.error.message}`.slice(0, 100)); continue; }
+          const d = (j.data || []).map(i => ({ id: i.id, at: i.geometry.coordinates, km: +Math.hypot((i.geometry.coordinates[0] - lo) * 111.32 * Math.cos(la * Math.PI / 180), (i.geometry.coordinates[1] - la) * 110.57).toFixed(2) })).sort((a, b) => a.km - b.km);
+          if (d.length) return { ...out, found: d.length, nearest: d[0] };
+        }
+        return { ...out, found: 0, nearest: null };
+      })(lo, la), [lo, la]);
       if (near.nearest) dots = await at(`17/${near.nearest.at[1]}/${near.nearest.at[0]}`, 'mly-img');
     }
   }
