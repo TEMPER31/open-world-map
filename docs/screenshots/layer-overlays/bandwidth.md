@@ -1,6 +1,6 @@
 # Bandwidth per frame and per 7-day play
 
-Generated 2026-11-01T00:11:28.656Z by `scripts/data/bandwidth.mjs` from the files this PR build produced (GFS run 2026-10-31T18:00:00Z, 137 frames).
+Generated 2026-11-01T00:48:14.313Z by `scripts/data/bandwidth.mjs` from the files this PR build produced (GFS run 2026-10-31T18:00:00Z, 137 frames).
 Sizes are the PNG files as stored (PNG is already compressed). The browser caches each file, so replaying the same run costs nothing more.
 
 | Layer file | Mean per frame (KB) | Largest frame (KB) | All 137 frames (MB) |
