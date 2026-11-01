@@ -61,7 +61,7 @@ export const SATELLITE = [
     // map zoom 15 here (MapLibre zooms count 512 px tiles), and only blurs past it.
     // USGS NAIP Plus (USDA NAIP, 0.6 m, plus state high-resolution orthoimagery where USGS has
     // it) is a dynamic ImageServer: each 512 px tile is one exportImage request for the
-    // tile's bbox (fewer, larger requests than 256 px; see docs/screenshots/satellite-zoom).
+    // tile's bbox (fewer, larger requests than 256 px).
     // format=jpg, not jpgpng: jpgpng sometimes comes back as a ~270 KB PNG (JPEG is ~60 KB),
     // and in CI one such PNG had no red on one side of a source-image seam (a teal tile).
     // Keyless, CORS-enabled. The cached layer stays underneath while these load.

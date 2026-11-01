@@ -137,10 +137,9 @@ docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
 `.github/workflows/pages.yml` runs the checks and builds the data on every pull request,
 push and schedule (four times a day, after each GFS cycle). On `main` it also deploys `site/`
 with the data to GitHub Pages. On pull requests it also takes screenshots, runs the accuracy
-check and the rendering tests: the screenshots and probe images go to the run's
-**ci-screenshots** artifact (kept 30 days), and only the small text reports are committed to
-`docs/screenshots/<branch>/` (`accuracy.md`, `render-tests.md`, and `views.json` /
-`run-report.json` when under ~200 KB). GitHub pauses scheduled workflows after 60 days without
+check and the rendering tests: all output (screenshots, probe images and text
+reports) goes to the run's **ci-screenshots** and **render-tests-*** artifacts; nothing is
+committed. GitHub pauses scheduled workflows after 60 days without
 repository activity; re-enable it from the Actions tab if that happens. To turn it on, set **Settings → Pages → Source:
 GitHub Actions**. Publishing Pages from a private repository needs a paid GitHub plan;
 on a free plan, the repository has to be public.
