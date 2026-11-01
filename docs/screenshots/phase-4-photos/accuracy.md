@@ -1,6 +1,6 @@
 # Accuracy check (phase-4-photos)
 
-Generated 2026-11-01T01:49:33.717Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T18:00:00.000Z, timeline +0 h = 2026-11-01T02:00:00.000Z (f008); live data: true.
+Generated 2026-11-01T02:20:21.608Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T18:00:00.000Z, timeline +0 h = 2026-11-01T02:00:00.000Z (f008); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
@@ -8,7 +8,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 - Page vs raw NOAA GFS 0.25° (grid resolution + encoding), +0 h and +24 h: 46 / 10 / 4
 - Page vs the stored grid before encoding (encoding only), +0 h and +24 h: 40 / 0 / 0
 - Open-Meteo gfs_global: 43 / 13 / 4
-- Open-Meteo gfs_seamless (uses HRRR over the US): 31 / 25 / 4
+- Open-Meteo gfs_seamless (uses HRRR over the US): 35 / 21 / 4
 - Open-Meteo cams_global at the cities: 3 / 7 / 0
 - NWS gridpoints (sanity check): 21 / 3 / 0
 - f120 (+5 d): page vs raw NOAA GFS 0.25°: 25 / 3 / 2
@@ -36,12 +36,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Kansas City MO | +0 h | precip mm/h | 0.14 | gfs_global 0.30 | -0.16 | ±0.3 | ok |
 | Kansas City MO | +0 h | cloud % | 100 | gfs_global 100 | 0 | ±15 | ok |
 | Kansas City MO | +0 h | pressure hPa | 1021.2 | gfs_global 1021.3 | -0.1 | ±1 | ok |
-| Kansas City MO | +0 h | temp °C | 16.7 | gfs_seamless 15.5 | 1.2 | ±1 | **FAIL** |
-| Kansas City MO | +0 h | wind km/h | 11.8 | gfs_seamless 12.0 | -0.2 | ±3 | ok |
-| Kansas City MO | +0 h | wind from ° | 69 | gfs_seamless 99 | 30 | ±20 | **FAIL** |
+| Kansas City MO | +0 h | temp °C | 16.7 | gfs_seamless 15.6 | 1.1 | ±1 | **FAIL** |
+| Kansas City MO | +0 h | wind km/h | 11.8 | gfs_seamless 9.0 | 2.8 | ±3 | ok |
+| Kansas City MO | +0 h | wind from ° | 69 | gfs_seamless 115 | 46 | ±20 | **FAIL** |
 | Kansas City MO | +0 h | precip mm/h | 0.14 | gfs_seamless 0.00 | 0.14 | ±0.3 | ok |
 | Kansas City MO | +0 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
-| Kansas City MO | +0 h | pressure hPa | 1021.2 | gfs_seamless 1022.2 | -1.0 | ±1 | **FAIL** |
+| Kansas City MO | +0 h | pressure hPa | 1021.2 | gfs_seamless 1021.6 | -0.4 | ±1 | ok |
 | Kansas City MO | +0 h | PM2.5 µg/m³ | 8.9 | cams_global 11.8 | -2.9 | ±3 | ok |
 | Kansas City MO | +0 h | temp °C | 16.7 | NWS 17.2 | -0.6 | ±3 | ok |
 | Kansas City MO | +0 h | wind km/h | 11.8 | NWS 9.3 | 2.5 | ±8 | ok |
@@ -63,12 +63,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Kansas City MO | +24 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
 | Kansas City MO | +24 h | cloud % | 100 | gfs_global 100 | 0 | ±15 | ok |
 | Kansas City MO | +24 h | pressure hPa | 1017.3 | gfs_global 1017.5 | -0.2 | ±1 | ok |
-| Kansas City MO | +24 h | temp °C | 17.8 | gfs_seamless 16.9 | 0.9 | ±1 | ok |
-| Kansas City MO | +24 h | wind km/h | 14.8 | gfs_seamless 8.4 | 6.4 | ±3 | **FAIL** |
-| Kansas City MO | +24 h | wind from ° | 140 | gfs_seamless 139 | 1 | ±20 | ok |
+| Kansas City MO | +24 h | temp °C | 17.8 | gfs_seamless 16.1 | 1.7 | ±1 | **FAIL** |
+| Kansas City MO | +24 h | wind km/h | 14.8 | gfs_seamless 7.1 | 7.7 | ±3 | **FAIL** |
+| Kansas City MO | +24 h | wind from ° | 140 | gfs_seamless 137 | 3 | ±20 | ok |
 | Kansas City MO | +24 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
 | Kansas City MO | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
-| Kansas City MO | +24 h | pressure hPa | 1017.3 | gfs_seamless 1019.3 | -2.0 | ±1 | **FAIL** |
+| Kansas City MO | +24 h | pressure hPa | 1017.3 | gfs_seamless 1018.1 | -0.8 | ±1 | ok |
 | Kansas City MO | +24 h | PM2.5 µg/m³ | 5.4 | cams_global 6.0 | -0.6 | ±3 | ok |
 | Kansas City MO | +24 h | temp °C | 17.8 | NWS 17.2 | 0.6 | ±3 | ok |
 | Kansas City MO | +24 h | wind km/h | 14.8 | NWS 7.4 | 7.4 | ±8 | ok |
@@ -100,12 +100,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Miami | +0 h | precip mm/h | 0.50 | gfs_global 2.80 | -2.30 | ±0.3 | **FAIL** |
 | Miami | +0 h | cloud % | 93 | gfs_global 100 | -7 | ±15 | ok |
 | Miami | +0 h | pressure hPa | 1018.3 | gfs_global 1018.4 | -0.1 | ±1 | ok |
-| Miami | +0 h | temp °C | 27.0 | gfs_seamless 25.5 | 1.5 | ±1 | **FAIL** |
-| Miami | +0 h | wind km/h | 27.2 | gfs_seamless 15.0 | 12.2 | ±3 | **FAIL** |
-| Miami | +0 h | wind from ° | 81 | gfs_seamless 90 | 9 | ±20 | ok |
+| Miami | +0 h | temp °C | 27.0 | gfs_seamless 25.4 | 1.6 | ±1 | **FAIL** |
+| Miami | +0 h | wind km/h | 27.2 | gfs_seamless 15.2 | 12.0 | ±3 | **FAIL** |
+| Miami | +0 h | wind from ° | 81 | gfs_seamless 87 | 6 | ±20 | ok |
 | Miami | +0 h | precip mm/h | 0.50 | gfs_seamless 0.00 | 0.50 | ±0.3 | **FAIL** |
 | Miami | +0 h | cloud % | 93 | gfs_seamless 100 | -7 | ±15 | ok |
-| Miami | +0 h | pressure hPa | 1018.3 | gfs_seamless 1019.4 | -1.1 | ±1 | **FAIL** |
+| Miami | +0 h | pressure hPa | 1018.3 | gfs_seamless 1018.3 | 0.0 | ±1 | ok |
 | Miami | +0 h | PM2.5 µg/m³ | 9.4 | cams_global 5.7 | 3.7 | ±3 | **FAIL** |
 | Miami | +0 h | temp °C | 27.0 | NWS 27.2 | -0.2 | ±3 | ok |
 | Miami | +0 h | wind km/h | 27.2 | NWS 25.9 | 1.3 | ±8 | ok |
@@ -127,12 +127,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Miami | +24 h | precip mm/h | 2.72 | gfs_global 1.70 | 1.02 | ±0.3 | **FAIL** |
 | Miami | +24 h | cloud % | 100 | gfs_global 100 | 0 | ±15 | ok |
 | Miami | +24 h | pressure hPa | 1017.1 | gfs_global 1017.0 | 0.1 | ±1 | ok |
-| Miami | +24 h | temp °C | 25.9 | gfs_seamless 23.2 | 2.7 | ±1 | **FAIL** |
-| Miami | +24 h | wind km/h | 29.2 | gfs_seamless 22.0 | 7.2 | ±3 | **FAIL** |
-| Miami | +24 h | wind from ° | 94 | gfs_seamless 69 | 25 | ±20 | **FAIL** |
+| Miami | +24 h | temp °C | 25.9 | gfs_seamless 25.1 | 0.8 | ±1 | ok |
+| Miami | +24 h | wind km/h | 29.2 | gfs_seamless 15.9 | 13.3 | ±3 | **FAIL** |
+| Miami | +24 h | wind from ° | 94 | gfs_seamless 94 | 0 | ±20 | ok |
 | Miami | +24 h | precip mm/h | 2.72 | gfs_seamless 0.00 | 2.72 | ±0.3 | **FAIL** |
-| Miami | +24 h | cloud % | 100 | gfs_seamless 93 | 7 | ±15 | ok |
-| Miami | +24 h | pressure hPa | 1017.1 | gfs_seamless 1019.1 | -2.0 | ±1 | **FAIL** |
+| Miami | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
+| Miami | +24 h | pressure hPa | 1017.1 | gfs_seamless 1018.7 | -1.6 | ±1 | **FAIL** |
 | Miami | +24 h | PM2.5 µg/m³ | 6.9 | cams_global 5.2 | 1.7 | ±3 | ok |
 | Miami | +24 h | temp °C | 25.9 | NWS 26.1 | -0.2 | ±3 | ok |
 | Miami | +24 h | wind km/h | 29.2 | NWS 27.8 | 1.4 | ±8 | ok |
@@ -164,12 +164,12 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Denver | +0 h | precip mm/h | 0.00 | gfs_global 0.00 | 0.00 | ±0.3 | ok |
 | Denver | +0 h | cloud % | 40 | gfs_global 100 | -60 | ±15 | **FAIL** |
 | Denver | +0 h | pressure hPa | 1015.1 | gfs_global 1013.9 | 1.2 | ±1 | **FAIL** |
-| Denver | +0 h | temp °C | 10.0 | gfs_seamless 12.0 | -2.0 | ±1 | **FAIL** |
-| Denver | +0 h | wind km/h | 3.4 | gfs_seamless 3.7 | -0.3 | ±3 | ok |
-| Denver | +0 h | wind from ° | 103 | gfs_seamless 114 | — | ±20 | calm |
+| Denver | +0 h | temp °C | 10.0 | gfs_seamless 11.7 | -1.7 | ±1 | **FAIL** |
+| Denver | +0 h | wind km/h | 3.4 | gfs_seamless 5.9 | -2.5 | ±3 | ok |
+| Denver | +0 h | wind from ° | 103 | gfs_seamless 133 | — | ±20 | calm |
 | Denver | +0 h | precip mm/h | 0.00 | gfs_seamless 0.00 | 0.00 | ±0.3 | ok |
-| Denver | +0 h | cloud % | 40 | gfs_seamless 100 | -60 | ±15 | **FAIL** |
-| Denver | +0 h | pressure hPa | 1015.1 | gfs_seamless 1013.5 | 1.6 | ±1 | **FAIL** |
+| Denver | +0 h | cloud % | 40 | gfs_seamless 73 | -33 | ±15 | **FAIL** |
+| Denver | +0 h | pressure hPa | 1015.1 | gfs_seamless 1013.1 | 2.0 | ±1 | **FAIL** |
 | Denver | +0 h | PM2.5 µg/m³ | 0.7 | cams_global 24.2 | -23.5 | ±3 | **FAIL** |
 | Denver | +0 h | temp °C | 10.0 | NWS 13.3 | -3.4 | ±3 | **FAIL** |
 | Denver | +0 h | wind km/h | 3.4 | NWS 3.7 | -0.3 | ±8 | ok |
@@ -192,11 +192,11 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Denver | +24 h | cloud % | 100 | gfs_global 100 | 0 | ±15 | ok |
 | Denver | +24 h | pressure hPa | 999.5 | gfs_global 997.7 | 1.8 | ±1 | **FAIL** |
 | Denver | +24 h | temp °C | 13.4 | gfs_seamless 11.4 | 2.0 | ±1 | **FAIL** |
-| Denver | +24 h | wind km/h | 12.3 | gfs_seamless 3.4 | 8.9 | ±3 | **FAIL** |
-| Denver | +24 h | wind from ° | 0 | gfs_seamless 284 | 76 | ±20 | **FAIL** |
+| Denver | +24 h | wind km/h | 12.3 | gfs_seamless 4.7 | 7.6 | ±3 | **FAIL** |
+| Denver | +24 h | wind from ° | 0 | gfs_seamless 153 | 153 | ±20 | **FAIL** |
 | Denver | +24 h | precip mm/h | 0.03 | gfs_seamless 0.00 | 0.03 | ±0.3 | ok |
 | Denver | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
-| Denver | +24 h | pressure hPa | 999.5 | gfs_seamless 1001.9 | -2.4 | ±1 | **FAIL** |
+| Denver | +24 h | pressure hPa | 999.5 | gfs_seamless 998.3 | 1.2 | ±1 | **FAIL** |
 | Denver | +24 h | PM2.5 µg/m³ | 1.5 | cams_global 5.0 | -3.5 | ±3 | **FAIL** |
 | Denver | +24 h | temp °C | 13.4 | NWS 12.8 | 0.6 | ±3 | ok |
 | Denver | +24 h | wind km/h | 12.3 | NWS 5.6 | 6.8 | ±8 | ok |
@@ -381,7 +381,7 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 
 ## Air quality at 4° grid nodes
 
-Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T17:15:17Z (8.6 h before this check), valid hour 2026-11-01T02:00:00Z.
+Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T17:15:17Z (9.1 h before this check), valid hour 2026-11-01T02:00:00Z.
 
 | Node | Time | Page PM2.5 | Downloaded | Diff | Tol | | CAMS now | Page − now |
 |---|---|---|---|---|---|---|---|---|
