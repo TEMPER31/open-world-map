@@ -136,6 +136,15 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     const nearest = () => page.evaluate(() => { const m = window.owmMap, c = m.getCenter(), fs = m.getLayer('mly-img') ? m.queryRenderedFeatures({ layers: ['mly-img'] }) : []; fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0]?.geometry.coordinates; });
     let n = await nearest();
     if (!n) { const z = await page.evaluate(() => { const z = window.owmMap.getZoom(); window.owmMap.jumpTo({ zoom: 14 }); return z; }); await page.waitForTimeout(2500); n = await nearest(); if (n) { await page.evaluate(([c, z]) => window.owmMap.jumpTo({ center: c, zoom: z }), [n, z]); await page.waitForTimeout(2500); } }
+    if (!n) { // none in view even at z14: the image Mapillary lists nearest the place (bbox about 10 km)
+      const c = await page.evaluate(async () => {
+        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js'), { lng: lo, lat: la } = window.owmMap.getCenter();
+        const j = await (await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=20&bbox=${lo - 0.1},${la - 0.1},${lo + 0.1},${la + 0.1}`, { headers: { Authorization: `OAuth ${t}` } })).json();
+        const d = (j.data || []).map(x => x.geometry.coordinates).sort((a, b) => Math.hypot(a[0] - lo, a[1] - la) - Math.hypot(b[0] - lo, b[1] - la));
+        return d[0] || null;
+      }).catch(() => null);
+      if (c) { await page.evaluate(c => window.owmMap.jumpTo({ center: c, zoom: 17 }), c); await page.waitForTimeout(3000); n = await nearest(); }
+    }
     const f = n && await page.evaluate(c => window.owmMap.project(c), n);
     if (f) { await page.mouse.click(box.x + f.x, box.y + f.y); await page.waitForTimeout(3000); }
     if (v.snap && v.phone) { await page.evaluate(s => window.owmTest.sheets?.place.set(s), v.snap); await page.waitForTimeout(800); }
