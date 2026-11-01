@@ -1,6 +1,6 @@
 # Accuracy check (phase-4-photos)
 
-Generated 2026-11-01T02:47:59.086Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T18:00:00.000Z, timeline +0 h = 2026-11-01T03:00:00.000Z (f009); live data: true.
+Generated 2026-11-01T03:19:02.397Z by `scripts/data/accuracy.mjs`. Site data: GFS run 2026-10-31T18:00:00.000Z, timeline +0 h = 2026-11-01T03:00:00.000Z (f009); live data: true.
 Values are read through the page's own code (`getGrid` + `sample` + `reading()`), bilinear at the city's coordinates.
 References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo `cams_global`.
 
@@ -10,7 +10,7 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 - Open-Meteo gfs_global: 44 / 12 / 4
 - Open-Meteo gfs_seamless (uses HRRR over the US): 32 / 24 / 4
 - Open-Meteo cams_global at the cities: 3 / 7 / 0
-- NWS gridpoints (sanity check): 20 / 4 / 0
+- NWS gridpoints (sanity check): 21 / 3 / 0
 - f120 (+5 d): page vs raw NOAA GFS 0.25°: 25 / 3 / 2
 - f120 (+5 d): page vs the stored grid (encoding only): 20 / 0 / 0
 - Grid alignment at 0.5° nodes: 27 / 0 / 0
@@ -43,9 +43,9 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Kansas City MO | +0 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
 | Kansas City MO | +0 h | pressure hPa | 1021.4 | gfs_seamless 1022.1 | -0.7 | ±1 | ok |
 | Kansas City MO | +0 h | PM2.5 µg/m³ | 8.6 | cams_global 11.9 | -3.3 | ±3 | **FAIL** |
-| Kansas City MO | +0 h | temp °C | 16.3 | NWS 16.7 | -0.3 | ±3 | ok |
+| Kansas City MO | +0 h | temp °C | 16.3 | NWS 16.1 | 0.2 | ±3 | ok |
 | Kansas City MO | +0 h | wind km/h | 12.2 | NWS 7.4 | 4.8 | ±8 | ok |
-| Kansas City MO | +0 h | cloud % | 100 | NWS 86 | 14 | ±30 | ok |
+| Kansas City MO | +0 h | cloud % | 100 | NWS 96 | 4 | ±30 | ok |
 | Kansas City MO | +0 h | precip mm/h | 0.07 | NWS 0.08 | -0.01 | ±1 | ok |
 | Kansas City MO | +24 h | temp °C | 17.6 | GFS 0.25° raw 17.7 | -0.1 | ±0.7 | ok |
 | Kansas City MO | +24 h | wind km/h | 16.6 | GFS 0.25° raw 16.3 | 0.3 | ±3 | ok |
@@ -70,9 +70,9 @@ References: Open-Meteo `gfs_global` / `gfs_seamless` (may come from a different 
 | Kansas City MO | +24 h | cloud % | 100 | gfs_seamless 100 | 0 | ±15 | ok |
 | Kansas City MO | +24 h | pressure hPa | 1017.0 | gfs_seamless 1017.9 | -0.9 | ±1 | ok |
 | Kansas City MO | +24 h | PM2.5 µg/m³ | 5.3 | cams_global 5.5 | -0.2 | ±3 | ok |
-| Kansas City MO | +24 h | temp °C | 17.6 | NWS 17.2 | 0.4 | ±3 | ok |
-| Kansas City MO | +24 h | wind km/h | 16.6 | NWS 7.4 | 9.2 | ±8 | **FAIL** |
-| Kansas City MO | +24 h | cloud % | 100 | NWS 75 | 25 | ±30 | ok |
+| Kansas City MO | +24 h | temp °C | 17.6 | NWS 17.8 | -0.1 | ±3 | ok |
+| Kansas City MO | +24 h | wind km/h | 16.6 | NWS 9.3 | 7.3 | ±8 | ok |
+| Kansas City MO | +24 h | cloud % | 100 | NWS 84 | 16 | ±30 | ok |
 | Kansas City MO | +24 h | precip mm/h | 0.00 | NWS 0.00 | 0.00 | ±1 | ok |
 | Kansas City MO | +111 h | temp °C | 9.8 | GFS 0.25° raw 9.8 | 0.1 | ±0.7 | ok |
 | Kansas City MO | +111 h | wind km/h | 14.0 | GFS 0.25° raw 14.7 | -0.8 | ±3 | ok |
@@ -381,7 +381,7 @@ The stored grids (temperature 0.5° every second point, wind 0.75° every third 
 
 ## Air quality at 4° grid nodes
 
-Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T17:15:17Z (9.5 h before this check), valid hour 2026-11-01T03:00:00Z.
+Pass/fail: page vs the pm2_5 the data job downloaded for that hour (`aq/nodes.json`). For information: page vs the CAMS forecast Open-Meteo serves at test time. These differ when the air-quality files were built from an earlier CAMS run; the files shown were built 2026-10-31T17:15:17Z (10.1 h before this check), valid hour 2026-11-01T03:00:00Z.
 
 | Node | Time | Page PM2.5 | Downloaded | Diff | Tol | | CAMS now | Page − now |
 |---|---|---|---|---|---|---|---|---|
