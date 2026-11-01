@@ -5,8 +5,8 @@ screenshots are in the run's `ci-screenshots` artifact (30 days). GFS run 31 Oct
 
 **Summary.** One main colored field plus up to 2 overlays: clouds (translucent veil), rain (only where it rains),
 isobars + H/L (lines only). Wind particles keep their own switch. **88 of 90 render checks pass; all 10 overlay checks
-pass.** The 2 failures are the live Mapillary photo checks, which this branch inherits from PR 2 and which wait on the
-owner's Mapillary app check. Each overlay downloads one more file per frame: +102 to +142 KB per frame, +14 to +19 MB
+pass.** The 2 failures are PR 2's live Mapillary checks for Brantley, AL, which has no Mapillary imagery (0 images within
+about 15 km); Times Square loads a real photo. Each overlay downloads one more file per frame: +102 to +142 KB per frame, +14 to +19 MB
 for a full 7-day play. Pan speed with no overlays matches main (7.0 vs 7.5 frames/s). With 2 overlays it drops to 2.5
 frames/s in CI's software graphics. Added JS is **6.2 KB** (guide ~10 KB). Weather files and Open-Meteo calls are
 unchanged.
@@ -39,12 +39,12 @@ unchanged.
 | Prefetch 2 frames per active layer only | Pass | 4/4 next-frame files for 2 overlays; nothing for overlays that are off | — |
 | Probe + place panel show every overlay | Pass | Probe "12 °C · Pressure 1028 hPa · Rain Dry"; panel "Pressure · overlay", "Precipitation · overlay" | — |
 | Phone | Pass | Overlay rows 44 px; overlays draw over "None"; chip "No layer +2" | — |
-| No page errors | Pass | Overlay sections 0; screenshots: 0 errors except the 2 PR 2 photo views (Mapillary HTTP 400) | Mapillary: PR 2 |
+| No page errors | Pass | Overlay sections 0; screenshots: 0 errors | — |
 | Screenshots desktop + phone | Done | `ov-desktop-temp-isobars-rain`, `ov-desktop-wind-clouds`, `ov-desktop-layers`, `ov-phone-temp-isobars-rain`, `ov-phone-wind-clouds`, `ov-phone-layers` | — |
-| Phase 3/4/5 tests and accuracy | Phase 3 and 5 pass; Phase 4 passes except the 2 live Mapillary checks | 88/90. Accuracy: encoding-only 40/0, grid alignment 27/0 (unchanged) | Live photos: PR 2 |
+| Phase 3/4/5 tests and accuracy | Phase 3 and 5 pass; Phase 4 passes except the 2 live Mapillary checks | 88/90. Accuracy: encoding-only 40/0, grid alignment 27/0 (unchanged) | Brantley imagery: PR 2 |
 | Sizes and calls unchanged | Pass | No data-job changes; weather file sizes as before (temp 142.6, wind 146.8, pres 142.4 KB per frame; largest 153.2 KB) | — |
 | Added JS ≤ ~10 KB | **6.2 KB** | `overlays.js` 4.4 KB + main/state/field-gl net | — |
-| CI green | Workflow green; render tests run with continue-on-error, so the 2 live-photo failures show in the report | — | Live photos: PR 2 |
+| CI green | Workflow green; render tests run with continue-on-error, so the 2 live-photo failures show in the report | — | Brantley imagery: PR 2 |
 
 ## Bandwidth (this run's files, GFS 31 Oct 18Z, 137 frames)
 
@@ -87,7 +87,7 @@ verify about 18). PR 2's run took 28.5 minutes.
 ## Unresolved
 
 - Pan speed with 2 overlays on real hardware (owner check).
-- Live Mapillary photo checks: PR 2, waiting on the Mapillary app's Read access / token type.
+- PR 2's Brantley checks fail on missing Mapillary imagery there (owner decision in PR 2).
 
 ## Live checks for the owner (after merge and deploy)
 
