@@ -281,7 +281,7 @@ jobs:
 
   verify:
     # Collects the text reports of the jobs above and commits them (no images).
-    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.data.result == 'success'
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.data.result == 'success' }}
     needs: [data, verify-tests, verify-shots]
     runs-on: ubuntu-latest
     permissions:
