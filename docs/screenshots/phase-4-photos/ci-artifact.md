@@ -1,5 +1,5 @@
 # CI output for this branch
 
 Screenshots, probe output and any report over 200 KB are in the workflow artifact
-**ci-screenshots** of run https://github.com/TEMPER31/open-world-map/actions/runs/41246834953 (kept 30 days).
-Sizes this run: views.json 66 KB; run-report.json 316 KB;
+**ci-screenshots** of run https://github.com/TEMPER31/open-world-map/actions/runs/41253811586 (kept 30 days).
+Sizes this run: views.json 66 KB; run-report.json 317 KB;
