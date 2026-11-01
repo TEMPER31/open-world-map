@@ -1,6 +1,6 @@
 # Sources probe
 
-Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitHub Actions, with `Origin: https://temper31.github.io`.
+Generated 2026-10-31T21:41:36.249Z by `scripts/data/sources-probe.mjs` from GitHub Actions, with `Origin: https://temper31.github.io`.
 
 ## Data endpoints
 
@@ -8,20 +8,20 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson`
 
-- HTTP 200 in 106 ms · 239,708 bytes · content-type application/json; charset=utf-8
-- Access-Control-Allow-Origin: ***** · cache-control: public, max-age=60 · last-modified: Sat, 31 Oct 2026 20:20:24 GMT
-- features: 339; metadata: {"generated":1793478024000,"url":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson","title":"USGS Magnitude 2.5+ Earthquakes, Past Week","status":200,"api":"2.8.2","count":339}
+- HTTP 200 in 143 ms · 238,296 bytes · content-type application/json; charset=utf-8
+- Access-Control-Allow-Origin: ***** · cache-control: public, max-age=60 · last-modified: Sat, 31 Oct 2026 21:41:29 GMT
+- features: 337; metadata: {"generated":1793482889000,"url":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson","title":"USGS Magnitude 2.5+ Earthquakes, Past Week","status":200,"api":"2.8.2","count":337}
 - property keys: mag, place, time, updated, tz, url, detail, felt, cdi, mmi, alert, status, tsunami, sig, net, code, ids, sources, types, nst, dmin, rms, gap, magType, type, title
-- first feature: {"geometry":"Point","coords":[-66.8773333333333,17.9428333333333,14.85],"properties":{"mag":3.15,"place":"4 km SSE of Maria Antonia, Puerto Rico","time":1793476688010,"updated":1793477884650,"tz":null,"url":"https://earthquake.usgs.gov/earthquakes/eventpage/pr71538103","detail":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/pr71538103.geojson","felt":null,"cdi":null,"mmi":null,"alert":null,"status":"reviewed","tsunami":0,"sig":153,"net":"pr","code":"71538103","ids":",pr71538103,","sources":",pr,","types":",origin,phase-data,","nst":25,"dmin":0.0321,"rms":0.13,"gap":181,"magType":"md","type":"earthquake","title":"M 3.2 - 4 km SSE of Maria Antonia, Puerto Rico"}}
-- geometry/class counts: {"Point":339}
+- first feature: {"geometry":"Point","coords":[51.5076,28.114,10],"properties":{"mag":5,"place":"115 km SE of Bushehr, Iran","time":1793481639173,"updated":1793482556040,"tz":null,"url":"https://earthquake.usgs.gov/earthquakes/eventpage/us7000tukm","detail":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us7000tukm.geojson","felt":null,"cdi":null,"mmi":null,"alert":null,"status":"reviewed","tsunami":0,"sig":385,"net":"us","code":"7000tukm","ids":",us7000tukm,","sources":",us,","types":",origin,phase-data,","nst":81,"dmin":5.258,"rms":0.75,"gap":58,"magType":"mb","type":"earthquake","title":"M 5.0 - 115 km SE of Bushehr, Iran"}}
+- geometry/class counts: {"Point":337}
 
 ### USGS significant past 7 days
 
 `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson`
 
-- HTTP 200 in 10 ms · 1,778 bytes · content-type application/json; charset=utf-8
-- Access-Control-Allow-Origin: ***** · cache-control: public, max-age=60 · last-modified: Sat, 31 Oct 2026 20:20:02 GMT
-- features: 2; metadata: {"generated":1793478002000,"url":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson","title":"USGS Significant Earthquakes, Past Week","status":200,"api":"2.8.2","count":2}
+- HTTP 200 in 18 ms · 1,778 bytes · content-type application/json; charset=utf-8
+- Access-Control-Allow-Origin: ***** · cache-control: public, max-age=60 · last-modified: Sat, 31 Oct 2026 21:40:51 GMT
+- features: 2; metadata: {"generated":1793482851000,"url":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson","title":"USGS Significant Earthquakes, Past Week","status":200,"api":"2.8.2","count":2}
 - property keys: mag, place, time, updated, tz, url, detail, felt, cdi, mmi, alert, status, tsunami, sig, net, code, ids, sources, types, nst, dmin, rms, gap, magType, type, title
 - first feature: {"geometry":"Point","coords":[-98.0489,-36.4058,10],"properties":{"mag":6.4,"place":"southeast of Easter Island","time":1793260190928,"updated":1793356727040,"tz":null,"url":"https://earthquake.usgs.gov/earthquakes/eventpage/us7000ttxz","detail":"https://earthquake.usgs.gov/earthquakes/feed/v1.0/detail/us7000ttxz.geojson","felt":null,"cdi":null,"mmi":0,"alert":"green","status":"reviewed","tsunami":0,"sig":630,"net":"us","code":"7000ttxz","ids":",us7000ttxz,","sources":",us,","types":",losspager,moment-tensor,origin,phase-data,shakemap,","nst":83,"dmin":13.321,"rms":1.32,"gap":39,"magType":"mww","type":"earthquake","title":"M 6.4 - southeast of Easter Island"}}
 - geometry/class counts: {"Point":2}
@@ -30,7 +30,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=7`
 
-- HTTP 200 in 195 ms · 69,397 bytes · content-type application/rss+xml; charset=utf-8
+- HTTP 200 in 2203 ms · 69,397 bytes · content-type application/rss+xml; charset=utf-8
 - Access-Control-Allow-Origin: ***** · cache-control: no-cache, private · last-modified: —
 - rate headers: x-ratelimit-limit: 60; x-ratelimit-remaining: 59
 - events: 15; keys: id, title, description, link, closed, categories, sources, geometry
@@ -41,7 +41,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://eonet.gsfc.nasa.gov/api/v3/categories`
 
-- HTTP 200 in 127 ms · 4,469 bytes · content-type application/rss+xml; charset=utf-8
+- HTTP 200 in 362 ms · 4,469 bytes · content-type application/rss+xml; charset=utf-8
 - Access-Control-Allow-Origin: ***** · cache-control: no-cache, private · last-modified: —
 - categories: drought (Drought), dustHaze (Dust and Haze), earthquakes (Earthquakes), floods (Floods), landslides (Landslides), manmade (Manmade), seaLakeIce (Sea and Lake Ice), severeStorms (Severe Storms), snow (Snow), tempExtremes (Temperature Extremes), volcanoes (Volcanoes), waterColor (Water Color), wildfires (Wildfires)
 
@@ -49,7 +49,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://www.gdacs.org/gdacsapi/api/events/geteventlist/MAP`
 
-- HTTP 400 in 391 ms · 36 bytes · content-type application/json; charset=utf-8
+- HTTP 400 in 1212 ms · 36 bytes · content-type application/json; charset=utf-8
 - Access-Control-Allow-Origin: ***** · cache-control: — · last-modified: —
 - json: {"message":"Eventtype is required."}
 
@@ -57,15 +57,18 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?fromDate=2026-10-24&toDate=2026-11-01&alertlevel=Green;Orange;Red`
 
-- HTTP 200 in 993 ms · 136,871 bytes · content-type application/json; charset=utf-8
+- HTTP 200 in 1679 ms · 136,770 bytes · content-type application/json; charset=utf-8
 - Access-Control-Allow-Origin: ***** · cache-control: — · last-modified: —
-- not JSON (Cannot read properties of undefined (reading 'length')); body: {"type":"FeatureCollection","features":[{"type":"Feature","bbox":[-172.7931,51.6994,-172.7931,51.6994],"geometry":{"type":"Point","coordinates":[-172.7931,51.6994]},"properties":{"eventtype":"EQ","eventid":1574979,"episodeid":1743957,"eventname":"","glide":"","name":"Earthquake in United States","de…
+- features: 100; metadata: undefined
+- property keys: eventtype, eventid, episodeid, eventname, glide, name, description, htmldescription, icon, iconoverall, url, alertlevel, alertscore, episodealertlevel, episodealertscore, istemporary, iscurrent, country, fromdate, todate, datemodified, iso3, source, sourceid, polygonlabel, Class, affectedcountries, severitydata
+- first feature: {"geometry":"Point","coords":[51.5076,28.114],"properties":{"eventtype":"EQ","eventid":1574991,"episodeid":1743971,"eventname":"","glide":"","name":"Earthquake in Iran","description":"Earthquake in Iran","htmldescription":"Green M 5 Earthquake in Iran at: 31 Oct 2026 21:20:39.","icon":"https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png","iconoverall":"https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png","url":{"geometry":"https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=EQ&eventid=1574991&episodeid=1743971","report":"https://www.gdacs.org/report.aspx?eventid=1574991&episodeid=1743971&eventtype=EQ","details":"https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=EQ&eventid=1574991"},"alertlevel":"Green","alertscore":1,"episodealertlevel":"Green","episodealertscore":0,"istemporary":"true","iscurrent":"true","country":"Iran","fromdate":"2026-10-31T21:20:39","todate":"2026-10-31T21:20:39","datemodified":"2026-10-31T21:38:42","iso3":"IRN","source":"NEIC","sourceid":"","polygonlabel":"Centroid","Class":"Point_Centroid","affectedcountries":[],"severitydata":{"severity":5,"severitytext":"Magnitude 5M, Depth:10km","severityunit":"M"}}}
+- geometry/class counts: {"Point Point_Centroid EQ":10,"Point Point_Centroid TC":1,"Point Point_Centroid FL":2,"Point Point_Centroid WF":87}
 
 ### GDACS swagger
 
 `https://www.gdacs.org/gdacsapi/swagger/v1/swagger.json`
 
-- HTTP 200 in 147 ms · 151,598 bytes · content-type application/json;charset=utf-8
+- HTTP 200 in 238 ms · 151,598 bytes · content-type application/json;charset=utf-8
 - Access-Control-Allow-Origin: **—** · cache-control: — · last-modified: —
 - paths: /api/AdaptiveCard/getevent/data | /api/AdaptiveCard/getevent/card | /api/AdaptiveCard/geteventlist/data | /api/AdaptiveCard/geteventlist/card | /api/AdaptiveCard/geteventlist/schema | /api/CopernicusActivation/getcopernicusaoi | /api/CopernicusActivation/getcopernicusobserved | /api/Cyclonesurge/getdetails | /api/Cyclonesurge/gettcactive4de | /api/admin/Documents/download | /api/admin/Documents/getdocumentsbyevent | /api/admin/Documents/getdocumentsbytext | /api/Emdat/getemdatbyeventkey | /api/Emdat/getemdatbydisno | /api/Emdat/getemdatbyiso3 | /api/Emdat/getemdatbyiso3list | /api/Emdat/getemdatlist | /api/Emm/getemmnewsbykey | /api/Emm/getemmnewsstatisticbykey | /api/Events/geteventdata | /api/Events/geteventdataapp | /api/Events/getepisodedata | /api/Events/geteventlist/map | /api/Events/geteventlist/homepagetable | /api/Events/geteventlist/forsocial | /api/Events/geteventlist/allpaging | /api/Events/geteventlist/archive | /api/Events/geteventlist/eventsbyarea | /api/Events/geteventlist/search | /api/Events/geteventlist/latest | /api/Events/geteventlist/statistic | /api/Events/geteventlist/events4app | /api/Events/getstructure/forsocial | /api/Events/getepisodealertlevel | /api/Events/geteventalertlevel | /api/Events/getnpp | /api/Export/getlocations | /api/Export/getids | /api/Export/getaffectedlocations | /api/Export/getimpact | /api/Export/gettimeline | /api/Export/getpopdense | /api/Export/getaoi | /api/FloodGfm/getfloodgfmwmsbykeys/bydate | /api/FloodGfm/getfloodgfmwmsbykeys/overall | /api/Gts/getdatabykey | /api/Gts/getdatabyperiod | /Api/InfoProduct/getinfoproduct | /api/News/getnewsbygdacskey | /api/Polygons/getgeometry | /api/Polygons/getgeometry/aoi | /api/Shakemap/getdetails | /api/Shakemap/getgeometry | /api/azurecontent/StaticData/comparefiles | /api/azurecontent/StaticData/updaterepository | /api/azurecontent/StaticData/updategenericrepository | /api/azurecontent/StaticData/updategenericrepositorysync | /api/Vaac/getgeometry | /api/Vaac/getvaacdata | /api/Vaac/getvaacbulletin | /api/Vaac/getvaacbulletintext | /api/Vaac/getgeometrypop | /api/Volcano/getseismicdata | /api/Volcano/getvolcanoesinfo | /api/Volcano/getvolcanoesinfoinperiod | /api/Volcano/getvolcanoinfo | /api/Volcano/getseismicdata_area | /api/VolcanoAdditional/getmountdata | /api/VolcanoAdditional/getmirovadata | /api/VolcanoSmithNews/getsmithsonianbyvolcanoid | /api/VolcanoSmithNews/getsmithsonianbykey
 - event list params: {"get":{"tags":["AdaptiveCard"],"summary":"Search a list of events by parameter, it returns the first 100 elements, it is possible to obtain record by paging specifying the page size and page number.\r\nThe records are ordered by todate desc","parameters":[{"name":"eventlist","in":"query","description":"the list of eventtypes to search","schema":{"type":"string"}},{"name":"alertlevel","in":"query","description":"the alertlevel filter","schema":{"type":"string"}},{"name":"fromDate","in":"query","description":"Optional: the datestart to filter","schema":{"type":"string","format":"date-time"}},{"name":"toDate","in":"query","description":"Optional: the dateend  to filter","schema":{"type":"string","format":"date-time"}},{"name":"country","in":"query","description":"Optional: the country  to filter","schema":{"type":"string"}},{"name":"pageSize","in":"query","description":"Optional: the number of record in the page (Max 100)","schema":{"type":"integer","format":"int32"}},{"name":"pageNumber","in":"query","description":"Optional: the page number of recordset","schema":{"type":"integer","format":"int32"}}],"responses":{"200":{"description":"OK"}}}}
@@ -82,7 +85,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://www.nhc.noaa.gov/productexamples/NHC_JSON_Sample.json`
 
-- HTTP 200 in 59 ms · 15,363 bytes · content-type application/json
+- HTTP 200 in 341 ms · 15,363 bytes · content-type application/json
 - Access-Control-Allow-Origin: **—** · cache-control: max-age=300 · last-modified: Fri, 14 Feb 2025 16:02:12 GMT
 - activeStorms: 4
 - storm: {"id":"al062023","binNumber":"AT1","name":"Gert","classification":"TD","intensity":"25","pressure":"1008","latitude":"17.1N","longitude":"58.4W","latitudeNumeric":17.1,"longitudeNumeric":-58.4,"movementDir":285,"movementSpeed":9,"lastUpdate":"2023-08-22T03:00:00.000Z","publicAdvisory":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","url":"https://www.nhc.noaa.gov/text/MIATCPAT1.shtml"},"forecastAdvisory":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","url":"https://www.nhc.noaa.gov/text/MIATCMAT1.shtml"},"windSpeedProbabilities":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","url":"https://www.nhc.noaa.gov/text/MIAPWSAT1.shtml"},"forecastDiscussion":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","url":"https://www.nhc.noaa.gov/text/MIATCDAT1.shtml"},"forecastGraphics":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","url":"https://www.nhc.noaa.gov/graphics_at1.shtml"},"forecastTrack":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","zipFile":"https://www.nhc.noaa.gov/gis/forecast/archive/al062023_5day_011.zip","kmzFile":"https://www.nhc.noaa.gov/storm_graphics/api/AL062023_011adv_TRACK.kmz"},"windWatchesWarnings":null,"trackCone":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","zipFile":"https://www.nhc.noaa.gov/gis/forecast/archive/al062023_5day_011.zip","kmzFile":"https://www.nhc.noaa.gov/storm_graphics/api/AL062023_011adv_CONE.kmz"},"initialWindExtent":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","zipFile":"https://www.nhc.noaa.gov/gis/forecast/archive/al062023_fcst_011.zip","kmzFile":"https://www.nhc.noaa.gov/storm_graphics/api/AL062023_initialradii_011adv.kmz"},"forecastWindRadiiGIS":{"advNum":"011","issuance":"2023-08-22T03:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","zipFile":"https://www.nhc.noaa.gov/gis/forecast/archive/al062023_fcst_011.zip","kmzFile":"https://www.nhc.noaa.gov/storm_graphics/api/AL062023_forecastradii_011adv.kmz"},"bestTrackGIS":{"issuance":"2023-08-22T00:00:00.000Z","fileUpdateTime":"2023-08-22T02:55:52.439Z","zipFile":"https://www.nhc.noaa.gov/gis/best_track/al062023_best_track.zip","kmzFile":"https://www.nhc.noaa.gov/g…
@@ -94,7 +97,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer?f=json`
 
-- HTTP 200 in 82 ms · 92,075 bytes · content-type application/json;charset=UTF-8
+- HTTP 200 in 386 ms · 92,075 bytes · content-type application/json;charset=UTF-8
 - Access-Control-Allow-Origin: **https://temper31.github.io** · cache-control: max-age=0,must-revalidate · last-modified: —
 - forecast layers: 4 AT1 | 6 AT1 Forecast Points | 7 AT1 Forecast Track | 8 AT1 Forecast Cone | 30 AT2 | 32 AT2 Forecast Points | 33 AT2 Forecast Track | 34 AT2 Forecast Cone | 56 AT3 | 58 AT3 Forecast Points | 59 AT3 Forecast Track | 60 AT3 Forecast Cone | 82 AT4 | 84 AT4 Forecast Points | 85 AT4 Forecast Track | 86 AT4 Forecast Cone | 108 AT5 | 110 AT5 Forecast Points | 111 AT5 Forecast Track | 112 AT5 Forecast Cone | 134 EP1 | 136 EP1 Forecast Points | 137 EP1 Forecast Track | 138 EP1 Forecast Cone | 160 EP2 | 162 EP2 Forecast Points | 163 EP2 Forecast Track | 164 EP2 Forecast Cone | 186 EP3 | 188 EP3 Forecast Points | 189 EP3 Forecast Track | 190 EP3 Forecast Cone | 212 EP4 | 214 EP4 Forecast Points | 215 EP4 Forecast Track | 216 EP4 Forecast Cone | 238 EP5 | 240 EP5 Forecast Points | 241 EP5 Forecast Track | 242 EP5 Forecast Cone | 264 CP1 | 266 CP1 Forecast Points | 267 CP1 Forecast Track | 268 CP1 Forecast Cone | 290 CP2 | 292 CP2 Forecast Points | 293 CP2 Forecast Track | 294 CP2 Forecast Cone | 316 CP3 | 318 CP3 Forecast Points | 319 CP3 Forecast Track | 320 CP3 Forecast Cone | 342 CP4 | 344 CP4 Forecast Points | 345 CP4 Forecast Track | 346 CP4 Forecast Cone | 368 CP5 | 370 CP5 Forecast Points | 371 CP5 Forecast Track | 372 CP5 Forecast Cone
 
@@ -102,7 +105,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/6?f=json`
 
-- HTTP 200 in 10 ms · 22,949 bytes · content-type application/json;charset=UTF-8
+- HTTP 200 in 71 ms · 22,949 bytes · content-type application/json;charset=UTF-8
 - Access-Control-Allow-Origin: **https://temper31.github.io** · cache-control: max-age=0,must-revalidate · last-modified: —
 - layer 6 AT1 Forecast Points: fields objectid (OID), stormname (String), stormtype (String), dvlbl (String), basin (String), advdate (String), advisnum (String), fcstprd (Double), gust (Double), maxwind (Double), mslp (Double), ssnum (Double), datelbl (String), tcdvlp (String), tcdir (Double), tcspd (Double), fldatelbl (String), lat (Double), lon (Double), stormnum (Double), stormsrc (String), tau (Double), timezone (String), validtime (String), idp_source (String), idp_filedate (Date), idp_ingestdate (Date), shape (Geometry), binnumber (String)
 
@@ -110,15 +113,15 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/6/query?where=1%3D1&outFields=*&f=geojson`
 
-- HTTP 200 in 27 ms · 42 bytes · content-type application/geo+json;charset=UTF-8
+- HTTP 200 in 94 ms · 42 bytes · content-type application/geo+json;charset=UTF-8
 - Access-Control-Allow-Origin: **https://temper31.github.io** · cache-control: max-age=0,must-revalidate · last-modified: —
-- not JSON (Cannot read properties of undefined (reading 'length')); body: {"type":"FeatureCollection","features":[]}
+- features: 0; metadata: undefined
 
 ### NHC AT1 Forecast Cone layer
 
 `https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/8?f=json`
 
-- HTTP 200 in 10 ms · 5,447 bytes · content-type application/json;charset=UTF-8
+- HTTP 200 in 72 ms · 5,447 bytes · content-type application/json;charset=UTF-8
 - Access-Control-Allow-Origin: **https://temper31.github.io** · cache-control: max-age=0,must-revalidate · last-modified: —
 - layer 8 AT1 Forecast Cone: fields objectid (OID), stormname (String), stormtype (String), basin (String), advdate (String), advisnum (String), fcstprd (Double), stormnum (Double), idp_source (String), idp_filedate (Date), idp_ingestdate (Date), shape (Geometry), st_area(shape) (Double), st_perimeter(shape) (Double), binnumber (String)
 
@@ -126,7 +129,7 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://tiles.mapillary.com/maps/vtp/mly1_public/2/2/1/1`
 
-- HTTP 403 in 99 ms · 0 bytes · content-type text/html; charset="utf-8"
+- HTTP 403 in 167 ms · 0 bytes · content-type text/html; charset="utf-8"
 - Access-Control-Allow-Origin: **—** · cache-control: — · last-modified: —
 - not JSON (Unexpected end of JSON input); body: 
 
@@ -134,9 +137,9 @@ Generated 2026-10-31T20:20:49.957Z by `scripts/data/sources-probe.mjs` from GitH
 
 `https://graph.mapillary.com/images?limit=1&bbox=-73.99,40.75,-73.98,40.76`
 
-- HTTP 500 in 93 ms · 145 bytes · content-type application/json; charset=UTF-8
+- HTTP 500 in 124 ms · 145 bytes · content-type application/json; charset=UTF-8
 - Access-Control-Allow-Origin: ***** · cache-control: no-store · last-modified: —
-- json: {"error":{"message":"Invalid OAuth 2.0 Access Token","type":"MLYApiException","code":190,"error_data":{},"fbtrace_id":"AQ0d7Sdi89PCHCvlID5YuLq"}}
+- json: {"error":{"message":"Invalid OAuth 2.0 Access Token","type":"MLYApiException","code":190,"error_data":{},"fbtrace_id":"A8lPi_wxp0yrkroLxLdKmc-"}}
 - OPTIONS preflight: HTTP 200 · allow-origin * · allow-headers authorization
 
 ## Terms and documentation (matching sentences)
