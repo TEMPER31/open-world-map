@@ -64,6 +64,18 @@ for (const phone of [false, true]) {
     { name: `p5-${d}-layers-events`, field: 'temp', hash: phone ? '0.4/20/0' : '1.6/20/0', phone, events: ALL_EV, act: 'layers-events' }
   );
 }
+// Phase 4 street photos: with the optional CI token, live coverage at world / city / street zoom
+// and an open photo at Times Square and Brantley AL; without it, the "unavailable" state.
+for (const phone of [false, true]) {
+  const d = phone ? 'phone' : 'desktop', z = phone ? -1 : 0;
+  if (process.env.MLY_CI === '1') VIEWS.push(
+    { name: `p4-${d}-coverage-world`, field: 'none', hash: `${2 + z}/30/-40`, phone, photos: true },
+    { name: `p4-${d}-lines-city`, field: 'none', hash: `${12 + z}/40.758/-73.9855`, phone, photos: true },
+    { name: `p4-${d}-dots-times-square`, field: 'none', hash: `${17 + z}/40.758/-73.9855`, phone, photos: true },
+    { name: `p4-${d}-photo-times-square`, field: 'none', hash: `17/40.758/-73.9855`, phone, photos: true, act: 'photo', snap: 'half' },
+    { name: `p4-${d}-photo-brantley`, field: 'none', hash: `16/31.585/-86.255`, phone, photos: true, act: 'photo', snap: 'half' });
+  else VIEWS.push({ name: `p4-${d}-unavailable`, field: 'temp', hash: phone ? '0.4/20/0' : '1.6/20/0', phone, photos: true, act: 'layers-photos' });
+}
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -87,7 +99,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
   page.on('requestfailed', r => { if (/imagery\.nationalmap\.gov/.test(r.url())) naipFailed.push({ bbox: new URL(r.url()).searchParams.get('bbox'), failure: r.failure()?.errorText }); });
   if (v.samples) await eventSamples(page, { usgs: 'live', eonet: 'live', gdacs: 'live', ...v.samples });
   await page.addInitScript(p => localStorage.setItem('owm:prefs:v1', JSON.stringify(p)),
-    { events: v.events || {}, field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
+    { events: v.events || {}, photos: !!v.photos, field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
   if (v.t != null) { // jump to a forecast time (snapped to a frame)
@@ -119,6 +131,31 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     await page.waitForTimeout(1200);
     if (v.snap && v.phone) { await page.evaluate(s => window.owmTest.sheets?.place.set(s), v.snap); await page.waitForTimeout(800); }
   }
+  if (v.act === 'photo') { // open the image dot nearest the centre
+    await page.waitForTimeout(2500);
+    const nearest = () => page.evaluate(() => { const m = window.owmMap, c = m.getCenter(), fs = m.getLayer('mly-img') ? m.queryRenderedFeatures({ layers: ['mly-img'] }) : []; fs.sort((a, b) => Math.hypot(a.geometry.coordinates[0] - c.lng, a.geometry.coordinates[1] - c.lat) - Math.hypot(b.geometry.coordinates[0] - c.lng, b.geometry.coordinates[1] - c.lat)); return fs[0]?.geometry.coordinates; });
+    let n = await nearest();
+    if (!n) { const z = await page.evaluate(() => { const z = window.owmMap.getZoom(); window.owmMap.jumpTo({ zoom: 14 }); return z; }); await page.waitForTimeout(2500); n = await nearest(); if (n) { await page.evaluate(([c, z]) => window.owmMap.jumpTo({ center: c, zoom: z }), [n, z]); await page.waitForTimeout(2500); } }
+    if (!n) { // none in view even at z14: the image Mapillary lists nearest the place (bbox about 10 km)
+      const c = await page.evaluate(() => { const { lng, lat } = window.owmMap.getCenter(); return (async (lo, la) => { // nearest image Mapillary lists around lo/la: boxes of 0.098 deg (API max 0.01 sq deg), centre then the 8 around it
+        const { MAPILLARY_TOKEN: t } = await import('./js/secrets.js'), h = 0.049, out = { boxes: 0, errors: [] };
+        for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+          const x = lo + dx * 2 * h, y = la + dy * 2 * h; out.boxes++;
+          const r = await fetch(`https://graph.mapillary.com/images?fields=id,geometry&limit=50&bbox=${x - h},${y - h},${x + h},${y + h}`, { headers: { Authorization: `OAuth ${t}` } });
+          const j = await r.json();
+          if (j.error) { out.errors.push(`${r.status} ${j.error.message}`.slice(0, 100)); continue; }
+          const d = (j.data || []).map(i => ({ id: i.id, at: i.geometry.coordinates, km: +Math.hypot((i.geometry.coordinates[0] - lo) * 111.32 * Math.cos(la * Math.PI / 180), (i.geometry.coordinates[1] - la) * 110.57).toFixed(2) })).sort((a, b) => a.km - b.km);
+          if (d.length) return { ...out, found: d.length, nearest: d[0] };
+        }
+        return { ...out, found: 0, nearest: null };
+      })(lng, lat); }).then(r => r.nearest?.at || null, () => null);
+      if (c) { await page.evaluate(c => window.owmMap.jumpTo({ center: c, zoom: 17 }), c); await page.waitForTimeout(3000); n = await nearest(); }
+    }
+    const f = n && await page.evaluate(c => window.owmMap.project(c), n);
+    if (f) { await page.mouse.click(box.x + f.x, box.y + f.y); await page.waitForTimeout(3000); }
+    if (v.snap && v.phone) { await page.evaluate(s => window.owmTest.sheets?.place.set(s), v.snap); await page.waitForTimeout(800); }
+  }
+  if (v.act === 'layers-photos') { if (v.phone) { await page.tap('[data-lyr]'); await page.waitForTimeout(600); await page.evaluate(() => document.querySelector('#lsheet [data-photos]').scrollIntoView()); } }
   if (v.act === 'layers-events') { if (v.phone) { await page.tap('.tabs [data-lyr-tab]'); await page.waitForTimeout(800); } else await page.evaluate(() => document.querySelector('.layers [data-events]').scrollIntoView()); }
   if (!v.phone && !v.act) { await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.45); await page.waitForTimeout(400); }
   const info = await page.evaluate(() => ({
@@ -132,7 +169,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     legendMsg: document.querySelector('#legend')?.classList.contains('unavailable') ? document.querySelector('#legend').dataset.msg : null,
     stale: document.querySelector('#stale').hidden ? null : document.querySelector('#stale').textContent,
     updated: document.querySelector('[data-updated]')?.textContent,
-    events: document.querySelector('.layers [data-evnote]')?.textContent, eventCounts: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])),
+    events: document.querySelector('.layers [data-evnote]')?.textContent, photos: document.querySelector('.layers [data-phnote]')?.textContent, photoCredit: document.querySelector('[data-photo-credit]')?.textContent || null, eventCounts: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])),
     sampleLabelsVisible: [...document.querySelectorAll('[data-sample-only]')].filter(e => !e.hidden).length
   }));
   await page.screenshot({ path: `${out}/${v.name}.png` });

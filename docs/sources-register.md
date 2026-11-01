@@ -42,6 +42,36 @@ report is committed as `docs/screenshots/<branch>/sources-probe.md`.
 | **GDACS** (Global Disaster Alert and Coordination System; EC Joint Research Centre with UN OCHA) | Disaster alerts (green / orange / red): earthquakes, cyclones, floods, volcanoes, droughts, wildfires | `https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?fromDate=…&toDate=…&alertlevel=Green;Orange;Red&pageSize=100` | "GDACS specific Disclaimer and Terms of Use" (`/About/termofuse.aspx`, read 31 Oct 2026): GDACS is "a cooperation framework among United Nations (OCHA … and UNOSAT …) and the European Commission (JRC … and ECHO …)"; data "provided 'as is' without warranty"; "this information is purely indicative and should not be used for any decision making without alternate sources of information". The page states **no reuse licence**; the footer's Copyright link is the European Commission legal notice (not read). **Owner check:** reuse of the public API with credit appears intended but is not stated in a licence; the panel shows GDACS's own caveat. | "Alerts: GDACS (EC JRC, UN OCHA)" | `Access-Control-Allow-Origin: *` | Not published; the API returns at most 100 events per page (newest first), so a busy week can be cut at 100. | Verified 31 Oct 2026: HTTP 200 GeoJSON points. The `MAP` list needs an `eventtype` and was not used. |
 | **NOAA National Hurricane Center** via the NWS tropical map service | Active storms (Atlantic, East and Central Pacific): forecast points, track and cone, moved along the track by the timeline | `https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer/{6 + 26 i}/query?…&f=geojson` (Forecast Points, slots AT1–5, EP1–5, CP1–5) and `{8 + 26 i}` (Forecast Cone) | NWS: "in the public domain, unless specifically noted otherwise, and may be used without charge for any lawful purpose so long as you do not: 1) claim it is your own…" (weather.gov/disclaimer). | "Storm forecasts: NOAA NHC" | Echoes the requesting origin (`https://temper31.github.io`) | Not published. Up to 15 small queries (plus one cone per active storm) per refresh, ≤ every 10 min. | Verified 31 Oct 2026: layer list and fields (`stormname, stormtype, advisnum, advdate, tau, validtime "DD/HHMM", maxwind kt, gust kt, mslp, tcdir, tcspd`). No storm was active, so the track was tested with a saved sample. `CurrentStorms.json` has **no** CORS header and was not used. |
 
+## Street photos layer (Phase 4)
+
+| Source | Used for | Endpoints | Licence / terms | Credit shown | CORS | Status |
+|---|---|---|---|---|---|---|
+| **Mapillary** (Meta Platforms Ireland) | Street-level photo coverage and single photos | Coverage vector tiles `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=…` (layers `overview` z0–5 points, `sequence` z6–14 lines, `image` z14 points with `id, captured_at, sequence_id, compass_angle, creator_id`); Graph API `https://graph.mapillary.com/{image_id}?fields=id,thumb_1024_url,captured_at,creator,geometry` (`creator` = `{username, id}`, `captured_at` ms since epoch). Thumbnails come from a Meta CDN host named in `thumb_1024_url`. | Mapillary Terms of Use (effective 15 Feb 2024): "Your use of any User Content provided by other users is subject to the Creative Commons Share Alike (CC BY-SA) license, unless we indicate otherwise" (links CC BY-SA 4.0) and "You must adhere to the attribution requirements set forth below". | Strip: "Street photos: © Mapillary contributors, CC BY-SA 4.0". Photo panel: "CC BY-SA 4.0 — Mapillary / {creator}" plus "Open on Mapillary". | Graph API: `Access-Control-Allow-Origin: *`, preflight allows `authorization`. Tiles without a token: HTTP 403 with no CORS header (CORS on a successful tile is checked by the live test when a CI token exists). | Docs and terms read by the probe 31 Oct 2026. Rate limits (API docs): Graph entity requests 60,000/min per app; `images?bbox=` 10,000/min; **tiles.mapillary.com 50,000 per day** per app (exceeding it returns 4xx). The help centre (licence and attribution articles) answered HTTP 403 to the probe: the exact attribution wording Mapillary asks for is **unverified**, as is whether a client token can be limited to a domain (not mentioned in the API docs). |
+
+**Tile budget risk.** 50,000 tile requests a day is shared by every visitor (the token is per app).
+One visitor panning a city with the layer on can use 100–300 tiles, so a few hundred active
+users a day could reach it; the layer then shows no coverage until the next day. The layer is off
+by default and loads tiles only while on. If this becomes a problem: ask Mapillary for a higher
+limit, or show coverage only from zoom 6.
+
+**Token.** Mapillary needs an access token on every request. The site uses a **client token**
+(`MLY|…`, from https://www.mapillary.com/dashboard/developers), which Mapillary's docs describe as
+the token for client-side apps. It is **public by necessity**: it ships in the published page.
+How it gets there:
+
+- The owner saves it as the Actions secret **`MAPILLARY_CLIENT_TOKEN`**.
+- The data job writes `site/js/secrets.js` with an **empty** token (so PR builds and the build
+  artifact never contain it). Only the **deploy job** (main branch) overwrites that file with the
+  secret, after checking it looks like a client token (`MLY|digits|hex`), just before upload to Pages.
+- `site/js/secrets.js` is in `.gitignore` and never committed; `scripts/check_site.py` still fails
+  the build on any `MLY|…` token in a tracked file.
+- PR screenshots show the "unavailable" state, unless the owner adds a separate CI-only secret
+  **`MAPILLARY_CI_TOKEN`** (used only by the verify job on same-repository PRs).
+- Without a token, Street photos says "unavailable" and the page sends nothing to Mapillary.
+
+If the token is abused, revoke it in the Mapillary dashboard and save a new one as the secret; the
+next deploy publishes it.
+
 Not used (out of scope for Phase 5): **NASA FIRMS** active fires (needs a free MAP_KEY: a key in
 the page would break the no-keys rule, so it would have to be fetched by the data job with the key
 in an Actions secret, and the 6-hourly job would make it up to 6 h old); **JTWC** West Pacific /
