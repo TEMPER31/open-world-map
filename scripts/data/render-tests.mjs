@@ -5,6 +5,7 @@
 import { chromium } from 'playwright';
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { route as eventSamples } from './event-fixtures.mjs';
 
 const [, , site = 'http://127.0.0.1:8123/', out = 'render-tests.md'] = process.argv;
 const results = [];
@@ -13,7 +14,7 @@ const check = (name, ok, info = '') => results.push({ name, ok, info: String(inf
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 // Local time zone US Central, so local time and UTC differ in the time label.
 const TZ = 'America/Chicago';
-async function open(prefs, hash = '2/35/-20', ctx = {}) {
+async function open(prefs, hash = '2/35/-20', { samples, ...ctx } = {}) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, timezoneId: TZ, ...ctx });
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
     await page.route('https://cdn.jsdelivr.net/npm/maplibre-gl@*/dist/*', r => {
@@ -24,6 +25,10 @@ async function open(prefs, hash = '2/35/-20', ctx = {}) {
   }
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
+  // requests to each third-party events / photos host (privacy: a layer that is off sends none)
+  const hosts = {};
+  page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
+  if (samples) await eventSamples(page, samples);
   const reqs = [];
   page.on('request', r => { const m = r.url().match(/data\/live\/(gfs\/\w+\/f\d+|aq\/\d+)\.png/); if (m) reqs.push(m[1]); });
   // seed preferences once per tab (a reload must keep what the page saved)
@@ -31,7 +36,7 @@ async function open(prefs, hash = '2/35/-20', ctx = {}) {
   await page.goto(`${site}#map=${hash}`);
   await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
   await page.waitForTimeout(1500);
-  return { page, errors, reqs };
+  return { page, errors, reqs, hosts };
 }
 
 // 1. Wind direction: uniform synthetic fields; particles must move with the wind (towards).
@@ -356,6 +361,116 @@ const synced = page => page.evaluate(async () => {
   await page.waitForTimeout(400);
   check('Phone place sheet: dragging the handle down snaps to peek', await page.$eval('#detail', e => e.dataset.snap) === 'peek', await page.$eval('#detail', e => e.dataset.snap));
   check('No page errors (phone)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+
+// ---- Phase 5: natural events --------------------------------------------------------------
+const evCount = hosts => Object.values(hosts).reduce((a, b) => a + b.length, 0);
+const evWait = page => page.waitForFunction(() => { const C = window.owmTest.events.cache; return Object.keys(C).length && Object.values(C).every(c => c.at); }, null, { timeout: 30000 }).catch(() => {});
+// 11. Privacy: all event types off by default = no request to any event host, while stepping
+// and after a reload; each toggle contacts only its own source; off again = no more requests.
+{
+  const { page, errors, hosts } = await open({ field: 'temp', particles: false });
+  for (let i = 0; i < 3; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); }
+  const off0 = evCount(hosts);
+  const perType = {};
+  for (const [k, re] of [['eq', /usgs/], ['fv', /nasa/], ['ga', /gdacs/], ['st', /noaa|nasa/]]) {
+    for (const h in hosts) delete hosts[h];
+    await page.click(`.layers [data-ev="${k}"]`); await evWait(page); await page.waitForTimeout(800);
+    const got = Object.keys(hosts);
+    await page.click(`.layers [data-ev="${k}"]`);
+    for (const h in hosts) delete hosts[h];
+    for (let i = 0; i < 3; i++) { await page.keyboard.press('ArrowRight'); await page.waitForTimeout(300); }
+    perType[k] = { hosts: got, onlyOwn: got.length > 0 && got.every(h => re.test(h)), afterOff: evCount(hosts) };
+  }
+  check('Events off (default): 0 requests to USGS, NASA, GDACS or NOAA while stepping the timeline', off0 === 0, `${off0} requests`);
+  const style = () => page.evaluate(() => { const st = window.owmMap.getStyle(); return { sources: Object.keys(st.sources).filter(k => /^(events|nhc|nhc-now|ev-sel)$/.test(k)).length, layers: st.layers.filter(l => /^(ev-|nhc-)/.test(l.id)).length, images: window.owmMap.listImages().filter(i => i.startsWith('ev-')).length }; });
+  const offStyle = await style();
+  await page.click('.layers [data-ev="eq"]'); await evWait(page);
+  const onStyle = await style();
+  await page.click('.layers [data-ev="eq"]'); await page.waitForTimeout(300);
+  const offAgain = await style();
+  for (const h in hosts) delete hosts[h];
+  check('Events off cost nothing: no event sources, layers or icons on the map; added when a type is turned on, removed when the last is turned off', offStyle.sources + offStyle.layers + offStyle.images === 0 && onStyle.layers === 7 && onStyle.sources === 4 && offAgain.sources + offAgain.layers + offAgain.images === 0, JSON.stringify({ offStyle, onStyle, offAgain }));
+  check('Each event toggle contacts only its own source, and 0 requests after it is turned off', Object.values(perType).every(x => x.onlyOwn && x.afterOff === 0), JSON.stringify(perType));
+  await page.click('.layers [data-ev="eq"]'); await page.click('.layers [data-evwin="24h"]');
+  await page.reload(); await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
+  check('Event toggles and the 24 h / 7 d choice are remembered across reloads', await page.evaluate(() => { const s = window.owmTest.state.get(); return s.events.eq && !s.events.st && s.evWin === '24h'; }));
+  check('No page errors (events privacy)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 12. Live sources: each type shows real events (CI has network); counts and update times.
+{
+  const { page, errors } = await open({ field: 'none', particles: false, events: { eq: true, fv: true, st: true, ga: true } }, '1.6/20/0');
+  await evWait(page); await page.waitForTimeout(1500);
+  const live = await page.evaluate(() => ({ rows: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])), note: document.querySelector('.layers [data-evnote]').textContent,
+    drawn: window.owmMap.queryRenderedFeatures({ layers: ['ev-eq', 'ev-pt'] }).length, credits: document.querySelector('#credits').textContent, errors: Object.fromEntries(Object.entries(window.owmTest.events.cache).map(([k, c]) => [k, c.error || null])) }));
+  check('Live events: earthquakes, wildfires & volcanoes and disaster alerts load from their sources and are drawn', +live.rows.eq > 0 && /^\d+$|none/.test(live.rows.fv) && +live.rows.ga > 0 && live.drawn > 0, JSON.stringify(live));
+  check('Live storms: NHC answered (a storm count or "none active"), credits list every source in use', /^\d+$|none active/.test(live.rows.st) && ['USGS', 'NASA EONET', 'GDACS', 'NOAA NHC'].every(c => live.credits.includes(c)), `${live.rows.st}; ${live.credits}`);
+  // the panel of the largest quake: magnitude, depth in the chosen unit, source link
+  const panel = await page.evaluate(async () => {
+    const i = [...(window.owmTest.events.cache.usgs.items || [])].sort((a, b) => b.mag - a.mag)[0];
+    if (!i) return { id: null, x: 0, y: 0 };
+    window.owmMap.jumpTo({ center: [i.lon, i.lat], zoom: 4 }); await new Promise(r => window.owmMap.once('idle', r));
+    const p = window.owmMap.project([i.lon, i.lat]);
+    return { id: i.id, x: p.x, y: p.y };
+  });
+  await page.mouse.click(panel.x, panel.y); await page.waitForTimeout(600);
+  const shown = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection'), title: document.querySelector('#detail .d-title')?.textContent, text: document.querySelector('#detail')?.innerText.replace(/\s+/g, ' '), link: document.querySelector('#detail a.btn')?.href, pin: document.querySelectorAll('.maplibregl-marker').length }));
+  check('Click a live earthquake: the event panel opens (title, time local + UTC, magnitude, depth, source link)', shown.sel?.id === panel.id && /local · .*UTC/.test(shown.text) && /Magnitude/.test(shown.text) && /Depth \d[\d.,]* km/.test(shown.text) && /^https:\/\/earthquake\.usgs\.gov\//.test(shown.link) && shown.pin === 0, JSON.stringify(shown).slice(0, 600));
+  await page.evaluate(() => window.owmTest.state.set({ distUnit: 'mi' }));
+  check('Event panel depth follows the distance unit (km -> mi)', await page.evaluate(() => /Depth \d[\d.,]* (mi|ft)/.test(document.querySelector('#detail').innerText.replace(/\s+/g, ' '))));
+  await page.keyboard.press('Escape');
+  check('Esc closes the event panel', await page.evaluate(() => document.querySelector('#detail').hidden && !window.owmTest.state.get('selection')));
+  check('No page errors (live events)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 13. Saved samples: panel rule with places and the measure tool, storm follows the slider,
+// one clock includes the event layers, "unavailable" and "no active storms" states.
+{
+  const { page, errors } = await open({ field: 'pres', particles: true, events: { eq: true, fv: true, st: true, ga: true } }, '3/22/-66', { samples: { nhc: 'storm' } });
+  await evWait(page); await page.waitForTimeout(800);
+  const P = pt => page.evaluate(([lo, la]) => window.owmMap.project([lo, la]), pt);
+  // storm marker at t = 0 (current position), +30 h (between points), past the last point (hidden)
+  const st = await page.evaluate(async () => {
+    const T = window.owmTest, S = T.state, out = {}, P = T.events.cache.nhc.storms[0].pts;
+    for (const t of [0, 30, T.meta.hours]) { S.set({ t: T.stepTime(t, 0) }); await new Promise(r => setTimeout(r, 300)); out[t] = { at: T.events.stormAt('nhc:AT1'), stamp: T.layerTimes().storms }; }
+    out.lastPoint = new Date(P.at(-1).at).toISOString(); out.want30 = (() => { const v = T.meta.base + T.stepTime(30, 0) * 3600e3, k = P.findIndex(p => p.at >= v), a = P[k - 1], b = P[k], f = (v - a.at) / (b.at - a.at); return [a.lon + (b.lon - a.lon) * f, a.lat + (b.lat - a.lat) * f]; })();
+    S.set({ t: 0 });
+    return out;
+  });
+  const near = (a, b) => a && b && Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6;
+  check('Storm position follows the slider: at the forecast point for Now, interpolated at +30 h, hidden past the last forecast point', st[0].at && near(st[30].at, st.want30) && !near(st[0].at, st[30].at) && st[Object.keys(st).find(k => +k > 30)].at === null,
+    JSON.stringify(st));
+  // click the storm marker: event panel; click a plain spot: the place panel replaces it
+  const sp = await P(await page.evaluate(() => window.owmTest.events.stormAt('nhc:AT1')));
+  await page.mouse.click(sp.x, sp.y); await page.waitForTimeout(500);
+  const a = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection'), title: document.querySelector('#detail .d-title')?.textContent }));
+  await page.mouse.click(300, 650); await page.waitForTimeout(500);
+  const b = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection')?.type, panel: document.querySelector('#detail .kick')?.textContent }));
+  check('Click a storm: storm panel opens; then a place click replaces it (one panel, last click wins)', a.sel?.id === 'nhc:AT1' && /Testa/.test(a.title) && b.sel === 'place' && /Place/.test(b.panel), JSON.stringify({ a, b }));
+  // measure tool blocks event clicks
+  await page.keyboard.press('Escape');
+  await page.click('.zoom [data-measure]');
+  await page.mouse.click(sp.x, sp.y); await page.waitForTimeout(300);
+  const m = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection'), pts: document.querySelector('[data-mhint]').textContent, hidden: document.querySelector('#detail').hidden }));
+  await page.keyboard.press('Escape');
+  check('Measure tool on: clicking an event adds a point and opens no panel', !m.sel && m.hidden && /^1 point/.test(m.pts), JSON.stringify(m));
+  // one clock with event layers: every layer reports the same time after each step
+  await page.mouse.click(sp.x, sp.y); await page.mouse.move(640, 300);
+  const rows = [];
+  for (let i = 0; i < 4; i++) { await page.keyboard.press('ArrowRight'); rows.push(await synced(page)); }
+  const layers = [...new Set(rows.flatMap(r => Object.keys(r.lt)))];
+  check('One clock includes the event layers (events, storms) with field, isobars, H/L, wind, timeline', rows.every(r => r.ok) && ['events', 'storms', 'field', 'wind', 'timeline'].every(k => layers.includes(k)), `${rows.filter(r => r.ok).length}/4 in sync; layers: ${layers.join(', ')}`);
+  check('No page errors (event samples)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+{
+  const { page, errors } = await open({ field: 'none', particles: false, events: { eq: true, fv: true, st: true, ga: true } }, '2/20/0', { samples: { usgs: 'down', eonet: 'down', gdacs: 'empty', nhc: 'none' } });
+  await evWait(page); await page.waitForTimeout(500);
+  const r = await page.evaluate(() => ({ rows: Object.fromEntries([...document.querySelectorAll('.layers [data-evs]')].map(e => [e.dataset.evs, e.textContent])), note: document.querySelector('.layers [data-evnote]').textContent }));
+  check('A source that is down or empty shows a clear state ("unavailable", "none", "No active storms") and no page errors',
+    r.rows.eq === 'unavailable' && r.rows.fv === 'unavailable' && r.rows.ga === 'none' && r.rows.st === 'none active' && /Earthquakes: unavailable/.test(r.note) && /No active storms/.test(r.note) && !errors.length, JSON.stringify(r) + (errors.length ? ' errors: ' + errors.join(' | ') : ''));
   await page.close();
 }
 

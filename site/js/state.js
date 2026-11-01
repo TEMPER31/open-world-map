@@ -2,7 +2,7 @@
 // Preferences persist in localStorage on this device only (no accounts, nothing sent).
 
 const STORE_KEY = 'owm:prefs:v1';
-const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed'];
+const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed', 'events', 'evWin'];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // First visit: US units (°F, mph, mi) for an en-US browser, metric everywhere else.
 const us = /^en-US$/i.test(navigator.language || '');
@@ -21,8 +21,11 @@ const state = {
   measuring: false,       // distance tool on
   t: 0,                   // hours from Now (a frame time: hourly to f120, then every 3 h)
   playing: false,
-  selection: null,        // {type: 'place', lon, lat}
-  layersMin: false
+  selection: null,        // {type: 'place', lon, lat} | {type: 'event', id, lon, lat}
+  layersMin: false,
+  // natural events (Phase 5): one toggle per type, all off until chosen (no requests while off)
+  events: { eq: false, fv: false, st: false, ga: false },
+  evWin: '7d'             // observed events shown: '24h' | '7d'
 };
 
 try {
