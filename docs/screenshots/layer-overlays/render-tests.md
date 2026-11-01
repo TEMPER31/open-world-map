@@ -1,77 +1,15 @@
+<!-- part 3 of 3 -->
 # Rendering and behaviour tests
 
-Generated 2026-10-31T22:51:45.227Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
+Generated 2026-11-01T00:13:02.140Z by `scripts/data/render-tests.mjs` (headless Chromium, software WebGL).
 
 | Test | Result | Detail |
 |---|---|---|
-| Westerly (+U only): particles move east | pass | {"dx":0.0254,"dy":-0.002} |
-| Southerly (+V only): particles move north (screen up) | pass | {"dx":0.0008,"dy":-0.0319} |
-| Easterly (-U only): particles move west | pass | {"dx":-0.0219,"dy":0.0006} |
-| Pressure: isobars drawn by the field shader and H/L labels are a WebGL symbol layer (no DOM markers) | pass | {"domMarkers":0,"hlFeatures":63,"isobarsInShader":true} |
-| Pressure stays in sync while panning (labels drawn in the same WebGL frame as the map) | pass | 9 of 9 pan frames rendered the H/L layer; DOM labels: 0 |
-| No page errors (pressure) | pass |  |
-| None: field hidden and legend says "No layer" | pass | {"visible":false,"legend":"No layermap only","isobars":false,"hl":0} |
-| None + particles off: no data files fetched while stepping 4 hours | pass | 0 requests:  |
-| Clicking the active layer again turns it off | pass |  |
-| "None" is remembered across reloads | pass |  |
-| No page errors (None) | pass |  |
-| 7-day: frames run to f168, hourly to f120 then every 3 h | pass | first f11, last f168, 126 frames on the timeline (110 hourly + 16 three-hourly) |
-| Step button and arrow keys move to the next available frame (f120 -> f123 -> f126 -> back to f120) | pass | {"button":112,"right":115,"left":109,"chip":"3 h step","t120":109} |
-| Scrubbing in the 3-hourly part snaps to a frame | pass | t=142 (f153) |
-| Play moves frame to frame across f120 (same speed per frame) | pass | 107, 108, 109, 112, 115, 118, 121, 124 |
-| Rain legend says "past 3 h" after f120 and "past hour" before | pass | Precipitation · mm/hpast 3 h · GFS 0.5° / Precipitation · mm/hpast hour · GFS 0.5° |
-| Air quality past its forecast end: legend dimmed with "Air quality forecast ends {date}", no stale data | pass | Air quality forecast ends Thu 5 Nov · 00:00 UTC (AQ files requested at that hour: 0) |
-| Place-panel chart covers the whole run with day boundaries | pass | {"days":7,"end":"+6 d 13 h","points":33} |
-| No page errors (7-day timeline) | pass |  |
-| One clock: after each step every layer reports the same valid time (8 steps, across f120 -> f123) | pass | 8/8 steps in sync; layers: timeline, hl, wind, field, isobars, panel, chart, probe; slowest sync 467 ms; t: 1, 2, 3, 4, 108, 109, 112, 115 |
-| Place panel, chart playhead and probe show the timeline hour (DOM) | pass | {"panel":"115","chart":"115","probe":"115","t":"115"} |
-| Time API for future layers: onTime() fires with {t, valid}; getValidTime() agrees | pass | {"got":{"t":5,"valid":1793505600000},"valid":1793505600000} |
-| Esc closes the place pop-up | pass |  |
-| No page errors (one clock) | pass |  |
-| Play/pause button and Space toggle playing | pass | {"playBtn":true,"pauseBtn":false,"space":true,"space2":false} |
-| Arrow keys and step buttons move one frame | pass | {"right":2,"left":1,"stepBtn":2} |
-| Speed 4x plays about 4x as many frames as 1x; the chip cycles 1x -> 2x | pass | 1×: 5 frames in 2 s, 4×: 22; chip 2 2× |
-| Local time is shown next to UTC (US Central), and the order can be switched | pass | "Sat 18:00 local · 23:00 UTC" / UTC first: "Sat 23:00 UTC · 18:00 local" (expected local hour 18) |
-| "Now" is the frame closest to the current time and says which forecast hour it is | pass | Now is 27 min from the clock; label "forecast hour 11" |
-| Prefetch: the next 2 frames of the visible field are fetched; no wind (particles off) or other fields | pass | gfs/temp/f022: fetched, gfs/temp/f023: fetched; other files: none |
-| No page errors (timeline controls) | pass |  |
-| US units everywhere: probe, place panel, chart, legend ticks, scale bar, measure tool | pass | {"probe":"13 mphfrom ESE45.6°N 27.3°W · Sat 18:00 local · 23:00 UTC","panel":"Wind speed 18mph from SSE / Temperature 60°F at 2 m","chart":"Forecast— temp °F · ▮ wind mph","legend":"Wind speed · mph10 m · GFS 0.75°0122537506293+","scale":"200 mi","raw":["—","","loading"],"ticks":"0 12 25 37 50 62 93+","measure":"243 mi"} |
-| Units are remembered after reload | pass | {"t":"F","s":"mph","d":"mi","preset":"us"} |
-| Custom mix (knots with °F) shows the "Custom" preset | pass |  |
-| No page errors (units) | pass |  |
-| Measure: London -> New York within 0.5 % of 5,570 km, drawn as a GeoJSON layer, place panel not opened | pass | 5,569 km (5568.9 km, -0.02 %); place panel open: false; features: 11; DOM markers: 0 |
-| Measure km/mi toggle updates the page-wide unit (3,461 mi ± 0.5 %) | pass | 3,460 mi |
-| Undo removes the last point; Esc exits the measure tool | pass | after undo: —; after Esc: {"on":false,"hidden":true,"features":2} |
-| No page errors (measure) | pass |  |
-| Layers rail: only the selected field is expanded, with its legend; None collapses all; clicking the active row turns it off | pass | {"open1":["temp+legend"],"none":{"open":0,"legend":"No layermap only"},"toggled":"none"} |
-| No page errors (layers) | pass |  |
-| Phone: buttons and scrubber are at least 44 px; nothing covers the map centre | pass | [{"el":"m-search","w":258,"h":46},{"el":"m-btn","w":46,"h":46},{"el":"m-btn","w":46,"h":46},{"el":"step","w":44,"h":44},{"el":"play","w":44,"h":44},{"el":"step","w":44,"h":44},{"el":"track","w":332,"h":44}]; over the centre: none |
-| Phone layers sheet: half-open covers at most ~40 % of the map, with a drag handle | pass | 314 of 784 px (40.1 %) |
-| Phone place sheet: peek, half and full (tap the handle to step) | pass | {"peek":{"top":634,"h":150,"w":390,"bottom":784,"snap":"peek"},"half":{"top":470,"h":314,"w":390,"bottom":784,"snap":"half"},"full":{"top":64,"h":720,"w":390,"bottom":784,"snap":"full"}} |
-| Phone place sheet: dragging the handle down snaps to peek | pass | peek |
-| No page errors (phone) | pass |  |
-| Events off (default): 0 requests to USGS, NASA, GDACS or NOAA while stepping the timeline | pass | 0 requests |
-| Events off cost nothing: no event sources, layers or icons on the map; added when a type is turned on, removed when the last is turned off | pass | {"offStyle":{"sources":0,"layers":0,"images":0},"onStyle":{"sources":4,"layers":7,"images":6},"offAgain":{"sources":0,"layers":0,"images":0}} |
-| Each event toggle contacts only its own source, and 0 requests after it is turned off | pass | {"eq":{"hosts":["earthquake.usgs.gov"],"onlyOwn":true,"afterOff":0},"fv":{"hosts":["eonet.gsfc.nasa.gov"],"onlyOwn":true,"afterOff":0},"ga":{"hosts":["www.gdacs.org"],"onlyOwn":true,"afterOff":0},"st":{"hosts":["mapservices.weather.noaa.gov"],"onlyOwn":true,"afterOff":0}} |
-| Event toggles and the 24 h / 7 d choice are remembered across reloads | pass |  |
-| No page errors (events privacy) | pass |  |
-| Live events: earthquakes, wildfires & volcanoes and disaster alerts load from their sources and are drawn | pass | {"rows":{"eq":"338","fv":"4","st":"4","ga":"68"},"note":"Events from the past 7 days; storm forecasts follow the timeline. No active storms (NHC: Atlantic, East and Central Pacific). USGS updated 22:33 UTC · EONET checked 22:34 UTC · GDACS updated 22:34 UTC · NHC checked 22:34 UTC.","drawn":276,"credits":"Weather: NOAA/NCEP GFS · Air quality: CAMS via Open-Meteo.com (CC BY 4.0) · Earthquakes: USGS · Events: NASA EONET · Alerts: GDACS (EC JRC, UN OCHA) · Storm forecasts: NOAA NHC · OpenFreeMap · © OpenMapTiles · Data © OpenStreetMap contributors · Natural Earth · MapLibre","errors":{"usgs":null,"eonet":null,"gdacs":null,"nhc":null}} |
-| Live storms: NHC answered (a storm count or "none active"), credits list every source in use | pass | 4; Weather: NOAA/NCEP GFS · Air quality: CAMS via Open-Meteo.com (CC BY 4.0) · Earthquakes: USGS · Events: NASA EONET · Alerts: GDACS (EC JRC, UN OCHA) · Storm forecasts: NOAA NHC · OpenFreeMap · © OpenMapTiles · Data © OpenStreetMap contributors · Natural Earth · MapLibre |
-| Click a live earthquake: the event panel opens (title, time local + UTC, magnitude, depth, source link) | pass | {"sel":{"type":"event","id":"us:us6000u4r9","lon":139.6184,"lat":27.7953},"title":"M 6.5 earthquake","text":"× EVENT · EARTHQUAKES M 6.5 earthquake Bonin Islands, Japan region 7 d ago Sat 24 Oct 21:09 local · Sun 02:09 UTC Magnitude 6.5 mww Depth 492 km below the surface PAGER alert green USGS impact estimate Open source page ↗ Centre map here Earthquakes: USGS · updated Sat 31 Oct 17:33 local · 22:33 UTC","link":"https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4r9","pin":0} |
-| Event panel depth follows the distance unit (km -> mi) | pass |  |
-| Esc closes the event panel | pass |  |
-| No page errors (live events) | pass |  |
-| Storm position follows the slider: at the forecast point for Now, interpolated at +30 h, hidden past the last forecast point | pass | {"0":{"at":[-60.96,18.48],"stamp":"2026-10-31T23:00:00.000Z"},"30":{"at":[-64.56,20.28],"stamp":"2026-11-02T05:00:00.000Z"},"157":{"at":null,"stamp":"2026-11-07T12:00:00.000Z"},"lastPoint":"2026-11-05T15:00:00.000Z","want30":[-64.56,20.28]} |
-| Click a storm: storm panel opens; then a place click replaces it (one panel, last click wins) | pass | {"a":{"sel":{"type":"event","id":"nhc:AT1","lon":-60,"lat":18},"title":"Tropical Storm Testa"},"b":{"sel":"place","panel":"Place · GFS forecast"}} |
-| Measure tool on: clicking an event adds a point and opens no panel | pass | {"sel":null,"pts":"1 point · 0 legs","hidden":true} |
-| One clock includes the event layers (events, storms) with field, isobars, H/L, wind, timeline | pass | 4/4 in sync; layers: timeline, events, storms, hl, wind, field, isobars, probe |
-| No page errors (event samples) | pass |  |
-| A source that is down or empty shows a clear state ("unavailable", "none", "No active storms") and no page errors | pass | {"rows":{"eq":"unavailable","fv":"unavailable","st":"none active","ga":"none"},"note":"Events from the past 7 days; storm forecasts follow the timeline. Earthquakes: unavailable. Wildfires & volcanoes: unavailable. No active storms (NHC: Atlantic, East and Central Pacific). USGS unavailable · EONET unavailable · GDACS checked 22:34 UTC · NHC checked 22:34 UTC."} |
 | Overlays: 0 overlay files fetched while none is on | pass | 0 files |
 | Overlays: max 2; a third is disabled with a note why | pass | {"ov":["pres","rain"],"disabled":"true","why":"Up to 2 overlays: turn one off first","toast":"Up to 2 overlays: turn one off first."} |
 | Overlay same as the main field is blocked ("main field"), and choosing it as the main field drops it from the overlays | pass | {"same":{"ov":["rain"],"disabled":"true","label":"main field"},"drop":[]} |
-| One clock includes the overlays (ov-pres, ov-rain, H/L) with the field, probe and timeline | pass | 4/4 in sync; slowest 58 ms; layers: timeline, field, ov-rain, ov-pres, hl, probe |
-| Probe and place panel show the main field and every overlay | pass | {"probe":{"text":"12 °C / at 2 m / Pressure 1030 hPa / Rain Dry / 50.8°N 30.0°W · Sun 01:00 local · 06:00 UTC","ov":["pres","rain"]},"panel":["Wind speed 37km/h from SSE","Temperature 12°C at 2 m","Precipitation · overlay Dry past hour · area avg","Air quality 15µg/m³ Moderate · AQI 65 (24 h)","Clouds 100% area average","Pressure · overlay 1030hPa sea level"]} |
+| One clock includes the overlays (ov-pres, ov-rain, H/L) with the field, probe and timeline | pass | 4/4 in sync; slowest 101 ms; layers: timeline, field, ov-rain, ov-pres, hl, probe |
+| Probe and place panel show the main field and every overlay | pass | {"probe":{"text":"12 °C / at 2 m / Pressure 1029 hPa / Rain Dry / 50.8°N 30.0°W · Sun 01:00 local · 07:00 UTC","ov":["pres","rain"]},"panel":["Wind speed 39km/h from SSE","Temperature 12°C at 2 m","Precipitation · overlay Dry past hour · area avg","Air quality 15µg/m³ Moderate · AQI 66 (24 h)","Clouds 100% area average","Pressure · overlay 1029hPa sea level"]} |
 | Overlays prefetch their next 2 frames; turned off they fetch nothing | pass | prefetched 4/4; after off: 0 files |
 | Overlays are remembered across reloads | pass |  |
 | No page errors (overlays) | pass |  |
@@ -99,5 +37,5 @@ Generated 2026-10-31T22:51:45.227Z by `scripts/data/render-tests.mjs` (headless 
 
 | Field | Long tasks per hour step (ms) | Worst frame gap while stepping (ms) | Frames/s during a 2 s pan |
 |---|---|---|---|
-| pres | 0 | 371 | 7.5 |
-| temp | 0 | 310 | 9 |
+
+
