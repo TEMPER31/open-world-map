@@ -1,0 +1,258 @@
+{
+ "date": "2026-10-31",
+ "generated_utc": "2026-10-31T23:15:52Z",
+ "source": "NOAA/NCEP Global Forecast System (GFS) 0.25\u00b0",
+ "license": "Public domain (U.S. Government work); NOAA requests attribution",
+ "aq_source": "CAMS (Copernicus Atmosphere Monitoring Service) via Open-Meteo.com",
+ "aq_license": "CC BY 4.0",
+ "cycles": [
+  {
+   "generated_utc": "2026-10-31T07:03:17Z",
+   "gfs_run": "2026-10-31T00:00:00Z",
+   "gfs_source": "aws",
+   "gfs_stale": false,
+   "aq_generated_utc": "2026-10-31T05:23:18Z",
+   "aq_calls": 0,
+   "seconds": 503.3,
+   "bytes_downloaded": 787935755,
+   "http_requests": 967,
+   "file_kb_mean": {
+    "wind": 142.3,
+    "temp": 142.5,
+    "rain": 102.9,
+    "cloud": 130.0,
+    "pres": 142.0
+   },
+   "publish": {
+    "source": "aws",
+    "run": "2026-10-31T00:00:00Z",
+    "f000": "2026-10-31T03:49:09Z",
+    "f168": "2026-10-31T04:33:40Z"
+   },
+   "spot_check": {
+    "London": {
+     "gfs": {
+      "temp_c": 10.8,
+      "wind_kmh": 8.9,
+      "wind_from_deg": 77
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 9.6,
+      "wind_kmh": 6.2,
+      "wind_from_deg": 69
+     }
+    },
+    "New York": {
+     "gfs": {
+      "temp_c": 13.3,
+      "wind_kmh": 22.7,
+      "wind_from_deg": 333
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 12.8,
+      "wind_kmh": 12.9,
+      "wind_from_deg": 330
+     }
+    },
+    "Tokyo": {
+     "gfs": {
+      "temp_c": 18.8,
+      "wind_kmh": 13.6,
+      "wind_from_deg": 356
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 16.1,
+      "wind_kmh": 6.1,
+      "wind_from_deg": 315
+     }
+    }
+   }
+  },
+  {
+   "generated_utc": "2026-10-31T11:16:12Z",
+   "gfs_run": "2026-10-31T06:00:00Z",
+   "gfs_source": "nomads",
+   "gfs_stale": false,
+   "aq_generated_utc": "2026-10-31T05:23:18Z",
+   "aq_calls": 0,
+   "seconds": 510.6,
+   "bytes_downloaded": 1106839250,
+   "http_requests": 144,
+   "file_kb_mean": {
+    "wind": 141.4,
+    "temp": 142.7,
+    "rain": 102.9,
+    "cloud": 130.6,
+    "pres": 142.1
+   },
+   "publish": {
+    "source": "nomads",
+    "run": "2026-10-31T06:00:00Z",
+    "f000": "2026-10-31T09:31:58Z",
+    "f168": "2026-10-31T10:16:21Z"
+   },
+   "spot_check": {
+    "London": {
+     "gfs": {
+      "temp_c": 9.5,
+      "wind_kmh": 9.0,
+      "wind_from_deg": 80
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 7.6,
+      "wind_kmh": 7.1,
+      "wind_from_deg": 75
+     }
+    },
+    "New York": {
+     "gfs": {
+      "temp_c": 11.8,
+      "wind_kmh": 15.5,
+      "wind_from_deg": 317
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 10.3,
+      "wind_kmh": 8.8,
+      "wind_from_deg": 325
+     }
+    },
+    "Tokyo": {
+     "gfs": {
+      "temp_c": 22.2,
+      "wind_kmh": 7.8,
+      "wind_from_deg": 354
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 22.1,
+      "wind_kmh": 8.5,
+      "wind_from_deg": 324
+     }
+    }
+   }
+  },
+  {
+   "generated_utc": "2026-10-31T18:59:09Z",
+   "gfs_run": "2026-10-31T12:00:00Z",
+   "gfs_source": "aws",
+   "gfs_stale": false,
+   "aq_generated_utc": "2026-10-31T17:15:17Z",
+   "aq_calls": 0,
+   "seconds": 569.0,
+   "bytes_downloaded": 791501953,
+   "http_requests": 967,
+   "file_kb_mean": {
+    "wind": 144.8,
+    "temp": 142.5,
+    "rain": 102.5,
+    "cloud": 130.8,
+    "pres": 142.3
+   },
+   "publish": {
+    "source": "aws",
+    "run": "2026-10-31T12:00:00Z",
+    "f000": "2026-10-31T15:47:51Z",
+    "f168": "2026-10-31T16:18:23Z"
+   },
+   "spot_check": {
+    "London": {
+     "gfs": {
+      "temp_c": 14.2,
+      "wind_kmh": 12.6,
+      "wind_from_deg": 104
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 13.2,
+      "wind_kmh": 9.0,
+      "wind_from_deg": 92
+     }
+    },
+    "New York": {
+     "gfs": {
+      "temp_c": 10.0,
+      "wind_kmh": 13.7,
+      "wind_from_deg": 322
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 8.1,
+      "wind_kmh": 7.6,
+      "wind_from_deg": 329
+     }
+    },
+    "Tokyo": {
+     "gfs": {
+      "temp_c": 18.4,
+      "wind_kmh": 16.9,
+      "wind_from_deg": 357
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 14.7,
+      "wind_kmh": 6.6,
+      "wind_from_deg": 315
+     }
+    }
+   }
+  },
+  {
+   "generated_utc": "2026-10-31T23:15:52Z",
+   "gfs_run": "2026-10-31T18:00:00Z",
+   "gfs_source": "nomads",
+   "gfs_stale": false,
+   "aq_generated_utc": "2026-10-31T17:15:17Z",
+   "aq_calls": 0,
+   "seconds": 588.2,
+   "bytes_downloaded": 1107581583,
+   "http_requests": 144,
+   "file_kb_mean": {
+    "wind": 146.8,
+    "temp": 142.6,
+    "rain": 102.0,
+    "cloud": 131.0,
+    "pres": 142.4
+   },
+   "publish": {
+    "source": "nomads",
+    "run": "2026-10-31T18:00:00Z",
+    "f000": "2026-10-31T21:33:05Z",
+    "f168": "2026-10-31T22:17:14Z"
+   },
+   "spot_check": {
+    "London": {
+     "gfs": {
+      "temp_c": 11.5,
+      "wind_kmh": 8.8,
+      "wind_from_deg": 86
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 10.5,
+      "wind_kmh": 6.8,
+      "wind_from_deg": 65
+     }
+    },
+    "New York": {
+     "gfs": {
+      "temp_c": 14.2,
+      "wind_kmh": 8.4,
+      "wind_from_deg": 325
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 15.0,
+      "wind_kmh": 7.7,
+      "wind_from_deg": 323
+     }
+    },
+    "Tokyo": {
+     "gfs": {
+      "temp_c": 16.0,
+      "wind_kmh": 8.2,
+      "wind_from_deg": 342
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 12.3,
+      "wind_kmh": 4.3,
+      "wind_from_deg": 336
+     }
+    }
+   }
+  }
+ ]
+}
