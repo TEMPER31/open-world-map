@@ -18,7 +18,7 @@ Status as of Phase 1 (foundation).
 | **NASA GIBS**: `VIIRS_SNPP_CorrectedReflectance_TrueColor` | Satellite basemap, world to regional zoom | `gibs.earthdata.nasa.gov` | NASA imagery: no restrictions on use. GIBS asks for an acknowledgement. | "Imagery: NASA GIBS / ESDIS (VIIRS SNPP)" | **Unverified** (host blocked). See [Satellite zoom levels](#satellite-zoom-levels). |
 | **EOX Sentinel-2 cloudless 2016** (`s2cloudless_3857`) | Satellite basemap, regional to city zoom, worldwide | `tiles.maps.eox.at` | **CC BY 4.0** for the 2016 mosaic. | "Sentinel-2 cloudless (s2maps.eu) by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017)" | **Unverified** (host blocked). See [EOX licence](#eox-licence--owner-decision-needed). |
 | **USGS The National Map: Imagery Only** (mostly USDA NAIP) | Satellite basemap, street zoom up to level 16, contiguous US only | `basemap.nationalmap.gov` | US Government work: public domain. | "Imagery: USGS The National Map (USDA NAIP)" | Keyless and CORS-enabled (CI probe, 30 Oct 2026). Cached only to web tile level 16 (1:9,028), which is map zoom 15 on this site: requests for levels 17–19 return no tile, although the service lists levels up to 23. Alaska, Hawaii and Puerto Rico are not enabled (see below). |
-| **USGS The National Map: NAIP Plus** (`USGSNAIPPlus` ImageServer: USDA NAIP plus state high-resolution orthoimagery) | Satellite basemap from map zoom 15 (where the cached layer runs out), contiguous US only (dynamic: one `exportImage` per 512 px tile) | `imagery.nationalmap.gov` | US Government work: public domain. Service copyright text: "USGS, USDA, The National Map: Orthoimagery". | "Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery)" | Keyless, CORS `*`, MapLibre draws it with `{bbox-epsg-3857}` (CI probe, 30 Oct 2026). WMS is not enabled. At Brantley AL the image is NAIP 0.6 m, 28 May 2023, and differs in season from the cached level-16 layer. See `docs/screenshots/satellite-zoom/report.md`. |
+| **USGS The National Map: NAIP Plus** (`USGSNAIPPlus` ImageServer: USDA NAIP plus state high-resolution orthoimagery) | Satellite basemap from map zoom 15 (where the cached layer runs out), contiguous US only (dynamic: one `exportImage` per 512 px tile) | `imagery.nationalmap.gov` | US Government work: public domain. Service copyright text: "USGS, USDA, The National Map: Orthoimagery". | "Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery)" | Keyless, CORS `*`, MapLibre draws it with `{bbox-epsg-3857}` (CI probe, 30 Oct 2026). WMS is not enabled. At Brantley AL the image is NAIP 0.6 m, 28 May 2023, and differs in season from the cached level-16 layer. |
 | **MapLibre GL JS 5.24.0** | Map renderer | `cdn.jsdelivr.net` (pinned, SRI) | BSD-3-Clause | "MapLibre" | SRI hash computed from the npm tarball. CI re-checks it against jsDelivr (`check_site.py --verify-sri`). |
 | **IBM Plex Sans Condensed, IBM Plex Mono** | UI type | none: self-hosted in `site/fonts/` (from `@fontsource` 5.3.0) | SIL OFL 1.1 (licence files alongside) | (not required on the map) | Verified. Self-hosted so visitors' IPs are not sent to a font CDN. |
 | **NOAA/NCEP GFS 0.25°** | Wind, temperature, precipitation, clouds, pressure (f000–f048 hourly) | `nomads.ncep.noaa.gov` (grib filter, primary), `noaa-gfs-bdp-pds.s3.amazonaws.com` (AWS Open Data mirror, fallback); fetched by the data job only, never by visitors | U.S. Government work: public domain / no restrictions. NOAA asks for attribution. | "Weather: NOAA/NCEP GFS" | **Terms wording unverified**: noaa.gov, NOMADS and registry.opendata.aws were unreachable from the build environment. The AWS mirror was used and tested; NOMADS is first exercised in the Actions run. Confirm the exact credit line NOAA requests. |
@@ -33,7 +33,7 @@ All four sources are fetched **by the visitor's browser**, only while a toggle t
 on, at most once every 10 minutes per source, and kept in memory only (nothing stored, nothing
 proxied). CORS, status and field names were checked from GitHub Actions by
 `scripts/data/sources-probe.mjs` (the build environment cannot reach these hosts); the latest run's
-report is committed as `docs/screenshots/<branch>/sources-probe.md`.
+report is in the run's **ci-screenshots** artifact (`sources-probe.md`).
 
 | Source | Used for | Endpoint | Licence / terms | Credit shown | CORS | Rate limit | Status |
 |---|---|---|---|---|---|---|---|
@@ -66,7 +66,7 @@ How it gets there:
 - `site/js/secrets.js` is in `.gitignore` and never committed; `scripts/check_site.py` still fails
   the build on any `MLY|…` token in a tracked file.
 - PR screenshots show the "unavailable" state, unless the owner adds a separate CI-only secret
-  **`MAPILLARY_CI_TOKEN`** (used only by the verify job on same-repository PRs).
+  **`MAPILLARY_CI_TOKEN`** (used only by the PR test jobs on same-repository PRs).
 - Without a token, Street photos says "unavailable" and the page sends nothing to Mapillary.
 
 If the token is abused, revoke it in the Mapillary dashboard and save a new one as the secret; the

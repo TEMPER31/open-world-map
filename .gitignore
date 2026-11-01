@@ -6,3 +6,30 @@ node_modules/
 __pycache__/
 .aq-cache/
 site/js/secrets.js
+# secrets / credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+.npmrc
+.pypirc
+.netrc
+# OS / editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+# build / CI output and logs
+*.pyc
+*.log
+ci-out/
+built/
+docs/screenshots/
+*.bak
+*.old

@@ -158,8 +158,7 @@ jobs:
   # Pull requests: screenshot the site with the freshly built real data, check its values
   # against independent references and run the rendering tests. The work is split into jobs
   # that run side by side (render tests in 4 parts, screenshots + accuracy + perf + probes);
-  # a last job commits the small text reports to docs/screenshots/<branch>/. Images and probe
-  # output go to the ci-screenshots artifact (30 days).
+  # all output (reports, images, probe output) goes to the run's artifacts; nothing is committed.
   verify-tests:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
@@ -287,57 +286,3 @@ jobs:
           name: ci-screenshots
           path: ci-out
           retention-days: 30
-
-  verify:
-    # Collects the text reports of the jobs above and commits them (no images).
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.data.result == 'success' }}
-    needs: [data, verify-tests, verify-shots]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      RAW: ci-out
-      OUT: docs/screenshots/${{ github.head_ref }}
-      LABEL: ${{ github.head_ref }}
-      MAX_JSON_BYTES: 204800
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.head_ref }}
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: ci-screenshots
-          path: ci-out
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: render-tests-*
-          path: ci-out
-          merge-multiple: true
-      - name: Commit the text reports to the PR branch (no images)
-        run: |
-          mkdir -p "$OUT"
-          # one render-tests.md from the 4 parts
-          { for p in 1 2 3 4; do [ -f "$RAW/render-tests-$p.md" ] && { echo "<!-- part $p of 4 -->"; cat "$RAW/render-tests-$p.md"; echo; }; done; } > "$RAW/render-tests.md"
-          for f in accuracy.md render-tests.md perf.md sources-probe.md bandwidth.md; do [ -s "$RAW/$f" ] && cp "$RAW/$f" "$OUT/$f"; done
-          sizes=""
-          for f in views.json run-report.json; do
-            [ -f "$RAW/$f" ] || continue
-            n=$(stat -c %s "$RAW/$f"); sizes="$sizes $f $((n / 1024)) KB;"
-            if [ "$n" -le "$MAX_JSON_BYTES" ]; then cp "$RAW/$f" "$OUT/$f"
-            else
-              git rm -q --ignore-unmatch "${OUT:?}/${f:?}"
-              echo "::notice title=Artifact only::$f is $((n / 1024)) KB (over $((MAX_JSON_BYTES / 1024)) KB)"
-            fi
-          done
-          {
-            echo "# CI output for this branch"
-            echo
-            echo "Screenshots, probe output and any report over $((MAX_JSON_BYTES / 1024)) KB are in the workflow artifact"
-            echo "**ci-screenshots** of run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID (kept 30 days)."
-            echo "Sizes this run:$sizes"
-          } > "$OUT/ci-artifact.md"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$OUT"
-          git commit -m "CI: accuracy table, render tests and small reports ($LABEL) [skip ci]" || exit 0
-          git push
