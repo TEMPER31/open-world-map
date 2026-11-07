@@ -17,6 +17,8 @@ import { initPhotos, status as phStatus, credits as phCredits, hit as phHit, pan
 import { OVERLAYS, overlaysHTML, toggle as toggleOverlay, renderOverlayUI, initOverlays } from './overlays.js';
 import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 import { fieldFresh, placeFresh } from './fresh.js';
+import { initSearch } from './search.js';
+import * as quick from './quickview.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -218,7 +220,7 @@ function bindChrome(map) {
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closePops(); toggleLayersSheet(false); S.set({ selection: null }); $('#probe').hidden = true; }
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toast('Search coming soon.'); }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); const q = $(mobile.matches ? '#mq' : '#q'); q.focus(); q.select(); }
   });
   const op = $('#set-opacity');
   op.value = Math.round(S.get('opacity') * 100);
@@ -394,7 +396,7 @@ function renderDetail(s) {
     <div class="stats">${ORDER.map(stat).join('')}</div>
     <div class="d-sec"><div class="kick"><span>Forecast</span><span>— temp ${label('temp')} · ▮ wind ${label('speed')}</span></div>${chartSVG(detailSeries, t, detailVals?.temp?.v)}</div>
     ${note}
-    <div class="d-ft"><div class="d-btns"><button class="btn pri" type="button" data-center>Centre map here</button><button class="btn" type="button" data-soon="Point download" aria-label="Point download (coming soon)">Data ↓ <span class="soon">Coming soon</span></button></div>
+    <div class="d-ft"><div class="d-btns"><button class="btn pri" type="button" data-center>Centre map here</button><button class="btn" type="button" data-soon="Point download" aria-label="Point download (coming soon)">Data ↓ <span class="soon">Coming soon</span></button><button class="btn" type="button" data-qview aria-haspopup="dialog" aria-expanded="${quick.isOpen()}" aria-controls="qview">Quick view</button></div>
       <div class="src">${meta.live ? 'NOAA GFS · CAMS via Open-Meteo (CC BY 4.0)' : `Sample generator · ${SAMPLE_GRID_DEG}° grid`} · Updated ${hhmm(meta.generated)} UTC</div></div>`;
   el.hidden = false;
   // the panel counts as drawn for this hour once every value has arrived
@@ -511,6 +513,14 @@ async function boot() {
   renderStatus();
 
   bindChrome(map);
+  quick.initQuickView();
+  // Place search (Photon): picking a place flies there and opens its place panel.
+  for (const [q, pop] of [['#q', '#q-pop'], ['#mq', '#mq-pop']]) initSearch($(q), $(pop), { map, onPick: (f, view) => {
+    const [lon, lat] = view.center;
+    map.flyTo({ center: view.center, zoom: view.zoom });
+    S.set({ measuring: false, selection: { type: 'place', lon, lat } });
+    if (mobile.matches) $(q).blur(); // phones: put the keyboard away so the place sheet shows
+  } });
   initClock({ base: meta.base, snap: stepTime });
   S.set({ t: stepTime(Math.min(S.get('t'), meta.hours), 0) });
   // last hourly frame: from here on frames are 3 hours apart
@@ -618,6 +628,7 @@ async function boot() {
   map.on('click', e => {
     const { lng, lat } = e.lngLat;
     if (S.get('measuring')) return; // the measure tool owns clicks while on
+    if (quick.tookClick()) return; // this click closed Quick View; the place stays
     const ev = phHit(e) || evHit(e.point); // a photo or event under the click wins over the place
     if (ev) return S.set({ selection: ev });
     if (Math.abs(lat) > 85) return;
@@ -635,6 +646,8 @@ async function boot() {
     if (e.target.closest('[data-deselect]')) S.set({ selection: null });
     else if (e.target.closest('.d-hd') && !e.target.closest('button') && placeSheet.get() === 'peek') placeSheet.set('half');
     if (e.target.closest('[data-center]')) { const s = S.get('selection'); map.easeTo({ center: [s.lon, s.lat] }); }
+    const qb = e.target.closest('[data-qview]');
+    if (qb) quick.isOpen() ? quick.close() : quick.open(S.get('selection'), qb);
   });
 
   map.on('moveend', () => { renderScale(map); if (S.get('basemap') === 'satellite') renderCredits(map); });

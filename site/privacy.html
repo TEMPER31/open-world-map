@@ -21,6 +21,7 @@
 <p class="kick">Privacy &amp; disclaimer</p>
 <h1>Watching places, not people</h1>
 <p class="pg-lead">Open World Map has no accounts and no ads. It runs no visitor-statistics or tracking scripts, sets no tracking or advertising cookies and does nothing to recognise your device. This page lists every outside service your browser contacts, and when.</p>
+<p>What you type in search is sent to Photon (komoot) to find places; it is not stored by this site.</p>
 
 <h2>What is stored on your device</h2>
 <p>The only thing the site stores is your map preferences, in your browser's local storage under the key <code>owm:prefs:v1</code>: units, basemap, the chosen field and overlays, playback settings and which optional layers are on. They never leave your device. A layer you left on is on again when you return, so its service is contacted again. Event results and photo details are kept in memory only while the map is open.</p>
@@ -41,10 +42,11 @@
   </table></div>
 
 <h2>Contacted only while you use a layer</h2>
-<p>Nothing on this list is contacted until you turn on the layer that needs it. Turning the layer off stops the requests.</p>
+<p>Nothing on this list is contacted until you turn on the layer that needs it, or type in search. Turning the layer off stops the requests.</p>
 <div class="tbl"><table data-hosts>
     <thead><tr><th scope="col">Service</th><th scope="col">When your browser contacts it</th><th scope="col">What it receives, besides the basics above</th></tr></thead>
     <tbody>
+      <tr data-host="photon.komoot.io"><td><b>Photon by komoot (place search)</b><br><code>photon.komoot.io</code></td><td>You type 3 or more characters in search and pause</td><td>The text you type, plus normal request details. Nothing is stored by this site; results are kept in memory only while the map is open.</td></tr>
       <tr data-host="gibs.earthdata.nasa.gov"><td><b>NASA GIBS</b><br><code>gibs.earthdata.nasa.gov</code></td><td>Satellite basemap on, at world and regional zoom</td><td>Tile coordinates and the previous day's UTC date.</td></tr>
       <tr data-host="tiles.maps.eox.at"><td><b>EOX</b><br><code>tiles.maps.eox.at</code></td><td>Satellite basemap on, from regional zoom</td><td>Tile coordinates.</td></tr>
       <tr data-host="basemap.nationalmap.gov"><td><b>USGS Imagery Only</b><br><code>basemap.nationalmap.gov</code></td><td>Satellite basemap on, at city and street zoom in the contiguous US</td><td>Tile coordinates.</td></tr>

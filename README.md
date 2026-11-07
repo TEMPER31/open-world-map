@@ -9,7 +9,7 @@ no paywall.
 **Watching places, not people.** The map is static and uses no analytics or tracking cookies.
 Fonts are self-hosted, and preferences stay in your browser's local storage. The map uses
 jsDelivr and OpenFreeMap on every visit. Satellite, events and street photos use additional
-services while enabled. See the [privacy draft](docs/privacy-draft.md) for the request list.
+services while enabled, and place search contacts Photon while you type. See the [privacy draft](docs/privacy-draft.md) for the request list.
 
 > **Status: Phase 6 (launch preparation)**. Weather comes from the latest NOAA GFS 0.25° run
 > (hourly to 5 days, then every 3 hours to 7 days) and air quality from CAMS via Open-Meteo, rebuilt four times a day by GitHub
@@ -35,8 +35,9 @@ services while enabled. See the [privacy draft](docs/privacy-draft.md) for the r
   the event details and a source link.
 - **Street photos** show Mapillary coverage and a photo viewer when a client token is configured.
 - **Overlays** can add up to two fields over the main field.
-- **Search** and **downloads** of the processed data are not built yet: their buttons say
-  "Coming soon".
+- **Search** finds places by name (Photon by komoot, OpenStreetMap data) and opens their forecast;
+  **Quick view** in the place panel gives a large-text summary of the next 12 hours.
+- **Downloads** of the processed data are not built yet: their buttons say "Coming soon".
 
 ## Pages
 
