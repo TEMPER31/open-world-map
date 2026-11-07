@@ -134,6 +134,9 @@ jobs:
           path: site
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        with:
+          # The first deploy of ~100 MB of forecast files can take longer than the default 10 min.
+          timeout: 1800000
 
   archive:
     # One small summary per day (after the 18Z cycle). Hourly files are never committed.
