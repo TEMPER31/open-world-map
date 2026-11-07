@@ -1,0 +1,72 @@
+{
+ "date": "2026-10-29",
+ "generated_utc": "2026-10-29T22:50:16Z",
+ "source": "NOAA/NCEP Global Forecast System (GFS) 0.25\u00b0",
+ "license": "Public domain (U.S. Government work); NOAA requests attribution",
+ "aq_source": "CAMS (Copernicus Atmosphere Monitoring Service) via Open-Meteo.com",
+ "aq_license": "CC BY 4.0",
+ "cycles": [
+  {
+   "generated_utc": "2026-10-29T22:50:16Z",
+   "gfs_run": "2026-10-29T18:00:00Z",
+   "gfs_source": "nomads",
+   "gfs_stale": false,
+   "aq_generated_utc": "2026-10-29T21:59:05Z",
+   "aq_calls": 0,
+   "seconds": 137.5,
+   "bytes_downloaded": 354991719,
+   "http_requests": 123,
+   "file_kb_mean": {
+    "wind": 139.2,
+    "temp": 89.3,
+    "rain": 96.5,
+    "cloud": 128.7,
+    "pres": 64.6
+   },
+   "publish": {
+    "source": "nomads",
+    "run": "2026-10-29T18:00:00Z",
+    "f000": "2026-10-29T21:33:36Z",
+    "f048": "2026-10-29T21:46:23Z"
+   },
+   "spot_check": {
+    "London": {
+     "gfs": {
+      "temp_c": 13.2,
+      "wind_kmh": 9.5,
+      "wind_from_deg": 114
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 12.7,
+      "wind_kmh": 6.3,
+      "wind_from_deg": 103
+     }
+    },
+    "New York": {
+     "gfs": {
+      "temp_c": 18.2,
+      "wind_kmh": 14.4,
+      "wind_from_deg": 225
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 19.4,
+      "wind_kmh": 11.5,
+      "wind_from_deg": 221
+     }
+    },
+    "Tokyo": {
+     "gfs": {
+      "temp_c": 15.1,
+      "wind_kmh": 5.2,
+      "wind_from_deg": 249
+     },
+     "ecmwf_ifs025": {
+      "temp_c": 10.8,
+      "wind_kmh": 3.9,
+      "wind_from_deg": 292
+     }
+    }
+   }
+  }
+ ]
+}

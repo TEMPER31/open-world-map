@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en" class="pg">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy &amp; disclaimer · Open World Map</title>
+<meta name="description" content="Open World Map has no accounts, no visitor statistics and no tracking. Every outside service your browser contacts and when, plus the forecast disclaimer.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#07090c">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/page.css">
+</head>
+<body>
+<header class="pg-top"><a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a><a class="tb-link" href="./">Open the map →</a></header>
+<main class="pg-main">
+<p class="kick">Privacy &amp; disclaimer</p>
+<h1>Watching places, not people</h1>
+<p class="pg-lead">Open World Map has no accounts and no ads. It runs no visitor-statistics or tracking scripts, sets no tracking or advertising cookies and does nothing to recognise your device. This page lists every outside service your browser contacts, and when.</p>
+
+<h2>What is stored on your device</h2>
+<p>The only thing the site stores is your map preferences, in your browser's local storage under the key <code>owm:prefs:v1</code>: units, basemap, the chosen field and overlays, playback settings and which optional layers are on. They never leave your device. A layer you left on is on again when you return, so its service is contacted again. Event results and photo details are kept in memory only while the map is open.</p>
+
+<h2>What every service receives</h2>
+<p>Any server your browser contacts receives your IP address and the normal request details, including your browser's user agent. The site sets the referrer policy <code>strict-origin-when-cross-origin</code>, so other sites see at most this site's address, never the page you were on. The map position after the <code>#</code> in the address is never sent. Mapillary photo images are requested with no referrer at all.</p>
+
+<h2>Contacted on every visit</h2>
+<p>These are contacted as soon as the map opens, before you turn anything on. Without them there is no site, no map library and no basemap.</p>
+<div class="tbl"><table data-hosts>
+    <thead><tr><th scope="col">Service</th><th scope="col">When your browser contacts it</th><th scope="col">What it receives, besides the basics above</th></tr></thead>
+    <tbody>
+      <tr data-host="temper31.github.io"><td><b>GitHub Pages</b><br><code>temper31.github.io</code></td><td>Every visit: the site itself, its scripts, fonts and map data, and the forecast files for the hours you view</td><td>The page and file addresses you load. GitHub's own logging applies.</td></tr>
+      <tr data-host="cdn.jsdelivr.net"><td><b>jsDelivr</b><br><code>cdn.jsdelivr.net</code></td><td>Every visit: the MapLibre map library (JavaScript and CSS, pinned with integrity hashes)</td><td>Two fixed file addresses that do not depend on your view.</td></tr>
+      <tr data-host="tiles.openfreemap.org"><td><b>OpenFreeMap</b><br><code>tiles.openfreemap.org</code></td><td>Every visit, with every basemap including Satellite: the basemap description, road and place-name tiles and label fonts</td><td>Tile coordinates, which show the area and zoom on your screen, and the font and character range of labels.</td></tr>
+      <tr data-host="dynamic:openfreemap.tilejson.tiles"><td><b>OpenFreeMap vector tiles</b></td><td>Every visit: the tile address that OpenFreeMap's basemap description names (expected <code>tiles.openfreemap.org</code>; not yet confirmed against a live response)</td><td>Tile coordinates (area and zoom on your screen).</td></tr>
+    </tbody>
+  </table></div>
+
+<h2>Contacted only while you use a layer</h2>
+<p>Nothing on this list is contacted until you turn on the layer that needs it. Turning the layer off stops the requests.</p>
+<div class="tbl"><table data-hosts>
+    <thead><tr><th scope="col">Service</th><th scope="col">When your browser contacts it</th><th scope="col">What it receives, besides the basics above</th></tr></thead>
+    <tbody>
+      <tr data-host="gibs.earthdata.nasa.gov"><td><b>NASA GIBS</b><br><code>gibs.earthdata.nasa.gov</code></td><td>Satellite basemap on, at world and regional zoom</td><td>Tile coordinates and the previous day's UTC date.</td></tr>
+      <tr data-host="tiles.maps.eox.at"><td><b>EOX</b><br><code>tiles.maps.eox.at</code></td><td>Satellite basemap on, from regional zoom</td><td>Tile coordinates.</td></tr>
+      <tr data-host="basemap.nationalmap.gov"><td><b>USGS Imagery Only</b><br><code>basemap.nationalmap.gov</code></td><td>Satellite basemap on, at city and street zoom in the contiguous US</td><td>Tile coordinates.</td></tr>
+      <tr data-host="imagery.nationalmap.gov"><td><b>USGS NAIP Plus</b><br><code>imagery.nationalmap.gov</code></td><td>Satellite basemap on, at street zoom in the contiguous US</td><td>The map area of each tile (a bounding box) and image size.</td></tr>
+      <tr data-host="earthquake.usgs.gov"><td><b>USGS earthquakes</b><br><code>earthquake.usgs.gov</code></td><td>Earthquakes on (also when you click its credit)</td><td>A fixed request for the past week's M2.5+ earthquakes.</td></tr>
+      <tr data-host="eonet.gsfc.nasa.gov"><td><b>NASA EONET</b><br><code>eonet.gsfc.nasa.gov</code></td><td>Wildfires &amp; volcanoes or Storms on (also when you click its credit)</td><td>A fixed request for open events of the past 7 days.</td></tr>
+      <tr data-host="www.gdacs.org"><td><b>GDACS</b><br><code>www.gdacs.org</code></td><td>Disaster alerts on (also when you click its credit or an alert's report link)</td><td>A date range (the past 7 days) and alert levels.</td></tr>
+      <tr data-host="mapservices.weather.noaa.gov"><td><b>NOAA National Hurricane Center</b><br><code>mapservices.weather.noaa.gov</code></td><td>Storms on</td><td>Fixed requests for forecast points and cones of active storms.</td></tr>
+      <tr data-host="tiles.mapillary.com"><td><b>Mapillary coverage</b><br><code>tiles.mapillary.com</code></td><td>Street photos on</td><td>Tile coordinates and the site's public Mapillary client token.</td></tr>
+      <tr data-host="graph.mapillary.com"><td><b>Mapillary photo details</b><br><code>graph.mapillary.com</code></td><td>You select a photo dot or line</td><td>The photo's ID and the site's public client token.</td></tr>
+      <tr data-host="dynamic:mapillary.thumb_1024_url"><td><b>Mapillary photo image (Meta's image servers)</b></td><td>A selected photo is shown. The image comes from the address Mapillary returns, expected to be on <code>*.fbcdn.net</code> (not yet verified)</td><td>The image address Mapillary returned. No referrer is sent.</td></tr>
+    </tbody>
+  </table></div>
+
+<h2>Links you open</h2>
+<p>Credits, source links and “Open on Mapillary” are ordinary links: the site is only contacted if you click one, and then it receives the link address (which can identify the event or photo) and normal request details. An event's source link can point to any site the event feed names.</p>
+<div class="tbl"><table data-hosts>
+    <thead><tr><th scope="col">Service</th><th scope="col">When</th><th scope="col">What it receives</th></tr></thead>
+    <tbody>
+      <tr data-host="github.com"><td><b>GitHub</b><br><code>github.com</code></td><td>You open a GitHub, source code or licence link</td><td>The link address and normal request details</td></tr>
+      <tr data-host="earthdata.nasa.gov"><td><b>NASA Earthdata</b><br><code>earthdata.nasa.gov</code></td><td>You click the NASA GIBS credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="s2maps.eu"><td><b>EOX Sentinel-2 cloudless</b><br><code>s2maps.eu</code></td><td>You click the EOX imagery credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.usgs.gov"><td><b>USGS</b><br><code>www.usgs.gov</code></td><td>You click a USGS imagery credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="openfreemap.org"><td><b>OpenFreeMap</b><br><code>openfreemap.org</code></td><td>You click the OpenFreeMap credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="openmaptiles.org"><td><b>OpenMapTiles</b><br><code>openmaptiles.org</code></td><td>You click the OpenMapTiles credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.openstreetmap.org"><td><b>OpenStreetMap</b><br><code>www.openstreetmap.org</code></td><td>You click the OpenStreetMap credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.naturalearthdata.com"><td><b>Natural Earth</b><br><code>www.naturalearthdata.com</code></td><td>You click the Natural Earth credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.nco.ncep.noaa.gov"><td><b>NOAA/NCEP</b><br><code>www.nco.ncep.noaa.gov</code></td><td>You click the NOAA GFS credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="atmosphere.copernicus.eu"><td><b>Copernicus CAMS</b><br><code>atmosphere.copernicus.eu</code></td><td>You click the CAMS credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="open-meteo.com"><td><b>Open-Meteo</b><br><code>open-meteo.com</code></td><td>You click the Open-Meteo credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="maplibre.org"><td><b>MapLibre</b><br><code>maplibre.org</code></td><td>You click the MapLibre credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.nhc.noaa.gov"><td><b>NOAA National Hurricane Center</b><br><code>www.nhc.noaa.gov</code></td><td>You click the NHC credit or a storm's source link</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.mapillary.com"><td><b>Mapillary</b><br><code>www.mapillary.com</code></td><td>You click the Mapillary credit, a photo or “Open on Mapillary”</td><td>The link address and normal request details</td></tr>
+      <tr data-host="creativecommons.org"><td><b>Creative Commons</b><br><code>creativecommons.org</code></td><td>You click the CC BY-SA 4.0 licence link</td><td>The link address and normal request details</td></tr>
+      <tr data-host="dynamic:event.source_url"><td><b>The event's source (named by the event feed)</b></td><td>You click “Open source page” on an event</td><td>The link address and normal request details</td></tr>
+    </tbody>
+  </table></div>
+
+<h2>Behind the scenes</h2>
+<p>The forecast files are built by a scheduled job on GitHub Actions, not by your browser. That job downloads NOAA GFS from NOAA's NOMADS server or its AWS Open Data mirror and uses the Open-Meteo Air Quality and Forecast APIs. You receive only the finished files, from GitHub Pages.</p>
+
+<h2>Disclaimer</h2>
+<ul>
+  <li>The weather on this map is a computer model forecast on a grid of about 50 km. Mountains, coasts and cities can differ from the grid value, and forecasts become less certain beyond about 3 days.</li>
+  <li>It is <b>not an official warning service</b>. For decisions about safety, use your national weather service and local authorities.</li>
+  <li>Event, alert and storm information comes from third-party feeds and can be delayed, incomplete or withdrawn. Check the source.</li>
+  <li>The site and its code are provided “as is”, without warranty of any kind, under the <a href="https://github.com/TEMPER31/open-world-map/blob/main/LICENSE" rel="noopener">MIT licence</a>.</li>
+</ul>
+</main>
+<footer class="pg-foot">
+  <nav class="footnav" aria-label="Site pages"><a href="about.html">About</a><span class="sep" aria-hidden="true"> · </span><a href="data.html">Data</a><span class="sep" aria-hidden="true"> · </span><a href="sources.html">Sources &amp; licences</a><span class="sep" aria-hidden="true"> · </span><a href="privacy.html" aria-current="page">Privacy &amp; disclaimer</a></nav>
+  <p>Free, open source (MIT) and non-commercial. Watching places, not people.</p>
+</footer>
+</body>
+</html>

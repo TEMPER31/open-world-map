@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en" class="pg">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Data · Open World Map</title>
+<meta name="description" content="Where the weather, air quality, events and imagery on Open World Map come from, how often they update, their grid sizes and known limits.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#07090c">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/page.css">
+</head>
+<body>
+<header class="pg-top"><a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a><a class="tb-link" href="./">Open the map →</a></header>
+<main class="pg-main">
+<p class="kick">Data</p>
+<h1>What the map shows, and its limits</h1>
+<p class="pg-lead">The weather on the map is a computer forecast on a global grid. This page says where each layer comes from, how often it is updated, how fine its grid is and where it is known to be off.</p>
+
+<h2>Weather forecast</h2>
+<ul>
+  <li><b>Source:</b> NOAA/NCEP Global Forecast System (GFS), 0.25° model output.</li>
+  <li><b>Range:</b> 137 frames per run: hourly to +5 days (f000–f120), then every 3 hours to +7 days (f123–f168). Forecasts become less certain beyond about 3 days; the timeline marks that part.</li>
+  <li><b>Updates:</b> four times a day, after each GFS cycle (00, 06, 12 and 18 UTC). A run's files appear about 4½ hours after its cycle; the map's header shows when the data was built. If an update fails, the map keeps the previous run and shows a “may be out of date” banner.</li>
+  <li><b>Grids on the map:</b> temperature and pressure on a 0.5° grid (about 50 km) with NOAA's exact values at the grid points; wind on a 0.75° grid; clouds and precipitation as 0.5° area averages (about 50 km across).</li>
+  <li><b>Precipitation</b> is the mean rate over the past hour, or the past 3 hours after +5 days.</li>
+</ul>
+
+<h2>Air quality</h2>
+<ul>
+  <li><b>Source:</b> CAMS global forecast (Copernicus Atmosphere Monitoring Service) via the Open-Meteo Air Quality API, CC BY 4.0.</li>
+  <li><b>Grid:</b> 4° (3,870 points), smoothed between points in your browser.</li>
+  <li><b>Updates:</b> about twice a day. The CAMS forecast ends about 4½ days after its run; after that the map says “Air quality forecast ends” with the date.</li>
+  <li><b>Scale:</b> PM2.5 colours and categories use the US EPA bands revised in 2024, applied to hourly values. The AQI number is the 24-hour value.</li>
+</ul>
+
+<h2>Events, photos and satellite</h2>
+<ul>
+  <li><b>Events:</b> USGS earthquakes (M2.5+, past 7 days), NASA EONET wildfires, volcanoes and severe storms, GDACS disaster alerts, and NOAA National Hurricane Center forecast tracks and cones, which follow the timeline. Your browser fetches a feed only while its toggle is on, at most every 10 minutes.</li>
+  <li><b>Street photos:</b> Mapillary community photos (CC BY-SA 4.0), each with its capture date and creator.</li>
+  <li><b>Satellite basemap:</b> NASA GIBS true colour from the previous day at world and regional zoom, EOX Sentinel-2 cloudless 2016 from regional zoom, and USGS aerial imagery at street zoom in the contiguous US.</li>
+</ul>
+
+<h2>Known limits</h2>
+<ul>
+  <li><b>Temperature</b> reads 0.2–0.9 °C cold near cities and 3.3–3.9 °C cold at Denver (0.5° grid, mountains).</li>
+  <li><b>Coastal wind</b> reads 3–5 km/h low at Miami (0.75° wind grid).</li>
+  <li><b>City air quality</b> can be well off (Denver −23 µg/m³, Delhi about −16) because the CAMS grid used is 4°.</li>
+  <li>Mountains, coasts and cities can differ from the grid value at a point. Model values are not observations.</li>
+  <li>When live data is unavailable, the map shows clearly labelled <b>sample data</b> instead of a forecast.</li>
+</ul>
+
+<h2>Downloads <span class="soon">Coming soon</span></h2>
+<p>The processed forecast files are not offered for download yet, and there is no public data API.</p>
+</main>
+<footer class="pg-foot">
+  <nav class="footnav" aria-label="Site pages"><a href="about.html">About</a><span class="sep" aria-hidden="true"> · </span><a href="data.html" aria-current="page">Data</a><span class="sep" aria-hidden="true"> · </span><a href="sources.html">Sources &amp; licences</a><span class="sep" aria-hidden="true"> · </span><a href="privacy.html">Privacy &amp; disclaimer</a></nav>
+  <p>Free, open source (MIT) and non-commercial. Watching places, not people.</p>
+</footer>
+</body>
+</html>

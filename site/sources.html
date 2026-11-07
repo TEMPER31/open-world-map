@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" class="pg">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sources &amp; licences · Open World Map</title>
+<meta name="description" content="Every data source, map service and asset Open World Map uses, with its licence, the credit shown and when it loads.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#07090c">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/page.css">
+</head>
+<body>
+<header class="pg-top"><a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a><a class="tb-link" href="./">Open the map →</a></header>
+<main class="pg-main">
+<p class="kick">Sources &amp; licences</p>
+<h1>Where every layer comes from</h1>
+<p class="pg-lead">Every source the map uses, its licence or terms, the credit the map shows and when it loads. The map's credits strip lists the sources on screen at any moment.</p>
+<p>This page matches the project's source register (<code>docs/sources-register.md</code>) row for row. A source is added there before it is added to the map. The code is MIT; data and imagery keep their own licences.</p>
+
+<h2>Map and basemaps</h2>
+<div class="tbl"><table data-register>
+    <thead><tr><th scope="col">Source</th><th scope="col">Host or delivery</th><th scope="col">Licence or terms</th><th scope="col">Credit as displayed</th><th scope="col">When it loads</th></tr></thead>
+    <tbody>
+      <tr><td>GitHub Pages</td><td><code>temper31.github.io</code></td><td>GitHub Pages hosting terms apply. The project code is MIT. Data retain their source terms.</td><td>—</td><td>Every published visit. Same-origin assets and forecast files load as needed.</td></tr>
+      <tr><td>MapLibre GL JS 5.24.0</td><td><code>cdn.jsdelivr.net</code></td><td>BSD-3-Clause</td><td>MapLibre</td><td>JS and CSS on every visit, pinned with SRI.</td></tr>
+      <tr><td>OpenFreeMap</td><td><code>tiles.openfreemap.org</code></td><td>Keyless public service. Its tiles use OpenMapTiles and OpenStreetMap data under the terms below.</td><td>OpenFreeMap</td><td>Preconnect, TileJSON, vector tiles and glyphs on a normal visit with any basemap.</td></tr>
+      <tr><td>OpenMapTiles</td><td>Via OpenFreeMap</td><td>OpenMapTiles schema and design, CC BY 4.0</td><td>© OpenMapTiles</td><td>As part of the vector basemap.</td></tr>
+      <tr><td>OpenStreetMap</td><td>Via OpenFreeMap</td><td>ODbL 1.0</td><td>Data © OpenStreetMap contributors</td><td>As part of the vector basemap.</td></tr>
+      <tr><td>Natural Earth 1:110m</td><td>Same-origin GeoJSON in <code>site/data/</code>, converted from <code>world-atlas@2.0.2</code></td><td>Public domain. The world-atlas packaging is ISC.</td><td>Natural Earth</td><td>Land, coastlines and borders are registered in the map style on every visit.</td></tr>
+      <tr><td>IBM Plex Sans Condensed and IBM Plex Mono</td><td>Same-origin fonts in <code>site/fonts/</code></td><td>SIL OFL 1.1. Licence files ship beside the fonts.</td><td>—</td><td>UI fonts on every visit.</td></tr>
+      <tr><td>NASA GIBS VIIRS true colour</td><td><code>gibs.earthdata.nasa.gov</code></td><td>NASA imagery has no restrictions on use. GIBS requests acknowledgement.</td><td>Imagery: NASA GIBS / ESDIS (VIIRS SNPP)</td><td>Satellite at world and regional zoom, below configured map zoom 7.</td></tr>
+      <tr><td>EOX Sentinel-2 cloudless 2016</td><td><code>tiles.maps.eox.at</code></td><td>CC BY 4.0 for the 2016 mosaic</td><td>Sentinel-2 cloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017)</td><td>Satellite from configured map zoom 4.5 worldwide.</td></tr>
+      <tr><td>USGS The National Map Imagery Only</td><td><code>basemap.nationalmap.gov</code></td><td>U.S. Government work, public domain</td><td>Imagery: USGS The National Map (USDA NAIP)</td><td>Satellite from map zoom 11 within the contiguous-US source bounds.</td></tr>
+      <tr><td>USGS The National Map NAIP Plus</td><td><code>imagery.nationalmap.gov</code></td><td>U.S. Government work, public domain. Service credit is “USGS, USDA, The National Map: Orthoimagery.”</td><td>Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery)</td><td>Satellite from map zoom 15 within the same bounds. One image export per 512 px tile.</td></tr>
+    </tbody>
+  </table></div>
+<p>The three OpenFreeMap credit fragments appear together as “OpenFreeMap · © OpenMapTiles · Data © OpenStreetMap contributors”. The style requests Noto Sans glyphs through OpenFreeMap. The licence of the served glyph bundle was not independently verified.</p>
+<p>The Sentinel-2 cloudless imagery is the 2016 mosaic (CC BY 4.0); newer EOX mosaics use CC BY-NC-SA 4.0. The USGS layers cover the contiguous United States (source bounds 124.85° W to 66.88° W, 24.4° N to 49.39° N, which can include slivers of Canada and Mexico). Alaska, Hawaii and Puerto Rico are outside them.</p>
+
+<h2>Forecasts and processing</h2>
+<div class="tbl"><table data-register>
+    <thead><tr><th scope="col">Source</th><th scope="col">Host or delivery</th><th scope="col">Licence or terms</th><th scope="col">Credit as displayed</th><th scope="col">When it loads</th></tr></thead>
+    <tbody>
+      <tr><td>NOAA/NCEP GFS 0.25°</td><td><code>nomads.ncep.noaa.gov</code> and <code>noaa-gfs-bdp-pds.s3.amazonaws.com</code> in the data job</td><td>U.S. Government work, public domain. NOAA requests attribution. Exact terms wording was not independently rechecked.</td><td>Weather: NOAA/NCEP GFS</td><td>The job downloads 137 frames, hourly f000–f120 and three-hourly f123–f168. Same-cycle fallback is per hour. The browser reads processed wind, temperature, rain, cloud and pressure frames from the site origin as needed.</td></tr>
+      <tr><td>CAMS global via Open-Meteo Air Quality API</td><td><code>air-quality-api.open-meteo.com</code> in the data job</td><td>Open-Meteo data CC BY 4.0, free tier for non-commercial use. Copernicus requests a “Generated using Copernicus Atmosphere Monitoring Service information” acknowledgement. Exact attribution terms were not independently rechecked.</td><td>Air quality: CAMS via Open-Meteo.com (CC BY 4.0)</td><td>The job refreshes the 4° grid of 3,870 locations when due (typically about 7,740 location-calls per day) and probes forecast range at three points per run. The browser reads processed PM2.5, PM10 and U.S. AQI frames from the site origin as needed.</td></tr>
+      <tr><td>ECMWF IFS 0.25° via Open-Meteo Forecast API</td><td><code>api.open-meteo.com</code> in the data job</td><td>CC BY 4.0 (Open-Meteo)</td><td>—</td><td>Three-city comparison in the data job. The comparison is absent from the map.</td></tr>
+      <tr><td>wgrib2 v3.8.0 (NOAA-EMC)</td><td><code>github.com/NOAA-EMC/wgrib2</code> at build time</td><td>Public domain (U.S. Government work)</td><td>—</td><td>GRIB2 decoding in the job. Built from a pinned tag and commit when the cached tool is unavailable.</td></tr>
+      <tr><td>Generated sample weather</td><td>Generated in the browser</td><td>Project code under MIT</td><td>Weather: generated sample data</td><td>Fallback when the site cannot load a live manifest.</td></tr>
+    </tbody>
+  </table></div>
+<p>The credits strip shows GFS and CAMS when the live forecast loads, or the sample credit when the map is using generated data. The <a href="data.html">Data</a> page covers the grids, update times and known limits.</p>
+
+<h2>Events</h2>
+<p>Each feed loads while a matching event toggle is on, at most once per 10 minutes per source. Your browser keeps the results in memory. Opening a source link is a separate action.</p>
+<div class="tbl"><table data-register>
+    <thead><tr><th scope="col">Source</th><th scope="col">Host</th><th scope="col">Licence or terms</th><th scope="col">Credit as displayed</th><th scope="col">When it loads</th></tr></thead>
+    <tbody>
+      <tr><td>USGS Earthquake Hazards Program</td><td><code>earthquake.usgs.gov</code></td><td>Public domain except marked third-party material. USGS requests credit.</td><td>Earthquakes: USGS</td><td>Earthquakes on. M2.5+ GeoJSON for the past seven days.</td></tr>
+      <tr><td>NASA EONET v3</td><td><code>eonet.gsfc.nasa.gov</code></td><td>NASA data. EONET aggregates reports from other agencies and links to their source material.</td><td>Events: NASA EONET</td><td>Wildfires &amp; volcanoes or Storms on. Open events with reports in the past seven days. The map selects wildfires, volcanoes and severe storms.</td></tr>
+      <tr><td>GDACS (Global Disaster Alert and Coordination System)</td><td><code>www.gdacs.org</code></td><td>No published reuse licence. Kept with credit by owner decision. GDACS describes its alerts as indicative and advises checking alternate sources.</td><td>Alerts: GDACS (EC JRC, UN OCHA)</td><td>Disaster alerts on. Up to 100 alerts for earthquakes, cyclones, floods, volcanoes, droughts and wildfires.</td></tr>
+      <tr><td>NOAA National Hurricane Center via NWS tropical map service</td><td><code>mapservices.weather.noaa.gov</code></td><td>NWS public domain unless specifically marked otherwise. Credit NOAA NHC.</td><td>Storm forecasts: NOAA NHC</td><td>Storms on. Forecast points for up to 15 Atlantic, East Pacific and Central Pacific storm slots, plus a cone query per active storm.</td></tr>
+    </tbody>
+  </table></div>
+
+<h2>Street photos</h2>
+<div class="tbl"><table data-register>
+    <thead><tr><th scope="col">Source</th><th scope="col">Host</th><th scope="col">Licence or terms</th><th scope="col">Credit as displayed</th><th scope="col">When it loads</th></tr></thead>
+    <tbody>
+      <tr><td>Mapillary</td><td><code>tiles.mapillary.com</code>, <code>graph.mapillary.com</code> and the thumbnail host returned in <code>thumb_1024_url</code> (expected <code>*.fbcdn.net</code>, unverified)</td><td>User content is CC BY-SA 4.0 unless otherwise stated. Mapillary's terms require a visible Mapillary logo linked to its homepage for API or vector tile integrations.</td><td>Street photos: © Mapillary contributors, CC BY-SA 4.0, with “© Mapillary” linked to the Mapillary homepage. The photo panel adds “CC BY-SA 4.0 — Mapillary / {creator}” with “Mapillary” linked to the homepage, and an “Open on Mapillary” link. The Mapillary logo, linked to the homepage, is added to both once the official logo file is in the site.</td><td>Coverage tiles while Street photos is on with a configured client token. A dot or sequence selection fetches photo metadata from Graph when needed. The thumbnail loads when the panel displays it.</td></tr>
+    </tbody>
+  </table></div>
+<p>The site's public Mapillary client token is added when the site is published and is never stored in the code. If Mapillary rejects it or its daily limit is reached, the layer says “unavailable right now” and nothing else is affected.</p>
+
+<h2>Not used</h2>
+<p>Esri World Imagery, MapTiler, Mapbox, Google Maps, Bing, CARTO, the OpenStreetMap tile service, NASA FIRMS and a direct JTWC feed are outside this build.</p>
+</main>
+<footer class="pg-foot">
+  <nav class="footnav" aria-label="Site pages"><a href="about.html">About</a><span class="sep" aria-hidden="true"> · </span><a href="data.html">Data</a><span class="sep" aria-hidden="true"> · </span><a href="sources.html" aria-current="page">Sources &amp; licences</a><span class="sep" aria-hidden="true"> · </span><a href="privacy.html">Privacy &amp; disclaimer</a></nav>
+  <p>Free, open source (MIT) and non-commercial. Watching places, not people.</p>
+</footer>
+</body>
+</html>
