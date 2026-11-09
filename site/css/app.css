@@ -71,7 +71,6 @@ kbd { font: 500 10.5px var(--mono); padding: 2px 6px; border: 1px solid var(--li
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; text-transform: uppercase; white-space: nowrap; color: var(--ink); text-decoration: none; }
 .logo { width: 20px; height: 20px; flex: none; }
 .search { flex: 0 1 420px; min-width: 120px; display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px 0 12px; border: 1px solid var(--line); border-radius: var(--r); color: var(--mute); background: var(--hover); text-align: left; }
-.search span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .search::before, .m-search::before { content: ""; width: 10px; height: 10px; border: 1.5px solid var(--mute); border-radius: 50%; flex: none; }
 .tb-right { margin-left: auto; display: flex; align-items: center; gap: 16px; color: var(--mute); font-size: 12.5px; white-space: nowrap; }
 .tb-right .mono { color: var(--ink); font-size: 12px; }
@@ -452,8 +451,6 @@ button.chip:hover { background: var(--hover); }
 .lsec.ov .lx-note { padding: 4px 8px 0; font-size: 11px; }
 
 /* ---- Phase 6: "Coming soon" labels, Now button ---- */
-.search .soon, .m-search .soon { flex: none; overflow: visible; }
-.m-search > span:not(.soon) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .m-search { min-width: 0; } /* the label must not push the MSR / LYR buttons below 46 px */
 .btn .soon { font-size: 8.5px; }
 .pop p .soon { margin-left: 4px; vertical-align: 1px; }
@@ -493,3 +490,27 @@ button.chip:disabled:hover { background: none; }
 /* ---- Phase 6: Mapillary credit (logo shown only from the owner's official file; see config.js) ---- */
 .mly-logo img { height: 12px; width: auto; vertical-align: -2px; }
 .d-ft .src a { color: var(--ink); }
+
+/* ---- place search ---- */
+.search { position: relative; }
+.search input, .m-search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none; font: inherit; color: var(--ink); outline: none; }
+.search input::placeholder, .m-search input::placeholder { color: var(--mute); opacity: 1; }
+.search:focus-within, .m-search:focus-within { border-color: var(--accent); }
+.topbar:focus-within, .m-top:focus-within { z-index: 10; }
+.s-pop { z-index: 10; left: -1px; right: -1px; top: calc(100% + 6px); min-width: 320px; max-height: min(60vh, 420px); overflow-y: auto; border-color: var(--line2); box-shadow: var(--lift); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.s-pop ul { margin: 0; padding: 4px 0; list-style: none; }
+.s-pop ul:empty, .s-msg:empty { display: none; }
+.s-pop li { display: flex; align-items: baseline; gap: 8px; min-height: 34px; padding: 9px 12px 0; cursor: pointer; white-space: nowrap; }
+.s-pop li b { flex: none; max-width: 60%; overflow: hidden; text-overflow: ellipsis; font-weight: 500; color: var(--ink); }
+.s-pop li span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: 11px var(--mono); color: var(--mute); }
+.s-pop li[aria-selected="true"] { background: var(--ink); }
+.s-pop li[aria-selected="true"] b, .s-pop li[aria-selected="true"] span { color: var(--bg); }
+.s-msg { margin: 0; padding: 10px 12px; font: 12px/1.4 var(--mono); color: var(--mute); white-space: normal; }
+.d-name { color: var(--mute); flex-wrap: wrap; }
+.d-name .np { font: 600 9px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--line); padding: 3px 4px; border-radius: var(--r); white-space: nowrap; }
+@media (max-width: 1023px) {
+  /* the list spans the whole top row (search pill + buttons); 16 px text stops iOS zooming in */
+  .m-search input { font-size: 16px; }
+  .m-search .s-pop { right: auto; top: calc(100% + 8px); width: calc(100vw - 24px); min-width: 0; max-height: 50vh; }
+  .s-pop li { min-height: 44px; padding-top: 13px; font-size: 14.5px; }
+}

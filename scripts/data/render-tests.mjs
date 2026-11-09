@@ -301,15 +301,16 @@ if (part()) {
   check('No page errors (timeline controls)', !errors.length, errors.join(' | '));
   await page.close();
 }
-// 6b. Unbuilt features say "Coming soon" (visible, not only in aria-label), and the Now button
-// returns every layer to the Now frame (desktop chip and phone button).
+// 6b. Unbuilt features say "Coming soon" (visible, not only in aria-label), search and the place
+// name no longer do, and the Now button returns every layer to the Now frame (desktop chip and phone button).
 const shown = (page, sel) => page.evaluate(s => { const e = document.querySelector(s), r = e?.getBoundingClientRect(); return !!e && e.checkVisibility() && r.width > 0 && r.height > 0 ? e.textContent.trim() : null; }, sel);
 if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: true, overlays: ['pres'] }, '3/45/-30');
-  const soon = { search: await shown(page, '.topbar .search .soon') };
-  await page.click('.topbar .search'); soon.searchToast = await page.$eval('#toast', e => e.textContent);
-  await page.keyboard.press('Control+K'); soon.ctrlK = await page.$eval('#toast', e => e.textContent);
+  const soon = { searchSoon: await page.$$eval('.search .soon, .m-search .soon', e => e.length) };
+  await page.keyboard.press('Control+K'); soon.ctrlK = await page.evaluate(() => document.activeElement?.matches('.topbar .search input') ?? false);
+  await page.keyboard.press('Escape'); await page.evaluate(() => document.activeElement?.blur());
   await page.mouse.click(700, 350); await page.waitForSelector('#detail [data-soon="Point download"]', { timeout: 10000 }).catch(() => {});
+  soon.nameSoon = await page.$$eval('#detail .d-name .soon', e => e.length);
   soon.dataBtn = await shown(page, '#detail [data-soon="Point download"] .soon');
   soon.dataBtnLabel = await page.$eval('#detail [data-soon="Point download"]', e => e.getAttribute('aria-label')).catch(() => null);
   await page.click('#detail [data-soon="Point download"]'); soon.dataToast = await page.$eval('#toast', e => e.textContent);
@@ -317,8 +318,8 @@ if (part()) {
   await page.click('.topbar [data-open="data"]'); soon.downloads = await shown(page, '#pop-data [data-downloads] .soon');
   soon.downloadsText = await page.$eval('#pop-data [data-downloads]', e => e.textContent.replace(/\s+/g, ' ').trim());
   await page.keyboard.press('Escape');
-  check('Coming soon (desktop): visible label on Search, "Data ↓" and the Data popover downloads line; toasts say "… coming soon."',
-    soon.search === 'Coming soon' && soon.dataBtn === 'Coming soon' && soon.downloads === 'Coming soon' && soon.searchToast === 'Search coming soon.' && soon.ctrlK === 'Search coming soon.' && soon.dataToast === 'Point download coming soon.' && /coming soon/i.test(soon.dataBtnLabel || ''), JSON.stringify(soon));
+  check('Coming soon (desktop): visible label on "Data ↓" and the Data popover downloads line, toast "… coming soon."; none on search or the place name; Ctrl+K focuses search',
+    soon.searchSoon === 0 && soon.nameSoon === 0 && soon.ctrlK && soon.dataBtn === 'Coming soon' && soon.downloads === 'Coming soon' && soon.dataToast === 'Point download coming soon.' && /coming soon/i.test(soon.dataBtnLabel || ''), JSON.stringify(soon));
   // Now: inactive at Now; after stepping forward, keyboard Tab-reachable, Enter returns to t = 0 and every visible layer stamps that hour
   const now = await page.evaluate(() => { const b = document.querySelector('.timeline [data-now]'); return { disabled: b.disabled, label: b.getAttribute('aria-label'), t: window.owmTest.state.get('t') }; });
   for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
@@ -339,16 +340,131 @@ if (part()) {
 }
 if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  const search = await shown(page, '.m-search .soon');
+  const search = { soon: await page.$$eval('.m-search .soon', e => e.length), input: await page.$eval('.m-search input', e => e.checkVisibility()) };
   const b0 = await page.$eval('.m-scrub [data-now]', e => { const r = e.getBoundingClientRect(), s = document.querySelector('.m-scrub').getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), disabled: e.disabled, aboveScrub: r.bottom <= s.top, visible: e.checkVisibility() }; });
   await page.tap('.m-scrub [data-step="1"]'); await page.tap('.m-scrub [data-step="1"]');
   const t1 = await page.evaluate(() => window.owmTest.state.get('t'));
   await page.tap('.m-scrub [data-now]');
   const back = await synced(page);
   const t2 = await page.evaluate(() => ({ t: window.owmTest.state.get('t'), disabled: document.querySelector('.m-scrub [data-now]').disabled, scrubW: Math.round(document.querySelector('[data-track="mini"]').getBoundingClientRect().width) }));
-  check('Phone (375 px): Search pill shows "Coming soon"; Now button is 44 px+, sits above the scrubber, is inactive at Now and returns to t = 0 after stepping',
-    search === 'Coming soon' && b0.w >= 44 && b0.h >= 44 && b0.disabled && b0.aboveScrub && b0.visible && t1 > 0 && t2.t === 0 && t2.disabled && back.ok, JSON.stringify({ search, b0, t1, t2, layers: back.lt }));
+  check('Phone (375 px): Search pill is a search box (no "Coming soon"); Now button is 44 px+, sits above the scrubber, is inactive at Now and returns to t = 0 after stepping',
+    !search.soon && search.input && b0.w >= 44 && b0.h >= 44 && b0.disabled && b0.aboveScrub && b0.visible && t1 > 0 && t2.t === 0 && t2.disabled && back.ok, JSON.stringify({ search, b0, t1, t2, layers: back.lt }));
   check('No page errors (phone Now)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 6d. Place search: the index loads on first focus (not with the page), suggestions within ~300 ms
+// of a pause, keys and mouse, lat/lon, no results / unavailable; a pick flies there and opens the
+// place panel at the timeline's hour; a map click names the nearest place; nothing leaves the
+// site while typing and nothing is stored. Phone at 360 px.
+if (part()) {
+  const { page, errors } = await open({ field: 'temp', particles: false }, '3/40/-90');
+  const origin = new URL(site).origin, index = [], outside = [];
+  page.on('request', r => { if (/data\/places\.json/.test(r.url())) index.push(r.url()); });
+  const atLoad = index.length;
+  const box = '.topbar .search input', opts = '.topbar .s-pop [role=option]';
+  // pause-to-suggestions time: from the last key to the last change of the list (in the page)
+  await page.evaluate(() => {
+    window.searchT = {};
+    document.addEventListener('keyup', () => { window.searchT.key = performance.now(); }, true);
+    new MutationObserver(() => { window.searchT.list = performance.now(); }).observe(document.querySelector('.topbar .search'), { childList: true, subtree: true, characterData: true });
+  });
+  const typeIn = async text => {
+    await page.fill(box, ''); await page.focus(box);
+    await page.keyboard.type(text, { delay: 60 });
+    await page.waitForTimeout(600);
+    return page.evaluate(([o, b]) => ({ ms: Math.round(window.searchT.list - window.searchT.key), opts: [...document.querySelectorAll(o)].map(e => [e.querySelector('b').textContent, e.querySelector('span').textContent]), msg: document.querySelector('.topbar .s-msg').textContent, open: !document.querySelector('.topbar .s-pop').hidden, active: document.querySelector(b).getAttribute('aria-activedescendant') }), [opts, box]);
+  };
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
+  const t = await page.evaluate(() => window.owmTest.state.get('t'));
+  await page.focus(box);
+  await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => /places\.json/.test(e.name) && e.responseEnd > 0), null, { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(500);
+  page.on('request', r => { const u = new URL(r.url()); if (u.origin !== origin && !/^(data|blob):/.test(u.protocol)) outside.push(u.host); });
+  const kc = await typeIn('Kansas City');
+  const tops = {};
+  for (const q of ['Kansas City MO', 'Miami', 'Denver', 'London', 'Delhi']) tops[q] = (await typeIn(q)).opts[0]?.join(', ');
+  const none = await typeIn('qqxzq');
+  const bad = await typeIn('95, 10');
+  const typingOutside = outside.length;
+  check('Search: the place index is not loaded with the page, only when the search box is focused (once)', atLoad === 0 && index.length === 1, `requests for places.json: at page load ${atLoad}, after focus and ${Object.keys(tops).length + 4} searches ${index.length}`);
+  check('Search: "Kansas City" shows up to 8 suggestions (name, region, country), Missouri first, within ~300 ms of the pause', kc.opts.length >= 2 && kc.opts.length <= 8 && kc.opts[0].join(', ') === 'Kansas City, Missouri, US' && kc.opts.every(o => o[0] && /, [A-Z]{2}$/.test(o[1])) && kc.ms <= 300, JSON.stringify(kc));
+  check('Search: top results for Kansas City MO, Miami, Denver, London and Delhi', tops['Kansas City MO'] === 'Kansas City, Missouri, US' && tops.Miami === 'Miami, Florida, US' && tops.Denver === 'Denver, Colorado, US' && tops.London === 'London, England, GB' && tops.Delhi === 'Delhi, Delhi, IN', JSON.stringify(tops));
+  check('Search: "No results" and an out-of-range lat, lon are said plainly', /^No results for “qqxzq”/.test(none.msg) && !none.opts.length && bad.msg === 'Latitude must be between -90 and 90.' && !bad.opts.length, JSON.stringify({ none: none.msg, bad: bad.msg }));
+  check('Search: no request to any other host while typing', typingOutside === 0, `${typingOutside} requests outside ${origin}${typingOutside ? ': ' + outside.join(', ') : ''}`);
+  // keys: Down, Down, Up, Enter picks the first; the map flies there and the panel opens at the timeline's hour
+  await typeIn('Kansas City');
+  await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown');
+  const a2 = await page.$eval(box, e => e.getAttribute('aria-activedescendant'));
+  await page.keyboard.press('ArrowUp');
+  const a1 = await page.$eval(box, e => e.getAttribute('aria-activedescendant'));
+  await page.keyboard.press('Enter');
+  await page.evaluate(() => new Promise(r => { window.owmMap.once('moveend', r); setTimeout(r, 6000); }));
+  const kcPick = await page.evaluate(() => { const s = window.owmTest.state.get(), c = window.owmMap.getCenter(); return { sel: s.selection, t: s.t, center: [+c.lng.toFixed(2), +c.lat.toFixed(2)], panel: !document.querySelector('#detail').hidden, name: document.querySelector('#detail [data-place-name]')?.textContent, panelT: +document.querySelector('#detail [data-panel-t]')?.dataset.panelT, clockT: window.owmTest.state.get('t'), list: !document.querySelector('.topbar .s-pop').hidden }; });
+  check('Search: Down/Up move, Enter picks; the map flies to Kansas City and the place panel opens at the timeline hour (not reset to Now)',
+    /-1$/.test(a2) && /-0$/.test(a1) && kcPick.sel?.name === 'Kansas City, Missouri, US' && kcPick.panel && kcPick.name === 'Kansas City, Missouri, US' && kcPick.t === t && t > 0 && kcPick.panelT === t && Math.abs(kcPick.center[0] + 94.58) < 0.05 && Math.abs(kcPick.center[1] - 39.1) < 0.05 && !kcPick.list, JSON.stringify({ a2, a1, t, ...kcPick }));
+  // Esc closes the list and leaves the panel open; mouse click picks
+  const den = await typeIn('Den');
+  await page.keyboard.press('Escape');
+  const esc = await page.evaluate(() => ({ list: !document.querySelector('.topbar .s-pop').hidden, panel: !document.querySelector('#detail').hidden }));
+  await typeIn('London');
+  await page.click(`${opts}:nth-child(1)`);
+  await page.waitForTimeout(300);
+  const lon = await page.evaluate(() => window.owmTest.state.get('selection')?.name);
+  check('Search: Esc closes the suggestions (the place panel stays); a mouse click picks', den.open && !esc.list && esc.panel && lon === 'London, England, GB', JSON.stringify({ den: den.opts.length, esc, lon }));
+  // lat, lon: one suggestion, Enter goes there and names the nearest place
+  const ll = await typeIn('39.1, -94.58');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => /Nearest place/.test(document.querySelector('#detail [data-place-name]')?.textContent || ''), null, { timeout: 8000 }).catch(() => {});
+  const llPick = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection'), name: document.querySelector('#detail [data-place-name]')?.textContent }));
+  check('Search: "39.1, -94.58" offers the coordinates; Enter selects them and the panel names the nearest place', ll.opts.length === 1 && ll.opts[0][1] === 'Coordinates' && llPick.sel?.lat === 39.1 && llPick.sel?.lon === -94.58 && llPick.name === 'Near Kansas City, Missouri, USNearest place', JSON.stringify({ opts: ll.opts, ...llPick }));
+  // a map click: nearest place with distance, labelled; nothing within 100 km: coordinates only
+  await page.evaluate(() => window.owmMap.jumpTo({ center: [-79.6, 39.95], zoom: 9 }));
+  await page.waitForTimeout(500);
+  const pt = await page.evaluate(() => { const p = window.owmMap.project([-79.6, 39.95]), r = window.owmMap.getCanvas().getBoundingClientRect(); return [p.x + r.left, p.y + r.top]; });
+  await page.mouse.click(pt[0], pt[1]);
+  await page.waitForFunction(() => /Nearest place/.test(document.querySelector('#detail [data-place-name]')?.textContent || ''), null, { timeout: 8000 }).catch(() => {});
+  const click = await page.evaluate(() => { const e = document.querySelector('#detail [data-place-name]'); return { text: e?.querySelector('span')?.textContent, tag: e?.querySelector('.np')?.textContent, title: e?.title }; });
+  await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'place', lon: -30, lat: 0 } }));
+  await page.waitForTimeout(400);
+  const sea = await page.evaluate(() => ({ name: document.querySelector('#detail [data-place-name]')?.textContent ?? null, title: document.querySelector('#detail .d-title').textContent }));
+  await page.evaluate(() => window.owmTest.state.set({ distUnit: 'mi', selection: { type: 'place', lon: -79.6, lat: 39.95 } }));
+  await page.waitForTimeout(400);
+  const mi = await page.evaluate(() => document.querySelector('#detail [data-place-name] span')?.textContent);
+  await page.evaluate(() => window.owmTest.state.set({ distUnit: 'km' }));
+  check('Map click: the place name is the nearest indexed place with its distance, labelled "Nearest place" (not an address); in miles with US units; none within 100 km: coordinates only',
+    /^(Near |\d+ km from )\S.*, Pennsylvania, US$/.test(click.text || '') && click.tag === 'Nearest place' && /not an exact address/.test(click.title || '') && /^(Near |\d+ mi from )/.test(mi || '') && sea.name === null && /0\.00°N 30\.00°W/.test(sea.title), JSON.stringify({ click, mi, sea }));
+  const kept = await page.evaluate(async () => ({ local: JSON.stringify({ ...localStorage }), tab: Object.keys(sessionStorage), cookie: document.cookie, idb: (await indexedDB.databases?.())?.length ?? 0, hash: location.hash }));
+  check('Search: nothing about searches is stored (local and per-tab storage, cookies, IndexedDB, address)', !/kansas|london|miami|denver|delhi|qqxzq/i.test(kept.local + kept.hash) && kept.tab.every(k => k === 'seeded') && !kept.cookie && !kept.idb, JSON.stringify(kept));
+  check('No page errors (search)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+if (part()) {
+  // index unavailable: plain messages in the search box and the place panel
+  const { page, errors } = await open({ field: 'temp', particles: false }, '3/40/-90');
+  await page.route('**/data/places.json', r => r.fulfill({ status: 404, body: '' }));
+  await page.focus('.topbar .search input'); await page.keyboard.type('Paris', { delay: 40 });
+  await page.waitForFunction(() => /unavailable/.test(document.querySelector('.topbar .s-msg').textContent), null, { timeout: 8000 }).catch(() => {});
+  const msg = await page.$eval('.topbar .s-msg', e => e.textContent);
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'place', lon: -94.58, lat: 39.1 } }));
+  await page.waitForFunction(() => /unavailable/.test(document.querySelector('#detail [data-place-name]')?.textContent || ''), null, { timeout: 8000 }).catch(() => {});
+  const name = await page.$eval('#detail [data-place-name]', e => e.textContent).catch(() => null);
+  check('Search unavailable (index fails to load): said plainly in the search box and the place panel', msg === 'Search unavailable: the place list could not be loaded.' && /^Place name unavailable/.test(name || ''), JSON.stringify({ msg, name }));
+  check('No page errors (search unavailable)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+if (part()) {
+  // phone at 360 px: the list fits the screen with 44 px rows; a tap picks
+  const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+  await page.tap('.m-search input');
+  await page.keyboard.type('Miami', { delay: 40 });
+  await page.waitForSelector('.m-search .s-pop [role=option]', { timeout: 10000 }).catch(() => {});
+  const r = await page.evaluate(() => { const p = document.querySelector('.m-search .s-pop').getBoundingClientRect(), o = [...document.querySelectorAll('.m-search .s-pop [role=option]')]; return { left: p.left, right: p.right, n: o.length, rowH: Math.min(...o.map(e => e.getBoundingClientRect().height)), first: o[0]?.textContent, scrollW: document.documentElement.scrollWidth, inputFont: getComputedStyle(document.querySelector('.m-search input')).fontSize, onTop: (() => { const e = document.elementFromPoint((p.left + p.right) / 2, p.top + 10); return !!e?.closest('.s-pop'); })() }; });
+  await page.tap('.m-search .s-pop [role=option]:nth-child(1)');
+  await page.waitForTimeout(500);
+  const sel = await page.evaluate(() => ({ name: window.owmTest.state.get('selection')?.name, panel: !document.querySelector('#detail').hidden }));
+  check('Phone (360 px): suggestions fit the screen above the map chrome, rows 44 px+, no sideways scroll; a tap picks Miami', r.left >= 0 && r.right <= 360 && r.n >= 1 && r.rowH >= 44 && r.scrollW <= 360 && r.onTop && r.inputFont === '16px' && /^Miami/.test(r.first) && sel.name === 'Miami, Florida, US' && sel.panel, JSON.stringify({ ...r, sel }));
+  check('No page errors (phone search)', !errors.length, errors.join(' | '));
   await page.close();
 }
 const FRESH = { src: /NOAA GFS|CAMS via Open-Meteo|Sample data/, time: /Updated \d\d:\d\d UTC|generated, no update time/, grid: /\d(\.\d+)?° grid/ };

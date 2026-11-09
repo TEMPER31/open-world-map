@@ -89,5 +89,6 @@ export const CREDITS = {
   sample: '<b>Weather: generated sample data</b>',
   gfs: 'Weather: <a href="https://www.nco.ncep.noaa.gov/pmb/products/gfs/">NOAA/NCEP GFS</a>',
   cams: 'Air quality: <a href="https://atmosphere.copernicus.eu/">CAMS</a> via <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0)',
-  maplibre: '<a href="https://maplibre.org">MapLibre</a>'
+  maplibre: '<a href="https://maplibre.org">MapLibre</a>',
+  geonames: 'Places: <a href="https://www.geonames.org/">GeoNames</a> (CC BY 4.0)'
 };

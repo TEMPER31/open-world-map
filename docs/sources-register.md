@@ -15,6 +15,7 @@ a source.
 | OpenMapTiles | Via OpenFreeMap | OpenMapTiles schema and design, CC BY 4.0 | © OpenMapTiles | As part of the vector basemap. |
 | OpenStreetMap | Via OpenFreeMap | ODbL 1.0 | Data © OpenStreetMap contributors | As part of the vector basemap. |
 | Natural Earth 1:110m | Same-origin GeoJSON in `site/data/`, converted from `world-atlas@2.0.2` | Public domain. The world-atlas packaging is ISC. | Natural Earth | Land, coastlines and borders are registered in the map style on every visit. |
+| GeoNames cities5000 and admin1 region names | Same-origin JSON `site/data/places.json`, built once by `scripts/build_places.py` from the `download.geonames.org` files | CC BY 4.0 | Places: GeoNames (CC BY 4.0) | The place list loads from the site origin the first time the search box is focused or the map is clicked. Search and the nearest-place lookup run in the browser. |
 | IBM Plex Sans Condensed and IBM Plex Mono | Same-origin fonts in `site/fonts/` | SIL OFL 1.1. Licence files ship beside the fonts. | — | UI fonts on every visit. |
 | NASA GIBS VIIRS true colour | `gibs.earthdata.nasa.gov` | NASA imagery has no restrictions on use. GIBS requests acknowledgement. | Imagery: NASA GIBS / ESDIS (VIIRS SNPP) | Satellite at world and regional zoom, below configured map zoom 7. |
 | EOX Sentinel-2 cloudless 2016 | `tiles.maps.eox.at` | CC BY 4.0 for the 2016 mosaic | Sentinel-2 cloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017) | Satellite from configured map zoom 4.5 worldwide. |

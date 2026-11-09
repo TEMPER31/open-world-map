@@ -17,6 +17,7 @@ import { initPhotos, status as phStatus, credits as phCredits, hit as phHit, pan
 import { OVERLAYS, overlaysHTML, toggle as toggleOverlay, renderOverlayUI, initOverlays } from './overlays.js';
 import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 import { fieldFresh, placeFresh } from './fresh.js';
+import { initSearch, focusSearch, placeNameHTML } from './search.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -218,7 +219,7 @@ function bindChrome(map) {
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closePops(); toggleLayersSheet(false); S.set({ selection: null }); $('#probe').hidden = true; }
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); toast('Search coming soon.'); }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); focusSearch(); }
   });
   const op = $('#set-opacity');
   op.value = Math.round(S.get('opacity') * 100);
@@ -389,7 +390,7 @@ function renderDetail(s) {
     <div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close (Esc)" title="Close (Esc)">×</button>
       <div class="kick">Place · ${meta.live ? 'GFS forecast' : 'sample data'}</div>
       <div class="d-title">${fmtCoord(lon, lat)}</div>
-      <div class="d-name">Place name <span class="soon">Coming soon</span></div>
+      ${placeNameHTML(s.selection)}
       <div class="d-sub" data-panel-t="${t}"><span class="tag">${relT(t)}</span><span class="mono">${fmtBoth(meta.base + t * 3600e3)}</span></div></div>
     <div class="stats">${ORDER.map(stat).join('')}</div>
     <div class="d-sec"><div class="kick"><span>Forecast</span><span>— temp ${label('temp')} · ▮ wind ${label('speed')}</span></div>${chartSVG(detailSeries, t, detailVals?.temp?.v)}</div>
@@ -428,7 +429,7 @@ function renderCredits(map) {
   const parts = meta.live ? [CREDITS.gfs, CREDITS.cams] : [CREDITS.sample];
   parts.push(...evCredits(), ...phCredits());
   if (S.get('basemap') === 'satellite') parts.push(...activeSatellite(map).map(x => x.credit));
-  parts.push(CREDITS.vector, CREDITS.naturalEarth, CREDITS.maplibre);
+  parts.push(CREDITS.vector, CREDITS.naturalEarth, CREDITS.geonames, CREDITS.maplibre);
   $$('[data-satfresh]').forEach(e => e.textContent = S.get('basemap') === 'satellite' ? activeSatellite(map).map(x => x.fresh()).join('\n') : '');
   const el = $('#credits');
   el.innerHTML = parts.join(' · ');
@@ -511,6 +512,7 @@ async function boot() {
   renderStatus();
 
   bindChrome(map);
+  initSearch(map, redrawDetail);
   initClock({ base: meta.base, snap: stepTime });
   S.set({ t: stepTime(Math.min(S.get('t'), meta.hours), 0) });
   // last hourly frame: from here on frames are 3 hours apart

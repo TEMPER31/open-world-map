@@ -38,7 +38,7 @@
   <!-- Desktop chrome -->
   <header class="panel topbar">
     <a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a>
-    <button class="search" type="button" data-soon="Search" aria-label="Search (coming soon)"><span>Search places, events, datasets</span><span class="soon">Coming soon</span><kbd>⌘K</kbd></button>
+    <div class="search" role="search" data-search><input type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-label="Search places, or enter lat, lon" placeholder="Search places or lat, lon" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"><kbd>⌘K</kbd></div>
     <div class="tb-right">
       <span class="sample-badge" data-sample-only title="Every weather value on this map is generated sample data">Sample data</span>
       <span class="mono" data-updated>Updated --:-- UTC</span>
@@ -80,7 +80,7 @@
 
   <!-- Mobile chrome (shown below 1024 px) -->
   <div class="m-top">
-    <button class="m-search glass" type="button" data-soon="Search" aria-label="Search (coming soon)"><span>Search places, events</span><span class="soon">Coming soon</span></button>
+    <div class="m-search glass" role="search" data-search><input type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-label="Search places, or enter lat, lon" placeholder="Search places or lat, lon" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div>
     <button class="m-btn glass" type="button" data-measure aria-pressed="false" aria-label="Measure distance">MSR</button>
     <button class="m-btn glass" type="button" data-lyr aria-expanded="false" aria-controls="lsheet">LYR</button>
   </div>

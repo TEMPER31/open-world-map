@@ -35,8 +35,11 @@ services while enabled. See the [privacy draft](docs/privacy-draft.md) for the r
   the event details and a source link.
 - **Street photos** show Mapillary coverage and a photo viewer when a client token is configured.
 - **Overlays** can add up to two fields over the main field.
-- **Search** and **downloads** of the processed data are not built yet: their buttons say
-  "Coming soon".
+- **Place search**: type a town or city (accents and case don't matter) or "lat, lon". The
+  place list (GeoNames, `site/data/places.json`) loads from the site the first time the search box
+  is focused and is searched in the browser; nothing typed is sent or stored. Picking a result
+  flies there and opens the place panel at the hour on the timeline.
+- **Downloads** of the processed data are not built yet: their buttons say "Coming soon".
 
 ## Pages
 
@@ -62,7 +65,8 @@ phones):
 - **One units setting**: °C/°F, km/h · mph · m/s · knots, km/mi, with Metric and US presets
   (US by default for an en-US browser). Applies to the probe, place panel, chart, legends,
   scale bar and measure tool. Data stays metric; only what you read is converted.
-- **Place panel** with every value, both clocks and a close button (Esc). On phones it is a
+- **Place panel** with every value, both clocks and a close button (Esc). A clicked point is named
+  after the nearest town or city in the place list (within 100 km), with its distance. On phones it is a
   bottom sheet (peek / half / full); the layers sheet opens to 40 % of the map.
 - **Layers rail**: only the selected field is expanded, with its legend and options.
 - **Distance tool** (ruler button): click points for great-circle legs and the total.
@@ -143,11 +147,13 @@ site/                 the deployed site (only this folder is published)
   js/field-gl.js      weather field on the GPU (value texture + colour LUT), isobars, H/L labels
   js/wind-gl.js       GPU wind particles (MapLibre custom layer, webgl-wind technique)
   js/timeline.js      timeline + mobile scrubber
-  data/               field-scales.json, Natural Earth GeoJSON; data/live/ is built in CI
+  js/places.js        place list: search, lat/lon parser, nearest place
+  js/search.js        search box and the place panel's name line
+  data/               field-scales.json, Natural Earth GeoJSON, places.json; data/live/ is built in CI
   fonts/              IBM Plex (OFL)
 docs/design/          the v3 design bundle (canonical mockup, README, scales)
 docs/sources-register.md   every source, licence, credit and open question
-scripts/              build_coastlines.py (one-off), check_site.py (CI)
+scripts/              build_coastlines.py, build_places.py (one-off), check_site.py (CI)
 scripts/data/         build_data.py, build_wgrib2.sh, archive_day.py, screenshots.mjs
 data/archive/         one small JSON summary per day (hourly files are never committed)
 docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
