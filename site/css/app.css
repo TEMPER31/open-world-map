@@ -493,3 +493,81 @@ button.chip:disabled:hover { background: none; }
 /* ---- Phase 6: Mapillary credit (logo shown only from the owner's official file; see config.js) ---- */
 .mly-logo img { height: 12px; width: auto; vertical-align: -2px; }
 .d-ft .src a { color: var(--ink); }
+
+/* ---- place search (Photon): the top-bar field and the phone pill, with a suggestions list ---- */
+.search { position: relative; cursor: text; }
+.search input, .m-search input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; outline: none; }
+.search input::placeholder, .m-search input::placeholder { color: var(--mute); opacity: 1; }
+.search:focus-within, .m-search:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; color: var(--ink); }
+.search:focus-within kbd { visibility: hidden; }
+.topbar:has(.sq:not([hidden])) { z-index: 9; } /* the list opens over the layers rail */
+.sq { top: calc(100% + 6px); left: 0; right: 0; min-width: 320px; border-color: var(--line2); box-shadow: var(--lift); color: var(--ink); cursor: default; }
+.sq-list { list-style: none; margin: 0; padding: 0; max-height: min(330px, 60vh); overflow-y: auto; }
+.sq-list li { display: flex; flex-direction: column; justify-content: center; gap: 1px; min-height: 40px; padding: 5px 12px; border-top: 1px solid var(--line); cursor: pointer; }
+.sq-list li:first-child { border-top: 0; }
+.sq-list li b { font-weight: 500; font-size: 13px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-list li span { font-size: 11.5px; color: var(--mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sq-list li:hover { background: var(--hover); }
+.sq-list li[aria-selected="true"] { background: var(--hover); box-shadow: inset 2px 0 0 var(--accent); }
+.sq-msg { margin: 0; padding: 10px 12px; font-size: 12.5px; color: var(--ink); white-space: normal; }
+.sq-msg:empty { padding: 0; }
+.sq-credit { margin: 0; padding: 6px 12px 7px; border-top: 1px solid var(--line); font: 10px/1.4 var(--mono); color: var(--mute); white-space: normal; }
+.sq-credit a { color: var(--ink); text-decoration: none; }
+.sq-credit a:hover { text-decoration: underline; }
+@media (max-width: 1023px) {
+  .m-search input { font-size: 16px; } /* 16 px: phones do not zoom the page on focus */
+  .m-top:has(.sq:not([hidden])) { z-index: 10; }
+  .m-sq { top: calc(100% + 8px); min-width: 0; background: rgba(12,15,19,.96); }
+  .sq-list { max-height: min(352px, 55vh); }
+  .sq-list li { min-height: 52px; padding: 6px 14px; }
+  .sq-list li b { font-size: 14.5px; }
+  .sq-list li span { font-size: 12px; }
+  .sq-msg { font-size: 14px; padding: 12px 14px; }
+  .sq-credit { padding: 8px 14px; font-size: 10.5px; }
+  .sq-credit a { display: inline-block; min-height: 24px; line-height: 24px; }
+}
+
+/* Quick view button: a full-width row under the place panel's two footer buttons, which keep their size */
+.d-btns:has([data-qview]) { flex-wrap: wrap; }
+.d-btns [data-qview] { flex-basis: 100%; }
+
+/* ---- Quick View: large-text summary beside the place panel (desktop), full-height sheet (phones) ---- */
+.qv { position: absolute; z-index: 8; right: calc(var(--edge) + 348px + 12px); top: calc(var(--top) + var(--edge)); width: 340px; max-height: calc(100% - var(--top) - var(--edge) * 2 - var(--tl-bottom) - var(--tl-h)); display: flex; flex-direction: column; overflow: auto; }
+.qv-title { font-size: 24px; font-weight: 700; letter-spacing: -.01em; margin: 6px 0 4px; }
+.qv-title:focus { outline: none; }
+.qv-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.qv .kick .sample-badge { display: inline-block; margin-left: 4px; }
+.qv-sum { margin: 2px 0; font-size: 21px; font-weight: 600; line-height: 1.25; color: var(--ink); }
+.qv-rain { display: flex; align-items: center; gap: 12px; }
+.qv-rain b { display: block; font-size: 17px; font-weight: 600; }
+.qv-rain span { display: block; margin-top: 2px; font-size: 13.5px; color: var(--ink); opacity: .85; }
+.qv-ic { width: 22px; height: 22px; display: block; flex: none; color: var(--ink); }
+.qv-ic.big { width: 34px; height: 34px; color: var(--accent); }
+.qv-temp { display: flex; align-items: center; gap: 18px; }
+.qv-now { font-size: 46px; font-weight: 500; line-height: 1; letter-spacing: -.03em; }
+.qv-now small { font-size: 18px; color: var(--mute); margin-left: 2px; letter-spacing: 0; vertical-align: top; }
+.qv-hl { display: grid; gap: 3px; font-size: 14px; }
+.qv-hl b { font-size: 16px; font-weight: 600; margin-left: 4px; }
+.qv-lab { font: 10.5px var(--mono); color: var(--mute); }
+.qv-strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, 1fr); }
+.qv-strip li { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 2px 0; border-left: 1px solid var(--line); }
+.qv-strip li:first-child { border-left: 0; }
+.qv-strip .qv-t { font-size: 11px; color: var(--mute); }
+.qv-strip li:first-child .qv-t { color: var(--ink); font-weight: 600; }
+.qv-strip b { font-size: 15px; font-weight: 500; }
+.qv-days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); font-size: 12px; }
+.qv-days li { display: flex; flex-direction: column; align-items: center; gap: 2px; border-left: 1px solid var(--line); }
+.qv-days li:first-child { border-left: 0; }
+.qv-days span { font-family: var(--sans); font-size: 12px; color: var(--mute); }
+.qv-days b { font-weight: 500; font-size: 14px; }
+.qv-days i { font-style: normal; color: var(--mute); }
+.qv-note { border-bottom: 0; display: grid; gap: 4px; margin-top: auto; }
+.qv-loading { margin: 6px 0; font-size: 12px; }
+@media (min-width: 1024px) and (max-width: 1100px) { .qv { width: 300px; } }
+@media (max-width: 1023px) {
+  .qv { z-index: 10; left: 0; right: 0; top: auto; width: auto; max-height: none; height: calc(100% - var(--tabs) - var(--safe-top)); padding: 8px 0 0; }
+  .qv .d-hd { padding-top: 6px; }
+  .qv .d-x { top: 6px; width: 44px; height: 44px; font-size: 18px; }
+  .qv-title { font-size: 22px; margin: 6px 52px 4px 0; }
+  .qv .d-sec { padding: 12px 16px; }
+}

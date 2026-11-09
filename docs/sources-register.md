@@ -14,6 +14,7 @@ a source.
 | OpenFreeMap | `tiles.openfreemap.org` | Keyless public service. Its tiles use OpenMapTiles and OpenStreetMap data under the terms below. | OpenFreeMap | Preconnect, TileJSON, vector tiles and glyphs on a normal visit with any basemap. |
 | OpenMapTiles | Via OpenFreeMap | OpenMapTiles schema and design, CC BY 4.0 | © OpenMapTiles | As part of the vector basemap. |
 | OpenStreetMap | Via OpenFreeMap | ODbL 1.0 | Data © OpenStreetMap contributors | As part of the vector basemap. |
+| Photon by komoot (place search) | `photon.komoot.io` | Public geocoding API, fair use (no key). Results are OpenStreetMap data, ODbL 1.0. | Search: Photon by komoot · © OpenStreetMap contributors | While searching: after 3 or more characters and a 300 ms pause, one request at a time. Answers are kept in memory for the visit only. |
 | Natural Earth 1:110m | Same-origin GeoJSON in `site/data/`, converted from `world-atlas@2.0.2` | Public domain. The world-atlas packaging is ISC. | Natural Earth | Land, coastlines and borders are registered in the map style on every visit. |
 | IBM Plex Sans Condensed and IBM Plex Mono | Same-origin fonts in `site/fonts/` | SIL OFL 1.1. Licence files ship beside the fonts. | — | UI fonts on every visit. |
 | NASA GIBS VIIRS true colour | `gibs.earthdata.nasa.gov` | NASA imagery has no restrictions on use. GIBS requests acknowledgement. | Imagery: NASA GIBS / ESDIS (VIIRS SNPP) | Satellite at world and regional zoom, below configured map zoom 7. |

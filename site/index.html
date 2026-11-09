@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; style-src-attr 'unsafe-inline'; worker-src 'self' blob:; child-src blob:; connect-src 'self' https://tiles.openfreemap.org https://gibs.earthdata.nasa.gov https://tiles.maps.eox.at https://basemap.nationalmap.gov https://imagery.nationalmap.gov https://earthquake.usgs.gov https://eonet.gsfc.nasa.gov https://www.gdacs.org https://mapservices.weather.noaa.gov https://tiles.mapillary.com https://graph.mapillary.com; img-src 'self' data: blob: https://*.fbcdn.net; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; style-src-attr 'unsafe-inline'; worker-src 'self' blob:; child-src blob:; connect-src 'self' https://tiles.openfreemap.org https://gibs.earthdata.nasa.gov https://tiles.maps.eox.at https://basemap.nationalmap.gov https://imagery.nationalmap.gov https://earthquake.usgs.gov https://eonet.gsfc.nasa.gov https://www.gdacs.org https://mapservices.weather.noaa.gov https://tiles.mapillary.com https://graph.mapillary.com https://photon.komoot.io; img-src 'self' data: blob: https://*.fbcdn.net; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Open World Map: free 7-day weather and natural events map</title>
 <meta name="description" content="A free, open-source world map of weather, natural events and street-level imagery. No accounts, no ads. Watching places, not people.">
@@ -38,7 +38,8 @@
   <!-- Desktop chrome -->
   <header class="panel topbar">
     <a class="brand" href="./"><svg class="logo" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="10" fill="var(--accent)"/><ellipse cx="10" cy="10" rx="4.25" ry="9.25" fill="none" stroke="var(--accentInk)" stroke-width="1.5"/><path d="M0 10h20" stroke="var(--accentInk)" stroke-width="1.5"/></svg>Open World Map</a>
-    <button class="search" type="button" data-soon="Search" aria-label="Search (coming soon)"><span>Search places, events, datasets</span><span class="soon">Coming soon</span><kbd>⌘K</kbd></button>
+    <div class="search" data-search><input id="q" type="text" role="combobox" aria-label="Search places" aria-autocomplete="list" aria-expanded="false" aria-controls="q-list" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Search places"><kbd aria-hidden="true">⌘K</kbd>
+      <div class="sq panel" id="q-pop" hidden><ul class="sq-list" role="listbox" id="q-list" aria-label="Places found"></ul><p class="sq-msg" data-sqmsg role="status"></p><p class="sq-credit">Search: <a href="https://photon.komoot.io" rel="noopener">Photon by komoot</a> · © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors</p></div></div>
     <div class="tb-right">
       <span class="sample-badge" data-sample-only title="Every weather value on this map is generated sample data">Sample data</span>
       <span class="mono" data-updated>Updated --:-- UTC</span>
@@ -54,6 +55,7 @@
   <aside class="panel layers" id="layers" aria-label="Layers"></aside>
   <div class="legend glass" id="legend" aria-live="polite"></div>
   <aside class="detail glass lift" id="detail" aria-label="Place details" hidden><button class="grab" type="button" data-grab></button><div class="d-body"></div></aside>
+  <section class="qv sheet glass lift" id="qview" role="dialog" aria-labelledby="qv-title" hidden></section>
   <section class="measure glass lift" id="measure" aria-label="Measure distance" hidden>
     <div class="m-hd"><span class="kick">Distance · great circle</span><button class="d-x" type="button" data-mdone aria-label="Exit measuring (Esc)">×</button></div>
     <div class="m-total"><b class="mono" data-mtotal>—</b><div class="seg" role="radiogroup" aria-label="Distance unit"><button type="button" role="radio" data-dunit="km">km</button><button type="button" role="radio" data-dunit="mi">mi</button></div></div>
@@ -80,9 +82,10 @@
 
   <!-- Mobile chrome (shown below 1024 px) -->
   <div class="m-top">
-    <button class="m-search glass" type="button" data-soon="Search" aria-label="Search (coming soon)"><span>Search places, events</span><span class="soon">Coming soon</span></button>
+    <div class="m-search glass" data-search><input id="mq" type="text" role="combobox" aria-label="Search places" aria-autocomplete="list" aria-expanded="false" aria-controls="mq-list" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" placeholder="Search places"></div>
     <button class="m-btn glass" type="button" data-measure aria-pressed="false" aria-label="Measure distance">MSR</button>
     <button class="m-btn glass" type="button" data-lyr aria-expanded="false" aria-controls="lsheet">LYR</button>
+    <div class="sq m-sq panel" id="mq-pop" hidden><ul class="sq-list" role="listbox" id="mq-list" aria-label="Places found"></ul><p class="sq-msg" data-sqmsg role="status"></p><p class="sq-credit">Search: <a href="https://photon.komoot.io" rel="noopener">Photon by komoot</a> · © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap</a> contributors</p></div>
   </div>
   <div class="m-field glass" id="mchip"></div>
   <div class="m-scrub glass">
