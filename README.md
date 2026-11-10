@@ -169,7 +169,8 @@ docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
 ## Deploying
 
 `.github/workflows/pages.yml` runs the checks and builds the data on every pull request,
-push and schedule (four times a day, after each GFS cycle). GitHub has not been firing that
+push and schedule (four times a day, after each GFS cycle). A push to `main` that only changes
+docs or tests (the `paths-ignore` list in the workflow) skips it: nothing on the site changes. GitHub has not been firing that
 schedule for this repository, so `.github/workflows/refresh.yml` is a backup timer: once an
 hour it starts a data run if the site is behind the newest complete GFS run (one run per
 cycle, see `docs/data-pipeline.md`). It needs a 60-minute wait timer on the `refresh-timer`
