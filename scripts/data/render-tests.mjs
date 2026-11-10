@@ -500,6 +500,7 @@ if (part()) {
   await page.click('#detail [data-quick]');
   await page.waitForFunction(() => document.querySelectorAll('#detail .qv-h').length && !/…/.test(document.querySelector('#detail .qv-hours')?.textContent || '…'), null, { timeout: 15000 }).catch(() => {});
   const q1 = await qv(page);
+  const atOpen = { own: own.slice(), other: other.slice() }; // what opening it loaded; later steps load other fields on purpose
   const sky = await page.evaluate(async () => { const { skyWord } = await import('./js/quick.js'); return [skyWord(10, 0, 10), skyWord(24.9, 0, 10), skyWord(25, 0, 10), skyWord(69, 0, 10), skyWord(70, 0, 10), skyWord(100, 0.05, 10), skyWord(100, 0.1, 10), skyWord(50, 1, 10), skyWord(50, 4, 10), skyWord(50, 0.5, 1), skyWord(NaN, 0, 10)].join(' | '); });
   check('Quick view (desktop): a map click opens the detailed view; "Quick view" swaps in now, the next 48 hours, the next 7 days and the sun; "Detailed view" in its place',
     d0.stats && d0.chart && !d0.quick && d0.btn === 'Quick view' && d0.pressed === 'false' && q1.quick && !q1.stats && !q1.chart && q1.btn === 'Detailed view' && q1.pressed === 'true' && /^-?\d+°[CF]$/.test(q1.temp) && /^(Clear|Partly cloudy|Cloudy|(Light |Heavy )?([Rr]ain|[Rr]ain or snow))$/.test(q1.sky) && q1.cells >= 8 && q1.days >= 2,
@@ -522,7 +523,7 @@ if (part()) {
   check('Quick view: moving the timeline updates the now part (heading, panel hour) and marks its slot in the 48-hour row', q3.quick && t3 > 0 && q3.panelT === String(t3) && q3.nowKick === `At +${t3} h` && q3.onCell !== null && +q3.onCell <= t3, JSON.stringify({ t: t3, kick: q3.nowKick, on: q3.onCell, panelT: q3.panelT }));
   const sun = await page.evaluate(async ([rise, set, t]) => { const { sunTimes } = await import('./js/sun.js'); const m = window.owmTest.meta, at = m.base + t * 3600e3 - 94.58 / 15 * 3600e3, d0 = at - at % 864e5, r = sunTimes(39.1, -94.58, d0); return { rise: new Date(r.rise).toISOString() === rise, set: new Date(r.set).toISOString() === set }; }, [q3.rise, q3.set, t3]);
   check('Quick view: sunrise and sunset shown with local time next to UTC, for the place\'s day at the timeline hour', sun.rise && sun.set && /Sunrise \w+ \d\d:\d\d local · \d\d:\d\d UTC/.test(q3.sunText) && /Sunset /.test(q3.sunText), q3.sunText.slice(0, 160));
-  check('Quick view: no request to another host (only this site\'s own rain frames, or none with sample data)', !other.length && own.every(x => /data\/live\/gfs\/rain\//.test(x)), `${other.length} other-host requests; own: ${own.length} (${[...new Set(own.map(x => x.replace(/f\d+\.png.*/, '')))].join(', ') || 'none'})`);
+  check('Quick view: opening it requests no other host (only this site\'s own rain frames, or none with sample data)', !atOpen.other.length && atOpen.own.every(x => /data\/live\/gfs\/rain\//.test(x)), `${atOpen.other.length} other-host requests; own: ${atOpen.own.length} (${[...new Set(atOpen.own.map(x => x.replace(/f\d+\.png.*/, '')))].join(', ') || 'none'})`);
   // back to detailed, and every new open is detailed
   await page.click('#detail [data-quick]');
   const back = await qv(page);
@@ -755,10 +756,12 @@ if (part()) {
     drawn: window.owmMap.queryRenderedFeatures({ layers: ['ev-eq', 'ev-pt'] }).length, credits: document.querySelector('#credits').textContent, errors: Object.fromEntries(Object.entries(window.owmTest.events.cache).map(([k, c]) => [k, c.error || null])) }));
   check(liveName('Live events: earthquakes, wildfires & volcanoes and disaster alerts load from their sources and are drawn'), +live.rows.eq > 0 && /^\d+$|none/.test(live.rows.fv) && +live.rows.ga > 0 && live.drawn > 0, JSON.stringify(live));
   check(liveName('Live storms: NHC answered (a storm count or "none active"), credits list every source in use'), /^\d+$|none active/.test(live.rows.st) && ['USGS', 'NASA EONET', 'GDACS', 'NOAA NHC'].every(c => live.credits.includes(c)), `${live.rows.st}; ${live.credits}`);
-  // the panel of the largest quake: magnitude, depth in the chosen unit, source link
+  // the panel of the largest quake: magnitude, depth in the chosen unit, source link. Only
+  // earthquakes are shown for the click: a GDACS alert for the same quake is drawn on the same spot.
   const panel = await page.evaluate(async () => {
     const i = [...(window.owmTest.events.cache.usgs.items || [])].sort((a, b) => b.mag - a.mag)[0];
     if (!i) return { id: null, x: 0, y: 0 };
+    window.owmTest.state.set({ events: { eq: true, fv: false, st: false, ga: false } });
     window.owmMap.jumpTo({ center: [i.lon, i.lat], zoom: 4 }); await new Promise(r => window.owmMap.once('idle', r));
     const p = window.owmMap.project([i.lon, i.lat]);
     return { id: i.id, x: p.x, y: p.y };
