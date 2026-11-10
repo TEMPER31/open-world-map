@@ -776,6 +776,32 @@ if (part()) {
   check(liveName('No page errors (live events)'), !errors.length, errors.join(' | '));
   await page.close();
 }
+// 12b. Saved samples: a GDACS alert drawn on the same spot as a USGS quake. The click opens the
+// quake (the primary source), "Also here" lists the alert; following it opens the alert, which
+// lists the quake. Rows are 44 px on phones.
+if (part()) {
+  for (const [label, ctx] of [['desktop', {}], ['phone 390 px', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
+    const { page, errors } = await open({ field: 'none', particles: false, events: { eq: true, ga: true } }, '3/20/0', { samples: {}, ...ctx });
+    await evWait(page);
+    const q = await page.evaluate(async () => {
+      const C = window.owmTest.events.cache, i = [...C.usgs.items].sort((a, b) => b.mag - a.mag)[0];
+      C.gdacs.items.push({ id: 'ga:EQsame', k: 'ga', icon: 'alert-orange', title: 'Earthquake alert on the same spot', place: '', time: i.time + 6e5, lon: i.lon + 0.01, lat: i.lat + 0.01, src: 'gdacs', link: 'https://www.gdacs.org/',
+        stats: () => [['Alert level', 'Orange', '', 'GDACS']] });
+      window.owmTest.state.set({ events: { ...window.owmTest.state.get('events') } });
+      window.owmMap.jumpTo({ center: [i.lon, i.lat], zoom: 4 }); await new Promise(r => window.owmMap.once('idle', r));
+      const p = window.owmMap.project([i.lon, i.lat]), r = window.owmMap.getCanvas().getBoundingClientRect();
+      return { id: i.id, x: p.x + r.left, y: p.y + r.top };
+    });
+    await page.mouse.click(q.x, q.y); await page.waitForTimeout(600);
+    const a = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection')?.id, also: [...document.querySelectorAll('#detail [data-ev-also]')].map(b => ({ id: b.dataset.evAlso, h: b.getBoundingClientRect().height })) }));
+    await page.click('#detail [data-ev-also]'); await page.waitForTimeout(400);
+    const b = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection')?.id, also: [...document.querySelectorAll('#detail [data-ev-also]')].map(x => x.dataset.evAlso) }));
+    check(`Overlapping events (${label}): the click opens the USGS quake, "Also here" lists the GDACS alert and opens it, which lists the quake back`,
+      a.sel === q.id && a.also.length === 1 && a.also[0].id === 'ga:EQsame' && b.sel === 'ga:EQsame' && b.also.join() === q.id && (label === 'desktop' || a.also[0].h >= 44) && !errors.length,
+      JSON.stringify({ first: a, second: b, errors }));
+    await page.close();
+  }
+}
 // 13. Saved samples: panel rule with places and the measure tool, storm follows the slider,
 // one clock includes the event layers, "unavailable" and "no active storms" states.
 if (part()) {

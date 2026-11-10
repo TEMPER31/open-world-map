@@ -15,7 +15,7 @@ import { WindGL } from './wind-gl.js';
 import { initTimeline, relT, fmtUTC, fmtBoth } from './timeline.js';
 import { initPhotos, status as phStatus, credits as phCredits, hit as phHit, panelHTML as phPanel, photosTest } from './photos.js';
 import { OVERLAYS, overlaysHTML, toggle as toggleOverlay, renderOverlayUI, initOverlays } from './overlays.js';
-import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
+import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, select as evSelect, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 import { fieldFresh, placeFresh } from './fresh.js';
 import { initSearch, focusSearch, placeNameHTML } from './search.js';
 import { quickHTML, loadRain } from './quick.js';
@@ -650,6 +650,8 @@ async function boot() {
     if (e.target.closest('[data-deselect]')) S.set({ selection: null });
     else if (e.target.closest('.d-hd') && !e.target.closest('button') && placeSheet.get() === 'peek') placeSheet.set('half');
     if (e.target.closest('[data-center]')) { const s = S.get('selection'); map.easeTo({ center: [s.lon, s.lat] }); }
+    const also = e.target.closest('[data-ev-also]');
+    if (also) { const sel = evSelect(also.dataset.evAlso); if (sel) { S.set({ selection: sel }); $('#detail [data-ev-also]')?.focus(); } }
     if (e.target.closest('[data-quick]')) {
       quickSel = quickSel === S.get('selection') ? null : S.get('selection');
       if (mobile.matches && placeSheet.get() === 'peek') placeSheet.set('half');
