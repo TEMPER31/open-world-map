@@ -173,14 +173,20 @@ function nwsAt(name, key, ts) {
 const fmt = (v, d = 1) => v == null || Number.isNaN(v) ? '—' : (+v).toFixed(d);
 const angle = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 const rows = [], summaries = {};
+// Other models and runs differ by design: outside the tolerance they are marked "differs", for
+// information. A raw-GFS row outside tolerance where the page matches the stored grid is marked
+// "grid": the gap is the grid's resolution (see the Resolution table). Only the rest is a FAIL.
+const OTHER = new Set(['gfs_global', 'gfs_seamless', 'cams_global', 'NWS']);
 function row(city, t, field, our, ref, refName, tol, opts = {}) {
-  const sum = summaries[opts.group || refName] ||= { pass: 0, fail: 0, na: 0 };
+  const sum = summaries[opts.group || refName] ||= { pass: 0, fail: 0, na: 0, grid: 0 };
   let diff = our == null || ref == null || Number.isNaN(our) ? null : opts.angle ? angle(our, ref) : our - ref;
   let note = '';
   if (diff != null && opts.calm) { diff = null; note = 'calm'; }
   const ok = diff == null ? null : Math.abs(diff) <= tol;
-  sum[ok == null ? 'na' : ok ? 'pass' : 'fail']++;
-  rows.push(`| ${city} | +${t} h | ${field} | ${fmt(our, opts.d)} | ${refName} ${fmt(ref, opts.d)} | ${diff == null ? '—' : fmt(diff, opts.d)} | ±${tol} | ${ok == null ? (note || 'n/a') : ok ? 'ok' : '**FAIL**'} |`);
+  const byGrid = ok === false && opts.grid?.[0] != null && Math.abs(our - opts.grid[0]) <= opts.grid[1];
+  sum[ok == null ? 'na' : ok ? 'pass' : byGrid ? 'grid' : 'fail']++;
+  const mark = ok == null ? (note || 'n/a') : ok ? 'ok' : byGrid ? 'grid' : OTHER.has(refName) ? 'differs' : '**FAIL**';
+  rows.push(`| ${city} | +${t} h | ${field} | ${fmt(our, opts.d)} | ${refName} ${fmt(ref, opts.d)} | ${diff == null ? '—' : fmt(diff, opts.d)} | ±${tol} | ${mark} |`);
 }
 const resRows = [];
 const rawAt = (f, name) => report.city_raw?.hours.find(h => h.f === f)?.cities[name];
@@ -191,12 +197,13 @@ CITIES.forEach((c, i) => times.forEach((t, k) => {
   if (raw) {
     // Primary: the page vs NOAA's own GFS 0.25 deg values (bilinear) for the same run and hour.
     // The difference is what our 0.5 deg grid + encoding adds.
-    row(c.name, t, 'temp °C', o.temp.value, raw.temp, 'GFS 0.25° raw', 0.7, { group: 'raw' + g120 });
-    row(c.name, t, 'wind km/h', o.wind.value, raw.wind_kmh, 'GFS 0.25° raw', TOL.wind, { group: 'raw' + g120 });
+    const sg = raw.grid || {};   // the stored grid's value and the encoding tolerance, to tell resolution from error
+    row(c.name, t, 'temp °C', o.temp.value, raw.temp, 'GFS 0.25° raw', 0.7, { group: 'raw' + g120, grid: [sg.temp, 0.15] });
+    row(c.name, t, 'wind km/h', o.wind.value, raw.wind_kmh, 'GFS 0.25° raw', TOL.wind, { group: 'raw' + g120, grid: [sg.wind_kmh, 1] });
     row(c.name, t, 'wind from °', o.wind.dirFrom, raw.wind_from_deg, 'GFS 0.25° raw', TOL.dir, { group: 'raw' + g120, angle: true, d: 0, calm: Math.max(o.wind.value, raw.wind_kmh) < CALM_KMH });
     row(c.name, t, 'precip mm/h', o.rain.value, raw.rain, 'GFS 0.25° raw', TOL.rain, { group: 'raw' + g120, d: 2 });
-    row(c.name, t, 'cloud %', o.cloud.value, raw.cloud, 'GFS 0.25° raw', TOL.cloud, { group: 'raw' + g120, d: 0 });
-    row(c.name, t, 'pressure hPa', o.pres.value, raw.pres, 'GFS 0.25° raw', 0.5, { group: 'raw' + g120 });
+    row(c.name, t, 'cloud %', o.cloud.value, raw.cloud, 'GFS 0.25° raw', TOL.cloud, { group: 'raw' + g120, d: 0, grid: [sg.cloud, 1] });
+    row(c.name, t, 'pressure hPa', o.pres.value, raw.pres, 'GFS 0.25° raw', 0.5, { group: 'raw' + g120, grid: [sg.pres, 0.1] });
   }
   const gv = raw?.grid;
   if (gv) {
@@ -265,8 +272,8 @@ Generated ${new Date().toISOString()} by \`scripts/data/accuracy.mjs\`. Site dat
 Values are read through the page's own code (\`getGrid\` + \`sample\` + \`reading()\`), bilinear at the city's coordinates.
 References: Open-Meteo \`gfs_global\` / \`gfs_seamless\` (may come from a different GFS run than ours; Open-Meteo precipitation is the sum over the preceding hour), NWS gridpoints (different model blend: sanity check only), Open-Meteo \`cams_global\`.
 
-**Summary** (within tolerance / outside / not comparable):
-${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding), +0 h and +24 h', grid: 'Page vs the stored grid before encoding (encoding only), +0 h and +24 h', raw120: 'f120 (+5 d): page vs raw NOAA GFS 0.25°', grid120: 'f120 (+5 d): page vs the stored grid (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs the values the job downloaded', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${v.pass} / ${v.fail} / ${v.na}`).join('\n')}
+**Summary.** Pass/fail applies to the page's fidelity: the stored-grid, alignment and air-quality rows must all be within tolerance. Raw GFS rows count the gaps the grid resolution explains separately. Other models and runs are for information: they differ by design.
+${Object.entries(summaries).map(([k, v]) => `- ${{ raw: 'Page vs raw NOAA GFS 0.25° (grid resolution + encoding), +0 h and +24 h', grid: 'Page vs the stored grid before encoding (encoding only), +0 h and +24 h', raw120: 'f120 (+5 d): page vs raw NOAA GFS 0.25°', grid120: 'f120 (+5 d): page vs the stored grid (encoding only)', align: 'Grid alignment at 0.5° nodes', aqnode: 'Air quality at 4° grid nodes vs the values the job downloaded', gfs_global: 'Open-Meteo gfs_global', gfs_seamless: 'Open-Meteo gfs_seamless (uses HRRR over the US)', cams_global: 'Open-Meteo cams_global at the cities', NWS: 'NWS gridpoints (sanity check)' }[k] || k}: ${OTHER.has(k) ? `${v.pass} close, ${v.fail} differ, ${v.na} not comparable` : k.startsWith('raw') ? `${v.pass} within tolerance, ${v.grid} explained by the grid resolution, ${v.fail} unexplained, ${v.na} not comparable` : `${v.pass} within tolerance, ${v.fail} outside, ${v.na} not comparable`}`).join('\n')}
 ${refErr.length ? `\nReference errors: ${refErr.join('; ')}\n` : ''}
 ## Point values
 
@@ -313,7 +320,7 @@ ${CITIES.map(c => `| ${c.name} | ${FIELDS.map(k => probe[c.name][k].replace(/\|/
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, md);
 console.log(md);
-for (const [k, v] of Object.entries(summaries)) console.log(`::notice title=Accuracy ${label} ${k}::${v.pass} within tolerance, ${v.fail} outside, ${v.na} n/a`);
+for (const [k, v] of Object.entries(summaries)) console.log(`::notice title=Accuracy ${label} ${k}::${v.pass} within tolerance, ${OTHER.has(k) ? `${v.fail} differ (another model or run)` : `${v.fail} outside`}${v.grid ? `, ${v.grid} explained by the grid resolution` : ''}, ${v.na} n/a`);
 console.log(`::notice title=AQI table::Open-Meteo us_aqi is closest to: ${bestTable} ${JSON.stringify(aqiScore)}`);
 for (const r of rows.filter(r => r.includes('FAIL')).slice(0, 8)) console.log(`::notice title=Outside tolerance::${r.replace(/\*/g, '')}`);
 for (const r of alignRows.filter(r => r.includes('FAIL')).slice(0, 2)) console.log(`::notice title=Alignment::${r.replace(/\*/g, '')}`);
