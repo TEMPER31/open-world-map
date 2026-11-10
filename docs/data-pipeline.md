@@ -2,8 +2,8 @@
 
 `scripts/data/build_data.py` builds everything the map shows. It runs in GitHub Actions
 (`.github/workflows/pages.yml`) and its output is **deploy output only**. It goes into
-`site/data/live/` in the Pages artifact and is never committed. The only data committed
-is a small daily summary in `data/archive/`.
+`site/data/live/` in the Pages artifact and is never committed. The only data in the
+repository is the few daily summaries in `data/archive/` (see Daily archive).
 
 Dependencies: the Python standard library plus **one** external tool, the
 [wgrib2](https://github.com/NOAA-EMC/wgrib2) GRIB2 decoder. `scripts/data/build_wgrib2.sh`
@@ -350,5 +350,9 @@ with station observations is a later improvement.
 
 ## Daily archive
 
-After the 18Z cycle, the `archive` job commits `data/archive/YYYY-MM-DD.json`: that day's four
-cycle summaries (run, source, sizes, timings, Open-Meteo calls, publish times, spot check).
+Stopped. The workflow used to commit `data/archive/YYYY-MM-DD.json` after each 18Z cycle:
+that day's four cycle summaries (run, source, sizes, timings, Open-Meteo calls, publish times,
+spot check). The job was removed so the workflow never writes to the repository and every
+change to `main` comes through a pull request. The files already there (29 October to
+4 November 2026) stay. Each run's summary is still in its Actions log and step notices, which
+GitHub keeps for 90 days by default. `scripts/data/archive_day.py` is no longer run.

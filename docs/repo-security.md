@@ -25,10 +25,8 @@ Open repository Settings → Rules → Rulesets → New ruleset → New branch r
 5. Reopen the active ruleset and confirm the branch target, required checks and all three
    protections. In a pull request to `main`, verify both checks appear as required.
 
-The existing 18Z archive job pushes a summary directly to `main`. A pull-request rule
-can block that push. Resolve Q2 before relying on both the new ruleset and the current
-archive mechanism. Once the owner chooses the policy and activates it, verify the next
-scheduled archive run in Actions and check that the daily summary appears as expected.
+The workflow never writes to the repository (the daily archive job was removed), so the
+ruleset needs no exceptions: every change to `main` comes through a pull request.
 
 ## Action versions
 

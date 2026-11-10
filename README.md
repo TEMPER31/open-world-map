@@ -159,8 +159,8 @@ site/                 the deployed site (only this folder is published)
 docs/design/          the v3 design bundle (canonical mockup, README, scales)
 docs/sources-register.md   every source, licence, credit and open question
 scripts/              build_coastlines.py, build_places.py (one-off), check_site.py (CI)
-scripts/data/         build_data.py, build_wgrib2.sh, archive_day.py, screenshots.mjs
-data/archive/         one small JSON summary per day (hourly files are never committed)
+scripts/data/         build_data.py, build_wgrib2.sh, screenshots.mjs, archive_day.py (no longer run)
+data/archive/         daily run summaries, 29 Oct to 4 Nov 2026 (no longer added; hourly files are never committed)
 docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
 .github/workflows/    check, build data, deploy to GitHub Pages (4x daily + on push)
 ```
