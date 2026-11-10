@@ -154,13 +154,14 @@ site/                 the deployed site (only this folder is published)
   js/search.js        search box and the place panel's name line
   js/quick.js         the place panel's quick view
   js/sun.js           sunrise and sunset (NOAA solar formulas)
-  data/               field-scales.json, Natural Earth GeoJSON, places.json; data/live/ is built in CI
+  data/               field-scales.json, Natural Earth GeoJSON, places.json; data/live/ and data/archive/
+                      (forecast history) are built in CI, never committed
   fonts/              IBM Plex (OFL)
 docs/design/          the v3 design bundle (canonical mockup, README, scales)
 docs/sources-register.md   every source, licence, credit and open question
 scripts/              build_coastlines.py, build_places.py (one-off), check_site.py (CI)
-scripts/data/         build_data.py, build_wgrib2.sh, screenshots.mjs, archive_day.py (no longer run)
-data/archive/         daily run summaries, 29 Oct to 4 Nov 2026 (no longer added; hourly files are never committed)
+scripts/data/         build_data.py, build_wgrib2.sh, archive_day.py (forecast history), screenshots.mjs
+data/archive/         daily run summaries, 29 Oct to 4 Nov 2026: the seed for the forecast history (never added to)
 docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
 .github/workflows/    check, build data, deploy to GitHub Pages (4x daily + on push)
 ```
