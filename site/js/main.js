@@ -17,8 +17,8 @@ import { initPhotos, status as phStatus, credits as phCredits, hit as phHit, pan
 import { OVERLAYS, overlaysHTML, toggle as toggleOverlay, renderOverlayUI, initOverlays } from './overlays.js';
 import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 import { fieldFresh, placeFresh } from './fresh.js';
-import { initSearch } from './search.js';
-import * as quick from './quickview.js';
+import { initSearch, focusSearch, placeNameHTML } from './search.js';
+import { quickHTML, loadRain } from './quick.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -220,7 +220,7 @@ function bindChrome(map) {
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closePops(); toggleLayersSheet(false); S.set({ selection: null }); $('#probe').hidden = true; }
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); const q = $(mobile.matches ? '#mq' : '#q'); q.focus(); q.select(); }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); focusSearch(); }
   });
   const op = $('#set-opacity');
   op.value = Math.round(S.get('opacity') * 100);
@@ -348,6 +348,8 @@ function chartSVG(series, t, nowTemp) {
 }
 
 let detailVals = null, detailSeries = null, detailKey = '', placeSheet = null;
+// Quick view is shown only for the selection it was chosen on, so every new open starts detailed.
+let quickSel = null;
 // Each value appears as soon as its own file is ready (the field on screen is already loaded,
 // so it shows at once) instead of waiting for all six downloads.
 let detailFrame = 0;
@@ -384,19 +386,29 @@ function renderDetail(s) {
   const { lon, lat } = s.selection, t = s.t;
   const all = detailVals && ORDER.every(k => k in detailVals);
   const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : s.overlays.includes(k) ? ' ov' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}${s.overlays.includes(k) ? ' · overlay' : ''}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
+  const quick = quickSel === s.selection;
+  const head = `<div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close (Esc)" title="Close (Esc)">×</button>
+      <button class="chip d-q" type="button" data-quick aria-pressed="${quick}">${quick ? 'Detailed view' : 'Quick view'}</button>
+      <div class="kick">Place · ${meta.live ? 'GFS forecast' : 'sample data'}</div>
+      <div class="d-title">${fmtCoord(lon, lat)}</div>
+      ${placeNameHTML(s.selection)}
+      <div class="d-sub" data-panel-t="${t}"><span class="tag">${relT(t)}</span><span class="mono">${fmtBoth(meta.base + t * 3600e3)}</span></div></div>`;
   const note = meta.live
     ? `<div class="d-sec"><div class="src" data-fresh="place">${placeFresh(meta)}</div><div class="src">Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days.</div></div>`
     : `<div class="d-sec"><div class="alert"><b>Sample data</b><span>Generated to test the layout. Not an observation or a forecast.</span></div></div>`;
+  if (quick) {
+    loadRain(s.selection, detailSeries, redrawDetail);
+    body.innerHTML = `${head}<div class="qv" data-quick-view>${quickHTML(s, detailVals, detailSeries, dirFrom)}</div>${note}`;
+    el.hidden = false;
+    stamp('panel', all ? t : -1); stamp('chart', null);
+    return;
+  }
   body.innerHTML = `
-    <div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close (Esc)" title="Close (Esc)">×</button>
-      <div class="kick">Place · ${meta.live ? 'GFS forecast' : 'sample data'}</div>
-      <div class="d-title">${fmtCoord(lon, lat)}</div>
-      <div class="d-name">Place name <span class="soon">Coming soon</span></div>
-      <div class="d-sub" data-panel-t="${t}"><span class="tag">${relT(t)}</span><span class="mono">${fmtBoth(meta.base + t * 3600e3)}</span></div></div>
+    ${head}
     <div class="stats">${ORDER.map(stat).join('')}</div>
     <div class="d-sec"><div class="kick"><span>Forecast</span><span>— temp ${label('temp')} · ▮ wind ${label('speed')}</span></div>${chartSVG(detailSeries, t, detailVals?.temp?.v)}</div>
     ${note}
-    <div class="d-ft"><div class="d-btns"><button class="btn pri" type="button" data-center>Centre map here</button><button class="btn" type="button" data-soon="Point download" aria-label="Point download (coming soon)">Data ↓ <span class="soon">Coming soon</span></button><button class="btn" type="button" data-qview aria-haspopup="dialog" aria-expanded="${quick.isOpen()}" aria-controls="qview">Quick view</button></div>
+    <div class="d-ft"><div class="d-btns"><button class="btn pri" type="button" data-center>Centre map here</button><button class="btn" type="button" data-soon="Point download" aria-label="Point download (coming soon)">Data ↓ <span class="soon">Coming soon</span></button></div>
       <div class="src">${meta.live ? 'NOAA GFS · CAMS via Open-Meteo (CC BY 4.0)' : `Sample generator · ${SAMPLE_GRID_DEG}° grid`} · Updated ${hhmm(meta.generated)} UTC</div></div>`;
   el.hidden = false;
   // the panel counts as drawn for this hour once every value has arrived
@@ -430,7 +442,7 @@ function renderCredits(map) {
   const parts = meta.live ? [CREDITS.gfs, CREDITS.cams] : [CREDITS.sample];
   parts.push(...evCredits(), ...phCredits());
   if (S.get('basemap') === 'satellite') parts.push(...activeSatellite(map).map(x => x.credit));
-  parts.push(CREDITS.vector, CREDITS.naturalEarth, CREDITS.maplibre);
+  parts.push(CREDITS.vector, CREDITS.naturalEarth, CREDITS.geonames, CREDITS.maplibre);
   $$('[data-satfresh]').forEach(e => e.textContent = S.get('basemap') === 'satellite' ? activeSatellite(map).map(x => x.fresh()).join('\n') : '');
   const el = $('#credits');
   el.innerHTML = parts.join(' · ');
@@ -513,14 +525,7 @@ async function boot() {
   renderStatus();
 
   bindChrome(map);
-  quick.initQuickView();
-  // Place search (Photon): picking a place flies there and opens its place panel.
-  for (const [q, pop] of [['#q', '#q-pop'], ['#mq', '#mq-pop']]) initSearch($(q), $(pop), { map, onPick: (f, view) => {
-    const [lon, lat] = view.center;
-    map.flyTo({ center: view.center, zoom: view.zoom });
-    S.set({ measuring: false, selection: { type: 'place', lon, lat } });
-    if (mobile.matches) $(q).blur(); // phones: put the keyboard away so the place sheet shows
-  } });
+  initSearch(map, redrawDetail);
   initClock({ base: meta.base, snap: stepTime });
   S.set({ t: stepTime(Math.min(S.get('t'), meta.hours), 0) });
   // last hourly frame: from here on frames are 3 hours apart
@@ -628,7 +633,6 @@ async function boot() {
   map.on('click', e => {
     const { lng, lat } = e.lngLat;
     if (S.get('measuring')) return; // the measure tool owns clicks while on
-    if (quick.tookClick()) return; // this click closed Quick View; the place stays
     const ev = phHit(e) || evHit(e.point); // a photo or event under the click wins over the place
     if (ev) return S.set({ selection: ev });
     if (Math.abs(lat) > 85) return;
@@ -646,8 +650,12 @@ async function boot() {
     if (e.target.closest('[data-deselect]')) S.set({ selection: null });
     else if (e.target.closest('.d-hd') && !e.target.closest('button') && placeSheet.get() === 'peek') placeSheet.set('half');
     if (e.target.closest('[data-center]')) { const s = S.get('selection'); map.easeTo({ center: [s.lon, s.lat] }); }
-    const qb = e.target.closest('[data-qview]');
-    if (qb) quick.isOpen() ? quick.close() : quick.open(S.get('selection'), qb);
+    if (e.target.closest('[data-quick]')) {
+      quickSel = quickSel === S.get('selection') ? null : S.get('selection');
+      if (mobile.matches && placeSheet.get() === 'peek') placeSheet.set('half');
+      renderDetail(S.get());
+      $('#detail [data-quick]').focus();
+    }
   });
 
   map.on('moveend', () => { renderScale(map); if (S.get('basemap') === 'satellite') renderCredits(map); });

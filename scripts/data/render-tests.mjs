@@ -7,7 +7,6 @@ import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { route as eventSamples } from './event-fixtures.mjs';
 import { routePhotos, IMAGE_ID } from './photo-fixtures.mjs';
-import { routeSearch } from './search-fixtures.mjs';
 
 const [, , site = 'http://127.0.0.1:8123/', out = 'render-tests.md'] = process.argv;
 const results = [];
@@ -39,7 +38,7 @@ const liveName = n => OFFLINE ? `${n} [offline run: saved samples, live feeds no
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 // Local time zone US Central, so local time and UTC differ in the time label.
 const TZ = 'America/Chicago';
-async function open(prefs, hash = '2/35/-20', { samples, photos, logo, search, ...ctx } = {}) {
+async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } = {}) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, timezoneId: TZ, ...ctx });
   await watchCsp(page);
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
@@ -59,7 +58,6 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, search, .
   page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
   if (samples) await eventSamples(page, samples);
   if (photos) await routePhotos(fbcdn(page), photos);
-  const searchLog = await routeSearch(page, search || {}); // place search: always the stand-in, never the real Photon
   if (logo) { // the owner's logo file is not in the repository: a plain grey 48 x 12 rectangle stands in for it
     await page.route('**/js/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace("export const MAPILLARY_LOGO = null;", "export const MAPILLARY_LOGO = 'img/mapillary-logo.svg';") }); });
     await page.route('**/img/mapillary-logo.svg', r => r.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="12"><rect width="48" height="12" fill="#888"/></svg>' }));
@@ -71,7 +69,7 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, search, .
   await page.goto(`${site}#map=${hash}`);
   await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
   await page.waitForTimeout(1500);
-  return { page, errors, reqs, hosts, searchLog };
+  return { page, errors, reqs, hosts };
 }
 
 // 1. Wind direction: uniform synthetic fields; particles must move with the wind (towards).
@@ -303,15 +301,16 @@ if (part()) {
   check('No page errors (timeline controls)', !errors.length, errors.join(' | '));
   await page.close();
 }
-// 6b. Unbuilt features say "Coming soon" (visible, not only in aria-label; search is built now, so
-// it no longer does), and the Now button returns every layer to the Now frame (desktop chip and phone button).
+// 6b. Unbuilt features say "Coming soon" (visible, not only in aria-label), search and the place
+// name no longer do, and the Now button returns every layer to the Now frame (desktop chip and phone button).
 const shown = (page, sel) => page.evaluate(s => { const e = document.querySelector(s), r = e?.getBoundingClientRect(); return !!e && e.checkVisibility() && r.width > 0 && r.height > 0 ? e.textContent.trim() : null; }, sel);
 if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: true, overlays: ['pres'] }, '3/45/-30');
-  const soon = { search: await shown(page, '.topbar .search .soon') };
-  await page.keyboard.press('Control+K'); soon.ctrlK = await page.evaluate(() => document.activeElement?.id);
-  await page.keyboard.press('Escape');
+  const soon = { searchSoon: await page.$$eval('.search .soon, .m-search .soon', e => e.length) };
+  await page.keyboard.press('Control+K'); soon.ctrlK = await page.evaluate(() => document.activeElement?.matches('.topbar .search input') ?? false);
+  await page.keyboard.press('Escape'); await page.evaluate(() => document.activeElement?.blur());
   await page.mouse.click(700, 350); await page.waitForSelector('#detail [data-soon="Point download"]', { timeout: 10000 }).catch(() => {});
+  soon.nameSoon = await page.$$eval('#detail .d-name .soon', e => e.length);
   soon.dataBtn = await shown(page, '#detail [data-soon="Point download"] .soon');
   soon.dataBtnLabel = await page.$eval('#detail [data-soon="Point download"]', e => e.getAttribute('aria-label')).catch(() => null);
   await page.click('#detail [data-soon="Point download"]'); soon.dataToast = await page.$eval('#toast', e => e.textContent);
@@ -319,8 +318,8 @@ if (part()) {
   await page.click('.topbar [data-open="data"]'); soon.downloads = await shown(page, '#pop-data [data-downloads] .soon');
   soon.downloadsText = await page.$eval('#pop-data [data-downloads]', e => e.textContent.replace(/\s+/g, ' ').trim());
   await page.keyboard.press('Escape');
-  check('Coming soon (desktop): visible label on "Data ↓" and the Data popover downloads line, toast says "… coming soon."; Search has no such label and Ctrl+K focuses it',
-    soon.search === null && soon.ctrlK === 'q' && soon.dataBtn === 'Coming soon' && soon.downloads === 'Coming soon' && soon.dataToast === 'Point download coming soon.' && /coming soon/i.test(soon.dataBtnLabel || ''), JSON.stringify(soon));
+  check('Coming soon (desktop): visible label on "Data ↓" and the Data popover downloads line, toast "… coming soon."; none on search or the place name; Ctrl+K focuses search',
+    soon.searchSoon === 0 && soon.nameSoon === 0 && soon.ctrlK && soon.dataBtn === 'Coming soon' && soon.downloads === 'Coming soon' && soon.dataToast === 'Point download coming soon.' && /coming soon/i.test(soon.dataBtnLabel || ''), JSON.stringify(soon));
   // Now: inactive at Now; after stepping forward, keyboard Tab-reachable, Enter returns to t = 0 and every visible layer stamps that hour
   const now = await page.evaluate(() => { const b = document.querySelector('.timeline [data-now]'); return { disabled: b.disabled, label: b.getAttribute('aria-label'), t: window.owmTest.state.get('t') }; });
   for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
@@ -341,16 +340,228 @@ if (part()) {
 }
 if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  const search = await page.evaluate(() => ({ soon: !!document.querySelector('.m-search .soon'), field: document.querySelector('.m-search input')?.getAttribute('role') }));
+  const search = { soon: await page.$$eval('.m-search .soon', e => e.length), input: await page.$eval('.m-search input', e => e.checkVisibility()) };
   const b0 = await page.$eval('.m-scrub [data-now]', e => { const r = e.getBoundingClientRect(), s = document.querySelector('.m-scrub').getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), disabled: e.disabled, aboveScrub: r.bottom <= s.top, visible: e.checkVisibility() }; });
   await page.tap('.m-scrub [data-step="1"]'); await page.tap('.m-scrub [data-step="1"]');
   const t1 = await page.evaluate(() => window.owmTest.state.get('t'));
   await page.tap('.m-scrub [data-now]');
   const back = await synced(page);
   const t2 = await page.evaluate(() => ({ t: window.owmTest.state.get('t'), disabled: document.querySelector('.m-scrub [data-now]').disabled, scrubW: Math.round(document.querySelector('[data-track="mini"]').getBoundingClientRect().width) }));
-  check('Phone (375 px): Search pill is a search field (no "Coming soon"); Now button is 44 px+, sits above the scrubber, is inactive at Now and returns to t = 0 after stepping',
-    !search.soon && search.field === 'combobox' && b0.w >= 44 && b0.h >= 44 && b0.disabled && b0.aboveScrub && b0.visible && t1 > 0 && t2.t === 0 && t2.disabled && back.ok, JSON.stringify({ search, b0, t1, t2, layers: back.lt }));
+  check('Phone (375 px): Search pill is a search box (no "Coming soon"); Now button is 44 px+, sits above the scrubber, is inactive at Now and returns to t = 0 after stepping',
+    !search.soon && search.input && b0.w >= 44 && b0.h >= 44 && b0.disabled && b0.aboveScrub && b0.visible && t1 > 0 && t2.t === 0 && t2.disabled && back.ok, JSON.stringify({ search, b0, t1, t2, layers: back.lt }));
   check('No page errors (phone Now)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 6d. Place search: the index loads on first focus (not with the page), suggestions within ~300 ms
+// of a pause, keys and mouse, lat/lon, no results / unavailable; a pick flies there and opens the
+// place panel at the timeline's hour; a map click names the nearest place; nothing leaves the
+// site while typing and nothing is stored. Phone at 360 px.
+if (part()) {
+  const { page, errors } = await open({ field: 'temp', particles: false }, '3/40/-90');
+  const origin = new URL(site).origin, index = [], outside = [];
+  page.on('request', r => { if (/data\/places\.json/.test(r.url())) index.push(r.url()); });
+  const atLoad = index.length;
+  const box = '.topbar .search input', opts = '.topbar .s-pop [role=option]';
+  // pause-to-suggestions time: from the last key to the last change of the list (in the page)
+  await page.evaluate(() => {
+    window.searchT = {};
+    document.addEventListener('keyup', () => { window.searchT.key = performance.now(); }, true);
+    new MutationObserver(() => { window.searchT.list = performance.now(); }).observe(document.querySelector('.topbar .search'), { childList: true, subtree: true, characterData: true });
+  });
+  const typeIn = async text => {
+    await page.fill(box, ''); await page.focus(box);
+    await page.keyboard.type(text, { delay: 60 });
+    await page.waitForTimeout(600);
+    return page.evaluate(([o, b]) => ({ ms: Math.round(window.searchT.list - window.searchT.key), opts: [...document.querySelectorAll(o)].map(e => [e.querySelector('b').textContent, e.querySelector('span').textContent]), msg: document.querySelector('.topbar .s-msg').textContent, open: !document.querySelector('.topbar .s-pop').hidden, active: document.querySelector(b).getAttribute('aria-activedescendant') }), [opts, box]);
+  };
+  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowRight');
+  const t = await page.evaluate(() => window.owmTest.state.get('t'));
+  await page.focus(box);
+  await page.waitForFunction(() => performance.getEntriesByType('resource').some(e => /places\.json/.test(e.name) && e.responseEnd > 0), null, { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(500);
+  page.on('request', r => { const u = new URL(r.url()); if (u.origin !== origin && !/^(data|blob):/.test(u.protocol)) outside.push(u.host); });
+  const kc = await typeIn('Kansas City');
+  const tops = {};
+  for (const q of ['Kansas City MO', 'Miami', 'Denver', 'London', 'Delhi']) tops[q] = (await typeIn(q)).opts[0]?.join(', ');
+  const none = await typeIn('qqxzq');
+  const bad = await typeIn('95, 10');
+  const typingOutside = outside.length;
+  check('Search: the place index is not loaded with the page, only when the search box is focused (once)', atLoad === 0 && index.length === 1, `requests for places.json: at page load ${atLoad}, after focus and ${Object.keys(tops).length + 4} searches ${index.length}`);
+  check('Search: "Kansas City" shows up to 8 suggestions (name, region, country), Missouri first, within ~300 ms of the pause', kc.opts.length >= 2 && kc.opts.length <= 8 && kc.opts[0].join(', ') === 'Kansas City, Missouri, US' && kc.opts.every(o => o[0] && /, [A-Z]{2}$/.test(o[1])) && kc.ms <= 300, JSON.stringify(kc));
+  check('Search: top results for Kansas City MO, Miami, Denver, London and Delhi', tops['Kansas City MO'] === 'Kansas City, Missouri, US' && tops.Miami === 'Miami, Florida, US' && tops.Denver === 'Denver, Colorado, US' && tops.London === 'London, England, GB' && tops.Delhi === 'Delhi, Delhi, IN', JSON.stringify(tops));
+  check('Search: "No results" and an out-of-range lat, lon are said plainly', /^No results for “qqxzq”/.test(none.msg) && !none.opts.length && bad.msg === 'Latitude must be between -90 and 90.' && !bad.opts.length, JSON.stringify({ none: none.msg, bad: bad.msg }));
+  check('Search: no request to any other host while typing', typingOutside === 0, `${typingOutside} requests outside ${origin}${typingOutside ? ': ' + outside.join(', ') : ''}`);
+  // keys: Down, Down, Up, Enter picks the first; the map flies there and the panel opens at the timeline's hour
+  await typeIn('Kansas City');
+  await page.keyboard.press('ArrowDown'); await page.keyboard.press('ArrowDown');
+  const a2 = await page.$eval(box, e => e.getAttribute('aria-activedescendant'));
+  await page.keyboard.press('ArrowUp');
+  const a1 = await page.$eval(box, e => e.getAttribute('aria-activedescendant'));
+  await page.keyboard.press('Enter');
+  await page.evaluate(() => new Promise(r => { window.owmMap.once('moveend', r); setTimeout(r, 6000); }));
+  const kcPick = await page.evaluate(() => { const s = window.owmTest.state.get(), c = window.owmMap.getCenter(); return { sel: s.selection, t: s.t, center: [+c.lng.toFixed(2), +c.lat.toFixed(2)], panel: !document.querySelector('#detail').hidden, name: document.querySelector('#detail [data-place-name]')?.textContent, panelT: +document.querySelector('#detail [data-panel-t]')?.dataset.panelT, clockT: window.owmTest.state.get('t'), list: !document.querySelector('.topbar .s-pop').hidden }; });
+  check('Search: Down/Up move, Enter picks; the map flies to Kansas City and the place panel opens at the timeline hour (not reset to Now)',
+    /-1$/.test(a2) && /-0$/.test(a1) && kcPick.sel?.name === 'Kansas City, Missouri, US' && kcPick.panel && kcPick.name === 'Kansas City, Missouri, US' && kcPick.t === t && t > 0 && kcPick.panelT === t && Math.abs(kcPick.center[0] + 94.58) < 0.05 && Math.abs(kcPick.center[1] - 39.1) < 0.05 && !kcPick.list, JSON.stringify({ a2, a1, t, ...kcPick }));
+  // Esc closes the list and leaves the panel open; mouse click picks
+  const den = await typeIn('Den');
+  await page.keyboard.press('Escape');
+  const esc = await page.evaluate(() => ({ list: !document.querySelector('.topbar .s-pop').hidden, panel: !document.querySelector('#detail').hidden }));
+  await typeIn('London');
+  await page.click(`${opts}:nth-child(1)`);
+  await page.waitForTimeout(300);
+  const lon = await page.evaluate(() => window.owmTest.state.get('selection')?.name);
+  check('Search: Esc closes the suggestions (the place panel stays); a mouse click picks', den.open && !esc.list && esc.panel && lon === 'London, England, GB', JSON.stringify({ den: den.opts.length, esc, lon }));
+  // lat, lon: one suggestion, Enter goes there and names the nearest place
+  const ll = await typeIn('39.1, -94.58');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => /Nearest place/.test(document.querySelector('#detail [data-place-name]')?.textContent || ''), null, { timeout: 8000 }).catch(() => {});
+  const llPick = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection'), name: document.querySelector('#detail [data-place-name]')?.textContent }));
+  check('Search: "39.1, -94.58" offers the coordinates; Enter selects them and the panel names the nearest place', ll.opts.length === 1 && ll.opts[0][1] === 'Coordinates' && llPick.sel?.lat === 39.1 && llPick.sel?.lon === -94.58 && llPick.name === 'Near Kansas City, Missouri, USNearest place', JSON.stringify({ opts: ll.opts, ...llPick }));
+  // a map click: nearest place with distance, labelled; nothing within 100 km: coordinates only
+  await page.evaluate(() => window.owmMap.jumpTo({ center: [-79.6, 39.95], zoom: 9 }));
+  await page.waitForTimeout(500);
+  const pt = await page.evaluate(() => { const p = window.owmMap.project([-79.6, 39.95]), r = window.owmMap.getCanvas().getBoundingClientRect(); return [p.x + r.left, p.y + r.top]; });
+  await page.mouse.click(pt[0], pt[1]);
+  await page.waitForFunction(() => /Nearest place/.test(document.querySelector('#detail [data-place-name]')?.textContent || ''), null, { timeout: 8000 }).catch(() => {});
+  const click = await page.evaluate(() => { const e = document.querySelector('#detail [data-place-name]'); return { text: e?.querySelector('span')?.textContent, tag: e?.querySelector('.np')?.textContent, title: e?.title }; });
+  await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'place', lon: -30, lat: 0 } }));
+  await page.waitForTimeout(400);
+  const sea = await page.evaluate(() => ({ name: document.querySelector('#detail [data-place-name]')?.textContent ?? null, title: document.querySelector('#detail .d-title').textContent }));
+  await page.evaluate(() => window.owmTest.state.set({ distUnit: 'mi', selection: { type: 'place', lon: -79.6, lat: 39.95 } }));
+  await page.waitForTimeout(400);
+  const mi = await page.evaluate(() => document.querySelector('#detail [data-place-name] span')?.textContent);
+  await page.evaluate(() => window.owmTest.state.set({ distUnit: 'km' }));
+  check('Map click: the place name is the nearest indexed place with its distance, labelled "Nearest place" (not an address); in miles with US units; none within 100 km: coordinates only',
+    /^(Near |\d+ km from )\S.*, Pennsylvania, US$/.test(click.text || '') && click.tag === 'Nearest place' && /not an exact address/.test(click.title || '') && /^(Near |\d+ mi from )/.test(mi || '') && sea.name === null && /0\.00°N 30\.00°W/.test(sea.title), JSON.stringify({ click, mi, sea }));
+  const kept = await page.evaluate(async () => ({ local: JSON.stringify({ ...localStorage }), tab: Object.keys(sessionStorage), cookie: document.cookie, idb: (await indexedDB.databases?.())?.length ?? 0, hash: location.hash }));
+  check('Search: nothing about searches is stored (local and per-tab storage, cookies, IndexedDB, address)', !/kansas|london|miami|denver|delhi|qqxzq/i.test(kept.local + kept.hash) && kept.tab.every(k => k === 'seeded') && !kept.cookie && !kept.idb, JSON.stringify(kept));
+  check('No page errors (search)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+if (part()) {
+  // index unavailable: plain messages in the search box and the place panel
+  const { page, errors } = await open({ field: 'temp', particles: false }, '3/40/-90');
+  await page.route('**/data/places.json', r => r.fulfill({ status: 404, body: '' }));
+  await page.focus('.topbar .search input'); await page.keyboard.type('Paris', { delay: 40 });
+  await page.waitForFunction(() => /unavailable/.test(document.querySelector('.topbar .s-msg').textContent), null, { timeout: 8000 }).catch(() => {});
+  const msg = await page.$eval('.topbar .s-msg', e => e.textContent);
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'place', lon: -94.58, lat: 39.1 } }));
+  await page.waitForFunction(() => /unavailable/.test(document.querySelector('#detail [data-place-name]')?.textContent || ''), null, { timeout: 8000 }).catch(() => {});
+  const name = await page.$eval('#detail [data-place-name]', e => e.textContent).catch(() => null);
+  check('Search unavailable (index fails to load): said plainly in the search box and the place panel', msg === 'Search unavailable: the place list could not be loaded.' && /^Place name unavailable/.test(name || ''), JSON.stringify({ msg, name }));
+  check('No page errors (search unavailable)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+if (part()) {
+  // phone at 360 px: the list fits the screen with 44 px rows; a tap picks
+  const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+  await page.tap('.m-search input');
+  await page.keyboard.type('Miami', { delay: 40 });
+  await page.waitForSelector('.m-search .s-pop [role=option]', { timeout: 10000 }).catch(() => {});
+  const r = await page.evaluate(() => { const p = document.querySelector('.m-search .s-pop').getBoundingClientRect(), o = [...document.querySelectorAll('.m-search .s-pop [role=option]')]; return { left: p.left, right: p.right, n: o.length, rowH: Math.min(...o.map(e => e.getBoundingClientRect().height)), first: o[0]?.textContent, scrollW: document.documentElement.scrollWidth, inputFont: getComputedStyle(document.querySelector('.m-search input')).fontSize, onTop: (() => { const e = document.elementFromPoint((p.left + p.right) / 2, p.top + 10); return !!e?.closest('.s-pop'); })() }; });
+  await page.tap('.m-search .s-pop [role=option]:nth-child(1)');
+  await page.waitForTimeout(500);
+  const sel = await page.evaluate(() => ({ name: window.owmTest.state.get('selection')?.name, panel: !document.querySelector('#detail').hidden }));
+  check('Phone (360 px): suggestions fit the screen above the map chrome, rows 44 px+, no sideways scroll; a tap picks Miami', r.left >= 0 && r.right <= 360 && r.n >= 1 && r.rowH >= 44 && r.scrollW <= 360 && r.onTop && r.inputFont === '16px' && /^Miami/.test(r.first) && sel.name === 'Miami, Florida, US' && sel.panel, JSON.stringify({ ...r, sel }));
+  check('No page errors (phone search)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 6e. Quick view in the place panel: chosen with a header button, back with another; the
+// detailed view opens every time; units and the timeline update it; every section names its
+// source and grid; sunrise and sunset (and the polar messages); no request to another host.
+const qv = page => page.evaluate(() => {
+  const d = document.querySelector('#detail'), q = d.querySelector('[data-quick-view]'), b = d.querySelector('[data-quick]');
+  const sec = k => d.querySelector(`[data-qv="${k}"]`);
+  return { open: !d.hidden, quick: !!q, stats: !!d.querySelector('.stats'), chart: !!d.querySelector('[data-chart-t]'), btn: b?.textContent, pressed: b?.getAttribute('aria-pressed'),
+    temp: d.querySelector('.qv-temp')?.textContent, sky: d.querySelector('[data-sky]')?.textContent, nowKick: sec('now')?.querySelector('.kick span')?.textContent,
+    cells: d.querySelectorAll('.qv-h').length, onCell: d.querySelector('.qv-h.on')?.dataset.qt ?? null, firstCell: d.querySelector('.qv-h')?.textContent.replace(/\s+/g, ' ').trim(), days: d.querySelectorAll('.qv-day').length, day1: d.querySelector('.qv-day')?.textContent.replace(/\s+/g, ' ').trim(),
+    srcs: ['now', 'hours', 'days', 'sun'].map(k => sec(k)?.querySelector('.src')?.textContent || ''), note: [...d.querySelectorAll('.d-body > .d-sec')].pop()?.innerHTML,
+    rise: d.querySelector('[data-sunrise]')?.dataset.sunrise, set: d.querySelector('[data-sunset]')?.dataset.sunset, sunText: sec('sun')?.innerText.replace(/\s+/g, ' '), panelT: d.querySelector('[data-panel-t]')?.dataset.panelT };
+});
+if (part()) {
+  const { page, errors } = await open({ field: 'temp', particles: false }, '6/39.1/-94.58');
+  const origin = new URL(site).origin, other = [], own = [];
+  // a map click opens the detailed view
+  const pt = await page.evaluate(() => { const p = window.owmMap.project([-94.58, 39.1]), r = window.owmMap.getCanvas().getBoundingClientRect(); return [p.x + r.left, p.y + r.top]; });
+  await page.mouse.click(pt[0], pt[1]);
+  await page.waitForTimeout(1500);
+  const d0 = await qv(page);
+  const detailNote = d0.note;
+  page.on('request', r => { const u = new URL(r.url()); if (/^(data|blob):/.test(u.protocol)) return; (u.origin === origin ? own : other).push(u.pathname + (u.origin === origin ? '' : ' @' + u.host)); });
+  await page.click('#detail [data-quick]');
+  await page.waitForFunction(() => document.querySelectorAll('#detail .qv-h').length && !/…/.test(document.querySelector('#detail .qv-hours')?.textContent || '…'), null, { timeout: 15000 }).catch(() => {});
+  const q1 = await qv(page);
+  const sky = await page.evaluate(async () => { const { skyWord } = await import('./js/quick.js'); return [skyWord(10, 0, 10), skyWord(24.9, 0, 10), skyWord(25, 0, 10), skyWord(69, 0, 10), skyWord(70, 0, 10), skyWord(100, 0.05, 10), skyWord(100, 0.1, 10), skyWord(50, 1, 10), skyWord(50, 4, 10), skyWord(50, 0.5, 1), skyWord(NaN, 0, 10)].join(' | '); });
+  check('Quick view (desktop): a map click opens the detailed view; "Quick view" swaps in now, the next 48 hours, the next 7 days and the sun; "Detailed view" in its place',
+    d0.stats && d0.chart && !d0.quick && d0.btn === 'Quick view' && d0.pressed === 'false' && q1.quick && !q1.stats && !q1.chart && q1.btn === 'Detailed view' && q1.pressed === 'true' && /^-?\d+°[CF]$/.test(q1.temp) && /^(Clear|Partly cloudy|Cloudy|(Light |Heavy )?([Rr]ain|[Rr]ain or snow))$/.test(q1.sky) && q1.cells >= 8 && q1.days >= 2,
+    JSON.stringify({ d0: { stats: d0.stats, btn: d0.btn }, q1: { temp: q1.temp, sky: q1.sky, cells: q1.cells, first: q1.firstCell, days: q1.days, day1: q1.day1 } }));
+  check('Quick view: sky words follow the stated thresholds (cloud < 25 % Clear, < 70 % Partly cloudy, else Cloudy; rain from 0.1 mm, light < 1, heavy >= 4; "or snow" at <= 1 °C)',
+    sky === 'Clear | Clear | Partly cloudy | Partly cloudy | Cloudy | Cloudy | Light rain | Rain | Heavy rain | Light rain or snow | —', sky);
+  check('Quick view: every section names its source and grid (summary-file grid read from the data), and the panel keeps the detailed view\'s grid / sample note',
+    q1.srcs.every(x => x.length > 20) && /° grid/.test(q1.srcs[0]) && /summary file on a \d+(\.\d+)?° grid \(about \d+ km\)/.test(q1.srcs[1]) && /summary file on a/.test(q1.srcs[2]) && /NOAA's solar formulas/.test(q1.srcs[3]) && q1.note === detailNote && /~50 km grid|Sample data/.test(q1.note),
+    JSON.stringify(q1.srcs));
+  // units: change at once
+  await page.evaluate(() => window.owmTest.state.set({ tempUnit: 'F', speedUnit: 'kn' }));
+  await page.waitForTimeout(300);
+  const q2 = await qv(page);
+  await page.evaluate(() => window.owmTest.state.set({ tempUnit: 'C', speedUnit: 'kmh' }));
+  check('Quick view: a units change updates it at once (°C -> °F, km/h -> kn) and it stays in quick view', q2.quick && /^-?\d+°F$/.test(q2.temp) && / kn/.test(q2.firstCell) && / kn/.test(q2.day1) && !/km\/h/.test(q2.firstCell), JSON.stringify({ temp: q2.temp, cell: q2.firstCell, day: q2.day1 }));
+  // timeline: the now part follows
+  for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight');
+  await page.waitForTimeout(800);
+  const q3 = await qv(page), t3 = await page.evaluate(() => window.owmTest.state.get('t'));
+  check('Quick view: moving the timeline updates the now part (heading, panel hour) and marks its slot in the 48-hour row', q3.quick && t3 > 0 && q3.panelT === String(t3) && q3.nowKick === `At +${t3} h` && q3.onCell !== null && +q3.onCell <= t3, JSON.stringify({ t: t3, kick: q3.nowKick, on: q3.onCell, panelT: q3.panelT }));
+  const sun = await page.evaluate(async ([rise, set, t]) => { const { sunTimes } = await import('./js/sun.js'); const m = window.owmTest.meta, at = m.base + t * 3600e3 - 94.58 / 15 * 3600e3, d0 = at - at % 864e5, r = sunTimes(39.1, -94.58, d0); return { rise: new Date(r.rise).toISOString() === rise, set: new Date(r.set).toISOString() === set }; }, [q3.rise, q3.set, t3]);
+  check('Quick view: sunrise and sunset shown with local time next to UTC, for the place\'s day at the timeline hour', sun.rise && sun.set && /Sunrise \w+ \d\d:\d\d local · \d\d:\d\d UTC/.test(q3.sunText) && /Sunset /.test(q3.sunText), q3.sunText.slice(0, 160));
+  check('Quick view: no request to another host (only this site\'s own rain frames, or none with sample data)', !other.length && own.every(x => /data\/live\/gfs\/rain\//.test(x)), `${other.length} other-host requests; own: ${own.length} (${[...new Set(own.map(x => x.replace(/f\d+\.png.*/, '')))].join(', ') || 'none'})`);
+  // back to detailed, and every new open is detailed
+  await page.click('#detail [data-quick]');
+  const back = await qv(page);
+  await page.click('#detail [data-quick]');
+  await page.keyboard.press('Escape');
+  const closed = await qv(page);
+  await page.mouse.click(pt[0], pt[1]); await page.waitForTimeout(800);
+  const again = await qv(page);
+  await page.click('#detail [data-quick]');
+  await page.focus('.topbar .search input'); await page.keyboard.type('London', { delay: 40 });
+  await page.waitForSelector('.topbar .s-pop [role=option]', { timeout: 10000 }).catch(() => {});
+  await page.keyboard.press('Enter'); await page.waitForTimeout(1500);
+  const picked = await qv(page);
+  await page.click('#detail [data-quick]'); await page.waitForTimeout(800);
+  const pickedQ = await qv(page);
+  check('Quick view: "Detailed view" swaps back; Esc closes the panel; a new map click and a search pick both open the detailed view; quick view works after a search pick',
+    !back.quick && back.stats && back.btn === 'Quick view' && !closed.open && again.open && !again.quick && again.stats && picked.open && !picked.quick && picked.stats && pickedQ.quick && pickedQ.cells > 0,
+    JSON.stringify({ back: back.quick, closed: closed.open, again: again.quick, picked: picked.quick, pickedQ: pickedQ.quick }));
+  // polar: 80° N has no sunrise and 80° S no sunset in November
+  const polar = {};
+  for (const [k, lat] of [['north', 80], ['south', -80]]) {
+    await page.evaluate(lat => window.owmTest.state.set({ t: 0, selection: { type: 'place', lon: 0, lat } }), lat);
+    await page.waitForTimeout(300); await page.click('#detail [data-quick]'); await page.waitForTimeout(300);
+    polar[k] = (await qv(page)).sunText;
+  }
+  const nov = await page.evaluate(() => new Date(window.owmTest.meta.base).getUTCMonth() === 10);
+  check('Quick view: polar days say so plainly (80° N: the sun does not rise; 80° S: it does not set, in November)', !nov || (/The sun does not rise on this day/.test(polar.north) && /The sun does not set on this day/.test(polar.south)), nov ? JSON.stringify(polar).slice(0, 300) : 'not November: skipped');
+  check('No page errors (quick view)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+if (part()) {
+  // phone at 360 px: 44 px buttons, the sheet opens to half, the 48-hour row scrolls inside itself
+  const { page, errors } = await open({ field: 'temp', particles: false }, '5/39.1/-94.58', { viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+  await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'place', lon: -94.58, lat: 39.1 } }));
+  await page.waitForTimeout(1200);
+  const b0 = await page.$eval('#detail [data-quick]', e => { const r = e.getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(document.querySelector('#detail .d-title')); return { w: Math.round(r.width), h: Math.round(r.height), clearOfTitle: t.getBoundingClientRect().right <= r.left, snap: document.querySelector('#detail').dataset.snap }; });
+  const d0 = await qv(page);
+  await page.tap('#detail [data-quick]');
+  await page.waitForFunction(() => document.querySelectorAll('#detail .qv-h').length, null, { timeout: 15000 }).catch(() => {});
+  const q = await qv(page);
+  const lay = await page.evaluate(() => { const h = document.querySelector('#detail .qv-hours'); return { snap: document.querySelector('#detail').dataset.snap, rowScrolls: h ? h.scrollWidth > h.clientWidth : false, pageW: document.documentElement.scrollWidth, btn: (() => { const r = document.querySelector('#detail [data-quick]').getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })() }; });
+  await page.tap('#detail [data-quick]');
+  const back = await qv(page);
+  check('Quick view (phone 360 px): the 44 px button sits clear of the title, opens quick view (sheet to half), the 48-hour row scrolls inside the panel, no sideways page scroll; "Detailed view" swaps back',
+    b0.w >= 44 && b0.h >= 44 && b0.clearOfTitle && !d0.quick && d0.stats && q.quick && lay.snap === 'half' && lay.rowScrolls && lay.pageW <= 360 && lay.btn[1] >= 44 && !back.quick && back.stats,
+    JSON.stringify({ b0, lay, q: { cells: q.cells, days: q.days }, back: back.quick }));
+  check('No page errors (phone quick view)', !errors.length, errors.join(' | '));
   await page.close();
 }
 const FRESH = { src: /NOAA GFS|CAMS via Open-Meteo|Sample data/, time: /Updated \d\d:\d\d UTC|generated, no update time/, grid: /\d(\.\d+)?° grid/ };
@@ -910,174 +1121,6 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
   check('Live Mapillary: coverage at world zoom, lines at city zoom, dots at street zoom', world > 0 && city > 0 && Object.values(shots).every(x => x.dots > 0), JSON.stringify({ world, city, dots: Object.fromEntries(Object.entries(shots).map(([k, v]) => [k, v.dots])) }));
   check('Live Mapillary: click a dot at Times Square and on I-65 near Greenville AL -> photo with "CC BY-SA 4.0 — Mapillary / {creator}"', Object.values(shots).every(x => x.open && x.img > 0 && /^CC BY-SA 4\.0 — Mapillary \/ \S/.test(x.credit || '') && !/…$/.test(x.credit)), JSON.stringify(shots));
   check('No page errors (live Mapillary)', !errors.length, errors.join(' | '));
-  await page.close();
-}
-
-// ---- Place search (Photon stand-in, scripts/data/search-fixtures.mjs) and Quick View --------
-// Runs with part 3. No test contacts the real Photon service.
-const qsel = page => page.evaluate(() => { const s = window.owmTest.state.get('selection'), m = window.owmMap; return { sel: s, panel: !document.querySelector('#detail').hidden && !!document.querySelector('#detail .d-title'), zoom: +m.getZoom().toFixed(2), center: m.getCenter().toArray().map(v => +v.toFixed(3)) }; });
-const settle = page => page.waitForFunction(() => !window.owmMap.isMoving(), null, { timeout: 15000 }).catch(() => {});
-const nearLL = (a, b, d) => !!a && !!b && Math.abs(a[0] - b[0]) <= d && Math.abs(a[1] - b[1]) <= d;
-const popState = (page, phone = false) => page.evaluate(phone => {
-  const i = document.querySelector(phone ? '#mq' : '#q'), pop = document.querySelector(phone ? '#mq-pop' : '#q-pop');
-  return { open: !pop.hidden, items: [...pop.querySelectorAll('[role="option"]')].map(li => li.innerText.replace(/\s+/g, ' ').trim()), msg: pop.querySelector('[data-sqmsg]').textContent,
-    expanded: i.getAttribute('aria-expanded'), active: i.getAttribute('aria-activedescendant'), focused: document.activeElement === i };
-}, phone);
-const retype = async (page, sel, text) => { await page.click(sel, { clickCount: 3 }); await page.keyboard.press('Backspace'); await page.keyboard.type(text); };
-// 20. Search: fair use, suggestions, keyboard and mouse picks, Esc.
-if (part()) {
-  const { page, errors, searchLog: log } = await open({ field: 'temp', particles: false }, '2/35/-20');
-  await page.keyboard.press('Control+K');
-  const focused = await page.evaluate(() => document.activeElement?.id);
-  await page.keyboard.type('Lo'); await page.waitForTimeout(700);
-  const two = { reqs: log.queries.length, ...(await popState(page)) };
-  await page.keyboard.type('n');
-  const early = log.queries.length; // still inside the 300 ms pause
-  await page.waitForTimeout(800);
-  const three = { reqs: log.queries.slice(), ...(await popState(page)) };
-  check('Search: Ctrl+K focuses the field; 2 characters send no request; a 3rd sends one after the 300 ms pause', focused === 'q' && two.reqs === 0 && !two.open && early === 0 && three.reqs.join() === 'Lon' && three.open && three.items.length === 3, JSON.stringify({ focused, two, early, three }));
-  await page.keyboard.type('don', { delay: 60 }); await page.waitForTimeout(800);
-  const word = { reqs: log.queries.slice(), ...(await popState(page)) };
-  const aria = await page.evaluate(() => { const i = document.querySelector('#q'), l = document.getElementById(i.getAttribute('aria-controls')); return { role: i.getAttribute('role'), auto: i.getAttribute('aria-autocomplete'), list: l?.getAttribute('role'), opts: [...l.children].every(o => o.getAttribute('role') === 'option' && o.id), credit: [...document.querySelectorAll('#q-pop .sq-credit a')].map(a => a.href).join(' '), creditText: document.querySelector('#q-pop .sq-credit').textContent, soon: !!document.querySelector('.search .soon') }; });
-  check('Search: typing on sends one request for the word; suggestions show name, region and country (combobox, listbox, options); credit "Search: Photon by komoot · © OpenStreetMap contributors" under the list; no "Coming soon"',
-    word.reqs.join() === 'Lon,London' && word.items[0] === 'London England, United Kingdom' && word.items[2] === '10 Downing Street London, England, United Kingdom' && word.expanded === 'true' && aria.role === 'combobox' && aria.auto === 'list' && aria.list === 'listbox' && aria.opts && /https:\/\/photon\.komoot\.io/.test(aria.credit) && aria.creditText === 'Search: Photon by komoot · © OpenStreetMap contributors' && !aria.soon, JSON.stringify({ word, aria }));
-  await page.keyboard.press('ArrowDown');
-  const act = await popState(page);
-  await page.keyboard.press('Enter'); await page.waitForTimeout(300); await settle(page);
-  const london = await qsel(page);
-  check('Search: ↓ highlights the first place and Enter flies there (city zoom about 9) and opens the place panel', act.active === 'q-list-0' && london.sel?.type === 'place' && nearLL([london.sel.lon, london.sel.lat], [-0.1278, 51.5074], 1e-9) && london.panel && nearLL(london.center, [-0.128, 51.507], 0.01) && london.zoom >= 8 && london.zoom <= 10, JSON.stringify({ active: act.active, london }));
-  // an address flies closer; the same query again is answered from memory (no new request)
-  const n1 = log.queries.length;
-  await retype(page, '#q', 'London'); await page.waitForTimeout(800);
-  for (let i = 0; i < 3; i++) await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('Enter'); await page.waitForTimeout(300); await settle(page);
-  const house = await qsel(page);
-  check('Search: a street address flies closer (zoom 15+); a repeated query comes from memory without a new request', house.zoom >= 15 && nearLL([house.sel?.lon, house.sel?.lat], [-0.1276, 51.5034], 1e-9) && house.panel && log.queries.length === n1, JSON.stringify({ house, requests: log.queries.slice(n1) }));
-  await retype(page, '#q', 'Kansas City'); await page.waitForTimeout(800);
-  await page.click('#q-list li >> nth=0'); await page.waitForTimeout(300); await settle(page);
-  const kc = await qsel(page);
-  check('Search: clicking a suggestion flies to it and opens the place panel', nearLL([kc.sel?.lon, kc.sel?.lat], [-94.5786, 39.0997], 1e-9) && kc.panel && nearLL(kc.center, [-94.579, 39.1], 0.01) && kc.zoom >= 8 && kc.zoom <= 10, JSON.stringify(kc));
-  await retype(page, '#q', 'Tokyo'); await page.waitForTimeout(800);
-  const before = await popState(page);
-  await page.keyboard.press('Escape');
-  const after = { ...(await popState(page)), sel: await page.evaluate(() => window.owmTest.state.get('selection')?.lon) };
-  await page.focus('#q'); await page.keyboard.press('Enter'); await page.waitForTimeout(300); await settle(page);
-  const tokyo = await qsel(page);
-  check('Search: Esc closes the list and leaves the field (the place panel stays); Enter without ↓ picks the first place', before.open && !after.open && !after.focused && after.expanded === 'false' && after.sel === -94.5786 && nearLL([tokyo.sel?.lon, tokyo.sel?.lat], [139.6917, 35.6895], 1e-9) && tokyo.panel, JSON.stringify({ before, after, tokyo }));
-  check('No page errors (search)', !errors.length, errors.join(' | '));
-  await page.close();
-}
-// 21. Search: a slow answer says "Searching…"; a newer query cancels the older request.
-if (part()) {
-  const { page, errors, searchLog: log } = await open({ field: 'temp', particles: false }, '2/35/-20', { search: { mode: 'slow', delay: 3500 } });
-  await page.click('#q'); await page.keyboard.type('Tok'); await page.waitForTimeout(2700);
-  const slow = await popState(page);
-  await page.keyboard.type('yo'); await page.waitForTimeout(4500);
-  const done = await popState(page);
-  check('Search: a request slower than 2 s shows "Searching…"; a newer query cancels the older request and its answer is shown', slow.open && slow.msg === 'Searching…' && log.queries.join() === 'Tok,Tokyo' && log.aborted.includes('Tok') && done.items[0] === 'Tokyo Japan' && done.msg === '', JSON.stringify({ slow, done, log }));
-  check('No page errors (slow search)', !errors.length, errors.join(' | '));
-  await page.close();
-}
-// 22. Search: no results, a failed request (HTTP 500) and a timeout (no answer within 8 s) show a
-// short message in the list, and the map still works (a click opens the place panel).
-if (part()) for (const [name, search, wait, want] of [['no results', { mode: 'empty' }, 900, 'No places found. Check the spelling or try a nearby town.'], ['failed request (HTTP 500)', { mode: 'error' }, 900, "Search isn't available right now. You can still click the map."], ['no answer within 8 s', { mode: 'slow', delay: 10000 }, 8900, "Search isn't available right now. You can still click the map."]]) {
-  const { page, errors } = await open({ field: 'temp', particles: false }, '3/45/-30', { search });
-  await page.click('#q'); await page.keyboard.type('Qwxzt'); await page.waitForTimeout(wait);
-  const st = await popState(page);
-  await page.mouse.click(700, 420); await page.waitForTimeout(800);
-  const after = { ...(await qsel(page)), open: (await popState(page)).open };
-  check(`Search, ${name}: the list says "${want}"; the map still works`, st.open && st.msg === want && !st.items.length && st.expanded === 'false' && after.panel && after.sel?.type === 'place' && !after.open && !errors.length, JSON.stringify({ st, after, errors }));
-  await page.close();
-}
-// 23. Phone (375 px): the pill and the suggestions are 44 px+ targets; a tap flies to the place.
-if (part()) {
-  const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  await page.tap('#mq'); await page.keyboard.type('Tokyo'); await page.waitForTimeout(900);
-  const st = await popState(page, true);
-  const box = await page.evaluate(() => { const r = e => { const b = document.querySelector(e).getBoundingClientRect(); return { h: Math.round(b.height), w: Math.round(b.width), l: Math.round(b.left), r: Math.round(b.right) }; }; return { pill: r('.m-search'), pop: r('#mq-pop'), items: [...document.querySelectorAll('#mq-list li')].map(li => Math.round(li.getBoundingClientRect().height)), font: getComputedStyle(document.querySelector('#mq')).fontSize, sideways: document.documentElement.scrollWidth > innerWidth }; });
-  await page.tap('#mq-list li >> nth=0'); await page.waitForTimeout(300); await settle(page);
-  const t = { ...(await qsel(page)), blurred: await page.evaluate(() => document.activeElement !== document.querySelector('#mq')) };
-  check('Phone (375 px): the search pill and each suggestion are at least 44 px tall, the list fits the screen; a tap flies to the place, opens the place sheet and closes the keyboard',
-    st.open && st.items[0] === 'Tokyo Japan' && box.pill.h >= 44 && box.items.length && box.items.every(h => h >= 44) && box.pop.l >= 0 && box.pop.r <= 375 && box.font === '16px' && !box.sideways && nearLL([t.sel?.lon, t.sel?.lat], [139.6917, 35.6895], 1e-9) && t.panel && t.blurred, JSON.stringify({ st, box, t }));
-  check('No page errors (phone search)', !errors.length, errors.join(' | '));
-  await page.close();
-}
-// 24. Quick View: opens from the place panel, shows the summary, closes with ×, Esc and a click
-// outside, and leaves the place panel exactly as it was. Reports the bytes one open downloads.
-if (part()) {
-  const { page, errors, reqs } = await open({ field: 'wind', particles: false, tempUnit: 'C', timeFirst: 'local' }, '3/45/-30');
-  const bytes = [];
-  page.on('response', async r => { if (/\/data\/live\//.test(r.url())) { try { bytes.push([r.url().replace(/.*data\/live\//, '').replace(/\?.*/, ''), (await r.request().sizes()).responseBodySize]); } catch { /* ignore */ } } });
-  await page.mouse.click(700, 350);
-  await page.waitForFunction(() => document.querySelector('#detail [data-qview]') && 'panel' in window.owmTest.layerTimes() && window.owmTest.layerTimes().panel && window.owmTest.layerTimes().chart, null, { timeout: 20000 }).catch(() => {});
-  await page.waitForTimeout(500);
-  const html0 = await page.$eval('#detail', e => e.innerHTML), sel0 = await page.evaluate(() => JSON.stringify(window.owmTest.state.get('selection')));
-  const n0 = reqs.length; bytes.length = 0;
-  await page.click('#detail [data-qview]');
-  const focusIn = await page.evaluate(() => document.querySelector('#qview').contains(document.activeElement));
-  await page.waitForSelector('#qview [data-qv-takeaway]', { timeout: 30000 }).catch(() => {});
-  await page.waitForTimeout(300);
-  const qv = await page.evaluate(() => {
-    const q = document.querySelector('#qview'), a = q.getBoundingClientRect(), b = document.querySelector('#detail').getBoundingClientRect(), txt = s => q.querySelector(s)?.innerText.replace(/\s+/g, ' ').trim() || null;
-    return { live: window.owmTest.meta.live, takeaway: txt('[data-qv-takeaway]'), rain: txt('[data-qv-rain]'), rainIcon: q.querySelector('[data-qv-rain] svg')?.dataset.icon, temp: txt('[data-qv-temp]'),
-      strip: [...q.querySelectorAll('[data-qv-strip] li')].map(li => [li.querySelector('.qv-t').textContent, li.querySelector('svg')?.dataset.icon || null, li.querySelector('b').textContent]),
-      days: q.querySelectorAll('[data-qv-days] li').length, unitLine: txt('.qv-next .kick'), percent: q.innerText.includes('%'), note: /Model forecast on a ~50 km grid, not an official warning/.test(q.innerText) && /Updated \d\d:\d\d UTC/.test(q.innerText),
-      sample: q.querySelector('.sample-badge')?.textContent || null, beside: a.right <= b.left + 1 && a.width > 280, title: document.activeElement?.id };
-  });
-  const files = reqs.slice(n0), kb = (bytes.reduce((s, [, n]) => s + n, 0) / 1024).toFixed(1);
-  check('Quick view: opens beside the place panel with focus inside; takeaway, rain line with icon (no "%" anywhere), now temperature with forecast high / low, the next-12-hours strip (7 times with icon and temperature), the model note and update time; "Sample data" shown on sample data',
-    focusIn && qv.title === 'qv-title' && qv.takeaway?.length > 8 && /^(Rain|Dry|Forecast)/.test(qv.takeaway) && /^(Raining now|Rain from \d\d:\d\d|No rain expected in the next 12 hours)/.test(qv.rain || '') && qv.rainIcon && /^-?\d+°\s?C Forecast high -?\d+° Forecast low -?\d+° (rest of today|tomorrow)$/.test(qv.temp || '') && qv.strip.length === 7 && qv.strip[0][0] === 'Now' && qv.strip.every(([t, ic, v], i) => (i ? /^\d\d:\d\d$/.test(t) : true) && ic && /^-?\d+°$/.test(v)) && /local time · °C/i.test(qv.unitLine) && !qv.percent && qv.note && qv.beside && (qv.live || qv.sample === 'Sample data'),
-    JSON.stringify(qv));
-  check('Quick view: extra downloads for one open (information; 0 with sample data)', true, `${files.length} frame files: ${files.join(', ') || 'none'}; ${kb} KB (response bodies of data/live files)`);
-  const closed = async how => {
-    if (how !== 'first') { await page.click('#detail [data-qview]'); await page.waitForSelector('#qview [data-qv-takeaway]', { timeout: 30000 }).catch(() => {}); }
-    if (how === 'x' || how === 'first') await page.click('#qview [data-qv-close]');
-    else if (how === 'esc') await page.keyboard.press('Escape');
-    else await page.mouse.click(420, 640); // the map, outside Quick View and the panel
-    await page.waitForTimeout(400);
-    return page.evaluate(([h0, s0]) => ({ hidden: document.querySelector('#qview').hidden, focus: !!document.activeElement?.matches('#detail [data-qview]'), same: document.querySelector('#detail').innerHTML === h0, place: JSON.stringify(window.owmTest.state.get('selection')) === s0, panel: !document.querySelector('#detail').hidden }), [html0, sel0]);
-  };
-  const ways = { x: await closed('first'), esc: await closed('esc'), outside: await closed('outside') };
-  check('Quick view closes with ×, Esc and a click outside; the place panel stays open and unchanged (same HTML and place); × and Esc return focus to the button',
-    Object.values(ways).every(w => w.hidden && w.same && w.place && w.panel) && ways.x.focus && ways.esc.focus, JSON.stringify(ways));
-  // the wording rules on known inputs (site/js/quick-rules.js)
-  const rules = await page.evaluate(async () => {
-    const R = await import('./js/quick-rules.js'), t = ms => new Date(ms).toISOString().slice(11, 16);
-    const H = (rain, cloud) => rain.map((r, i) => ({ ms: Date.UTC(2026, 10, 7, 12 + i), rain: r, cloud }));
-    const run = (rain, cloud = 50) => { const s = R.summarise(H(rain, cloud), t); return [s.takeaway, s.rain.text, s.rain.amount]; };
-    return { q: R.QV, now: run([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), later: run([0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0]), clear: run(Array(13).fill(0), 10), cloudy: run(Array(13).fill(0.1), 85), some: run(Array(13).fill(0), 50) };
-  });
-  check('Quick view rules: rain >= 0.2 mm/h is rain, cloud >= 70 % cloudy, <= 30 % clear; "Rain now, easing by", "Rain expected from", "Dry and mostly clear", "Dry but cloudy"; amounts, never a percentage',
-    rules.q.RAIN_MM_H === 0.2 && rules.q.CLOUDY_PCT === 70 && rules.q.CLEAR_PCT === 30 && rules.now.join('|') === 'Rain now, easing by 14:00|Raining now|about 2 mm in the next 12 hours' && rules.later.join('|') === 'Rain expected from 14:00|Rain from 14:00|about 4 mm in the next 12 hours'
-    && rules.clear.join('|') === 'Dry and mostly clear for the next 12 hours|No rain expected in the next 12 hours|' && rules.cloudy[0] === 'Dry but cloudy for the next 12 hours' && rules.some[0] === 'Dry with some cloud for the next 12 hours' && !JSON.stringify(rules).includes('%'), JSON.stringify(rules));
-  // °F and UTC first follow Settings
-  await page.evaluate(() => window.owmTest.state.set({ tempUnit: 'F', timeFirst: 'utc' }));
-  await page.click('#detail [data-qview]'); await page.waitForSelector('#qview [data-qv-takeaway]', { timeout: 30000 }).catch(() => {});
-  const fu = await page.evaluate(() => ({ unit: document.querySelector('#qview .qv-next .kick').innerText.replace(/\s+/g, ' '), now: document.querySelector('#qview .qv-now').innerText.replace(/\s+/g, ''), panelTemp: document.querySelector('#detail .stat[data-field="temp"] .n').innerText.replace(/\s+/g, '') }));
-  await page.keyboard.press('Escape');
-  check('Quick view follows Settings: °F and UTC-first times', /UTC · °F/i.test(fu.unit) && /°F$/.test(fu.now) && /°F$/.test(fu.panelTemp), JSON.stringify(fu));
-  check('No page errors (Quick view)', !errors.length, errors.join(' | '));
-  await page.close();
-}
-// 25. Quick View is for places only (no button on an event panel), and is a full-height sheet on phones.
-if (part()) {
-  const { page, errors } = await open({ field: 'none', particles: false, events: { eq: false, fv: false, st: true, ga: false } }, '3/22/-66', { samples: { nhc: 'storm' } });
-  await evWait(page); await page.waitForTimeout(500);
-  await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'event', id: 'nhc:AT1' } })); await page.waitForTimeout(400);
-  const ev = await page.evaluate(() => ({ open: !document.querySelector('#detail').hidden, title: document.querySelector('#detail .d-title')?.textContent, btn: !!document.querySelector('#detail [data-qview]') }));
-  check('Quick view button is shown for places only (not on an event panel)', ev.open && /Testa/.test(ev.title || '') && !ev.btn && !errors.length, JSON.stringify(ev));
-  await page.close();
-}
-if (part()) {
-  const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: 375, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  await page.touchscreen.tap(200, 380); await page.waitForTimeout(1200);
-  await page.evaluate(() => window.owmTest.sheets.place.set('full')); await page.waitForTimeout(400);
-  await page.evaluate(() => document.querySelector('#detail [data-qview]').scrollIntoView({ block: 'nearest' }));
-  await page.tap('#detail [data-qview]'); await page.waitForSelector('#qview [data-qv-takeaway]', { timeout: 30000 }).catch(() => {});
-  const r = await page.evaluate(() => { const q = document.querySelector('#qview').getBoundingClientRect(), tabs = document.querySelector('.tabs').getBoundingClientRect(), x = document.querySelector('#qview [data-qv-close]').getBoundingClientRect(); return { top: Math.round(q.top), bottom: Math.round(q.bottom), tabsTop: Math.round(tabs.top), w: Math.round(q.width), close: [Math.round(x.width), Math.round(x.height)], strip: document.querySelectorAll('#qview [data-qv-strip] li').length, sideways: document.documentElement.scrollWidth > innerWidth }; });
-  await page.tap('#qview [data-qv-close]'); await page.waitForTimeout(300);
-  const after = await page.evaluate(() => ({ hidden: document.querySelector('#qview').hidden, panel: !document.querySelector('#detail').hidden }));
-  check('Phone (375 px): Quick view is a full-height sheet above the tab bar with a 44 px close button; closing returns to the place sheet', r.top <= 1 && Math.abs(r.bottom - r.tabsTop) <= 1 && r.w === 375 && r.close.every(v => v >= 44) && r.strip === 7 && !r.sideways && after.hidden && after.panel && !errors.length, JSON.stringify({ r, after, errors }));
   await page.close();
 }
 

@@ -3,7 +3,8 @@
 Open World Map runs without accounts, analytics, tracking cookies or ads. Your browser keeps
 map preferences in local storage, including units, basemap, and which layers are on. A saved
 choice can enable a layer when you return. Event results and photo metadata are cached in
-memory while the map is open.
+memory while the map is open. Place search runs in the browser on a place list from the site's
+own origin; search text is not sent or stored.
 
 Servers you contact receive your IP address and the request details, which can include your
 browser's user agent. The page uses `strict-origin-when-cross-origin`. An HTTPS third-party
@@ -15,10 +16,9 @@ Mapillary thumbnail image explicitly omits the referrer.
 
 | Service | When | Request details |
 |---|---|---|
-| GitHub Pages | Every visit to the published site. The map requests forecast files and other assets as needed. | Page URL and paths for scripts, worker modules, styles, fonts, map data and weather files. GitHub's logging applies. |
+| GitHub Pages | Every visit to the published site. The map requests forecast files and other assets as needed, and the place list on the first search-box focus or map click. | Page URL and paths for scripts, worker modules, styles, fonts, map data, the place list and weather files. GitHub's logging applies. |
 | jsDelivr | Every visit | MapLibre GL JS 5.24.0 JavaScript and CSS with pinned integrity hashes. The URLs are independent of the map view. |
 | OpenFreeMap | Every visit, including on Satellite | Preconnect at page load, followed by a TileJSON request, vector tiles and glyphs. Tile coordinates indicate the area and zoom on screen. Glyph requests include a font stack and character range. |
-| Photon by komoot | You type 3 or more characters in search and pause for 300 ms | The search text, a result limit of 6 and the language `en`. One request at a time (a newer one cancels the older), 8 s timeout. Answers are kept in memory for the visit; nothing is stored. |
 | NASA GIBS | Satellite at world and regional zoom (configured below 7) | Tile coordinates and the previous UTC date. |
 | EOX | Satellite from configured map zoom 4.5 | Tile coordinates for the 2016 Sentinel-2 mosaic. |
 | USGS Imagery Only | Satellite from configured map zoom 11 within the contiguous-US source bounds | Tile coordinates. |
@@ -57,10 +57,9 @@ set of event link hosts. Click-only destinations do not require resource allowli
 
 | host | contacted when | source file:line |
 |---|---|---|
-| `temper31.github.io` | Published site origin on every visit and for same-origin assets, data, the worker and the optional photo client module | `site/index.html:10`, `site/index.html:17`, `site/js/data.js:9`, `site/js/data.js:29`, `site/js/data-core.js:44`, `site/js/photos.js:18` |
+| `temper31.github.io` | Published site origin on every visit and for same-origin assets, data, the worker, the place list and the optional photo client module | `site/index.html:10`, `site/index.html:17`, `site/js/data.js:9`, `site/js/data.js:29`, `site/js/data-core.js:44`, `site/js/places.js:23`, `site/js/photos.js:18` |
 | `cdn.jsdelivr.net` | Every visit, MapLibre JS and CSS | `site/index.html:14`, `site/index.html:16` |
 | `tiles.openfreemap.org` | Every visit, preconnect, TileJSON and glyphs in all basemaps. The audit also identifies this as the vector tile host. | `site/index.html:11`, `site/js/config.js:17`, `site/js/config.js:18`, `site/js/basemaps.js:77` |
-| `photon.komoot.io` | Place search: 3 or more characters typed, after a 300 ms pause; also when the Photon credit under the suggestions is clicked | `site/js/search.js:10`, `site/js/search.js:62`, `site/index.html:42`, `site/index.html:88` |
 | `gibs.earthdata.nasa.gov` | Satellite below configured map zoom 7 | `site/js/config.js:32` |
 | `tiles.maps.eox.at` | Satellite from configured map zoom 4.5 | `site/js/config.js:42` |
 | `basemap.nationalmap.gov` | Satellite from configured map zoom 11, within contiguous-US bounds | `site/js/config.js:52` |
@@ -85,6 +84,7 @@ set of event link hosts. Click-only destinations do not require resource allowli
 | `atmosphere.copernicus.eu` | CAMS credit clicked | `site/js/config.js:81` |
 | `open-meteo.com` | Open-Meteo credit clicked | `site/js/config.js:81` |
 | `maplibre.org` | MapLibre credit clicked | `site/js/config.js:82` |
+| `www.geonames.org` | GeoNames credit clicked | `site/js/config.js:93` |
 | `www.nhc.noaa.gov` | NOAA NHC credit or storm source link clicked | `site/js/events.js:29`, `site/js/events.js:70` |
 | `www.mapillary.com` | Mapillary credit, thumbnail link or “Open on Mapillary” clicked | `site/js/photos.js:11`, `site/js/photos.js:89`, `site/js/photos.js:98` |
 | `creativecommons.org` | Mapillary CC BY-SA 4.0 link clicked | `site/js/photos.js:11` |

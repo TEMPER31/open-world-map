@@ -21,10 +21,10 @@
 <p class="kick">Privacy &amp; disclaimer</p>
 <h1>Watching places, not people</h1>
 <p class="pg-lead">Open World Map has no accounts and no ads. It runs no visitor-statistics or tracking scripts, sets no tracking or advertising cookies and does nothing to recognise your device. This page lists every outside service your browser contacts, and when.</p>
-<p>What you type in search is sent to Photon (komoot) to find places; it is not stored by this site.</p>
 
 <h2>What is stored on your device</h2>
 <p>The only thing the site stores is your map preferences, in your browser's local storage under the key <code>owm:prefs:v1</code>: units, basemap, the chosen field and overlays, playback settings and which optional layers are on. They never leave your device. A layer you left on is on again when you return, so its service is contacted again. Event results and photo details are kept in memory only while the map is open.</p>
+<p>Place search runs entirely in your browser. The list of places is downloaded from this site the first time you use the search box or click the map, and what you type is not sent anywhere and not stored. The map position in the address bar moves to the place you pick, as it does whenever the map moves.</p>
 
 <h2>What every service receives</h2>
 <p>Any server your browser contacts receives your IP address and the normal request details, including your browser's user agent. The site sets the referrer policy <code>strict-origin-when-cross-origin</code>, so other sites see at most this site's address, never the page you were on. The map position after the <code>#</code> in the address is never sent. Mapillary photo images are requested with no referrer at all.</p>
@@ -34,7 +34,7 @@
 <div class="tbl"><table data-hosts>
     <thead><tr><th scope="col">Service</th><th scope="col">When your browser contacts it</th><th scope="col">What it receives, besides the basics above</th></tr></thead>
     <tbody>
-      <tr data-host="temper31.github.io"><td><b>GitHub Pages</b><br><code>temper31.github.io</code></td><td>Every visit: the site itself, its scripts, fonts and map data, and the forecast files for the hours you view</td><td>The page and file addresses you load. GitHub's own logging applies.</td></tr>
+      <tr data-host="temper31.github.io"><td><b>GitHub Pages</b><br><code>temper31.github.io</code></td><td>Every visit: the site itself, its scripts, fonts and map data, and the forecast files for the hours you view. The place list the first time you search or click the map</td><td>The page and file addresses you load. GitHub's own logging applies.</td></tr>
       <tr data-host="cdn.jsdelivr.net"><td><b>jsDelivr</b><br><code>cdn.jsdelivr.net</code></td><td>Every visit: the MapLibre map library (JavaScript and CSS, pinned with integrity hashes)</td><td>Two fixed file addresses that do not depend on your view.</td></tr>
       <tr data-host="tiles.openfreemap.org"><td><b>OpenFreeMap</b><br><code>tiles.openfreemap.org</code></td><td>Every visit, with every basemap including Satellite: the basemap description, road and place-name tiles and label fonts</td><td>Tile coordinates, which show the area and zoom on your screen, and the font and character range of labels.</td></tr>
       <tr data-host="dynamic:openfreemap.tilejson.tiles"><td><b>OpenFreeMap vector tiles</b></td><td>Every visit: the tile address that OpenFreeMap's basemap description names (expected <code>tiles.openfreemap.org</code>; not yet confirmed against a live response)</td><td>Tile coordinates (area and zoom on your screen).</td></tr>
@@ -42,11 +42,10 @@
   </table></div>
 
 <h2>Contacted only while you use a layer</h2>
-<p>Nothing on this list is contacted until you turn on the layer that needs it, or type in search. Turning the layer off stops the requests.</p>
+<p>Nothing on this list is contacted until you turn on the layer that needs it. Turning the layer off stops the requests.</p>
 <div class="tbl"><table data-hosts>
     <thead><tr><th scope="col">Service</th><th scope="col">When your browser contacts it</th><th scope="col">What it receives, besides the basics above</th></tr></thead>
     <tbody>
-      <tr data-host="photon.komoot.io"><td><b>Photon by komoot (place search)</b><br><code>photon.komoot.io</code></td><td>You type 3 or more characters in search and pause</td><td>The text you type, plus normal request details. Nothing is stored by this site; results are kept in memory only while the map is open.</td></tr>
       <tr data-host="gibs.earthdata.nasa.gov"><td><b>NASA GIBS</b><br><code>gibs.earthdata.nasa.gov</code></td><td>Satellite basemap on, at world and regional zoom</td><td>Tile coordinates and the previous day's UTC date.</td></tr>
       <tr data-host="tiles.maps.eox.at"><td><b>EOX</b><br><code>tiles.maps.eox.at</code></td><td>Satellite basemap on, from regional zoom</td><td>Tile coordinates.</td></tr>
       <tr data-host="basemap.nationalmap.gov"><td><b>USGS Imagery Only</b><br><code>basemap.nationalmap.gov</code></td><td>Satellite basemap on, at city and street zoom in the contiguous US</td><td>Tile coordinates.</td></tr>
@@ -77,6 +76,7 @@
       <tr data-host="www.nco.ncep.noaa.gov"><td><b>NOAA/NCEP</b><br><code>www.nco.ncep.noaa.gov</code></td><td>You click the NOAA GFS credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="atmosphere.copernicus.eu"><td><b>Copernicus CAMS</b><br><code>atmosphere.copernicus.eu</code></td><td>You click the CAMS credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="open-meteo.com"><td><b>Open-Meteo</b><br><code>open-meteo.com</code></td><td>You click the Open-Meteo credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.geonames.org"><td><b>GeoNames</b><br><code>www.geonames.org</code></td><td>You click the GeoNames credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="maplibre.org"><td><b>MapLibre</b><br><code>maplibre.org</code></td><td>You click the MapLibre credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="www.nhc.noaa.gov"><td><b>NOAA National Hurricane Center</b><br><code>www.nhc.noaa.gov</code></td><td>You click the NHC credit or a storm's source link</td><td>The link address and normal request details</td></tr>
       <tr data-host="www.mapillary.com"><td><b>Mapillary</b><br><code>www.mapillary.com</code></td><td>You click the Mapillary credit, a photo or “Open on Mapillary”</td><td>The link address and normal request details</td></tr>
