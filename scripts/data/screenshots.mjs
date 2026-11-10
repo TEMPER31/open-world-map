@@ -88,6 +88,9 @@ for (const phone of [false, true]) {
 const only = process.env.VIEWS ? process.env.VIEWS.split(',') : null;
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+// NAIP tiles are decoded for their colour in a blank page: the site's CSP (connect-src) blocks
+// fetching data: URLs, which made every satellite close-up log two CSP errors per tile.
+const decoder = await browser.newPage();
 const report = [];
 for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))) {
   const page = await browser.newPage({ timezoneId: 'America/Chicago', ...(v.phone ? { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } : { viewport: { width: 1280, height: 800 } }) });
@@ -192,7 +195,7 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
   for (const [i, x] of (await Promise.all(naip)).entries()) {
     const bbox = new URL(x.url).searchParams.get('bbox')?.split(',').map(v => Math.round(+v)).join(',');
     if (!x.body) { tiles.push({ bbox, status: x.status, error: x.error }); continue; }
-    const st = await page.evaluate(async ([b64, mime]) => {
+    const st = await decoder.evaluate(async ([b64, mime]) => {
       try {
         const bmp = await createImageBitmap(await (await fetch(`data:${mime};base64,${b64}`)).blob(), { premultiplyAlpha: 'none' });
         const c = new OffscreenCanvas(bmp.width, bmp.height), g = c.getContext('2d'); g.drawImage(bmp, 0, 0);
