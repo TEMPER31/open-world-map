@@ -168,8 +168,14 @@ docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
 ## Deploying
 
 `.github/workflows/pages.yml` runs the checks and builds the data on every pull request,
-push and schedule (four times a day, after each GFS cycle). On `main` it also deploys `site/`
-with the data to GitHub Pages. On pull requests it also takes screenshots, runs the accuracy
+push and schedule (four times a day, after each GFS cycle). GitHub has not been firing that
+schedule for this repository, so `.github/workflows/refresh.yml` is a backup timer: once an
+hour it starts a data run if the site is behind the newest complete GFS run (one run per
+cycle, see `docs/data-pipeline.md`). It needs a 60-minute wait timer on the `refresh-timer`
+environment (**Settings → Environments → New environment** `refresh-timer` → **Wait timer**
+60, deployment branches: `main` only); without one it stops on its first round. Start it
+from **Actions → Data refresh timer → Run workflow**; a push to `main` also restarts it.
+On `main`, `pages.yml` also deploys `site/` with the data to GitHub Pages. On pull requests it also takes screenshots, runs the accuracy
 check and the rendering tests: all output (screenshots, probe images and text
 reports) goes to the run's **ci-screenshots** and **render-tests-*** artifacts.
 GitHub pauses scheduled workflows after 60 days without

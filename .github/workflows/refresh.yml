@@ -1,0 +1,64 @@
+name: Data refresh timer
+
+# Backup for the schedule in pages.yml, which GitHub has not been firing for this repository.
+# Each round waits an hour on the refresh-timer environment's wait timer (no runner is used
+# while it waits), starts "Data and deploy" when a newer GFS run should be ready
+# (scripts/data/refresh_due.py: at most one run per cycle, four a day), then starts the next
+# round. A push to main or "Run workflow" (re)starts it; the concurrency group keeps a single
+# round going. Needs a 60-minute wait timer on the refresh-timer environment (README).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-timer
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+
+jobs:
+  round:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: refresh-timer
+    permissions:
+      contents: read
+      actions: write      # start "Data and deploy" and the next round
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Without the wait timer each round would start the next one at once, so the chain stops
+      # here if this round did not wait.
+      - name: Check that this round waited
+        id: waited
+        run: |
+          created=$(gh run view "$GITHUB_RUN_ID" --json createdAt --jq .createdAt)
+          waited=$(( $(date -u +%s) - $(date -u -d "$created" +%s) ))
+          echo "This round started $((waited / 60)) min after it was queued."
+          if [ "$waited" -lt 3000 ]; then
+            echo "::error title=Refresh timer stopped::This round did not wait (started after $((waited / 60)) min). Give the refresh-timer environment a 60-minute wait timer (Settings, Environments), then start it again from Actions, Data refresh timer, Run workflow."
+            exit 1
+          fi
+      - name: Is a data run due?
+        id: due
+        run: |
+          gh run list --workflow pages.yml --branch main --limit 20 --json createdAt,status > "$RUNNER_TEMP/runs.json"
+          python3 scripts/data/refresh_due.py --manifest-url "$PAGES_URL/data/live/manifest.json" --runs "$RUNNER_TEMP/runs.json"
+      - name: Start "Data and deploy"
+        if: steps.due.outputs.due == 'true'
+        run: gh workflow run pages.yml --ref main
+      - name: Start the next round
+        if: always() && steps.waited.outcome == 'success'
+        run: |
+          for i in 1 2 3; do gh workflow run refresh.yml --ref main && exit 0; sleep 15; done
+          echo "::error title=Refresh timer stopped::Could not start the next round. Start it again from Actions, Data refresh timer, Run workflow."
+          exit 1

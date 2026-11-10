@@ -39,6 +39,32 @@ times of the cycle it used, as a run annotation and in `manifest.json` → `hist
 The job takes the newest cycle whose **f168** index exists, so an early or delayed run never
 picks a half-published cycle.
 
+### Backup timer (refresh.yml)
+
+From 7 to 10 November 2026 GitHub never fired the cron above for this repository (about 15
+slots in a row; push, pull request and manual runs all worked, and the workflow showed as
+active). `.github/workflows/refresh.yml` is a backup that does not depend on GitHub's
+scheduler:
+
+* Each round waits an hour on the `refresh-timer` environment's wait timer. No runner is used
+  while it waits. Then it starts the next round with `workflow_dispatch` (allowed for the
+  built-in `GITHUB_TOKEN`), so the chain keeps going. The concurrency group keeps one round
+  going; a push to `main` or **Run workflow** restarts it.
+* `scripts/data/refresh_due.py` starts "Data and deploy" only when the site's GFS run is older
+  than the newest cycle that should be complete (cycle + 4 h 45 m, after the latest f168 time
+  measured above), no data run is queued or running, and none started in the last 2 hours.
+  That is one run per cycle, four a day: the same downloads from NOAA and calls to Open-Meteo
+  as the cron, and four Pages deploys a day. If a run fails, it is retried every 2 hours at
+  most (no more than 12 a day).
+* Data reaches the site within about an hour of the cron's time (each round checks once an
+  hour), so about 5 to 6 hours after the cycle.
+* If the cron starts working again the two don't double up: a round finds the site already
+  has the newest run and does nothing.
+* If the environment has no wait timer, the first round sees that it did not wait, stops
+  with an error, and starts nothing, so it can never loop without pause.
+* The cost is one short run (about 10 seconds) per hour in the Actions list, plus one
+  deployment record per round on the `refresh-timer` environment.
+
 Which forecast hours exist was checked against the real `.idx` files (12Z 30 Oct 2026, AWS):
 the 0.25° files are **hourly to f120** (f118, f119, f120 exist; f121, f122 do not) and
 **3-hourly after** (f123, f126, f129 … f165, f168, f171 exist; f124, f125, f166 do not). All six
