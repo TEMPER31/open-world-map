@@ -1,10 +1,11 @@
-// Unit tests for display-unit conversions and distances (site/js/units.js), and place search,
-// the lat/lon parser and the nearest place (site/js/places.js, on site/data/places.json).
-// No dependencies.
+// Unit tests for display-unit conversions and distances (site/js/units.js), place search,
+// the lat/lon parser and the nearest place (site/js/places.js, on site/data/places.json), and
+// sunrise and sunset (site/js/sun.js). No dependencies.
 //   node scripts/data/unit-tests.mjs
 import { readFileSync } from 'node:fs';
 import { setUnits, conv, label, fmtDist, scaleBar, haversineKm, greatCircle, PRESETS, presetOf, defaultPreset } from '../../site/js/units.js';
 import { fold, indexOf, search, parseLatLon, nearest, nearText, placeLabel } from '../../site/js/places.js';
+import { sunTimes } from '../../site/js/sun.js';
 
 let fail = 0, n = 0;
 const near = (name, got, want, tol) => { n++; const ok = Math.abs(got - want) <= tol; if (!ok) fail++; console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}: ${got} (want ${want} ± ${tol})`); };
@@ -117,6 +118,34 @@ setUnits({ dist: 'km' });
 eq('nearest: nothing within 100 km (mid-Atlantic)', nearest(idx, -30, 0), null);
 near('nearest: distance is the great-circle distance', nearest(idx, -79.72, 40.0).km, haversineKm([-79.72, 40.0], [nearest(idx, -79.72, 40.0).place.lon, nearest(idx, -79.72, 40.0).place.lat]), 1e-9);
 eq('nearest: across the 180° meridian (Savusavu, Fiji, from both sides)', [179.99, -179.99].map(lon => nearest(idx, lon, -16.8)?.place.name).join(), 'Savusavu,Savusavu');
+
+// sunrise and sunset (NOAA solar formulas): times in UTC, minutes of tolerance
+const day = d => Date.parse(d + 'T00:00Z'), min = (a, b) => (a - Date.parse(b)) / 60e3;
+const kc = sunTimes(39.0997, -94.5786, day('2026-11-10'));
+near('Kansas City MO, 10 Nov 2026: sunrise 12:56 UTC (06:56 CST)', min(kc.rise, '2026-11-10T12:56Z'), 0, 2);
+near('Kansas City MO, 10 Nov 2026: sunset 23:08 UTC (17:08 CST)', min(kc.set, '2026-11-10T23:08Z'), 0, 2);
+const ldn = sunTimes(51.5074, -0.1278, day('2026-11-10'));
+near('London, 10 Nov 2026: sunrise 07:10 UTC', min(ldn.rise, '2026-11-10T07:10Z'), 0, 2);
+near('London, 10 Nov 2026: sunset 16:18 UTC', min(ldn.set, '2026-11-10T16:18Z'), 0, 2);
+// independent of any table: equinox day at the equator is 12 h plus ~7 min (sun's radius and
+// refraction at both ends); solar noon at 0° falls at 12:00 minus the equation of time (about -7.5 min on 20 Mar)
+const e0 = sunTimes(0, 0, day('2026-03-20'));
+near('Equator, March equinox: day length 12 h 7 min', (e0.set - e0.rise) / 60e3, 727, 2);
+near('Equator, March equinox: solar noon 12:07 UTC', min((e0.rise + e0.set) / 2, '2026-03-20T12:07:30Z'), 0, 1);
+const syd = sunTimes(-33.8688, 151.2093, day('2026-06-21'));
+near('Sydney, June solstice: shortest day 9 h 54 min', (syd.set - syd.rise) / 60e3, 594, 3);
+eq('Sydney: sunrise falls on its own morning (20 Jun 20:59 UTC = 21 Jun 06:59 AEST)', new Date(syd.rise).toISOString().slice(0, 13), '2026-06-20T20');
+// polar: Tromsø's polar night runs from about 27-28 Nov to 14-15 Jan; Longyearbyen's midnight
+// sun from about 19-20 Apr to 23 Aug
+eq('Tromsø 21 Dec: the sun does not rise', sunTimes(69.6492, 18.9553, day('2026-12-21')).polar, 'night');
+eq('Tromsø 27 Nov: last sunrise before the polar night', typeof sunTimes(69.6492, 18.9553, day('2026-11-27')).rise, 'number');
+eq('Tromsø 28 Nov: polar night', sunTimes(69.6492, 18.9553, day('2026-11-28')).polar, 'night');
+eq('Tromsø 15 Jan 2027: first sunrise', typeof sunTimes(69.6492, 18.9553, day('2027-01-15')).rise, 'number');
+eq('Longyearbyen 21 Jun: the sun does not set', sunTimes(78.2232, 15.6267, day('2026-06-21')).polar, 'day');
+eq('Longyearbyen 17 Apr: still sets', typeof sunTimes(78.2232, 15.6267, day('2026-04-17')).set, 'number');
+eq('Longyearbyen 18 Apr: rises but does not set (midnight sun begins)', JSON.stringify(Object.values(sunTimes(78.2232, 15.6267, day('2026-04-18'))).map(x => x == null ? null : 'time')), '["time",null]');
+eq('Longyearbyen 20 Apr: midnight sun', sunTimes(78.2232, 15.6267, day('2026-04-20')).polar, 'day');
+eq('Longyearbyen 25 Aug: sets again', typeof sunTimes(78.2232, 15.6267, day('2026-08-25')).set, 'number');
 
 console.log(`\n${n - fail} / ${n} passed`);
 process.exit(fail ? 1 : 0);

@@ -66,7 +66,10 @@ phones):
   (US by default for an en-US browser). Applies to the probe, place panel, chart, legends,
   scale bar and measure tool. Data stays metric; only what you read is converted.
 - **Place panel** with every value, both clocks and a close button (Esc). A clicked point is named
-  after the nearest town or city in the place list (within 100 km), with its distance. On phones it is a
+  after the nearest town or city in the place list (within 100 km), with its distance. Its
+  **Quick view** button swaps in a plain summary: now (temperature, sky, wind), the next 48 hours,
+  the next 7 days, and sunrise and sunset worked out in the browser (NOAA solar formulas). The
+  detailed view is what opens every time. On phones it is a
   bottom sheet (peek / half / full); the layers sheet opens to 40 % of the map.
 - **Layers rail**: only the selected field is expanded, with its legend and options.
 - **Distance tool** (ruler button): click points for great-circle legs and the total.
@@ -149,6 +152,8 @@ site/                 the deployed site (only this folder is published)
   js/timeline.js      timeline + mobile scrubber
   js/places.js        place list: search, lat/lon parser, nearest place
   js/search.js        search box and the place panel's name line
+  js/quick.js         the place panel's quick view
+  js/sun.js           sunrise and sunset (NOAA solar formulas)
   data/               field-scales.json, Natural Earth GeoJSON, places.json; data/live/ is built in CI
   fonts/              IBM Plex (OFL)
 docs/design/          the v3 design bundle (canonical mockup, README, scales)
