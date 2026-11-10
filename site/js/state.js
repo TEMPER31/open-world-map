@@ -1,8 +1,10 @@
 // One small shared state store. Components subscribe to the keys they care about.
 // Preferences persist in localStorage on this device only (no accounts, nothing sent).
+// Events, street photos and satellite contact other sites, so they are not remembered: they
+// start off on every visit and the basemap comes back as the last Dark or Light choice.
 
 const STORE_KEY = 'owm:prefs:v1';
-const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed', 'events', 'evWin', 'photos', 'overlays'];
+const PERSIST = ['field', 'basemap', 'particles', 'opacity', 'density', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst', 'speed', 'evWin', 'overlays'];
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // First visit: US units (°F, mph, mi) for an en-US browser, metric everywhere else.
 const us = /^en-US$/i.test(navigator.language || '');
@@ -34,6 +36,8 @@ try {
   const saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
   for (const k of PERSIST) if (k in saved) state[k] = saved[k];
 } catch { /* storage unavailable: defaults are fine */ }
+if (state.basemap === 'satellite') state.basemap = 'dark'; // saved before satellite stopped being kept
+let plainBase = state.basemap;
 
 const subs = new Set();
 
@@ -43,8 +47,9 @@ export function set(patch) {
   const changed = Object.keys(patch).filter(k => state[k] !== patch[k]);
   if (!changed.length) return;
   Object.assign(state, patch);
+  if (state.basemap !== 'satellite') plainBase = state.basemap;
   if (changed.some(k => PERSIST.includes(k))) {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify(Object.fromEntries(PERSIST.map(k => [k, state[k]])))); } catch { /* ignore */ }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(Object.fromEntries(PERSIST.map(k => [k, k === 'basemap' ? plainBase : state[k]])))); } catch { /* ignore */ }
   }
   for (const s of subs) if (s.keys.some(k => changed.includes(k))) s.fn(state);
 }

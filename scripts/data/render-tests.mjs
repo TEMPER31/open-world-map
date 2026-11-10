@@ -55,6 +55,8 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
   page.on('pageerror', e => errors.push(e.message));
   // requests to each third-party events / photos host (privacy: a layer that is off sends none)
   const hosts = {};
+  const allHosts = new Set(); // every host the page asks for, from the first request
+  page.on('request', r => allHosts.add(new URL(r.url()).host));
   page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
   if (samples) await eventSamples(page, samples);
   if (photos) await routePhotos(fbcdn(page), photos);
@@ -68,8 +70,14 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
   await page.addInitScript(p => { if (!sessionStorage.getItem('seeded')) { localStorage.setItem('owm:prefs:v1', JSON.stringify(p)); sessionStorage.setItem('seeded', '1'); } }, { basemap: 'dark', opacity: 1, density: 1, tempUnit: 'C', speedUnit: 'kmh', distUnit: 'km', ...prefs });
   await page.goto(`${site}#map=${hash}`);
   await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
+  // events, street photos and satellite start off on every visit: turn them on as a click would
+  const live = { ...prefs.events && { events: { eq: false, fv: false, st: false, ga: false, ...prefs.events } }, ...prefs.photos && { photos: true }, ...prefs.basemap === 'satellite' && { basemap: 'satellite' } };
+  if (Object.keys(live).length) {
+    await page.evaluate(p => window.owmTest.state.set(p), live);
+    await page.waitForFunction(() => window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => {});
+  }
   await page.waitForTimeout(1500);
-  return { page, errors, reqs, hosts };
+  return { page, errors, reqs, hosts, allHosts };
 }
 
 // 1. Wind direction: uniform synthetic fields; particles must move with the wind (towards).
@@ -728,9 +736,14 @@ if (part()) {
   for (const h in hosts) delete hosts[h];
   check('Events off cost nothing: no event sources, layers or icons on the map; added when a type is turned on, removed when the last is turned off', offStyle.sources + offStyle.layers + offStyle.images === 0 && onStyle.layers === 7 && onStyle.sources === 4 && offAgain.sources + offAgain.layers + offAgain.images === 0, JSON.stringify({ offStyle, onStyle, offAgain }));
   check('Each event toggle contacts only its own source, and 0 requests after it is turned off', Object.values(perType).every(x => x.onlyOwn && x.afterOff === 0), JSON.stringify(perType));
-  await page.click('.layers [data-ev="eq"]'); await page.click('.layers [data-evwin="24h"]');
+  await page.click('.layers [data-ev="eq"]'); await page.click('.layers [data-evwin="24h"]'); await evWait(page);
+  await page.evaluate(() => window.owmTest.state.set({ photos: true, basemap: 'light' }));
+  await page.evaluate(() => window.owmTest.state.set({ basemap: 'satellite' })); await page.waitForTimeout(500);
   await page.reload(); await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
-  check('Event toggles and the 24 h / 7 d choice are remembered across reloads', await page.evaluate(() => { const s = window.owmTest.state.get(); return s.events.eq && !s.events.st && s.evWin === '24h'; }));
+  for (const h in hosts) delete hosts[h];
+  await page.waitForTimeout(2000);
+  const back = await page.evaluate(() => { const s = window.owmTest.state.get(); return { events: Object.values(s.events).some(Boolean), photos: s.photos, basemap: s.basemap, evWin: s.evWin, field: s.field, units: s.tempUnit }; });
+  check('A new visit starts with events, street photos and satellite off (0 requests to their hosts); the 24 h / 7 d choice, field, units and the last Dark or Light basemap are remembered', !back.events && !back.photos && back.basemap === 'light' && back.evWin === '24h' && back.field === 'temp' && back.units === 'C' && Object.keys(hosts).length === 0, JSON.stringify({ ...back, hosts: Object.keys(hosts) }));
   check('No page errors (events privacy)', !errors.length, errors.join(' | '));
   await page.close();
 }
@@ -1130,9 +1143,10 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
   if (!PART || PART === 1) {
     const seen = new Set();
     for (const hash of ['5/38/-95', '15/31.7001/-86.7404']) {
-      const { page, errors } = await open({ field: 'none', particles: false, basemap: 'satellite' }, hash);
-      page.on('request', r => seen.add(new URL(r.url()).host));
+      // satellite is turned on inside open(), so its first tiles are requested before open() returns
+      const { page, errors, allHosts } = await open({ field: 'none', particles: false, basemap: 'satellite' }, hash);
       await page.evaluate(() => new Promise(r => { window.owmMap.once('idle', r); setTimeout(r, 4000); }));
+      for (const h of allHosts) seen.add(h);
       if (errors.length) csp.push(`satellite ${hash}: page errors ${errors.join(' | ')}`);
       await page.close();
     }

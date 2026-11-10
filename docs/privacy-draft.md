@@ -1,8 +1,9 @@
 # Privacy draft
 
 Open World Map runs without accounts, analytics, tracking cookies or ads. Your browser keeps
-map preferences in local storage, including units, basemap, and which layers are on. A saved
-choice can enable a layer when you return. Event results and photo metadata are cached in
+map preferences in local storage, including units, the Dark or Light basemap, the chosen field
+and overlays. Events, street photos and satellite are not saved: they start off on every visit,
+so none of their services is contacted until you turn them on. Event results and photo metadata are cached in
 memory while the map is open. Place search runs in the browser on a place list from the site's
 own origin; search text is not sent or stored.
 
