@@ -9,7 +9,7 @@ no paywall.
 **Watching places, not people.** The map is static and uses no analytics or tracking cookies.
 Fonts are self-hosted, and preferences stay in your browser's local storage. The map uses
 jsDelivr and OpenFreeMap on every visit. Satellite, events and street photos use additional
-services while enabled. See the [privacy draft](docs/privacy-draft.md) for the request list.
+services while enabled; they start off on every visit and are not remembered. See the [privacy draft](docs/privacy-draft.md) for the request list.
 
 > **Status: Phase 6 (launch preparation)**. Weather comes from the latest NOAA GFS 0.25° run
 > (hourly to 5 days, then every 3 hours to 7 days) and air quality from CAMS via Open-Meteo, rebuilt four times a day by GitHub

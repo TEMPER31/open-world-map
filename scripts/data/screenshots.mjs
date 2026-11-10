@@ -111,6 +111,12 @@ for (const v of VIEWS.filter(v => !only || only.some(o => v.name.startsWith(o)))
     { events: v.events || {}, photos: !!v.photos, overlays: v.overlays || [], field: v.field, basemap: v.basemap || 'dark', particles: !!v.particles, opacity: 1, density: 1, tempUnit: v.units === 'us' ? 'F' : v.tempUnit || 'C', speedUnit: v.units === 'us' ? 'mph' : 'kmh', distUnit: v.units === 'us' ? 'mi' : 'km' });
   await page.goto(`${site}#map=${v.hash}`);
   await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
+  // events, street photos and satellite start off on every visit: turn them on as a click would
+  const live = { ...v.events && { events: { eq: false, fv: false, st: false, ga: false, ...v.events } }, ...v.photos && { photos: true }, ...v.basemap === 'satellite' && { basemap: 'satellite' } };
+  if (Object.keys(live).length) {
+    await page.evaluate(p => window.owmTest.state.set(p), live);
+    await page.waitForFunction(() => window.owmMap?.getLayer('field') && window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => errors.push('map not idle after 60 s'));
+  }
   if (v.t != null) { // jump to a forecast time (snapped to a frame)
     await page.evaluate(t => { const T = window.owmTest; T.state.set({ t: t === 'end' ? T.meta.hours : T.stepTime(t, 0) }); }, v.t);
     await page.waitForTimeout(1500);
