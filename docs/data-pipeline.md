@@ -3,7 +3,8 @@
 `scripts/data/build_data.py` builds everything the map shows. It runs in GitHub Actions
 (`.github/workflows/pages.yml`) and its output is **deploy output only**. It goes into
 `site/data/live/` in the Pages artifact and is never committed. The only data in the
-repository is the few daily summaries in `data/archive/` (see Daily archive).
+repository is the few daily summaries in `data/archive/`; the forecast history is built on
+the site instead (see Forecast history).
 
 Dependencies: the Python standard library plus **one** external tool, the
 [wgrib2](https://github.com/NOAA-EMC/wgrib2) GRIB2 decoder. `scripts/data/build_wgrib2.sh`
@@ -348,11 +349,42 @@ Tokyo Bay, where neighbouring GFS points range from 9 °C (inland) to 21 °C (ov
 Comparing against a second model shows the models differ, not which is right. A comparison
 with station observations is a later improvement.
 
-## Daily archive
+## Forecast history
 
-Stopped. The workflow used to commit `data/archive/YYYY-MM-DD.json` after each 18Z cycle:
-that day's four cycle summaries (run, source, sizes, timings, Open-Meteo calls, publish times,
-spot check). The job was removed so the workflow never writes to the repository and every
-change to `main` comes through a pull request. The files already there (29 October to
-4 November 2026) stay. Each run's summary is still in its Actions log and step notices, which
-GitHub keeps for 90 days by default. `scripts/data/archive_day.py` is no longer run.
+`scripts/data/archive_day.py` keeps a history of past runs on the deployed site, at
+`data/archive/`, for a future accuracy page. It is never committed and the workflow never
+writes to the repository.
+
+**How it is kept.** After the data build, the script reads the history the deployed site
+already has (`$PAGES_URL/data/archive/`) and a copy kept in the Actions cache, adds this run,
+and writes the result into `site/data/archive/`, which deploys with everything else. It only
+downloads the months the cache lacks. On `main` the new copy is saved back to the cache.
+Pull requests read both but save nothing.
+
+**Safety.** The deploy replaces the whole site, so a run must never publish less history than
+the site has. If the published history can't be read and there is no cached copy, the job
+stops before deploying (the site keeps its current forecast until the next run). If the site
+lost its history (404) the cached copy brings it back. A final check refuses to write any
+month with fewer entries than either copy held.
+
+**Files** (one pair per month, by the run's date, plus `index.json`):
+
+| File | Contents |
+|---|---|
+| `index.json` | months and entry counts, the cities, hours and units, source and licence |
+| `runs-YYYY-MM.json` | one summary per GFS cycle: run, source, sizes, timings, Open-Meteo calls, publish times, spot check |
+| `points-YYYY-MM.json` | each cycle's forecast at the five check cities (`CITY_POINTS`: Kansas City MO, Miami, Denver, London, Delhi), every 6 h from f000 to f168: temperature, wind speed and direction, sea-level pressure, rain |
+
+Point values are the raw GFS 0.25° numbers the build already records for the accuracy check
+(bilinear from the four surrounding grid points), so they don't depend on the site's coarser
+grids. Every forecast hour is a multiple of 6, so each one lines up with a later run's f000,
+the model's own analysis for that time: the files hold both the forecast and the outcome it
+can be compared with. Station observations would be a separate, later source.
+
+**Seed.** `data/archive/` in the repository has the daily run summaries from 29 October to
+4 November 2026, written by the earlier archive job. They are read into the run summaries
+on every build and are not added to any more.
+
+**Size.** Measured with a simulated month (120 cycles): `points` 477 KB (166 KB gzipped, as
+Pages serves it), `runs` about 100 KB. About 7 MB a year, under 1 % of the 1 GB Pages limit
+per year.

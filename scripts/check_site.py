@@ -155,6 +155,8 @@ def check_no_live_data(errors):
         rel = p.relative_to(ROOT).as_posix()
         if rel.startswith("site/data/live/"):
             errors.append(f"{rel}: hourly data must not be committed (deploy output only)")
+        elif rel.startswith("site/data/archive/"):
+            errors.append(f"{rel}: forecast history is carried forward on the site, never committed")
         elif rel.startswith("docs/screenshots/"):
             errors.append(f"{rel}: CI output belongs in the workflow artifact, not the repository")
 

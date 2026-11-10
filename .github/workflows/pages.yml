@@ -40,6 +40,8 @@ jobs:
         run: node scripts/data/unit-tests.mjs
       - name: Unit tests (GFS download fallback)
         run: python3 -m unittest scripts/data/test_build_data.py -v
+      - name: Unit tests (forecast history)
+        run: python3 -m unittest scripts/data/test_archive_day.py -v
       - name: Sources probe (events and street-photo hosts, CORS headers, terms text)
         if: github.event_name == 'pull_request'
         continue-on-error: true
@@ -82,6 +84,26 @@ jobs:
         run: |
           python3 scripts/data/build_data.py --out site/data/live --previous "$PAGES_URL/data/live" \
             --aq-cache .aq-cache --report run-report.json
+      # Forecast history (data/archive/ on the site) for a future accuracy page. Carried forward
+      # from the deployed site, with a copy in the Actions cache, and never committed. If the
+      # published history can't be read and there is no cached copy, the job stops before the
+      # deploy rather than publish less (scripts/data/archive_day.py).
+      - name: Restore forecast history cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .history-cache
+          key: history-v1-${{ github.run_id }}
+          restore-keys: history-v1-
+      - name: Forecast history (carried forward from the site, never committed)
+        run: |
+          python3 scripts/data/archive_day.py --manifest site/data/live/manifest.json --report run-report.json \
+            --out site/data/archive --previous "$PAGES_URL/data/archive" --cache .history-cache --seed data/archive
+      - name: Save forecast history cache
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .history-cache
+          key: history-v1-${{ github.run_id }}
       # Street photos: the page reads its public Mapillary client token from js/secrets.js. The
       # build writes it empty (layer shows "unavailable"); only the deploy job (main) fills it in
       # from the MAPILLARY_CLIENT_TOKEN secret. Never committed (.gitignore; check_site.py scans).
