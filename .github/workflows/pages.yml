@@ -36,6 +36,8 @@ jobs:
         run: |
           for f in site/js/*.js scripts/data/*.mjs; do cp "$f" "$RUNNER_TEMP/check.mjs" && node --check "$RUNNER_TEMP/check.mjs" || exit 1; done
           python3 -m py_compile scripts/*.py scripts/data/*.py
+      - name: Unit tests (refresh timer)
+        run: python3 -m unittest scripts/data/test_refresh_due.py -v
       - name: Unit tests (display-unit conversions, great-circle distance)
         run: node scripts/data/unit-tests.mjs
       - name: Unit tests (GFS download fallback)
