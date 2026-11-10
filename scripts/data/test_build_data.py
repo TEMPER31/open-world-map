@@ -1,6 +1,7 @@
 """Offline tests for GFS source selection and per-hour fallback."""
 
 import datetime as dt
+import math
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -118,6 +119,25 @@ class BuildGfsTests(unittest.TestCase):
             self.build()
         self.assertEqual(self.find_cycle.call_args_list, [call("nomads"), call("aws")])
         self.assertNotIn("gfs_hour_sources", self.report)
+
+
+class CityPointTests(unittest.TestCase):
+    def test_city_names_are_unique(self):
+        names = [n for n, _, _ in build_data.CITY_POINTS]
+        self.assertEqual(len(names), len(set(names)))
+
+    def test_grid_city_bilinear_and_wind_speed_per_node(self):
+        """Wind speed is worked out at each of the four nodes, then interpolated, as the page does."""
+        nx, ny, wnx, wny = build_data.NX, build_data.NY, build_data.WNX, build_data.WNY
+        fld = {k: [float(i % 97) for i in range(nx * ny)] for k in ("temp", "pres", "cloud", "rain")}
+        fld["u"] = [float((i * 7) % 23 - 11) for i in range(wnx * wny)]
+        fld["v"] = [float((i * 5) % 19 - 9) for i in range(wnx * wny)]
+        name, lat, lon = build_data.CITY_POINTS[0]
+        x, y = (lon + 180) / build_data.WDEG, (90 - lat) / build_data.WDEG
+        i0, j0, fx, fy = int(x), int(y), x - int(x), y - int(y)
+        sp = lambda i, j: math.hypot(fld["u"][j * wnx + i], fld["v"][j * wnx + i]) * 3.6
+        want = (sp(i0, j0) * (1 - fx) + sp(i0 + 1, j0) * fx) * (1 - fy) + (sp(i0, j0 + 1) * (1 - fx) + sp(i0 + 1, j0 + 1) * fx) * fy
+        self.assertAlmostEqual(build_data.grid_city(fld, name)["wind_kmh"], round(want, 2), places=6)
 
 
 if __name__ == "__main__":

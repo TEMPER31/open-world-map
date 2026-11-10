@@ -399,7 +399,7 @@ month with fewer entries than either copy held.
 |---|---|
 | `index.json` | months and entry counts, the cities, hours and units, source and licence |
 | `runs-YYYY-MM.json` | one summary per GFS cycle: run, source, sizes, timings, Open-Meteo calls, publish times, spot check |
-| `points-YYYY-MM.json` | each cycle's forecast at the five check cities (`CITY_POINTS`: Kansas City MO, Miami, Denver, London, Delhi), every 6 h from f000 to f168: temperature, wind speed and direction, sea-level pressure, rain |
+| `points-YYYY-MM.json` | each cycle's forecast at the 20 check cities (`CITY_POINTS`: Kansas City MO, Miami, Denver, London, Delhi, New York, Los Angeles, Anchorage, Mexico City, São Paulo, Reykjavík, Madrid, Cairo, Lagos, Nairobi, Moscow, Beijing, Tokyo, Singapore, Sydney; the last 15 from 11 November 2026), every 6 h from f000 to f168: temperature, wind speed and direction, sea-level pressure, rain |
 
 Point values are the raw GFS 0.25° numbers the build already records for the accuracy check
 (bilinear from the four surrounding grid points), so they don't depend on the site's coarser
@@ -411,6 +411,9 @@ can be compared with. Station observations would be a separate, later source.
 4 November 2026, written by the earlier archive job. They are read into the run summaries
 on every build and are not added to any more.
 
-**Size.** Measured with a simulated month (120 cycles): `points` 477 KB (166 KB gzipped, as
-Pages serves it), `runs` about 100 KB. About 7 MB a year, under 1 % of the 1 GB Pages limit
-per year.
+**Size.** Measured with a simulated month (120 cycles, 20 cities): `points` 1.9 MB (656 KB
+gzipped, as Pages serves it), `runs` about 100 KB. About 23 MB a year: the site's own files are
+about 100 MB, and Pages allows 1 GB, so years of history fit. Older months could be thinned to
+daily runs later if needed. The build samples the cities' wind speed at the four grid nodes it
+needs only (it used to recompute the whole wind grid per city and hour, about 30 s per run with
+20 cities).

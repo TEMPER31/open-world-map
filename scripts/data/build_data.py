@@ -273,10 +273,17 @@ def fetch_aws(run, f):
 # Grid-alignment test nodes: on the 0.5 deg grid, with strong gradients nearby, so a shifted
 # or flipped grid would show up as large errors. Raw GFS values here go into the run report.
 ALIGN_POINTS = [("Tokyo Bay", 35.5, 139.5), ("Chile coast", -33.5, -71.5), ("Kansas City", 39.0, -95.0)]
-# Accuracy-check cities: raw GFS 0.25 deg values, bilinear from the four surrounding native
-# grid points, are recorded every hour so the page can be compared with NOAA's own numbers.
+# Check cities: raw GFS 0.25 deg values, bilinear from the four surrounding native grid points,
+# are recorded every hour in the run report and kept in the forecast history (archive_day.py).
+# The first five are also the CI accuracy check's cities (accuracy.mjs has its own list). Names
+# are the history's keys: rename only with a migration.
 CITY_POINTS = [("Kansas City MO", 39.10, -94.58), ("Miami", 25.76, -80.19), ("Denver", 39.74, -104.99),
-               ("London", 51.51, -0.13), ("Delhi", 28.61, 77.21)]
+               ("London", 51.51, -0.13), ("Delhi", 28.61, 77.21),
+               ("New York", 40.71, -74.01), ("Los Angeles", 34.05, -118.24), ("Anchorage", 61.22, -149.90),
+               ("Mexico City", 19.43, -99.13), ("São Paulo", -23.55, -46.63), ("Reykjavík", 64.15, -21.94),
+               ("Madrid", 40.42, -3.70), ("Cairo", 30.04, 31.24), ("Lagos", 6.52, 3.38), ("Nairobi", -1.29, 36.82),
+               ("Moscow", 55.76, 37.62), ("Beijing", 39.90, 116.41), ("Tokyo", 35.68, 139.69),
+               ("Singapore", 1.35, 103.82), ("Sydney", -33.87, 151.21)]
 
 
 def city_corners():
@@ -580,16 +587,16 @@ def grid_city(fld, name):
     difference into grid resolution (this vs raw 0.25 deg) and encoding (page vs this)."""
     _, lat, lon = next(c for c in CITY_POINTS if c[0] == name)
 
-    def s(a, nx, deg):
+    def s(at, nx, deg):  # at(k) is the value at flat grid index k
         x, y = (lon + 180) / deg, (90 - lat) / deg
         i0, j0 = int(x), int(y)
         fx, fy = x - i0, y - j0
-        g = lambda i, j: a[j * nx + i % nx]
+        g = lambda i, j: at(j * nx + i % nx)
         return (g(i0, j0) * (1 - fx) + g(i0 + 1, j0) * fx) * (1 - fy) + (g(i0, j0 + 1) * (1 - fx) + g(i0 + 1, j0 + 1) * fx) * fy
-    speed = [math.hypot(a, b) * 3.6 for a, b in zip(fld["u"], fld["v"])]
-    return {"temp": round(s(fld["temp"], NX, DEG), 3), "pres": round(s(fld["pres"], NX, DEG), 3),
-            "cloud": round(s(fld["cloud"], NX, DEG), 2), "rain": round(s(fld["rain"], NX, DEG), 4),
-            "wind_kmh": round(s(speed, WNX, WDEG), 2)}
+    v = lambda key: s(fld[key].__getitem__, NX, DEG)
+    speed = lambda k: math.hypot(fld["u"][k], fld["v"][k]) * 3.6   # only at the four nodes used
+    return {"temp": round(v("temp"), 3), "pres": round(v("pres"), 3), "cloud": round(v("cloud"), 2),
+            "rain": round(v("rain"), 4), "wind_kmh": round(s(speed, WNX, WDEG), 2)}
 
 
 SPOT_CITIES = [("London", 51.51, -0.13), ("New York", 40.71, -74.01), ("Tokyo", 35.68, 139.69)]
