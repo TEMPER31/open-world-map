@@ -2,7 +2,9 @@
 
 These settings are for the owner to review on GitHub and in the Mapillary developer
 dashboard. The audit's observations are from 5 November 2026. Check current settings in
-the relevant dashboard.
+the relevant dashboard. Checked from the repository on 10 November 2026: K4 holds (Pages deploys
+from Actions succeed), T1 is set (the timer's rounds wait), and `main` has no branch protection
+yet (I8 not done). K1, K2, K3 and D5 can only be checked in the account and dashboards.
 
 | Audit | Setting and path | How to verify |
 |---|---|---|
@@ -11,6 +13,7 @@ the relevant dashboard.
 | K3 | Repository Settings → Pages → Enforce HTTPS. Enable it. | Confirm the checkbox is enabled and that an HTTP visit to the published map redirects to HTTPS. |
 | K4 | Repository Settings → Pages → Build and deployment → Source → GitHub Actions. | Confirm GitHub Actions is selected. In Actions, check a successful Pages deploy from `main` and verify the published site opens. |
 | I8 | Repository Settings → Rules → Rulesets. Create and activate the branch ruleset below. | Confirm the active ruleset targets `main` and requires the two intended workflow checks. |
+| T1 | Repository Settings → Environments → `refresh-timer`. Wait timer **60** minutes; deployment branches: `main` only. The backup timer (`.github/workflows/refresh.yml`) needs it. | Actions → Data refresh timer: the newest run shows **Waiting** for about an hour, then runs and starts the next round. Without the wait timer each round stops itself with an error. |
 | D5 | Mapillary developer dashboard → project app → client token settings. Check whether an allowed website or origin restriction is available. | If supported, restrict the token to `https://temper31.github.io`. In the published map, enable Street photos and confirm a known dot opens a photo. Use a controlled origin outside the allowlist to verify that requests are rejected. If the dashboard lacks this restriction, record the result for Q5. |
 
 ## Ruleset Protect main
