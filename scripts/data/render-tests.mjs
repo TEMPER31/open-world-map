@@ -599,11 +599,11 @@ if (part()) {
   const liveOk = ['wind', 'temp', 'rain', 'cloud', 'pres', 'aq'].every(k => freshOk(live[k].text)) && live.temp.text === 'NOAA GFS · run 18Z 5 Nov · Updated 22:47 UTC · 0.5° grid' && live.wind.text.endsWith('· 0.75° grid')
     && /0\.5° grid, area average$/.test(live.cloud.text) && /^CAMS via Open-Meteo · Updated 10:52 UTC 5 Nov · 4° grid · forecast ends Mon 9 Nov · 00:00 UTC$/.test(live.aq.text) && /^Clouds overlay: NOAA GFS/.test(live.overlay.text)
     && /NOMADS: 3, from the AWS mirror: 1/.test(live.hosts.title) && !/NOMADS/.test(live.temp.title) && /unavailable/.test(live.noAq.text) && /Updated 22:47 UTC: 0\.5° grid \(wind 0\.75° grid\) · air quality CAMS via Open-Meteo, Updated 10:52 UTC 5 Nov, 4° grid/.test(live.place);
-  // satellite at regional zoom over the US: GIBS (daily date) and EOX (2016 mosaic), each with its tile levels
+  // satellite at regional zoom over the US: GIBS (daily date) and EOX (2025 mosaic), each with its tile levels
   await page.evaluate(() => window.owmTest.state.set({ basemap: 'satellite' })); await page.waitForTimeout(800);
   const sat = await page.evaluate(() => [...document.querySelectorAll('.layers [data-satfresh]')].map(e => e.textContent)[0] || '');
   const yday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-  const satOk = sat.includes(`NASA GIBS VIIRS true colour · ${yday} (daily`) && /EOX Sentinel-2 cloudless · 2016 mosaic/.test(sat) && (sat.match(/tiles to zoom \d+/g) || []).length === 2;
+  const satOk = sat.includes(`NASA GIBS VIIRS true colour · ${yday} (daily`) && /EOX Sentinel-2 cloudless · 2025 mosaic/.test(sat) && (sat.match(/tiles to zoom \d+/g) || []).length === 2;
   await page.evaluate(() => window.owmTest.state.set({ basemap: 'dark' })); await page.waitForTimeout(300);
   const satOff = await page.evaluate(() => document.querySelector('.layers [data-satfresh]').textContent);
   check('Freshness: each visible weather layer (field, overlays, particles) shows source, update time (or "generated, no update time") and grid; live wording with a synthetic manifest; satellite dates and tile levels',

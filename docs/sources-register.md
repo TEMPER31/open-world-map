@@ -18,7 +18,7 @@ a source.
 | GeoNames cities5000 and admin1 region names | Same-origin JSON `site/data/places.json`, built once by `scripts/build_places.py` from the `download.geonames.org` files | CC BY 4.0 | Places: GeoNames (CC BY 4.0) | The place list loads from the site origin the first time the search box is focused or the map is clicked. Search and the nearest-place lookup run in the browser. |
 | IBM Plex Sans Condensed and IBM Plex Mono | Same-origin fonts in `site/fonts/` | SIL OFL 1.1. Licence files ship beside the fonts. | — | UI fonts on every visit. |
 | NASA GIBS VIIRS true colour | `gibs.earthdata.nasa.gov` | NASA imagery has no restrictions on use. GIBS requests acknowledgement. | Imagery: NASA GIBS / ESDIS (VIIRS SNPP) | Satellite at world and regional zoom, below configured map zoom 7. |
-| EOX Sentinel-2 cloudless 2016 | `tiles.maps.eox.at` | CC BY 4.0 for the 2016 mosaic | Sentinel-2 cloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 & 2017) | Satellite from configured map zoom 4.5 worldwide. |
+| EOX Sentinel-2 cloudless 2025 | `tiles.maps.eox.at` | CC BY-NC-SA 4.0 for the 2025 mosaic: non-commercial use only; anything made from the imagery is shared under the same licence | EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025), CC BY-NC-SA 4.0 | Satellite from configured map zoom 4.5 worldwide. |
 | USGS The National Map Imagery Only | `basemap.nationalmap.gov` | U.S. Government work, public domain | Imagery: USGS The National Map (USDA NAIP) | Satellite from map zoom 11 within the contiguous-US source bounds. |
 | USGS The National Map NAIP Plus | `imagery.nationalmap.gov` | U.S. Government work, public domain. Service credit is “USGS, USDA, The National Map: Orthoimagery.” | Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery) | Satellite from map zoom 15 within the same bounds. One image export per 512 px tile. |
 
@@ -26,7 +26,11 @@ The three OpenFreeMap credit fragments appear together as “OpenFreeMap · © O
 Data © OpenStreetMap contributors”. The style requests Noto Sans glyphs through OpenFreeMap.
 The licence of the served glyph bundle was not independently verified.
 
-The owner has selected the EOX 2016 mosaic. Newer EOX mosaics use CC BY-NC-SA 4.0.
+The owner switched from the EOX 2016 mosaic (CC BY 4.0) to the 2025 mosaic on 10 November 2026.
+The 2025 mosaic is CC BY-NC-SA 4.0 (licence and credit text from EOX's WMTS capabilities, checked
+the same day). The site is non-commercial, so the licence fits. Its ShareAlike term covers anything
+made from the imagery, such as screenshots of the satellite view; the site's code stays MIT. EOX
+serves tiles above zoom 14, but they are upscaled, so the map overzooms its zoom 14 tiles instead.
 The USGS source bounds are `[-124.85, 24.4, -66.88, 49.39]` and can include slivers of
 Canada and Mexico. Alaska, Hawaii and Puerto Rico are outside those bounds. Imagery Only
 has cached tiles through tile zoom 16. The map can overzoom those tiles, with NAIP Plus
