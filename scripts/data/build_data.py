@@ -103,8 +103,11 @@ def notice(title, msg):
 
 
 # ---- HTTP -------------------------------------------------------------------------
-def get(url, method="GET", headers=None, timeout=120, retries=4, ok404=False):
-    """Returns (status, headers, body). Retries with backoff on network errors / 5xx / 429."""
+def get(url, method="GET", headers=None, timeout=120, retries=4, ok404=False, max_wait=None):
+    """Returns (status, headers, body). Retries with backoff on network errors / 5xx / 429.
+    max_wait: give up rather than wait longer than this many seconds before a retry. The
+    informational checks use it, so a long Retry-After (Open-Meteo answered 1,652 s once) can't
+    hold up the build and its deploy."""
     h = {"User-Agent": UA, **(headers or {})}
     for attempt in range(retries + 1):
         req = urllib.request.Request(url, method=method, headers=h)
@@ -131,6 +134,8 @@ def get(url, method="GET", headers=None, timeout=120, retries=4, ok404=False):
                 raise RuntimeError(f"{url}: {e}") from e
         if attempt == retries:
             raise RuntimeError(f"{url}: giving up after {retries + 1} attempts")
+        if max_wait is not None and wait > max_wait:
+            raise RuntimeError(f"{url}: asked to wait {wait} s before retrying, more than {max_wait} s")
         time.sleep(wait)
 
 
@@ -273,10 +278,17 @@ def fetch_aws(run, f):
 # Grid-alignment test nodes: on the 0.5 deg grid, with strong gradients nearby, so a shifted
 # or flipped grid would show up as large errors. Raw GFS values here go into the run report.
 ALIGN_POINTS = [("Tokyo Bay", 35.5, 139.5), ("Chile coast", -33.5, -71.5), ("Kansas City", 39.0, -95.0)]
-# Accuracy-check cities: raw GFS 0.25 deg values, bilinear from the four surrounding native
-# grid points, are recorded every hour so the page can be compared with NOAA's own numbers.
+# Check cities: raw GFS 0.25 deg values, bilinear from the four surrounding native grid points,
+# are recorded every hour in the run report and kept in the forecast history (archive_day.py).
+# The first five are also the CI accuracy check's cities (accuracy.mjs has its own list). Names
+# are the history's keys: rename only with a migration.
 CITY_POINTS = [("Kansas City MO", 39.10, -94.58), ("Miami", 25.76, -80.19), ("Denver", 39.74, -104.99),
-               ("London", 51.51, -0.13), ("Delhi", 28.61, 77.21)]
+               ("London", 51.51, -0.13), ("Delhi", 28.61, 77.21),
+               ("New York", 40.71, -74.01), ("Los Angeles", 34.05, -118.24), ("Anchorage", 61.22, -149.90),
+               ("Mexico City", 19.43, -99.13), ("São Paulo", -23.55, -46.63), ("Reykjavík", 64.15, -21.94),
+               ("Madrid", 40.42, -3.70), ("Cairo", 30.04, 31.24), ("Lagos", 6.52, 3.38), ("Nairobi", -1.29, 36.82),
+               ("Moscow", 55.76, 37.62), ("Beijing", 39.90, 116.41), ("Tokyo", 35.68, 139.69),
+               ("Singapore", 1.35, 103.82), ("Sydney", -33.87, 151.21)]
 
 
 def city_corners():
@@ -580,16 +592,16 @@ def grid_city(fld, name):
     difference into grid resolution (this vs raw 0.25 deg) and encoding (page vs this)."""
     _, lat, lon = next(c for c in CITY_POINTS if c[0] == name)
 
-    def s(a, nx, deg):
+    def s(at, nx, deg):  # at(k) is the value at flat grid index k
         x, y = (lon + 180) / deg, (90 - lat) / deg
         i0, j0 = int(x), int(y)
         fx, fy = x - i0, y - j0
-        g = lambda i, j: a[j * nx + i % nx]
+        g = lambda i, j: at(j * nx + i % nx)
         return (g(i0, j0) * (1 - fx) + g(i0 + 1, j0) * fx) * (1 - fy) + (g(i0, j0 + 1) * (1 - fx) + g(i0 + 1, j0 + 1) * fx) * fy
-    speed = [math.hypot(a, b) * 3.6 for a, b in zip(fld["u"], fld["v"])]
-    return {"temp": round(s(fld["temp"], NX, DEG), 3), "pres": round(s(fld["pres"], NX, DEG), 3),
-            "cloud": round(s(fld["cloud"], NX, DEG), 2), "rain": round(s(fld["rain"], NX, DEG), 4),
-            "wind_kmh": round(s(speed, WNX, WDEG), 2)}
+    v = lambda key: s(fld[key].__getitem__, NX, DEG)
+    speed = lambda k: math.hypot(fld["u"][k], fld["v"][k]) * 3.6   # only at the four nodes used
+    return {"temp": round(v("temp"), 3), "pres": round(v("pres"), 3), "cloud": round(v("cloud"), 2),
+            "rain": round(v("rain"), 4), "wind_kmh": round(s(speed, WNX, WDEG), 2)}
 
 
 SPOT_CITIES = [("London", 51.51, -0.13), ("New York", 40.71, -74.01), ("Tokyo", 35.68, 139.69)]
@@ -690,7 +702,7 @@ def aq_range_probe(report):
          "hourly": "pm2_5,pm10,us_aqi", "domains": "cams_global", "timezone": "GMT", "timeformat": "unixtime",
          "past_days": 1, "forecast_days": 6}
     try:
-        _, _, body = get(f"{OPEN_METEO_AQ}?{urllib.parse.urlencode(q)}", retries=2)
+        _, _, body = get(f"{OPEN_METEO_AQ}?{urllib.parse.urlencode(q)}", retries=2, max_wait=30)
         STATS["aq_probe_locations"] = len(pts)
         res = json.loads(body)
         out = {}
@@ -720,7 +732,7 @@ def spot_check(report):
              "models": "ecmwf_ifs025", "timezone": "GMT", "timeformat": "unixtime", "past_days": 1, "forecast_days": 2,
              "wind_speed_unit": "kmh"}
         try:
-            _, _, body = get(f"{OPEN_METEO_FC}?{urllib.parse.urlencode(q)}", retries=2)
+            _, _, body = get(f"{OPEN_METEO_FC}?{urllib.parse.urlencode(q)}", retries=2, max_wait=30)
             STATS["spot_locations"] += 1
             h = json.loads(body)["hourly"]
             t = int(dt.datetime.strptime(run, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc).timestamp())

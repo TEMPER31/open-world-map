@@ -21,7 +21,7 @@ Mapillary thumbnail image explicitly omits the referrer.
 | jsDelivr | Every visit | MapLibre GL JS 5.24.0 JavaScript and CSS with pinned integrity hashes. The URLs are independent of the map view. |
 | OpenFreeMap | Every visit, including on Satellite | Preconnect at page load, followed by a TileJSON request, vector tiles and glyphs. Tile coordinates indicate the area and zoom on screen. Glyph requests include a font stack and character range. |
 | NASA GIBS | Satellite at world and regional zoom (configured below 7) | Tile coordinates and the previous UTC date. |
-| EOX | Satellite from configured map zoom 4.5 | Tile coordinates for the 2016 Sentinel-2 mosaic. |
+| EOX | Satellite from configured map zoom 4.5 | Tile coordinates for the 2025 Sentinel-2 mosaic. |
 | USGS Imagery Only | Satellite from configured map zoom 11 within the contiguous-US source bounds | Tile coordinates. |
 | USGS NAIP Plus | Satellite from configured map zoom 15 within the same bounds | A Web Mercator tile bounding box, projection, dimensions and image format. |
 | USGS Earthquake Hazards Program | Earthquakes on | Fixed M2.5+ seven-day GeoJSON feed. |
@@ -60,11 +60,11 @@ set of event link hosts. Click-only destinations do not require resource allowli
 |---|---|---|
 | `temper31.github.io` | Published site origin on every visit and for same-origin assets, data, the worker, the place list and the optional photo client module | `site/index.html:10`, `site/index.html:17`, `site/js/data.js:9`, `site/js/data.js:29`, `site/js/data-core.js:44`, `site/js/places.js:23`, `site/js/photos.js:18` |
 | `cdn.jsdelivr.net` | Every visit, MapLibre JS and CSS | `site/index.html:14`, `site/index.html:16` |
-| `tiles.openfreemap.org` | Every visit, preconnect, TileJSON and glyphs in all basemaps. The audit also identifies this as the vector tile host. | `site/index.html:11`, `site/js/config.js:17`, `site/js/config.js:18`, `site/js/basemaps.js:77` |
+| `tiles.openfreemap.org` | Every visit, preconnect, TileJSON and glyphs in all basemaps. The audit also identifies this as the vector tile host. | `site/index.html:11`, `site/js/basemaps.js:77`, `site/js/config.js:17`, `site/js/config.js:18` |
 | `gibs.earthdata.nasa.gov` | Satellite below configured map zoom 7 | `site/js/config.js:32` |
-| `tiles.maps.eox.at` | Satellite from configured map zoom 4.5 | `site/js/config.js:42` |
-| `basemap.nationalmap.gov` | Satellite from configured map zoom 11, within contiguous-US bounds | `site/js/config.js:52` |
-| `imagery.nationalmap.gov` | Satellite from configured map zoom 15, within contiguous-US bounds | `site/js/config.js:68` |
+| `tiles.maps.eox.at` | Satellite from configured map zoom 4.5 | `site/js/config.js:43` |
+| `basemap.nationalmap.gov` | Satellite from configured map zoom 11, within contiguous-US bounds | `site/js/config.js:54` |
+| `imagery.nationalmap.gov` | Satellite from configured map zoom 15, within contiguous-US bounds | `site/js/config.js:71` |
 | `earthquake.usgs.gov` | Earthquakes on, or USGS earthquake credit clicked | `site/js/events.js:26`, `site/js/events.js:36` |
 | `eonet.gsfc.nasa.gov` | Wildfires & volcanoes or Storms on, or EONET credit clicked | `site/js/events.js:27`, `site/js/events.js:42` |
 | `www.gdacs.org` | Disaster alerts on, or GDACS credit or fallback report link clicked | `site/js/events.js:28`, `site/js/events.js:53`, `site/js/events.js:58` |
@@ -75,18 +75,18 @@ set of event link hosts. Click-only destinations do not require resource allowli
 | `dynamic:mapillary.thumb_1024_url` | A Mapillary thumbnail is shown | `site/js/photos.js:77`, `site/js/photos.js:91` |
 | `github.com` | GitHub, Sources and licences, or Source code link clicked | `site/index.html:34`, `site/index.html:100`, `site/index.html:113` |
 | `earthdata.nasa.gov` | GIBS imagery credit clicked | `site/js/config.js:35` |
-| `s2maps.eu` | EOX imagery credit clicked | `site/js/config.js:45` |
-| `www.usgs.gov` | USGS imagery credit clicked | `site/js/config.js:56`, `site/js/config.js:72` |
-| `openfreemap.org` | OpenFreeMap credit clicked | `site/js/config.js:77` |
-| `openmaptiles.org` | OpenMapTiles credit clicked | `site/js/config.js:77` |
-| `www.openstreetmap.org` | OpenStreetMap credit clicked | `site/js/config.js:77` |
-| `www.naturalearthdata.com` | Natural Earth credit clicked | `site/js/config.js:78` |
-| `www.nco.ncep.noaa.gov` | NOAA GFS credit clicked | `site/js/config.js:80` |
-| `atmosphere.copernicus.eu` | CAMS credit clicked | `site/js/config.js:81` |
-| `open-meteo.com` | Open-Meteo credit clicked | `site/js/config.js:81` |
-| `maplibre.org` | MapLibre credit clicked | `site/js/config.js:82` |
+| `cloudless.eox.at` | EOX imagery credit clicked | `site/js/config.js:46` |
+| `www.usgs.gov` | USGS imagery credit clicked | `site/js/config.js:58`, `site/js/config.js:75` |
+| `openfreemap.org` | OpenFreeMap credit clicked | `site/js/config.js:87` |
+| `openmaptiles.org` | OpenMapTiles credit clicked | `site/js/config.js:87` |
+| `www.openstreetmap.org` | OpenStreetMap credit clicked | `site/js/config.js:87` |
+| `www.naturalearthdata.com` | Natural Earth credit clicked | `site/js/config.js:88` |
+| `www.nco.ncep.noaa.gov` | NOAA GFS credit clicked | `site/js/config.js:90` |
+| `atmosphere.copernicus.eu` | CAMS credit clicked | `site/js/config.js:91` |
+| `open-meteo.com` | Open-Meteo credit clicked | `site/js/config.js:91` |
+| `maplibre.org` | MapLibre credit clicked | `site/js/config.js:92` |
 | `www.geonames.org` | GeoNames credit clicked | `site/js/config.js:93` |
 | `www.nhc.noaa.gov` | NOAA NHC credit or storm source link clicked | `site/js/events.js:29`, `site/js/events.js:70` |
 | `www.mapillary.com` | Mapillary credit, thumbnail link or “Open on Mapillary” clicked | `site/js/photos.js:11`, `site/js/photos.js:89`, `site/js/photos.js:98` |
-| `creativecommons.org` | Mapillary CC BY-SA 4.0 link clicked | `site/js/photos.js:11` |
+| `creativecommons.org` | Mapillary CC BY-SA 4.0 or EOX imagery CC BY-NC-SA 4.0 link clicked | `site/js/photos.js:15`, `site/js/config.js:46` |
 | `dynamic:event.source_url` | “Open source page” clicked for a report URL provided by an event feed | `site/js/events.js:38`, `site/js/events.js:48`, `site/js/events.js:58`, `site/js/events.js:229` |

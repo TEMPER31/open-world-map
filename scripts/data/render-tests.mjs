@@ -57,6 +57,8 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
   const hosts = {};
   const allHosts = new Set(); // every host the page asks for, from the first request
   page.on('request', r => allHosts.add(new URL(r.url()).host));
+  const status = {}; // HTTP status counts per host, from the first response
+  page.on('response', r => { const h = new URL(r.url()).host, c = (status[h] ||= {}); c[r.status()] = (c[r.status()] || 0) + 1; });
   page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
   if (samples) await eventSamples(page, samples);
   if (photos) await routePhotos(fbcdn(page), photos);
@@ -77,7 +79,7 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
     await page.waitForFunction(() => window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => {});
   }
   await page.waitForTimeout(1500);
-  return { page, errors, reqs, hosts, allHosts };
+  return { page, errors, reqs, hosts, allHosts, status };
 }
 
 // 1. Wind direction: uniform synthetic fields; particles must move with the wind (towards).
@@ -360,6 +362,27 @@ if (part()) {
   check('No page errors (phone Now)', !errors.length, errors.join(' | '));
   await page.close();
 }
+// The phone time label is longest when local time and UTC fall on different days ("Tue 20:00 local
+// · Wed 02:00 UTC"). It once ran over the step buttons at those hours: test that frame at any hour.
+if (part()) {
+  const out = {};
+  for (const w of [360, 375]) {
+    const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: w, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    out[w] = await page.evaluate(async () => {
+      const m = window.owmTest.meta, t = (m.times || []).find(h => { const d = new Date(m.base + h * 36e5); return d.getDate() !== d.getUTCDate(); });
+      window.owmTest.state.set({ t }); await new Promise(r => setTimeout(r, 400));
+      const R = e => e.getBoundingClientRect(), btns = [...document.querySelectorAll('.m-scrub .tl-step, .m-scrub .play')].map(R);
+      const bits = [...document.querySelectorAll('.m-time b, .m-time span span, .m-time i')].map(R), step = document.querySelector('.m-scrub [data-step="1"]'), s = R(step);
+      return { t, label: document.querySelector('.m-time [data-abs-short]').textContent,
+        overlap: bits.some(k => btns.some(b => k.left < b.right && k.right > b.left && k.top < b.bottom && k.bottom > b.top)),
+        tapReachesStep: document.elementFromPoint(s.left + s.width / 2, s.top + s.height / 2) === step };
+    });
+    out[w].errors = errors.length;
+    await page.close();
+  }
+  check('Phone (360 and 375 px): the longest time label (local and UTC on different days) stays clear of the step buttons, and a tap on "next frame" reaches it',
+    Object.values(out).every(o => o.t != null && / · \S+ \d\d:\d\d /.test(o.label) && !o.overlap && o.tapReachesStep && !o.errors), JSON.stringify(out));
+}
 // 6d. Place search: the index loads on first focus (not with the page), suggestions within ~300 ms
 // of a pause, keys and mouse, lat/lon, no results / unavailable; a pick flies there and opens the
 // place panel at the timeline's hour; a map click names the nearest place; nothing leaves the
@@ -599,11 +622,11 @@ if (part()) {
   const liveOk = ['wind', 'temp', 'rain', 'cloud', 'pres', 'aq'].every(k => freshOk(live[k].text)) && live.temp.text === 'NOAA GFS · run 18Z 5 Nov · Updated 22:47 UTC · 0.5° grid' && live.wind.text.endsWith('· 0.75° grid')
     && /0\.5° grid, area average$/.test(live.cloud.text) && /^CAMS via Open-Meteo · Updated 10:52 UTC 5 Nov · 4° grid · forecast ends Mon 9 Nov · 00:00 UTC$/.test(live.aq.text) && /^Clouds overlay: NOAA GFS/.test(live.overlay.text)
     && /NOMADS: 3, from the AWS mirror: 1/.test(live.hosts.title) && !/NOMADS/.test(live.temp.title) && /unavailable/.test(live.noAq.text) && /Updated 22:47 UTC: 0\.5° grid \(wind 0\.75° grid\) · air quality CAMS via Open-Meteo, Updated 10:52 UTC 5 Nov, 4° grid/.test(live.place);
-  // satellite at regional zoom over the US: GIBS (daily date) and EOX (2016 mosaic), each with its tile levels
+  // satellite at regional zoom over the US: GIBS (daily date) and EOX (2025 mosaic), each with its tile levels
   await page.evaluate(() => window.owmTest.state.set({ basemap: 'satellite' })); await page.waitForTimeout(800);
   const sat = await page.evaluate(() => [...document.querySelectorAll('.layers [data-satfresh]')].map(e => e.textContent)[0] || '');
   const yday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-  const satOk = sat.includes(`NASA GIBS VIIRS true colour · ${yday} (daily`) && /EOX Sentinel-2 cloudless · 2016 mosaic/.test(sat) && (sat.match(/tiles to zoom \d+/g) || []).length === 2;
+  const satOk = sat.includes(`NASA GIBS VIIRS NOAA-20 true colour · ${yday} (daily`) && /EOX Sentinel-2 cloudless · 2025 mosaic/.test(sat) && (sat.match(/tiles to zoom \d+/g) || []).length === 2;
   await page.evaluate(() => window.owmTest.state.set({ basemap: 'dark' })); await page.waitForTimeout(300);
   const satOff = await page.evaluate(() => document.querySelector('.layers [data-satfresh]').textContent);
   check('Freshness: each visible weather layer (field, overlays, particles) shows source, update time (or "generated, no update time") and grid; live wording with a synthetic manifest; satellite dates and tile levels',
@@ -775,6 +798,32 @@ if (part()) {
   check('Esc closes the event panel', await page.evaluate(() => document.querySelector('#detail').hidden && !window.owmTest.state.get('selection')));
   check(liveName('No page errors (live events)'), !errors.length, errors.join(' | '));
   await page.close();
+}
+// 12b. Saved samples: a GDACS alert drawn on the same spot as a USGS quake. The click opens the
+// quake (the primary source), "Also here" lists the alert; following it opens the alert, which
+// lists the quake. Rows are 44 px on phones.
+if (part()) {
+  for (const [label, ctx] of [['desktop', {}], ['phone 390 px', { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true }]]) {
+    const { page, errors } = await open({ field: 'none', particles: false, events: { eq: true, ga: true } }, '3/20/0', { samples: {}, ...ctx });
+    await evWait(page);
+    const q = await page.evaluate(async () => {
+      const C = window.owmTest.events.cache, i = [...C.usgs.items].sort((a, b) => b.mag - a.mag)[0];
+      C.gdacs.items.push({ id: 'ga:EQsame', k: 'ga', icon: 'alert-orange', title: 'Earthquake alert on the same spot', place: '', time: i.time + 6e5, lon: i.lon + 0.01, lat: i.lat + 0.01, src: 'gdacs', link: 'https://www.gdacs.org/',
+        stats: () => [['Alert level', 'Orange', '', 'GDACS']] });
+      window.owmTest.state.set({ events: { ...window.owmTest.state.get('events') } });
+      window.owmMap.jumpTo({ center: [i.lon, i.lat], zoom: 4 }); await new Promise(r => window.owmMap.once('idle', r));
+      const p = window.owmMap.project([i.lon, i.lat]), r = window.owmMap.getCanvas().getBoundingClientRect();
+      return { id: i.id, x: p.x + r.left, y: p.y + r.top };
+    });
+    await page.mouse.click(q.x, q.y); await page.waitForTimeout(600);
+    const a = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection')?.id, also: [...document.querySelectorAll('#detail [data-ev-also]')].map(b => ({ id: b.dataset.evAlso, h: b.getBoundingClientRect().height })) }));
+    await page.click('#detail [data-ev-also]'); await page.waitForTimeout(400);
+    const b = await page.evaluate(() => ({ sel: window.owmTest.state.get('selection')?.id, also: [...document.querySelectorAll('#detail [data-ev-also]')].map(x => x.dataset.evAlso) }));
+    check(`Overlapping events (${label}): the click opens the USGS quake, "Also here" lists the GDACS alert and opens it, which lists the quake back`,
+      a.sel === q.id && a.also.length === 1 && a.also[0].id === 'ga:EQsame' && b.sel === 'ga:EQsame' && b.also.join() === q.id && (label === 'desktop' || a.also[0].h >= 44) && !errors.length,
+      JSON.stringify({ first: a, second: b, errors }));
+    await page.close();
+  }
 }
 // 13. Saved samples: panel rule with places and the measure tool, storm follows the slider,
 // one clock includes the event layers, "unavailable" and "no active storms" states.
@@ -1144,17 +1193,21 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
 // violation. Part 1 also shows Satellite at regional and street zoom (all four imagery hosts).
 {
   if (!PART || PART === 1) {
-    const seen = new Set();
+    const seen = new Set(), answers = {};
     for (const hash of ['5/38/-95', '15/31.7001/-86.7404']) {
       // satellite is turned on inside open(), so its first tiles are requested before open() returns
-      const { page, errors, allHosts } = await open({ field: 'none', particles: false, basemap: 'satellite' }, hash);
+      const { page, errors, allHosts, status } = await open({ field: 'none', particles: false, basemap: 'satellite' }, hash);
       await page.evaluate(() => new Promise(r => { window.owmMap.once('idle', r); setTimeout(r, 4000); }));
       for (const h of allHosts) seen.add(h);
+      for (const [h, c] of Object.entries(status)) for (const [code, n] of Object.entries(c)) (answers[h] ||= {})[code] = ((answers[h] || {})[code] || 0) + n;
       if (errors.length) csp.push(`satellite ${hash}: page errors ${errors.join(' | ')}`);
       await page.close();
     }
     const imagery = ['gibs.earthdata.nasa.gov', 'tiles.maps.eox.at', 'basemap.nationalmap.gov', 'imagery.nationalmap.gov'];
     check('Satellite at regional and street zoom (US): requests to all four imagery hosts pass the CSP', imagery.every(h => seen.has(h) || blockedHosts.has(h)), imagery.map(h => `${h}: ${seen.has(h) || blockedHosts.has(h) ? 'requested' : 'not requested'}`).join(', '));
+    // a source that stops publishing (as Suomi NPP did on GIBS in November 2026) answers 404 for every tile
+    check(liveName('Satellite tiles come back: at least one HTTP 200 from each of the four imagery hosts'), OFFLINE || imagery.every(h => answers[h]?.[200]),
+      OFFLINE ? 'not checked: imagery hosts are not contacted offline' : imagery.map(h => `${h}: ${Object.entries(answers[h] || {}).map(([code, n]) => `${n}× ${code}`).join(' ') || 'no responses'}`).join(', '));
   }
   for (const p of PAGES) { const { page } = await openPage(p); await page.waitForTimeout(300); await page.close(); }
   check('No Content-Security-Policy violation on any page (every map page this part opened and every static page)', !csp.length, csp.length ? csp.slice(0, 6).join(' | ') : `${cspPages} pages watched, 0 violations`);

@@ -94,7 +94,12 @@ export function initTimeline({ base, times, stepTime, coarseFrom, zone, uncertai
     // which forecast hour of the model run this frame is
     document.querySelectorAll('[data-fh]').forEach(e => { e.textContent = f == null ? 'sample' : `forecast hour ${f}`; e.title = f == null ? 'Generated sample data' : `Hour ${f} of the GFS run`; });
     document.querySelectorAll('[data-abs]').forEach(e => { e.textContent = fmtBoth(abs, s.timeFirst, { date: false }); e.title = fmtBoth(abs); });
-    document.querySelectorAll('[data-abs-short]').forEach(e => e.textContent = fmtBoth(abs, s.timeFirst, { date: false }));
+    // phone label: one piece per clock, so a long label (local and UTC on different days) wraps
+    // between the clocks instead of running over the step buttons
+    document.querySelectorAll('[data-abs-short]').forEach(e => {
+      const [a, b] = fmtBoth(abs, s.timeFirst, { date: false }).split(' · '), p = document.createElement('span'), q = document.createElement('span');
+      p.textContent = `${a} ·`; q.textContent = b; e.replaceChildren(p, ' ', q);
+    });
     document.querySelectorAll('[data-tfirst]').forEach(b => { b.textContent = s.timeFirst === 'utc' ? 'UTC · local' : 'Local · UTC'; b.title = 'Switch which clock is shown first'; });
   });
 }

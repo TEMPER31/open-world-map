@@ -1,6 +1,7 @@
 """Offline tests for GFS source selection and per-hour fallback."""
 
 import datetime as dt
+import math
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -119,6 +120,50 @@ class BuildGfsTests(unittest.TestCase):
         self.assertEqual(self.find_cycle.call_args_list, [call("nomads"), call("aws")])
         self.assertNotIn("gfs_hour_sources", self.report)
 
+
+class CityPointTests(unittest.TestCase):
+    def test_city_names_are_unique(self):
+        names = [n for n, _, _ in build_data.CITY_POINTS]
+        self.assertEqual(len(names), len(set(names)))
+
+    def test_grid_city_bilinear_and_wind_speed_per_node(self):
+        """Wind speed is worked out at each of the four nodes, then interpolated, as the page does."""
+        nx, ny, wnx, wny = build_data.NX, build_data.NY, build_data.WNX, build_data.WNY
+        fld = {k: [float(i % 97) for i in range(nx * ny)] for k in ("temp", "pres", "cloud", "rain")}
+        fld["u"] = [float((i * 7) % 23 - 11) for i in range(wnx * wny)]
+        fld["v"] = [float((i * 5) % 19 - 9) for i in range(wnx * wny)]
+        name, lat, lon = build_data.CITY_POINTS[0]
+        x, y = (lon + 180) / build_data.WDEG, (90 - lat) / build_data.WDEG
+        i0, j0, fx, fy = int(x), int(y), x - int(x), y - int(y)
+        sp = lambda i, j: math.hypot(fld["u"][j * wnx + i], fld["v"][j * wnx + i]) * 3.6
+        want = (sp(i0, j0) * (1 - fx) + sp(i0 + 1, j0) * fx) * (1 - fy) + (sp(i0, j0 + 1) * (1 - fx) + sp(i0 + 1, j0 + 1) * fx) * fy
+        self.assertAlmostEqual(build_data.grid_city(fld, name)["wind_kmh"], round(want, 2), places=6)
+
+
+
+class GetTests(unittest.TestCase):
+    def _429(self, after):
+        import email.message, urllib.error
+        h = email.message.Message(); h["Retry-After"] = str(after)
+        return urllib.error.HTTPError("https://example.test/x", 429, "Too Many Requests", h, None)
+
+    def test_long_retry_after_gives_up_without_waiting_when_capped(self):
+        with patch.object(build_data.urllib.request, "urlopen", side_effect=self._429(1652)), \
+                patch.object(build_data.time, "sleep") as sleep:
+            with self.assertRaisesRegex(RuntimeError, "1652 s"):
+                build_data.get("https://example.test/x", retries=2, max_wait=30)
+        sleep.assert_not_called()
+
+    def test_short_retry_after_still_waits_and_retries(self):
+        class R:
+            status, headers = 200, {}
+            def read(self): return b"ok"
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+        with patch.object(build_data.urllib.request, "urlopen", side_effect=[self._429(5), R()]), \
+                patch.object(build_data.time, "sleep") as sleep:
+            self.assertEqual(build_data.get("https://example.test/x", retries=2, max_wait=30)[2], b"ok")
+        sleep.assert_called_once_with(5)
 
 if __name__ == "__main__":
     unittest.main()

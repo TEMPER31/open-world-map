@@ -127,6 +127,26 @@ near('Kansas City MO, 10 Nov 2026: sunset 23:08 UTC (17:08 CST)', min(kc.set, '2
 const ldn = sunTimes(51.5074, -0.1278, day('2026-11-10'));
 near('London, 10 Nov 2026: sunrise 07:10 UTC', min(ldn.rise, '2026-11-10T07:10Z'), 0, 2);
 near('London, 10 Nov 2026: sunset 16:18 UTC', min(ldn.set, '2026-11-10T16:18Z'), 0, 2);
+// US Naval Observatory times (aa.usno.navy.mil rstt/oneday API, read 10 Nov 2026; it also confirms
+// the Kansas City and London times above). Checked for all 20 history cities on 20 Mar, 21 Jun,
+// 22 Sep, 10 Nov and 21 Dec 2026: every sunrise and sunset within 0.5 min (USNO rounds to the minute).
+const USNO = [
+  ['Reykjavík, 21 Dec', 64.15, -21.94, '2026-12-21', '2026-12-21T11:22Z', '2026-12-21T15:29Z'],
+  ['Anchorage, 21 Jun', 61.22, -149.90, '2026-06-21', '2026-06-21T12:20Z', '2026-06-22T07:43Z'],
+  ['Sydney, 21 Jun', -33.87, 151.21, '2026-06-21', '2026-06-20T21:00Z', '2026-06-21T06:54Z'],
+  ['São Paulo, 21 Dec', -23.55, -46.63, '2026-12-21', '2026-12-21T08:17Z', '2026-12-21T21:52Z'],
+  ['Singapore, 20 Mar', 1.35, 103.82, '2026-03-20', '2026-03-19T23:09Z', '2026-03-20T11:15Z'],
+  ['Nairobi, 22 Sep', -1.29, 36.82, '2026-09-22', '2026-09-22T03:22Z', '2026-09-22T15:29Z'],
+  ['Tokyo, 10 Nov', 35.68, 139.69, '2026-11-10', '2026-11-09T21:12Z', '2026-11-10T07:38Z'],
+  ['Moscow, 21 Dec', 55.76, 37.62, '2026-12-21', '2026-12-21T05:57Z', '2026-12-21T12:58Z'],
+  ['Los Angeles, 21 Jun', 34.05, -118.24, '2026-06-21', '2026-06-21T12:42Z', '2026-06-22T03:08Z'],
+  ['Delhi, 10 Nov', 28.61, 77.21, '2026-11-10', '2026-11-10T01:10Z', '2026-11-10T12:00Z']
+];
+for (const [name, lat, lon, d, rise, set] of USNO) {
+  const s = sunTimes(lat, lon, day(d));
+  near(`${name} 2026: sunrise ${rise.slice(11, 16)} UTC as USNO`, min(s.rise, rise), 0, 1);
+  near(`${name} 2026: sunset ${set.slice(11, 16)} UTC as USNO`, min(s.set, set), 0, 1);
+}
 // independent of any table: equinox day at the equator is 12 h plus ~7 min (sun's radius and
 // refraction at both ends); solar noon at 0° falls at 12:00 minus the equation of time (about -7.5 min on 20 Mar)
 const e0 = sunTimes(0, 0, day('2026-03-20'));

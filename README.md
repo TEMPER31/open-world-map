@@ -14,7 +14,8 @@ services while enabled; they start off on every visit and are not remembered. Se
 > **Status: Phase 6 (launch preparation)**. Weather comes from the latest NOAA GFS 0.25° run
 > (hourly to 5 days, then every 3 hours to 7 days) and air quality from CAMS via Open-Meteo, rebuilt after each new GFS run (usually four times a day) by
 > GitHub Actions. See [`docs/data-pipeline.md`](docs/data-pipeline.md). If no data has been built yet,
-> the map falls back to clearly labelled sample data.
+> the map falls back to clearly labelled sample data. Each build also publishes a forecast history for 20
+> cities at `data/archive/` for a future accuracy page (see the data pipeline doc).
 
 ## Map features
 
@@ -32,7 +33,8 @@ services while enabled; they start off on every visit and are not remembered. Se
   pressure with isobars and H/L centres), each with its legend, plus a cursor probe and
   wind particles.
 - **Events** show earthquakes, wildfires, volcanoes, storms and disaster alerts. A marker opens
-  the event details and a source link.
+  the event details and a source link. When markers overlap (a GDACS alert is drawn on the quake
+  it is about), the click opens the reporting source first and lists the rest under "Also here".
 - **Street photos** show Mapillary coverage and a photo viewer when a client token is configured.
 - **Overlays** can add up to two fields over the main field.
 - **Place search**: type a town or city (accents and case don't matter) or "lat, lon". The
@@ -95,7 +97,7 @@ of them agree. See `site/js/clock.js`.
 | 3 · Usability | Shared forecast clock, timeline controls, units, place and layers sheets, distance tool |
 | 4 · Street photos | Coverage lines and clickable photo dots, with a photo viewer |
 | 5 · Event layers | Earthquakes, wildfires, tropical cyclones and severe storms |
-| **6 · Launch preparation** | Data pipeline fixes, source and privacy documentation, repository security, launch checks *(in progress)* |
+| **6 · Launch preparation** | Data pipeline fixes, source and privacy documentation, repository security, launch checks *(in progress: the owner's repository settings in `docs/repo-security.md`)* |
 
 ## Preview locally
 
@@ -169,7 +171,8 @@ docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
 ## Deploying
 
 `.github/workflows/pages.yml` runs the checks and builds the data on every pull request,
-push and schedule (four times a day, after each GFS cycle). GitHub has not been firing that
+push and schedule (four times a day, after each GFS cycle). A push to `main` that only changes
+docs or tests (the `paths-ignore` list in the workflow) skips it: nothing on the site changes. GitHub has not been firing that
 schedule for this repository, so `.github/workflows/refresh.yml` is a backup timer: once an
 hour it starts a data run if the site is behind the newest complete GFS run (one run per
 cycle, see `docs/data-pipeline.md`). It needs a 60-minute wait timer on the `refresh-timer`

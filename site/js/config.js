@@ -27,24 +27,24 @@ const yesterdayUTC = () => new Date(Date.now() - 864e5).toISOString().slice(0, 1
 export const SATELLITE = [
   {
     id: 'sat-gibs',
-    // NASA GIBS, VIIRS SNPP corrected-reflectance true colour, previous UTC day.
+    // NASA GIBS, VIIRS NOAA-20 true colour, previous UTC day (GIBS stopped adding Suomi NPP days after 2 Nov 2026).
     // GoogleMapsCompatible_Level9 => z0-9, 256 px tiles.
-    tiles: () => [`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/${yesterdayUTC()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`],
+    tiles: () => [`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/${yesterdayUTC()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`],
     tileSize: 256, maxzoom: 9,
     layer: { maxzoom: 7 },
-    credit: 'Imagery: <a href="https://earthdata.nasa.gov/gibs">NASA GIBS</a> / ESDIS (VIIRS SNPP)',
-    fresh: () => `NASA GIBS VIIRS true colour · ${yesterdayUTC()} (daily, the previous UTC day) · tiles to zoom 9`
+    credit: 'Imagery: <a href="https://earthdata.nasa.gov/gibs">NASA GIBS</a> / ESDIS (VIIRS NOAA-20)',
+    fresh: () => `NASA GIBS VIIRS NOAA-20 true colour · ${yesterdayUTC()} (daily, the previous UTC day) · tiles to zoom 9`
   },
   {
     id: 'sat-eox',
-    // EOX Sentinel-2 cloudless. Default is the 2016 mosaic (CC BY 4.0). The newer
-    // yearly mosaics (e.g. s2cloudless-2024_3857) are CC BY-NC-SA 4.0: switch only
-    // after the owner confirms the licence (docs/sources-register.md, "EOX licence").
-    tiles: () => ['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg'],
+    // EOX Sentinel-2 cloudless, 2025 mosaic: CC BY-NC-SA 4.0, chosen by the owner on 10 Nov 2026
+    // (docs/sources-register.md). Sentinel-2 is about 10 m, so tiles stop at zoom 14 and the map
+    // overzooms them; EOX serves only upscaled tiles above that.
+    tiles: () => ['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg'],
     tileSize: 256, maxzoom: 14,
     layer: { minzoom: 4.5, fadeIn: [5, 6.5] },
-    credit: '<a href="https://s2maps.eu">Sentinel-2 cloudless</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016 &amp; 2017)',
-    fresh: () => 'EOX Sentinel-2 cloudless · 2016 mosaic (Sentinel data 2016 & 2017) · tiles to zoom 14'
+    credit: '<a href="https://cloudless.eox.at">EOxCloudless</a> by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025), <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a>',
+    fresh: () => 'EOX Sentinel-2 cloudless · 2025 mosaic (Sentinel data 2025) · tiles to zoom 14'
   },
   {
     id: 'sat-usgs',

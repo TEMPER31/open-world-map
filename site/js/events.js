@@ -211,11 +211,35 @@ export function initEvents(m, changed) {
   });
 }
 
-// The event under a click or tap (within 8 px), as a selection, or null.
+// The event under a click or tap (within 8 px), as a selection, or null. A GDACS alert is about an
+// event another source reports (USGS quake, NHC or EONET storm, EONET fire or volcano) and is drawn
+// on the same spot, so that source opens first; the rest go under "Also here" in its panel.
+const RANK = { usgs: 0, nhc: 1, eonet: 2, gdacs: 3 };
+let group = [];   // the events under the last click, in the order the panel lists them
 export function hit(p) {
   if (!added) return null;
-  const f = map.queryRenderedFeatures([[p.x - 8, p.y - 8], [p.x + 8, p.y + 8]], { layers: HIT }).find(f => f.properties.id), i = f && byId(f.properties.id);
-  return i ? { type: 'event', id: i.id, lon: i.lon, lat: i.lat } : null;
+  const ids = new Set(map.queryRenderedFeatures([[p.x - 8, p.y - 8], [p.x + 8, p.y + 8]], { layers: HIT }).map(f => f.properties.id));
+  const found = [...ids].map(byId).filter(Boolean).sort((a, b) => RANK[a.src] - RANK[b.src]);   // stable: topmost first within a source
+  if (!found.length) return null;
+  group = found.map(i => i.id);
+  return select(group[0]);
+}
+export const select = id => { const i = byId(id); return i ? { type: 'event', id: i.id, lon: i.lon, lat: i.lat } : null; };
+
+// A small copy of the event's map marker, for the "Also here" rows.
+function swatch(i) {
+  if (i.k === 'eq') return '<svg viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="rgba(237,232,221,.38)" stroke="#ede8dd" stroke-width="1.2"/></svg>';
+  const [fill, pts] = ICONS[i.icon] || ICONS.storm;
+  const shape = pts ? `<polygon points="${pts.map(p => p.join(',')).join(' ')}"/>` : '<circle r="6"/><circle r="2.2" fill="#07090c" stroke="none"/>';
+  return `<svg viewBox="-8 -8 16 16" aria-hidden="true"><g fill="${fill}" stroke="#07090c" stroke-width="1.5">${shape}</g></svg>`;
+}
+const SRC_SHORT = { usgs: 'USGS', eonet: 'NASA EONET', gdacs: 'GDACS', nhc: 'NOAA NHC' };
+function alsoHTML(id) {
+  if (!group.includes(id)) return '';
+  const others = group.filter(x => x !== id).map(byId).filter(Boolean).slice(0, 5);
+  if (!others.length) return '';
+  return `<div class="d-sec also"><div class="kick"><span>Also here</span><span>${others.length} more</span></div>${others.map(o =>
+    `<button type="button" data-ev-also="${esc(o.id)}">${swatch(o)}<b>${esc(o.title)}</b><span>${esc(NAME[o.k])} · ${SRC_SHORT[o.src]} · ${ago(o.time)}</span><i aria-hidden="true">›</i></button>`).join('')}</div>`;
 }
 
 const ago = ms => { const m = Math.max(0, Math.round((Date.now() - ms) / 6e4)); return m < 60 ? `${m} min ago` : m < 2880 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
@@ -236,8 +260,8 @@ export function panelHTML(id) {
   return `<div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close (Esc)" title="Close (Esc)">×</button>
       <div class="kick">Event · ${NAME[i.k]}</div><div class="d-title" data-event-id="${esc(i.id)}">${esc(i.title)}</div><div class="d-name">${esc(i.place)}</div>
       <div class="d-sub"><span class="tag">${tag}</span><span class="mono">${fmtBoth(when)}</span></div></div>
-    <div class="stats">${stats().map(([l, v, u, d]) => `<div class="stat"><div class="l">${l}</div><div class="n">${esc(v)}<small>${esc(u)}</small></div><div class="l">${esc(d)}</div></div>`).join('')}</div>${note}
+    <div class="stats">${stats().map(([l, v, u, d]) => `<div class="stat"><div class="l">${l}</div><div class="n">${esc(v)}<small>${esc(u)}</small></div><div class="l">${esc(d)}</div></div>`).join('')}</div>${note}${alsoHTML(id)}
     <div class="d-ft"><div class="d-btns"><a class="btn pri" href="${esc(i.link)}" target="_blank" rel="noopener">Open source page ↗</a><button class="btn" type="button" data-center>Centre map here</button></div>
       <div class="src">${CREDIT[i.src].replace(/<[^>]+>/g, '')} · ${c.updated ? 'updated' : 'checked'} ${fmtBoth(c.updated || c.at)}</div></div>`;
 }
-export const eventsTest = { cache, stormAt: id => stormAt(byId(id)) };
+export const eventsTest = { cache, stormAt: id => stormAt(byId(id)), group: () => group };

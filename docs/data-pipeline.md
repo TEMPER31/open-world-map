@@ -317,6 +317,56 @@ that disagrees with the map beneath it.
   own temperature for the hour on the timeline, so the highlighted point and the number agree;
   the rest of the line is still the coarse series (a finer series file would cost more data).
 
+### Check of 10 November 2026: 20 cities, the full week
+
+The run report (`city_raw`) holds both the raw GFS 0.25° value at each check city and the value
+read from the stored grid, for every forecast hour. For the **18Z 10 Nov 2026** run, every 6 h
+from f000 to f168 (29 hours per city), stored grid minus raw 0.25°:
+
+| City | Temperature mean (°C) | min | max | Wind mean (km/h) | min | max |
+|---|---|---|---|---|---|---|
+| Denver | −2.43 | −4.88 | +0.74 | +0.2 | −0.4 | +2.1 |
+| Cairo | −1.81 | −2.73 | −0.57 | +0.7 | −3.5 | +4.2 |
+| Reykjavík | −1.54 | −2.98 | −0.84 | +2.9 | −7.9 | +19.3 |
+| Delhi | −0.98 | −1.78 | +0.07 | +0.2 | −2.7 | +2.0 |
+| Lagos | −0.59 | −1.38 | −0.20 | −5.1 | −10.2 | +2.5 |
+| Miami | −0.57 | −1.47 | +0.11 | −1.5 | −4.5 | +1.8 |
+| Moscow | −0.50 | −1.04 | −0.08 | +1.5 | −0.2 | +4.4 |
+| Singapore | −0.45 | −1.35 | +1.06 | −0.9 | −4.4 | +4.5 |
+| Beijing | −0.42 | −0.90 | +0.11 | +0.4 | −7.6 | +4.0 |
+| New York | −0.26 | −1.08 | +0.25 | +0.8 | −4.0 | +5.3 |
+| Tokyo | −0.25 | −0.97 | +0.34 | +0.5 | −5.9 | +9.1 |
+| Los Angeles | −0.24 | −0.92 | +0.13 | +2.9 | −3.2 | +14.4 |
+| São Paulo | −0.17 | −0.71 | +0.81 | −1.2 | −9.1 | +4.0 |
+| Mexico City | −0.15 | −0.87 | +1.03 | +1.3 | −2.6 | +4.0 |
+| Madrid | −0.12 | −0.48 | +0.38 | −2.3 | −4.8 | +3.8 |
+| Kansas City MO | −0.08 | −0.27 | +0.17 | −0.0 | −0.5 | +1.4 |
+| Sydney | −0.07 | −0.87 | +1.03 | +0.3 | −6.7 | +6.5 |
+| London | −0.06 | −0.32 | +0.26 | +3.7 | −0.1 | +11.2 |
+| Anchorage | +0.37 | −0.54 | +0.81 | −2.7 | −7.4 | +4.1 |
+| Nairobi | +0.89 | −0.09 | +2.15 | +0.6 | −3.1 | +5.1 |
+
+* This is the grid-resolution cost only: the page reproduced the stored grid exactly in the same
+  check (stored grid 60/60, alignment 27/27, air-quality nodes 3/3), so encoding and the browser
+  add nothing.
+* The earlier finding holds: the cold readings are at mountain, desert-edge and coastal cities,
+  where the 0.25° point next to the city differs from the 0.5° nodes around it. One run is a
+  single sample; the forecast history (below) will give the long-run numbers.
+* The Data page's "Known limits" quotes these figures.
+
+**How the accuracy check labels its rows** (`scripts/data/accuracy.mjs`, since November 2026):
+
+* **ok**: within tolerance of the reference.
+* **grid**: outside tolerance of the raw 0.25° value, but within encoding tolerance of the stored
+  grid value at that point, so the gap is the grid resolution above, not a fault.
+* **differs**: a different model or blend (Open-Meteo `gfs_global` / `gfs_seamless`, which can be a
+  different GFS run or include HRRR; `cams_global`; NWS). Shown for information only.
+* **FAIL**: outside tolerance and not explained by either. Only FAIL rows raise an "Outside
+  tolerance" notice.
+
+On 10 Nov 2026 the check gave, against raw GFS at +0 h and +24 h, 50 ok, 7 grid and 0 FAIL; at
+f120, 25 ok, 4 grid and 0 FAIL.
+
 ## US air quality index
 
 The map's PM2.5 colours, categories and AQI use the **US EPA breakpoints revised on 6 May 2024**
@@ -399,7 +449,7 @@ month with fewer entries than either copy held.
 |---|---|
 | `index.json` | months and entry counts, the cities, hours and units, source and licence |
 | `runs-YYYY-MM.json` | one summary per GFS cycle: run, source, sizes, timings, Open-Meteo calls, publish times, spot check |
-| `points-YYYY-MM.json` | each cycle's forecast at the five check cities (`CITY_POINTS`: Kansas City MO, Miami, Denver, London, Delhi), every 6 h from f000 to f168: temperature, wind speed and direction, sea-level pressure, rain |
+| `points-YYYY-MM.json` | each cycle's forecast at the 20 check cities (`CITY_POINTS`: Kansas City MO, Miami, Denver, London, Delhi, New York, Los Angeles, Anchorage, Mexico City, São Paulo, Reykjavík, Madrid, Cairo, Lagos, Nairobi, Moscow, Beijing, Tokyo, Singapore, Sydney; the last 15 from 11 November 2026), every 6 h from f000 to f168: temperature, wind speed and direction, sea-level pressure, rain |
 
 Point values are the raw GFS 0.25° numbers the build already records for the accuracy check
 (bilinear from the four surrounding grid points), so they don't depend on the site's coarser
@@ -411,6 +461,9 @@ can be compared with. Station observations would be a separate, later source.
 4 November 2026, written by the earlier archive job. They are read into the run summaries
 on every build and are not added to any more.
 
-**Size.** Measured with a simulated month (120 cycles): `points` 477 KB (166 KB gzipped, as
-Pages serves it), `runs` about 100 KB. About 7 MB a year, under 1 % of the 1 GB Pages limit
-per year.
+**Size.** Measured with a simulated month (120 cycles, 20 cities): `points` 1.9 MB (656 KB
+gzipped, as Pages serves it), `runs` about 100 KB. About 23 MB a year: the site's own files are
+about 100 MB, and Pages allows 1 GB, so years of history fit. Older months could be thinned to
+daily runs later if needed. The build samples the cities' wind speed at the four grid nodes it
+needs only (it used to recompute the whole wind grid per city and hour, about 30 s per run with
+20 cities).

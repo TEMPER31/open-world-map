@@ -10,6 +10,32 @@ on:
     - cron: '47 4,10,16,22 * * *'
   push:
     branches: [main]
+    # A merge that only changes docs or tests doesn't rebuild and redeploy the data (a NOAA
+    # download and a Pages deploy); the refresh timer keeps the forecast current. Anything
+    # under site/, the data scripts or this workflow still runs it.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.github/dependabot.yml'
+      - '.github/workflows/refresh.yml'
+      - 'scripts/build_coastlines.py'
+      - 'scripts/build_places.py'
+      - 'scripts/check_site.py'
+      - 'scripts/data/refresh_due.py'
+      - 'scripts/data/test_*.py'
+      - 'scripts/data/accuracy.mjs'
+      - 'scripts/data/bandwidth.mjs'
+      - 'scripts/data/event-fixtures.mjs'
+      - 'scripts/data/perf.mjs'
+      - 'scripts/data/photo-fixtures.mjs'
+      - 'scripts/data/render-tests.mjs'
+      - 'scripts/data/satellite-probe.mjs'
+      - 'scripts/data/screenshots.mjs'
+      - 'scripts/data/sources-probe.mjs'
+      - 'scripts/data/unit-tests.mjs'
   pull_request:
   workflow_dispatch:
 
@@ -221,7 +247,8 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # ~15 min of screenshots and checks, plus up to 45 for the satellite probe when it runs
+    timeout-minutes: 70
     env:
       RAW: ci-out
       LABEL: ${{ github.head_ref }}
@@ -277,10 +304,12 @@ jobs:
       - name: Sources probe (events and street-photo hosts; report committed with the others)
         continue-on-error: true
         run: node scripts/data/sources-probe.mjs "$RAW/sources-probe.md" > /dev/null
-      # The satellite probe (Phase 2 diagnostics) takes ~45 minutes: run it only when the
-      # satellite code or the probe itself differs from main.
+      # The satellite probe (Phase 2 diagnostics) takes 30-45 minutes: run it only when the
+      # satellite code or the probe itself differs from main, and stop it at 45 minutes so the
+      # job still ends in time to upload the screenshots and reports.
       - name: Satellite imagery probe (only when satellite code changed)
         continue-on-error: true
+        timeout-minutes: 45
         run: |
           if git diff --quiet FETCH_HEAD HEAD -- site/js/basemaps.js site/js/config.js scripts/data/satellite-probe.mjs; then
             echo "Satellite code unchanged from main: probe skipped."
