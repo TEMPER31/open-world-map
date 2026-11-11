@@ -198,10 +198,12 @@ CITIES.forEach((c, i) => times.forEach((t, k) => {
     // Primary: the page vs NOAA's own GFS 0.25 deg values (bilinear) for the same run and hour.
     // The difference is what our 0.5 deg grid + encoding adds.
     const sg = raw.grid || {};   // the stored grid's value and the encoding tolerance, to tell resolution from error
+    // rain is an area average stored on a log scale (2 % steps): its encoding tolerance grows with the rate
+    const rainTol = sg.rain == null ? null : +Math.max(0.02, 0.05 * sg.rain).toFixed(3);
     row(c.name, t, 'temp °C', o.temp.value, raw.temp, 'GFS 0.25° raw', 0.7, { group: 'raw' + g120, grid: [sg.temp, 0.15] });
     row(c.name, t, 'wind km/h', o.wind.value, raw.wind_kmh, 'GFS 0.25° raw', TOL.wind, { group: 'raw' + g120, grid: [sg.wind_kmh, 1] });
     row(c.name, t, 'wind from °', o.wind.dirFrom, raw.wind_from_deg, 'GFS 0.25° raw', TOL.dir, { group: 'raw' + g120, angle: true, d: 0, calm: Math.max(o.wind.value, raw.wind_kmh) < CALM_KMH });
-    row(c.name, t, 'precip mm/h', o.rain.value, raw.rain, 'GFS 0.25° raw', TOL.rain, { group: 'raw' + g120, d: 2 });
+    row(c.name, t, 'precip mm/h', o.rain.value, raw.rain, 'GFS 0.25° raw', TOL.rain, { group: 'raw' + g120, d: 2, grid: [sg.rain, rainTol] });
     row(c.name, t, 'cloud %', o.cloud.value, raw.cloud, 'GFS 0.25° raw', TOL.cloud, { group: 'raw' + g120, d: 0, grid: [sg.cloud, 1] });
     row(c.name, t, 'pressure hPa', o.pres.value, raw.pres, 'GFS 0.25° raw', 0.5, { group: 'raw' + g120, grid: [sg.pres, 0.1] });
   }
@@ -212,6 +214,7 @@ CITIES.forEach((c, i) => times.forEach((t, k) => {
     row(c.name, t, 'temp °C', o.temp.value, gv.temp, 'stored grid', 0.15, { group: 'grid' + g120 });
     row(c.name, t, 'wind km/h', o.wind.value, gv.wind_kmh, 'stored grid', 1, { group: 'grid' + g120 });
     row(c.name, t, 'cloud %', o.cloud.value, gv.cloud, 'stored grid', 1, { group: 'grid' + g120, d: 0 });
+    if (gv.rain != null) row(c.name, t, 'precip mm/h', o.rain.value, gv.rain, 'stored grid', +Math.max(0.02, 0.05 * gv.rain).toFixed(3), { group: 'grid' + g120, d: 2 });
     row(c.name, t, 'pressure hPa', o.pres.value, gv.pres, 'stored grid', 0.1, { group: 'grid' + g120, d: 2 });
     resRows.push(`| ${c.name} | +${t} h${g120 ? ' (f120)' : ''} | ${fmt(gv.temp, 2)} | ${fmt(raw.temp, 2)} | ${fmt(gv.temp - raw.temp, 2)} | ${fmt(gv.wind_kmh)} | ${fmt(raw.wind_kmh)} | ${fmt(gv.wind_kmh - raw.wind_kmh)} | ${fmt(gv.cloud, 0)} | ${fmt(raw.cloud, 0)} |`);
   }
