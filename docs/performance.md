@@ -212,13 +212,19 @@ step is measured locally and the rest is added up from the step times above.
 
 | | Before | After | Change |
 |---|---|---|---|
-| GFS part of the build, same cycle (local, AWS mirror, see below) | BUILD_MISS_S s | BUILD_HIT_S s | **BUILD_PCT** |
-| P6 push to deploy, cycle already built on `main` | 11 min 13 s | about 1 min 30 s (estimate) | about −85 % |
+| GFS part of the build, same cycle (measured locally) | 522.3 s | 0.5 s | **−99.9 %** |
+| Whole build step, same cycle (measured locally) | 524.4 s | 32.1 s | **−94 %** |
+| P6 push to deploy, cycle already built on `main` | 11 min 13 s | about 2 min (estimate) | about −80 % |
 | P6 push to deploy, new cycle | 11 min 13 s | unchanged | 0 |
-| P5 push to checks, cycle already built, no satellite change | about 22 min (run 21 less the probe) | about 9 min 30 s (estimate) | about −55 % |
+| P5 push to checks, cycle already built, no satellite change | about 22 min (run 21 less the probe) | about 10 min (estimate) | about −55 % |
 | P5 push to checks, first run on a new cycle | about 22 min | about 18 min (estimate) | about −18 % |
 
-BUILD_NOTE
+The local measurement is GFS 00Z 11 Nov from the AWS mirror with `--prefer-aws --skip-aq
+--gfs-cache`, run twice: the first run downloaded 801.9 MB in 965 requests and filled the
+cache (92 MB); the second downloaded nothing, and its 137 frames and `series.png` were
+byte-identical to the first run's. The 32 s that remain are the spot check and the
+air-quality range probe against Open-Meteo, which run every time. In Actions the build goes
+through NOMADS (612 s in run 22), so the saving there is a little larger.
 
 **Limits of the estimate.** Render tests part 3 (street photos) has taken between 2 min 21 s
 and 18 min 19 s; when it is slow it decides the total, and nothing here changes that. A pull
