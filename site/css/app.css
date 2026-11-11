@@ -397,7 +397,8 @@ button.chip:hover { background: var(--hover); }
   .m-scrub { height: auto; display: grid; grid-template-columns: 44px 44px 44px 1fr; grid-template-rows: 44px 44px; gap: 4px 6px; padding: 6px 10px 2px; align-items: center; }
   .m-scrub .tl-step { width: 44px; height: 44px; }
   .m-track { height: 44px; grid-column: 1 / -1; grid-row: 2; margin: 0 6px; }
-  .m-time { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 0 8px; }
+  .m-time { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 0 8px; pointer-events: none; } /* a label: taps always reach the buttons */
+  .m-time [data-abs-short] { display: contents; } /* its two clocks wrap as separate pieces */
   .m-time span { white-space: nowrap; }
   .m-track .tl-zone, .m-track .tl-coarse { top: 4px; }
   .m-track .tl-unc { top: 14px; }

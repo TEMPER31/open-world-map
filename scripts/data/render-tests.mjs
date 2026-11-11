@@ -362,6 +362,27 @@ if (part()) {
   check('No page errors (phone Now)', !errors.length, errors.join(' | '));
   await page.close();
 }
+// The phone time label is longest when local time and UTC fall on different days ("Tue 20:00 local
+// · Wed 02:00 UTC"). It once ran over the step buttons at those hours: test that frame at any hour.
+if (part()) {
+  const out = {};
+  for (const w of [360, 375]) {
+    const { page, errors } = await open({ field: 'temp', particles: false }, '1/30/-30', { viewport: { width: w, height: 812 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    out[w] = await page.evaluate(async () => {
+      const m = window.owmTest.meta, t = (m.times || []).find(h => { const d = new Date(m.base + h * 36e5); return d.getDate() !== d.getUTCDate(); });
+      window.owmTest.state.set({ t }); await new Promise(r => setTimeout(r, 400));
+      const R = e => e.getBoundingClientRect(), btns = [...document.querySelectorAll('.m-scrub .tl-step, .m-scrub .play')].map(R);
+      const bits = [...document.querySelectorAll('.m-time b, .m-time span span, .m-time i')].map(R), step = document.querySelector('.m-scrub [data-step="1"]'), s = R(step);
+      return { t, label: document.querySelector('.m-time [data-abs-short]').textContent,
+        overlap: bits.some(k => btns.some(b => k.left < b.right && k.right > b.left && k.top < b.bottom && k.bottom > b.top)),
+        tapReachesStep: document.elementFromPoint(s.left + s.width / 2, s.top + s.height / 2) === step };
+    });
+    out[w].errors = errors.length;
+    await page.close();
+  }
+  check('Phone (360 and 375 px): the longest time label (local and UTC on different days) stays clear of the step buttons, and a tap on "next frame" reaches it',
+    Object.values(out).every(o => o.t != null && / · \S+ \d\d:\d\d /.test(o.label) && !o.overlap && o.tapReachesStep && !o.errors), JSON.stringify(out));
+}
 // 6d. Place search: the index loads on first focus (not with the page), suggestions within ~300 ms
 // of a pause, keys and mouse, lat/lon, no results / unavailable; a pick flies there and opens the
 // place panel at the timeline's hour; a map click names the nearest place; nothing leaves the
