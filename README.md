@@ -25,10 +25,12 @@ services while enabled; they start off on every visit and are not remembered. Se
   chip, a time scrubber, bottom sheets and a tab bar.
 - MapLibre GL JS (flat Web Mercator) with three basemaps. The UI stays dark on all of them.
   - **Dark** and **Light**: OpenFreeMap vector tiles with custom palettes.
-  - **Satellite**: a keyless raster stack. NASA GIBS covers world to regional zoom, EOX
-    Sentinel-2 cloudless covers regional to city zoom worldwide, and USGS NAIP covers street
-    zoom in the contiguous US. The layers cross-fade by zoom. Satellite tiles load only while
-    Satellite is selected and are released when you switch away.
+  - **Satellite**: NASA GIBS at world zoom, then Esri World Imagery (ArcGIS Imagery Standard,
+    free tier) from regional to street zoom worldwide when the deploy has an ArcGIS key. Without
+    a key, or if Esri refuses requests or its free monthly tiles run out, the keyless stack is
+    used instead: EOX Sentinel-2 cloudless from regional to city zoom worldwide and USGS NAIP
+    at street zoom in the contiguous US. The layers cross-fade by zoom. Satellite tiles load
+    only while Satellite is selected and are released when you switch away.
 - Six fields from `field-scales.json` (wind, temperature, precipitation, PM2.5, clouds,
   pressure with isobars and H/L centres), each with its legend, plus a cursor probe and
   wind particles.
@@ -65,14 +67,16 @@ phones):
   first). Play waits for each frame to be drawn instead of skipping. The **Now** button
   returns to the Now frame (as the Home key does on the timeline).
 - **One units setting**: °C/°F, km/h · mph · m/s · knots, km/mi, with Metric and US presets
-  (US by default for an en-US browser). Applies to the probe, place panel, chart, legends,
+  (US by default for an en-US browser). Rain follows the distance unit: mm and mm/h with km,
+  inches and in/h with miles. Applies to the probe, place panel, chart, legends,
   scale bar and measure tool. Data stays metric; only what you read is converted.
 - **Place panel** with every value, both clocks and a close button (Esc). A clicked point is named
-  after the nearest town or city in the place list (within 100 km), with its distance. Its
-  **Quick view** button swaps in a plain summary: now (temperature, sky, wind, rain), the next 48 hours,
+  after the nearest town or city in the place list (within 100 km), with its distance. It opens
+  in **quick view**, a plain summary: now (temperature, sky, wind, rain), the next 48 hours,
   the next 7 days with a low-to-high bar, and sunrise and sunset worked out in the browser (NOAA
   solar formulas). One source line stays in view; "Sources and method" opens the rest. The
-  detailed view is what opens every time. On phones it is a
+  **Detailed view** switch in the header shows every value and the forecast chart, and switches
+  back. On phones it is a
   bottom sheet (peek / half / full); the layers sheet opens to 40 % of the map.
 - **Layers rail**: only the selected field is expanded, with its legend and options.
 - **Distance tool** (ruler button): click points for great-circle legs and the total.

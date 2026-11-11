@@ -3,13 +3,13 @@
 import { CREDITS, SAMPLE_GRID_DEG } from './config.js';
 import * as S from './state.js';
 import { loadScales, FIELDS, ORDER, legendHTML, barHTML, rangeText, aqCategory, aqi2024, toTemp, unitOf } from './scales.js';
-import { setUnits, conv, label, PRESETS, presetOf, scaleBar } from './units.js';
+import { setUnits, conv, label, rainNum, PRESETS, presetOf, scaleBar } from './units.js';
 import { initClock, stamp, layerTimes, getValidTime, onTime } from './clock.js';
 import { sheet } from './sheet.js';
 import { initMeasure } from './measure.js';
 import { sample } from './grid.js';
 import { initData, meta, stepTime, getGrid, getPoint, getFieldTexture, getPressureOverlays, getWindTexture, getSeries } from './data.js';
-import { buildStyle, applyBasemap, activeSatellite } from './basemaps.js';
+import { buildStyle, applyBasemap, activeSatellite, satelliteTest } from './basemaps.js';
 import { FieldGL } from './field-gl.js';
 import { WindGL } from './wind-gl.js';
 import { initTimeline, relT, fmtUTC, fmtBoth } from './timeline.js';
@@ -96,7 +96,7 @@ function readingOf(k, p) {
   switch (k) {
     case 'wind': return [Math.round(conv('speed', v)), label('speed'), `from ${dirFrom(p.u, p.w)}`];
     case 'temp': return [Math.round(toTemp(v)), unitOf('temp'), 'at 2 m'];
-    case 'rain': return v < 0.1 ? ['Dry', '', `${rainSpan()} · area avg`] : [v.toFixed(1), 'mm/h', `${rainSpan()} · area avg`];
+    case 'rain': return v < 0.1 ? ['Dry', '', `${rainSpan()} · area avg`] : [rainNum(v), unitOf('rain'), `${rainSpan()} · area avg`];
     case 'aq': {
       // Category from the hourly PM2.5 (what the colours show). The AQI number follows EPA's
       // definition (24-hour mean): Open-Meteo's us_aqi, which the CI check matched to the 2024
@@ -262,6 +262,7 @@ function bindChrome(map) {
     const radio = (attr, v) => $$(`[data-${attr}]`).forEach(el => el.closest('.seg') && el.setAttribute('aria-checked', String(el.dataset[attr] === v)));
     radio('tunit', s.tempUnit); radio('sunit', s.speedUnit); radio('dunit', s.distUnit); radio('preset', presetOf(u));
     $$('[data-unit]').forEach(el => el.textContent = unitOf(el.dataset.unit));
+    renderOverlayUI(s); // the rain overlay's range follows the units
   });
   S.on(['timeFirst'], s => $$('[data-settfirst]').forEach(el => el.setAttribute('aria-checked', String(el.dataset.settfirst === s.timeFirst))));
   S.on(['speed'], s => $$('[data-setspeed]').forEach(el => el.setAttribute('aria-checked', String(+el.dataset.setspeed === s.speed))));
@@ -277,10 +278,10 @@ function bindChrome(map) {
   // Freshness: source · update time · grid of every weather layer on screen (main field, overlays, particles).
   const freshLines = s => [...(FIELDS[s.field] ? [[s.field, '']] : []), ...s.overlays.map(k => [k, `${OVERLAYS.find(o => o[0] === k)[1]} overlay`]), ...(s.particles && s.field !== 'wind' ? [['wind', 'Particles']] : [])]
     .map(([k, who]) => { const f = fieldFresh(meta, k, who, SAMPLE_GRID_DEG); return `<div class="lg-fresh mono" data-fresh="${who ? (who === 'Particles' ? 'particles' : 'ov-' + k) : k}" title="${f.title}">${f.text}</div>`; }).join('');
-  S.on(['field', 'basemap', 'tempUnit', 'speedUnit', 't', 'overlays', 'particles'], s => {
+  S.on(['field', 'basemap', 'tempUnit', 'speedUnit', 'distUnit', 't', 'overlays', 'particles'], s => {
     const light = s.basemap === 'light', f = FIELDS[s.field];
     // only rebuild when something shown changes (rain's span and the AQ end state follow t)
-    const key = [s.field, s.basemap, s.tempUnit, s.speedUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : '', s.overlays, s.particles].join();
+    const key = [s.field, s.basemap, s.tempUnit, s.speedUnit, s.distUnit, s.field === 'rain' ? rainSpan(s.t) : '', s.field === 'aq' ? aqEnded(s.t) : '', s.overlays, s.particles].join();
     if (key === legendKey) return;
     legendKey = key;
     const ovs = s.overlays.length ? `<div class="lg-ov mono">+ ${s.overlays.map(k => OVERLAYS.find(o => o[0] === k)[1]).join(' · ')}</div>` : '';
@@ -348,8 +349,9 @@ function chartSVG(series, t, nowTemp) {
 }
 
 let detailVals = null, detailSeries = null, detailKey = '', placeSheet = null;
-// Quick view is shown only for the selection it was chosen on, so every new open starts detailed.
-let quickSel = null;
+// The detailed view is shown only for the selection it was chosen on, so every new open starts
+// in quick view.
+let detailSel = null;
 // Each value appears as soon as its own file is ready (the field on screen is already loaded,
 // so it shows at once) instead of waiting for all six downloads.
 let detailFrame = 0;
@@ -373,6 +375,23 @@ function loadDetail(s) {
   }
 }
 
+// The quick view redraws as each value arrives and on every hour step. A new 48-hour row would
+// lose its scroll position and cut off a scroll in progress, so the row stays in the page and
+// only what is around it (and its cells, when they change) is replaced.
+function swapKeepingRow(body, html) {
+  const row = $('.qv-hours', body), tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  const fresh = $('.qv-hours', tpl.content);
+  if (!row || !fresh) { body.replaceChildren(tpl.content); return; }
+  if (fresh.innerHTML !== row.innerHTML) row.innerHTML = fresh.innerHTML;
+  for (let keep = row, next = fresh; keep !== body; keep = keep.parentNode, next = next.parentNode) {
+    const parent = keep.parentNode, around = [...next.parentNode.childNodes], i = around.indexOf(next);
+    for (const n of [...parent.childNodes]) if (n !== keep) n.remove();
+    keep.before(...around.slice(0, i)); keep.after(...around.slice(i + 1));
+    if (parent !== body) for (const a of next.parentNode.attributes) parent.setAttribute(a.name, a.value);
+  }
+}
+
 function renderDetail(s) {
   const el = $('#detail'), body = $('#detail .d-body');
   document.body.classList.toggle('has-detail', !!s.selection);
@@ -386,9 +405,9 @@ function renderDetail(s) {
   const { lon, lat } = s.selection, t = s.t;
   const all = detailVals && ORDER.every(k => k in detailVals);
   const stat = k => { const [v, u, d] = readingOf(k, detailVals && k in detailVals ? detailVals[k] : undefined); return `<button class="stat${k === s.field ? ' on' : s.overlays.includes(k) ? ' ov' : ''}" type="button" data-field="${k}" title="Show ${FIELDS[k].label}"><div class="l">${FIELDS[k].label}${s.overlays.includes(k) ? ' · overlay' : ''}</div><div class="n">${v}<small>${u}</small></div><div class="l">${d}</div></button>`; };
-  const quick = quickSel === s.selection;
+  const quick = detailSel !== s.selection;
   const head = `<div class="d-hd"><button class="d-x" type="button" data-deselect aria-label="Close (Esc)" title="Close (Esc)">×</button>
-      <button class="chip d-q" type="button" data-quick aria-pressed="${quick}">${quick ? 'Detailed view' : 'Quick view'}</button>
+      <button class="chip d-q" type="button" data-quick aria-pressed="${!quick}" title="${quick ? 'Show every value and the forecast chart' : 'Back to the quick view'}">Detailed view</button>
       <div class="kick">Place · ${meta.live ? 'GFS forecast' : 'sample data'}</div>
       <div class="d-title">${fmtCoord(lon, lat)}</div>
       ${placeNameHTML(s.selection)}
@@ -401,9 +420,7 @@ function renderDetail(s) {
     // Live data: the panel's source note moves into the quick view's "Sources and method" list
     // (one short line stays in view). The sample-data warning is always shown in full.
     const about = meta.live ? [['Data', `<span data-fresh="place">${placeFresh(meta)}</span>`], ['Limits', 'Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days.']] : [];
-    const row = $('.qv-hours', body), left = row ? row.scrollLeft : 0; // keep the 48-hour row where it was scrolled to
-    body.innerHTML = `${head}<div class="qv" data-quick-view>${quickHTML(s, detailVals, detailSeries, dirFrom, about)}</div>${meta.live ? '' : note}`;
-    if (left) $('.qv-hours', body).scrollLeft = left;
+    swapKeepingRow(body, `${head}<div class="qv" data-quick-view>${quickHTML(s, detailVals, detailSeries, dirFrom, about)}</div>${meta.live ? '' : note}`);
     el.hidden = false;
     stamp('panel', all ? t : -1); stamp('chart', null);
     return;
@@ -498,7 +515,7 @@ function bindProbe(map) {
     pending = last = e;
     requestAnimationFrame(show);
   });
-  S.on(['t', 'field', 'overlays', 'tempUnit', 'speedUnit', 'timeFirst'], () => { if (last && !left) { pending = last; show(); } }, { now: false });
+  S.on(['t', 'field', 'overlays', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst'], () => { if (last && !left) { pending = last; show(); } }, { now: false });
   map.getCanvas().addEventListener('mouseleave', () => { pending = null; left = true; hide(); });
   map.on('movestart', hide);
 }
@@ -572,7 +589,7 @@ async function boot() {
   const changed = () => { renderEvStatus(); renderPhStatus(); renderCredits(map); const s = S.get(); if (s.selection && s.selection.type !== 'place') renderDetail(s); };
   initEvents(map, changed);
   initPhotos(map, changed);
-  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets, events: eventsTest, photos: photosTest };
+  window.owmTest = { meta, getGrid, sample, reading, state: S, aqi2024, field, stepTime, layerTimes, getValidTime, measure, sheets, events: eventsTest, photos: photosTest, satellite: satelliteTest };
   // Public time API for future layers (events, Phase 5): see clock.js.
   window.owmClock = { onTime, getValidTime, layerTimes };
 
@@ -625,7 +642,7 @@ async function boot() {
   // Particles are thin and partly transparent so the field and labels read through them.
   const windColour = () => wind.setColor(light() ? [0.08, 0.09, 0.1, 0.42] : S.get('field') === 'cloud' ? [1, 0.84, 0.59, 0.55] : [1, 1, 1, 0.58]);
 
-  S.on(['basemap'], s => { applyBasemap(map, s.basemap); renderCredits(map); });
+  S.on(['basemap'], s => { applyBasemap(map, s.basemap, () => renderCredits(map)); renderCredits(map); });
   S.on(['t', 'field'], updateField);
   S.on(['t', 'field', 'overlays', 'basemap'], updateHL);
   S.on(['field', 'basemap'], s => { if (FIELDS[s.field]) field.setLut(s.field, light()); windColour(); });
@@ -667,7 +684,7 @@ async function boot() {
     const also = e.target.closest('[data-ev-also]');
     if (also) { const sel = evSelect(also.dataset.evAlso); if (sel) { S.set({ selection: sel }); $('#detail [data-ev-also]')?.focus(); } }
     if (e.target.closest('[data-quick]')) {
-      quickSel = quickSel === S.get('selection') ? null : S.get('selection');
+      detailSel = detailSel === S.get('selection') ? null : S.get('selection');
       if (mobile.matches && placeSheet.get() === 'peek') placeSheet.set('half');
       renderDetail(S.get());
       $('#detail [data-quick]').focus();

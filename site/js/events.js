@@ -1,5 +1,5 @@
 // Natural events (Phase 5): earthquakes (USGS), wildfires, volcanoes and storms (NASA EONET),
-// disaster alerts (GDACS), active tropical storms with forecast track and cone (NOAA NHC). All
+// disaster alerts (GDACS), active tropical storms with forecast points and cone (NOAA NHC). All
 // keyless and CORS-enabled (scripts/data/sources-probe.mjs), fetched by the browser only while a
 // toggle that needs them is on, at most every 10 min, kept in memory. Observed events don't move
 // with the timeline; NHC storm positions follow it. Drawn as GeoJSON layers, no DOM markers.
@@ -127,8 +127,8 @@ function draw() {
   if (!added) return;
   const s = S.get(), now = Date.now(), sel = s.selection?.type === 'event' && byId(s.selection.id);
   map.getSource('events').setData(fc(visible(s).filter(i => !i.nhc).map(i => pt([i.lon, i.lat], { id: i.id, k: i.k, icon: i.icon || '', mag: i.mag ?? 0, recent: +(now - i.time < DAY) }))));
+  // forecast points only, no line joining them
   map.getSource('nhc').setData(fc((s.events.st && cache.nhc?.storms || []).flatMap(st => [...st.cone.map(f => ({ ...f, properties: { k: 'cone' } })),
-    { type: 'Feature', properties: { k: 'track' }, geometry: { type: 'LineString', coordinates: st.pts.map(p => [p.lon, p.lat]) } },
     ...st.pts.map(p => pt([p.lon, p.lat], { k: 'fpt', id: 'nhc:' + st.bin }))])));
   map.getSource('ev-sel').setData(fc(sel ? [pt(stormAt(sel) || [sel.lon, sel.lat])] : []));
   position(s.t);
@@ -171,7 +171,7 @@ const HIT = ['ev-eq', 'ev-pt', 'nhc-pt', 'nhc-now'];
 
 // Nothing is added to the map, drawn or subscribed while every type is off: the icons, sources and
 // layers are created when the first type is turned on and removed when the last one is turned off.
-const SOURCES = ['events', 'nhc', 'nhc-now', 'ev-sel'], LAYERS = ['nhc-cone', 'nhc-track', 'nhc-pt', 'ev-eq', 'ev-pt', 'nhc-now', 'ev-sel'];
+const SOURCES = ['events', 'nhc', 'nhc-now', 'ev-sel'], LAYERS = ['nhc-cone', 'nhc-pt', 'ev-eq', 'ev-pt', 'nhc-now', 'ev-sel'];
 let added = false, subs = [];
 function setup(on) {
   if (on === added) return;
@@ -190,7 +190,6 @@ function setup(on) {
   // above the weather field and particles, below the labels
   const L = o => map.addLayer(o, map.getLayer('omt-label-road') ? 'omt-label-road' : undefined), k = v => ['==', ['get', 'k'], v];
   L({ id: 'nhc-cone', type: 'fill', source: 'nhc', filter: k('cone'), paint: { 'fill-color': '#8a7cff', 'fill-opacity': 0.16, 'fill-outline-color': '#b3a9ff' } });
-  L({ id: 'nhc-track', type: 'line', source: 'nhc', filter: k('track'), paint: { 'line-color': '#b3a9ff', 'line-width': 1.6, 'line-dasharray': [2, 1.5] } });
   L({ id: 'nhc-pt', type: 'circle', source: 'nhc', filter: k('fpt'), paint: { 'circle-radius': 3, 'circle-color': '#07090c', 'circle-stroke-color': '#b3a9ff', 'circle-stroke-width': 1.5 } });
   L({ id: 'ev-eq', type: 'circle', source: 'events', filter: k('eq'), paint: { 'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 2.5, 3, 5, 7, 7, 13, 9, 20],
     'circle-color': ['case', ['==', ['get', 'recent'], 1], 'rgba(237,232,221,.38)', 'rgba(237,232,221,.1)'], 'circle-stroke-color': '#ede8dd', 'circle-stroke-width': 1.2 } });

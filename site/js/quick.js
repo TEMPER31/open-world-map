@@ -5,7 +5,7 @@
 // run, grid, method) is one line at the foot and a "Sources and method" list that opens on demand.
 
 import { meta, getPoint } from './data.js';
-import { conv, label } from './units.js';
+import { conv, label, rainNum } from './units.js';
 import { toTemp, unitOf } from './scales.js';
 import { relT, fmtBoth } from './timeline.js';
 import { runLabel } from './fresh.js';
@@ -16,7 +16,7 @@ const H = 3600e3, DAY = 864e5;
 const pad = n => String(n).padStart(2, '0');
 const temp = c => c == null || c !== c ? '—' : `${Math.round(toTemp(c))}°`;
 const wind = k => k == null || k !== k ? '—' : `${Math.round(conv('speed', k))} ${label('speed')}`;
-const rainText = v => v === undefined ? '…' : v == null || v !== v ? '—' : v < 0.1 ? 'Dry' : `${v.toFixed(1)} mm`;
+const rainText = v => v === undefined ? '…' : v == null || v !== v ? '—' : v < 0.1 ? 'Dry' : `${rainNum(v)} ${label('rain')}`;
 const validOf = t => meta.base + t * H;
 
 // Plain sky words from total cloud cover (%), precipitation (mm in the past hour, the
@@ -105,7 +105,7 @@ export function quickHTML(s, vals, series, dirFrom, about = []) {
   const fine = meta.live ? `${meta.gfs?.grid?.deg ?? 0.5}° grid (~50 km); wind ${meta.gfs?.wind_grid?.deg ?? 0.75}°; clouds and rain are area averages` : `${SAMPLE_GRID_DEG}° grid`;
   const sky = v('cloud') === undefined || v('rain') === undefined ? '…' : skyWord(v('cloud'), v('rain'), v('temp'));
   const windNow = w === undefined ? '…' : w && w.v === w.v ? `${wind(w.v)} from ${dirFrom(w.u, w.w)}` : '—';
-  const rainNow = v('rain') === undefined ? '…' : v('rain') == null || v('rain') !== v('rain') ? '—' : v('rain') < 0.1 ? 'Dry' : `${v('rain').toFixed(1)} mm/h`;
+  const rainNow = v('rain') === undefined ? '…' : v('rain') == null || v('rain') !== v('rain') ? '—' : v('rain') < 0.1 ? 'Dry' : `${rainNum(v('rain'))} ${unitOf('rain')}`;
   const now = `<div class="d-sec" data-qv="now"><div class="kick"><span>${t ? `At ${relT(t)}` : 'Now'}</span><span>follows the timeline</span></div>
     <div class="qv-now"><b class="qv-temp mono">${v('temp') === undefined ? '…' : temp(v('temp')).replace('°', '')}<small>${unitOf('temp')}</small></b><div class="qv-sky" data-sky>${sky}</div></div>
     <div class="qv-facts"><div><span>Wind</span><b class="mono">${windNow}</b></div><div><span>Rain, ${meta.rainHours(t) >= 3 ? 'past 3 h' : 'past hour'}</span><b class="mono">${rainNow}</b></div></div></div>`;
@@ -134,7 +134,7 @@ export function quickHTML(s, vals, series, dirFrom, about = []) {
   // one line that is always shown, and the full account behind a disclosure
   const list = [
     ['Now', 'now', `${src} · ${fine}`],
-    ['Next 48 hours', 'hours', `Temperature (${unitOf('temp')}) and wind (${label('speed')}): ${src}, summary file on a ${gridText(deg)}, ${stepText(pts)}. Rain: mm in the hour before each time, ${fine.split(';')[0]}, area average.`],
+    ['Next 48 hours', 'hours', `Temperature (${unitOf('temp')}) and wind (${label('speed')}): ${src}, summary file on a ${gridText(deg)}, ${stepText(pts)}. Rain: ${label('rain') === 'in' ? 'inches' : 'mm'} in the hour before each time, ${fine.split(';')[0]}, area average.`],
     ['Next 7 days', 'days', `${src}, summary file on a ${gridText(deg)}, ${stepText((series || []).filter(p => p.t >= 0))}; days in your local time; wind is the day's strongest value. “part”: the day is only partly in the forecast. Rain by day is not in the summary file.`],
     ['Sun', 'sun', SUN_SRC]
   ].map(([n, k, x]) => `<dt>${n}</dt><dd class="src" data-qv-src="${k}">${x}</dd>`).join('') + about.map(([n, x]) => `<dt>${n}</dt><dd class="src">${x}</dd>`).join('');

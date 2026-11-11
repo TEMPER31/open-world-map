@@ -157,7 +157,9 @@ button.row:hover, .row[data-toggle]:hover { background: var(--hover); }
 .tl-lab b { color: var(--ink); font-weight: 600; }
 .tl-tick { position: absolute; top: 42px; width: 1px; height: 3px; background: var(--line2); }
 .tl-tick.major { height: 6px; }
-.tl-head { position: absolute; top: 6px; bottom: 22px; width: 2px; background: var(--accent); transform: translateX(-1px); pointer-events: none; }
+.tl-head { position: absolute; top: 6px; bottom: 22px; width: 2px; background: var(--accent); transform: translateX(-1px); pointer-events: none; transition: left .09s ease-out; }
+.dragging .tl-head { transition: none; } /* follows the pointer exactly while dragged */
+@media (prefers-reduced-motion: reduce) { .tl-head { transition: none; } }
 .tl-head::before { content: ""; position: absolute; left: -5px; top: -4px; width: 12px; height: 12px; background: var(--accent); transform: rotate(45deg); }
 
 /* ---- detail panel ---- */
@@ -528,7 +530,10 @@ button.chip:disabled:hover { background: none; }
 }
 
 /* ---- place panel: quick view ---- */
-.d-q { position: absolute; right: 48px; top: 11px; }
+/* the switch to the detailed view: accent outline and glow so it stands out from the grey chrome */
+.d-q { position: absolute; right: 48px; top: 11px; color: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 1px rgba(220,182,114,.25), 0 0 12px 1px rgba(220,182,114,.4); }
+button.d-q:hover { background: rgba(220,182,114,.12); }
+.d-q[aria-pressed="true"], button.d-q[aria-pressed="true"]:hover { background: var(--accent); color: var(--accentInk); }
 .qv .d-sec { padding: 12px 18px 14px; }
 .qv .d-sec .kick { margin-bottom: 10px; }
 .qv-now { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; }
@@ -542,8 +547,9 @@ button.chip:disabled:hover { background: none; }
 .qv-facts b, .qv-sun b { font-size: 13px; font-weight: 500; }
 .qv-sun small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--mute); }
 .qv-sun small i { font-size: 0; } /* the separator reads in text, but is not drawn at the start of the line */
-.qv-hours { display: flex; overflow-x: auto; border: 1px solid var(--line); scroll-snap-type: x proximity; }
-.qv-h { flex: none; min-width: 57px; padding: 8px 8px 9px; display: grid; gap: 4px; border-left: 1px solid var(--line); scroll-snap-align: start; font-size: 11px; color: var(--faint); }
+/* free scrolling, no snap points: snapping made the row jump while dragged or swiped */
+.qv-hours { display: flex; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--line); }
+.qv-h { flex: none; min-width: 57px; padding: 8px 8px 9px; display: grid; gap: 4px; border-left: 1px solid var(--line); font-size: 11px; color: var(--faint); }
 .qv-h:first-child { border-left: 0; }
 .qv-h.day:not(:first-child) { border-left-color: var(--line2); }
 .qv-h b { font-size: 17px; font-weight: 500; color: var(--ink); }

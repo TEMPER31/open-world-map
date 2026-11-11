@@ -21,9 +21,11 @@ Mapillary thumbnail image explicitly omits the referrer.
 | jsDelivr | Every visit | MapLibre GL JS 5.24.0 JavaScript and CSS with pinned integrity hashes. The URLs are independent of the map view. |
 | OpenFreeMap | Every visit, including on Satellite | Preconnect at page load, followed by a TileJSON request, vector tiles and glyphs. Tile coordinates indicate the area and zoom on screen. Glyph requests include a font stack and character range. |
 | NASA GIBS | Satellite at world and regional zoom (configured below 7) | Tile coordinates and the previous UTC date. |
-| EOX | Satellite from configured map zoom 4.5 | Tile coordinates for the 2025 Sentinel-2 mosaic. |
-| USGS Imagery Only | Satellite from configured map zoom 11 within the contiguous-US source bounds | Tile coordinates. |
-| USGS NAIP Plus | Satellite from configured map zoom 15 within the same bounds | A Web Mercator tile bounding box, projection, dimensions and image format. |
+| Esri basemap style | Satellite on, once per visit, when the site's ArcGIS key is configured | The site's public ArcGIS browser API key in the query string. |
+| Esri World Imagery tiles | Satellite from map zoom 6.5 while Esri imagery is in use | Tile coordinates and the site's public ArcGIS browser API key in the query string. |
+| EOX | Satellite from configured map zoom 4.5, when Esri imagery is not in use | Tile coordinates for the 2025 Sentinel-2 mosaic. |
+| USGS Imagery Only | Satellite from configured map zoom 11 within the contiguous-US source bounds, when Esri imagery is not in use | Tile coordinates. |
+| USGS NAIP Plus | Satellite from configured map zoom 15 within the same bounds, when Esri imagery is not in use | A Web Mercator tile bounding box, projection, dimensions and image format. |
 | USGS Earthquake Hazards Program | Earthquakes on | Fixed M2.5+ seven-day GeoJSON feed. |
 | NASA EONET | Wildfires & volcanoes or Storms on | Fixed query for open events over seven days. |
 | GDACS | Disaster alerts on | Date range from seven days ago through tomorrow UTC, alert levels and a page size of 100. |
@@ -62,7 +64,9 @@ set of event link hosts. Click-only destinations do not require resource allowli
 | `cdn.jsdelivr.net` | Every visit, MapLibre JS and CSS | `site/index.html:14`, `site/index.html:16` |
 | `tiles.openfreemap.org` | Every visit, preconnect, TileJSON and glyphs in all basemaps. The audit also identifies this as the vector tile host. | `site/index.html:11`, `site/js/basemaps.js:77`, `site/js/config.js:17`, `site/js/config.js:18` |
 | `gibs.earthdata.nasa.gov` | Satellite below configured map zoom 7 | `site/js/config.js:32` |
-| `tiles.maps.eox.at` | Satellite from configured map zoom 4.5 | `site/js/config.js:43` |
+| `basemapstyles-api.arcgis.com` | Satellite on with a configured ArcGIS key: the Imagery Standard style, once per visit | `site/js/config.js:87`, `site/js/basemaps.js:145` |
+| `ibasemaps-api.arcgis.com` | Satellite from map zoom 6.5 while Esri imagery is in use: the tile host the style names (expected; checked against this allowed list before use) | `site/js/config.js:89`, `site/js/basemaps.js:152` |
+| `tiles.maps.eox.at` | Satellite from configured map zoom 4.5, when Esri imagery is not in use | `site/js/config.js:43` |
 | `basemap.nationalmap.gov` | Satellite from configured map zoom 11, within contiguous-US bounds | `site/js/config.js:54` |
 | `imagery.nationalmap.gov` | Satellite from configured map zoom 15, within contiguous-US bounds | `site/js/config.js:71` |
 | `earthquake.usgs.gov` | Earthquakes on, or USGS earthquake credit clicked | `site/js/events.js:26`, `site/js/events.js:36` |
@@ -76,6 +80,7 @@ set of event link hosts. Click-only destinations do not require resource allowli
 | `github.com` | GitHub, Sources and licences, or Source code link clicked | `site/index.html:34`, `site/index.html:100`, `site/index.html:113` |
 | `earthdata.nasa.gov` | GIBS imagery credit clicked | `site/js/config.js:35` |
 | `cloudless.eox.at` | EOX imagery credit clicked | `site/js/config.js:46` |
+| `www.esri.com` | “Powered by Esri” credit clicked | `site/js/basemaps.js:158` |
 | `www.usgs.gov` | USGS imagery credit clicked | `site/js/config.js:58`, `site/js/config.js:75` |
 | `openfreemap.org` | OpenFreeMap credit clicked | `site/js/config.js:87` |
 | `openmaptiles.org` | OpenMapTiles credit clicked | `site/js/config.js:87` |

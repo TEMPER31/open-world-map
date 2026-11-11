@@ -3,7 +3,7 @@
 // sunrise and sunset (site/js/sun.js). No dependencies.
 //   node scripts/data/unit-tests.mjs
 import { readFileSync } from 'node:fs';
-import { setUnits, conv, label, fmtDist, scaleBar, haversineKm, greatCircle, PRESETS, presetOf, defaultPreset } from '../../site/js/units.js';
+import { setUnits, conv, label, fmtDist, scaleBar, haversineKm, greatCircle, PRESETS, presetOf, defaultPreset, rainNum, rainTick } from '../../site/js/units.js';
 import { fold, indexOf, search, parseLatLon, nearest, nearText, placeLabel } from '../../site/js/places.js';
 import { sunTimes } from '../../site/js/sun.js';
 
@@ -40,6 +40,16 @@ const [sl, spx] = scaleBar(1000);
 eq('scale bar 1 km/px (mi) label', sl, '50 mi');
 near('scale bar 50 mi width px', spx, 80.4672, 1e-3);
 setUnits({ dist: 'km' });
+// rain (data in mm): follows the distance unit
+eq('rain in mm with km', [label('rain'), rainNum(2.44)].join(' '), 'mm 2.4');
+setUnits({ dist: 'mi' });
+near('25.4 mm -> in', conv('rain', 25.4), 1, 1e-12);
+eq('rain label with mi', label('rain'), 'in');
+eq('rainNum 2.54 mm in in', rainNum(2.54), '0.10');
+eq('rainNum 0.1 mm in in', rainNum(0.1), '<0.01');
+eq('rain ticks in in', [0.1, 0.5, 1, 2, 4, 8, 16, 64].map(rainTick).join(' '), '.004 .02 .04 .08 .16 .31 .63 2.5');
+setUnits({ ...PRESETS.metric });
+eq('metric preset gives mm again', label('rain'), 'mm');
 // presets
 eq('preset of US units', presetOf(PRESETS.us), 'us');
 eq('preset of metric', presetOf(PRESETS.metric), 'metric');

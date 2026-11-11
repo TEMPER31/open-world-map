@@ -41,6 +41,24 @@ The Dependabot configuration opens a grouped weekly pull request for GitHub Acti
 version updates when updates are available. Review the full-SHA pins and required checks
 before merging.
 
+## ArcGIS key (Esri satellite imagery)
+
+The deploy job writes the `ARCGIS_API_KEY` Actions secret into the ignored `js/secrets.js`.
+Builds and pull request tests get an empty key and use the keyless imagery.
+
+1. Use an ArcGIS Location Platform account on the free tier: pay-as-you-go off and no payment
+   method, so Esri stops serving (and the map falls back) instead of billing when the
+   2,000,000 free basemap tiles of a month are used.
+2. Create API key credentials with only the Basemaps privilege (`premium:user:basemaps`), set
+   the allowed referrer to `https://temper31.github.io` (the page sends only its origin as the
+   referrer) and generate a key. Keys last up to one year: note the expiry date.
+3. Open repository Settings → Secrets and variables → Actions → Repository secrets and save the
+   key as `ARCGIS_API_KEY`.
+4. After the next successful `main` deploy, choose Satellite and zoom in: the credits should
+   read "Powered by Esri". The deploy log shows only the key's length and character check.
+5. To rotate, generate the second key on the same credentials, replace the secret, wait for a
+   deploy, then invalidate the old key.
+
 ## Mapillary token rotation
 
 1. In the Mapillary developer dashboard, create a replacement client token for the

@@ -38,7 +38,17 @@ const liveName = n => OFFLINE ? `${n} [offline run: saved samples, live feeds no
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 // Local time zone US Central, so local time and UTC differ in the time label.
 const TZ = 'America/Chicago';
-async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } = {}) {
+// Esri imagery without a real key or quota: a stand-in key, style and tiles (or refusals).
+const PNG1 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+const CORS = { 'access-control-allow-origin': '*' };
+async function routeEsri(page, { style = 200, tiles = 200 } = {}) {
+  await page.route('**/js/secrets.js', r => r.fulfill({ contentType: 'text/javascript', body: "export const MAPILLARY_TOKEN = '';\nexport const ARCGIS_API_KEY = 'owmTestKeyNotARealKey0000';\n" }));
+  const fail = (r, status) => r.fulfill({ status, contentType: 'application/json', headers: CORS, body: JSON.stringify({ error: { code: status, message: 'test refusal' } }) });
+  await page.route('https://basemapstyles-api.arcgis.com/**', r => style !== 200 ? fail(r, style) : r.fulfill({ contentType: 'application/json', headers: CORS, body: JSON.stringify({ version: 8, layers: [],
+    sources: { esri: { type: 'raster', tiles: ['https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256, maxzoom: 19, attribution: 'Esri, Vantor, Earthstar Geographics, and the GIS User Community' } } }) }));
+  await page.route('https://ibasemaps-api.arcgis.com/**', r => tiles !== 200 ? fail(r, tiles) : r.fulfill({ contentType: 'image/png', headers: CORS, body: PNG1 }));
+}
+async function open(prefs, hash = '2/35/-20', { samples, photos, logo, esri, ...ctx } = {}) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, timezoneId: TZ, ...ctx });
   await watchCsp(page);
   if (process.env.OWM_ML_DIR) { // local testing only: serve MapLibre from disk when the CDN is unreachable
@@ -62,6 +72,7 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
   page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
   if (samples) await eventSamples(page, samples);
   if (photos) await routePhotos(fbcdn(page), photos);
+  if (esri) await routeEsri(page, esri);
   if (logo) { // the owner's logo file is not in the repository: a plain grey 48 x 12 rectangle stands in for it
     await page.route('**/js/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace("export const MAPILLARY_LOGO = null;", "export const MAPILLARY_LOGO = 'img/mapillary-logo.svg';") }); });
     await page.route('**/img/mapillary-logo.svg', r => r.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="12"><rect width="48" height="12" fill="#888"/></svg>' }));
@@ -243,6 +254,7 @@ if (part()) {
   const { page, errors } = await open({ field: 'pres', particles: true }, '3/45/-30');
   const m = await page.evaluate(() => ({ first: window.owmTest.meta.first, times: window.owmTest.meta.times }));
   await page.mouse.click(700, 350); // place panel
+  await page.click('#detail [data-quick]'); // detailed view, for the chart
   await page.mouse.move(640, 300); // probe
   const rows = [];
   const starts = [0, 120 - m.first - 2];
@@ -498,13 +510,14 @@ if (part()) {
   check('No page errors (phone search)', !errors.length, errors.join(' | '));
   await page.close();
 }
-// 6e. Quick view in the place panel: chosen with a header button, back with another; the
-// detailed view opens every time; units and the timeline update it; every section names its
-// source and grid; sunrise and sunset (and the polar messages); no request to another host.
+// 6e. Quick view in the place panel: it opens every time; the "Detailed view" switch in the
+// header shows the detailed view and switches back; units and the timeline update it; every
+// section names its source and grid; sunrise and sunset (and the polar messages); no request
+// to another host.
 const qv = page => page.evaluate(() => {
   const d = document.querySelector('#detail'), q = d.querySelector('[data-quick-view]'), b = d.querySelector('[data-quick]');
   const sec = k => d.querySelector(`[data-qv="${k}"]`);
-  return { open: !d.hidden, quick: !!q, stats: !!d.querySelector('.stats'), chart: !!d.querySelector('[data-chart-t]'), btn: b?.textContent, pressed: b?.getAttribute('aria-pressed'),
+  return { open: !d.hidden, quick: !!q, stats: !!d.querySelector('.stats'), chart: !!d.querySelector('[data-chart-t]'), btn: b?.textContent, pressed: b?.getAttribute('aria-pressed'), glow: b ? getComputedStyle(b).boxShadow !== 'none' : false,
     temp: d.querySelector('.qv-temp')?.textContent, sky: d.querySelector('[data-sky]')?.textContent, nowKick: sec('now')?.querySelector('.kick span')?.textContent,
     cells: d.querySelectorAll('.qv-h').length, onCell: d.querySelector('.qv-h.on')?.dataset.qt ?? null, firstCell: d.querySelector('.qv-h')?.textContent.replace(/\s+/g, ' ').trim(), days: d.querySelectorAll('.qv-day').length, day1: d.querySelector('.qv-day')?.textContent.replace(/\s+/g, ' ').trim(),
     srcs: ['now', 'hours', 'days', 'sun'].map(k => d.querySelector(`[data-qv-src="${k}"]`)?.textContent || ''), note: [...d.querySelectorAll('.d-body > .d-sec')].pop()?.innerHTML,
@@ -514,27 +527,29 @@ const qv = page => page.evaluate(() => {
 if (part()) {
   const { page, errors } = await open({ field: 'temp', particles: false }, '6/39.1/-94.58');
   const origin = new URL(site).origin, other = [], own = [];
-  // a map click opens the detailed view
+  // a map click opens the quick view; the switch shows the detailed view (its note is compared below)
   const pt = await page.evaluate(() => { const p = window.owmMap.project([-94.58, 39.1]), r = window.owmMap.getCanvas().getBoundingClientRect(); return [p.x + r.left, p.y + r.top]; });
-  await page.mouse.click(pt[0], pt[1]);
-  await page.waitForTimeout(1500);
-  const d0 = await qv(page);
-  const detailNote = d0.note;
   page.on('request', r => { const u = new URL(r.url()); if (/^(data|blob):/.test(u.protocol)) return; (u.origin === origin ? own : other).push(u.pathname + (u.origin === origin ? '' : ' @' + u.host)); });
-  await page.click('#detail [data-quick]');
+  await page.mouse.click(pt[0], pt[1]);
   await page.waitForFunction(() => document.querySelectorAll('#detail .qv-h').length && !/…/.test(document.querySelector('#detail .qv-hours')?.textContent || '…'), null, { timeout: 15000 }).catch(() => {});
   const q1 = await qv(page);
   const atOpen = { own: own.slice(), other: other.slice() }; // what opening it loaded; later steps load other fields on purpose
+  await page.click('#detail [data-quick]'); await page.waitForTimeout(800);
+  const d0 = await qv(page);
+  const detailNote = d0.note;
+  await page.click('#detail [data-quick]');
   const sky = await page.evaluate(async () => { const { skyWord } = await import('./js/quick.js'); return [skyWord(10, 0, 10), skyWord(24.9, 0, 10), skyWord(25, 0, 10), skyWord(69, 0, 10), skyWord(70, 0, 10), skyWord(100, 0.05, 10), skyWord(100, 0.1, 10), skyWord(50, 1, 10), skyWord(50, 4, 10), skyWord(50, 0.5, 1), skyWord(NaN, 0, 10)].join(' | '); });
-  check('Quick view (desktop): a map click opens the detailed view; "Quick view" swaps in now, the next 48 hours, the next 7 days and the sun; "Detailed view" in its place',
-    d0.stats && d0.chart && !d0.quick && d0.btn === 'Quick view' && d0.pressed === 'false' && q1.quick && !q1.stats && !q1.chart && q1.btn === 'Detailed view' && q1.pressed === 'true' && /^-?\d+°[CF]$/.test(q1.temp) && /^(Clear|Partly cloudy|Cloudy|(Light |Heavy )?([Rr]ain|[Rr]ain or snow))$/.test(q1.sky) && q1.cells >= 8 && q1.days >= 2,
-    JSON.stringify({ d0: { stats: d0.stats, btn: d0.btn }, q1: { temp: q1.temp, sky: q1.sky, cells: q1.cells, first: q1.firstCell, days: q1.days, day1: q1.day1 } }));
+  check('Quick view (desktop): a map click opens it (now, the next 48 hours, the next 7 days and the sun); the glowing "Detailed view" switch shows the stats and chart',
+    q1.quick && !q1.stats && !q1.chart && q1.btn === 'Detailed view' && q1.pressed === 'false' && q1.glow && d0.stats && d0.chart && !d0.quick && d0.btn === 'Detailed view' && d0.pressed === 'true' && /^-?\d+°[CF]$/.test(q1.temp) && /^(Clear|Partly cloudy|Cloudy|(Light |Heavy )?([Rr]ain|[Rr]ain or snow))$/.test(q1.sky) && q1.cells >= 8 && q1.days >= 2,
+    JSON.stringify({ d0: { stats: d0.stats, btn: d0.btn, pressed: d0.pressed }, q1: { btn: q1.btn, glow: q1.glow, temp: q1.temp, sky: q1.sky, cells: q1.cells, first: q1.firstCell, days: q1.days, day1: q1.day1 } }));
   check('Quick view: sky words follow the stated thresholds (cloud < 25 % Clear, < 70 % Partly cloudy, else Cloudy; rain from 0.1 mm, light < 1, heavy >= 4; "or snow" at <= 1 °C)',
     sky === 'Clear | Clear | Partly cloudy | Partly cloudy | Cloudy | Cloudy | Light rain | Rain | Heavy rain | Light rain or snow | —', sky);
   check('Quick view: one source line stays in view (source, both grids); "Sources and method" starts closed and names every section\'s source and grid (summary-file grid read from the data) with the detailed view\'s grid note; sample data keeps its warning in view',
     q1.srcs.every(x => x.length > 20) && /° grid/.test(q1.srcs[0]) && /summary file on a \d+(\.\d+)?° grid \(about \d+ km\)/.test(q1.srcs[1]) && /summary file on a/.test(q1.srcs[2]) && /NOAA's solar formulas/.test(q1.srcs[3])
     && /° grid, outlook on a \d+(\.\d+)?° grid/.test(q1.line) && q1.aboutOpen === false && q1.paras === 0 && /~50 km grid|Sample data/.test(detailNote) && (/~50 km grid/.test(q1.about) || /Sample data/.test(q1.alert)),
     JSON.stringify({ line: q1.line, open: q1.aboutOpen, srcs: q1.srcs }));
+  // the 48-hour row is scrolled and marked: redraws below must keep it (no jump back, no cut-off scroll)
+  await page.evaluate(() => { const h = document.querySelector('#detail .qv-hours'); h.scrollLeft = 120; h.dataset.mark = '1'; });
   // units: change at once
   await page.evaluate(() => window.owmTest.state.set({ tempUnit: 'F', speedUnit: 'kn' }));
   await page.waitForTimeout(300);
@@ -546,10 +561,14 @@ if (part()) {
   await page.waitForTimeout(800);
   const q3 = await qv(page), t3 = await page.evaluate(() => window.owmTest.state.get('t'));
   check('Quick view: moving the timeline updates the now part (heading, panel hour) and marks its slot in the 48-hour row', q3.quick && t3 > 0 && q3.panelT === String(t3) && q3.nowKick === `At +${t3} h` && q3.onCell !== null && +q3.onCell <= t3, JSON.stringify({ t: t3, kick: q3.nowKick, on: q3.onCell, panelT: q3.panelT }));
+  const kept = await page.evaluate(() => { const h = document.querySelector('#detail .qv-hours'); return { same: h?.dataset.mark === '1', left: h?.scrollLeft, snap: h && getComputedStyle(h).scrollSnapType }; });
+  check('Quick view: the 48-hour row stays the same element through redraws (units change, 4 hour steps), keeps its scroll position and has no snap points', kept.same && kept.left === 120 && kept.snap === 'none', JSON.stringify(kept));
   const sun = await page.evaluate(async ([rise, set, t]) => { const { sunTimes } = await import('./js/sun.js'); const m = window.owmTest.meta, at = m.base + t * 3600e3 - 94.58 / 15 * 3600e3, d0 = at - at % 864e5, r = sunTimes(39.1, -94.58, d0); return { rise: new Date(r.rise).toISOString() === rise, set: new Date(r.set).toISOString() === set }; }, [q3.rise, q3.set, t3]);
   check('Quick view: sunrise and sunset shown with local time next to UTC, for the place\'s day at the timeline hour', sun.rise && sun.set && /Sunrise \w+ \d\d:\d\d local · \d\d:\d\d UTC/.test(q3.sunText) && /Sunset /.test(q3.sunText), q3.sunText.slice(0, 160));
-  check('Quick view: opening it requests no other host (only this site\'s own rain frames, or none with sample data)', !atOpen.other.length && atOpen.own.every(x => /data\/live\/gfs\/rain\//.test(x)), `${atOpen.other.length} other-host requests; own: ${atOpen.own.length} (${[...new Set(atOpen.own.map(x => x.replace(/f\d+\.png.*/, '')))].join(', ') || 'none'})`);
-  // back to detailed, and every new open is detailed
+  check('Quick view: opening it requests no other host (only this site\'s own data files, or none with sample data)', !atOpen.other.length && atOpen.own.every(x => /\/data\//.test(x)), `${atOpen.other.length} other-host requests; own: ${atOpen.own.length} (${[...new Set(atOpen.own.map(x => x.replace(/f\d+\.png.*/, '')))].join(', ') || 'none'})`);
+  // to detailed and back; every new open is quick
+  await page.click('#detail [data-quick]');
+  const det = await qv(page);
   await page.click('#detail [data-quick]');
   const back = await qv(page);
   await page.click('#detail [data-quick]');
@@ -563,15 +582,15 @@ if (part()) {
   await page.keyboard.press('Enter'); await page.waitForTimeout(1500);
   const picked = await qv(page);
   await page.click('#detail [data-quick]'); await page.waitForTimeout(800);
-  const pickedQ = await qv(page);
-  check('Quick view: "Detailed view" swaps back; Esc closes the panel; a new map click and a search pick both open the detailed view; quick view works after a search pick',
-    !back.quick && back.stats && back.btn === 'Quick view' && !closed.open && again.open && !again.quick && again.stats && picked.open && !picked.quick && picked.stats && pickedQ.quick && pickedQ.cells > 0,
-    JSON.stringify({ back: back.quick, closed: closed.open, again: again.quick, picked: picked.quick, pickedQ: pickedQ.quick }));
+  const pickedD = await qv(page);
+  check('Quick view: the "Detailed view" switch swaps to the detailed view and back; Esc closes the panel; a new map click and a search pick both open the quick view; the detailed view works after a search pick',
+    !det.quick && det.stats && det.pressed === 'true' && back.quick && !back.stats && back.pressed === 'false' && !closed.open && again.open && again.quick && !again.stats && picked.open && picked.quick && picked.cells > 0 && !pickedD.quick && pickedD.stats,
+    JSON.stringify({ det: det.quick, back: back.quick, closed: closed.open, again: again.quick, picked: picked.quick, pickedD: pickedD.quick }));
   // polar: 80° N has no sunrise and 80° S no sunset in November
   const polar = {};
   for (const [k, lat] of [['north', 80], ['south', -80]]) {
     await page.evaluate(lat => window.owmTest.state.set({ t: 0, selection: { type: 'place', lon: 0, lat } }), lat);
-    await page.waitForTimeout(300); await page.click('#detail [data-quick]'); await page.waitForTimeout(300);
+    await page.waitForTimeout(600);
     polar[k] = (await qv(page)).sunText;
   }
   const nov = await page.evaluate(() => new Date(window.owmTest.meta.base).getUTCMonth() === 10);
@@ -585,16 +604,17 @@ if (part()) {
   await page.evaluate(() => window.owmTest.state.set({ selection: { type: 'place', lon: -94.58, lat: 39.1 } }));
   await page.waitForTimeout(1200);
   const b0 = await page.$eval('#detail [data-quick]', e => { const r = e.getBoundingClientRect(), t = document.createRange(); t.selectNodeContents(document.querySelector('#detail .d-title')); return { w: Math.round(r.width), h: Math.round(r.height), clearOfTitle: t.getBoundingClientRect().right <= r.left, snap: document.querySelector('#detail').dataset.snap }; });
-  const d0 = await qv(page);
-  await page.tap('#detail [data-quick]');
   await page.waitForFunction(() => document.querySelectorAll('#detail .qv-h').length, null, { timeout: 15000 }).catch(() => {});
   const q = await qv(page);
-  const lay = await page.evaluate(() => { const h = document.querySelector('#detail .qv-hours'); return { snap: document.querySelector('#detail').dataset.snap, rowScrolls: h ? h.scrollWidth > h.clientWidth : false, pageW: document.documentElement.scrollWidth, btn: (() => { const r = document.querySelector('#detail [data-quick]').getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })() }; });
+  await page.tap('#detail [data-quick]');
+  const lay = await page.evaluate(() => { const h = document.querySelector('#detail .qv-hours'); return { snap: document.querySelector('#detail').dataset.snap, pageW: document.documentElement.scrollWidth, btn: (() => { const r = document.querySelector('#detail [data-quick]').getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })() }; });
+  const d0 = await qv(page);
   await page.tap('#detail [data-quick]');
   const back = await qv(page);
-  check('Quick view (phone 360 px): the 44 px button sits clear of the title, opens quick view (sheet to half), the 48-hour row scrolls inside the panel, no sideways page scroll; "Detailed view" swaps back',
-    b0.w >= 44 && b0.h >= 44 && b0.clearOfTitle && !d0.quick && d0.stats && q.quick && lay.snap === 'half' && lay.rowScrolls && lay.pageW <= 360 && lay.btn[1] >= 44 && !back.quick && back.stats,
-    JSON.stringify({ b0, lay, q: { cells: q.cells, days: q.days }, back: back.quick }));
+  const row = await page.evaluate(() => { const h = document.querySelector('#detail .qv-hours'); return h ? h.scrollWidth > h.clientWidth : false; });
+  check('Quick view (phone 360 px): it opens first; the 44 px "Detailed view" switch sits clear of the title, shows the detailed view (sheet to half) and switches back; the 48-hour row scrolls inside the panel, no sideways page scroll',
+    b0.w >= 44 && b0.h >= 44 && b0.clearOfTitle && q.quick && !q.stats && !d0.quick && d0.stats && lay.snap === 'half' && row && lay.pageW <= 360 && lay.btn[1] >= 44 && back.quick && !back.stats,
+    JSON.stringify({ b0, lay, row, q: { cells: q.cells, days: q.days }, d0: d0.quick, back: back.quick }));
   check('No page errors (phone quick view)', !errors.length, errors.join(' | '));
   await page.close();
 }
@@ -642,6 +662,7 @@ if (part()) {
   await page.mouse.click(640, 400); await page.waitForTimeout(2500);
   await page.click('[data-open="settings"]'); await page.click('#pop-settings [data-preset="us"]'); await page.keyboard.press('Escape');
   await page.mouse.click(640, 400); await page.waitForTimeout(2500);
+  await page.click('#detail [data-quick]'); // detailed view: stats and chart
   await page.mouse.move(700, 380); await page.waitForTimeout(1200);
   const us = await page.evaluate(() => ({
     probe: document.querySelector('#probe').textContent,
@@ -658,6 +679,12 @@ if (part()) {
   us.measure = await page.evaluate(() => document.querySelector('[data-mtotal]').textContent);
   await page.keyboard.press('Escape');
   check('US units everywhere: probe, place panel, chart, legend ticks, scale bar, measure tool', /mph/.test(us.probe) && /mph/.test(us.panel) && /°F/.test(us.panel) && /°F/.test(us.chart) && /mph/.test(us.chart) && /mph/.test(us.legend) && / (mi|ft)$/.test(us.scale) && / mi$/.test(us.measure) && /^0 12 25 37 50 62 93\+$/.test(us.ticks), JSON.stringify(us));
+  // rain in inches: legend, field tile and the place panel's precipitation tile
+  await page.evaluate(() => window.owmTest.state.set({ field: 'rain' })); await page.waitForTimeout(800);
+  const rain = await page.evaluate(() => ({ legend: document.querySelector('#legend .lg-h').textContent, ticks: [...document.querySelectorAll('#legend .lg-t span')].map(e => e.textContent).join(' '), tile: document.querySelector('[data-unit="rain"]')?.textContent,
+    stat: document.querySelector('#detail .stat[data-field="rain"] .n')?.textContent }));
+  await page.evaluate(() => window.owmTest.state.set({ field: 'wind' }));
+  check('US units: rain in inches (legend in/h with ticks .004 to 2.5, field tile, place panel shows in/h or Dry)', /in\/h/.test(rain.legend) && rain.ticks === '.004 .02 .04 .08 .16 .31 .63 2.5' && rain.tile === 'in/h' && /^(Dry|(<0\.01|\d+\.\d\d)in\/h)$/.test(rain.stat), JSON.stringify(rain));
   await page.reload(); await page.waitForFunction(() => window.owmTest && window.owmMap?.loaded(), null, { timeout: 60000 });
   const kept = await page.evaluate(() => ({ t: window.owmTest.state.get('tempUnit'), s: window.owmTest.state.get('speedUnit'), d: window.owmTest.state.get('distUnit'), preset: document.querySelector('[data-preset][aria-checked="true"]')?.dataset.preset }));
   check('Units are remembered after reload', kept.t === 'F' && kept.s === 'mph' && kept.d === 'mi' && kept.preset === 'us', JSON.stringify(kept));
@@ -729,6 +756,22 @@ if (part()) {
   await page.waitForTimeout(400);
   check('Phone place sheet: dragging the handle down snaps to peek', await page.$eval('#detail', e => e.dataset.snap) === 'peek', await page.$eval('#detail', e => e.dataset.snap));
   check('No page errors (phone)', !errors.length, errors.join(' | '));
+  await page.close();
+}
+// 10b. Dragging the timeline: the playhead follows the pointer between frames while dragged and
+// snaps to its frame when let go; only the pointer that started the drag moves it.
+if (part()) {
+  const { page, errors } = await open({ field: 'temp', particles: false }, '3/30/-30');
+  const box = await page.$('[data-track="full"]').then(e => e.boundingBox()), y = box.y + box.height / 2;
+  const head = () => page.evaluate(() => ({ left: parseFloat(document.querySelector('[data-track="full"] .tl-head').style.left), t: window.owmTest.state.get('t'), hours: window.owmTest.meta.times.at(-1), dragging: document.querySelector('[data-track="full"]').classList.contains('dragging') }));
+  await page.mouse.move(box.x + box.width * 0.2, y); await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.4137, y, { steps: 12 }); await page.waitForTimeout(100);
+  const mid = await head();
+  await page.mouse.up(); await page.waitForTimeout(200);
+  const end = await head();
+  check('Timeline drag: the playhead follows the pointer (41.4 % of the track) while dragged, the hour follows, and on release it snaps to its frame',
+    mid.dragging && Math.abs(mid.left - 41.37) < 0.5 && mid.t > 0 && !end.dragging && Math.abs(end.left - end.t / end.hours * 100) < 0.01, JSON.stringify({ mid, end }));
+  check('No page errors (timeline drag)', !errors.length, errors.join(' | '));
   await page.close();
 }
 
@@ -1001,6 +1044,7 @@ if (part()) {
   check('One clock includes the overlays (ov-pres, ov-rain, H/L) with the field, probe and timeline', rows.every(r => r.ok) && ['ov-pres', 'ov-rain', 'hl', 'field', 'probe'].every(k => layers.includes(k)), `${rows.filter(r => r.ok).length}/4 in sync; slowest ${Math.max(...rows.map(r => r.ms))} ms; layers: ${layers.join(', ')}`);
   const probe = await page.evaluate(() => ({ text: document.querySelector('#probe').innerText.replace(/\n/g, ' | '), ov: [...document.querySelectorAll('#probe [data-pov]')].map(e => e.dataset.pov) }));
   await page.mouse.click(640, 300); await page.waitForTimeout(2500);
+  await page.click('#detail [data-quick]'); // detailed view: every value
   const panel = await page.evaluate(() => [...document.querySelectorAll('#detail .stat')].map(e => e.innerText.replace(/\s+/g, ' ')));
   check('Probe and place panel show the main field and every overlay', probe.ov.join() === 'pres,rain' && /°C/.test(probe.text) && /hPa/.test(probe.text) && panel.some(t => /Pressure · overlay \d/.test(t)) && panel.some(t => /Precipitation · overlay/.test(t)), JSON.stringify({ probe, panel }));
   await page.keyboard.press('Escape');
@@ -1028,6 +1072,51 @@ if (part()) {
   check('Phone: overlays section in the layers sheet (44 px rows); overlays draw over "None"; chip shows "+2"', r.rows.every(h => h >= 44) && /\+2/.test(r.chip) && r.lt.includes('ov-cloud') && r.lt.includes('ov-pres') && !r.lt.includes('field'), JSON.stringify(r));
   check('No page errors (overlays, phone)', !errors.length, errors.join(' | '));
   await page.close();
+}
+
+// 20. Esri satellite imagery with a stand-in key, style and tiles (nothing reaches Esri, no quota
+// used): Esri over GIBS when it answers; Dark and Light ask Esri nothing; a refused style or
+// refused tiles switch to the keyless EOX and USGS stack and Esri is not asked again.
+if (part()) {
+  const esriReqs = reqs => reqs.filter(u => /arcgis\.com/.test(u));
+  const run = async (esri, hash = '12/39.013/117.69') => {
+    const { page, errors } = await open({ field: 'none', particles: false }, hash, { esri });
+    const urls = [], logs = []; page.on('request', r => urls.push(r.url())); page.on('console', m => logs.push(m.text()));
+    const sat = async () => { await page.evaluate(() => window.owmTest.state.set({ basemap: 'satellite' })); await page.waitForTimeout(3500); };
+    return { page, errors, urls, logs, sat, state: () => page.evaluate(() => ({ ...window.owmTest.satellite(), credits: document.querySelector('#credits').textContent })) };
+  };
+  // Esri answers
+  let t = await run({ style: 200, tiles: 200 });
+  await t.page.evaluate(() => window.owmTest.state.set({ basemap: 'light' })); await t.page.waitForTimeout(800);
+  await t.page.evaluate(() => window.owmTest.state.set({ basemap: 'dark' })); await t.page.waitForTimeout(800);
+  const darkLight = esriReqs(t.urls).length;
+  await t.sat();
+  const ok = await t.state(), okUrls = t.urls.slice();
+  check('Esri imagery: Dark and Light send nothing to Esri; Satellite asks for the style once, shows Esri over GIBS with "Powered by Esri" and the providers, and loads no EOX or USGS tiles',
+    darkLight === 0 && ok.stack.join() === 'sat-gibs,sat-esri' && /Powered by Esri · Esri, Vantor, Earthstar Geographics/.test(ok.credits) && okUrls.filter(u => /basemapstyles-api/.test(u)).length === 1
+      && okUrls.some(u => /ibasemaps-api\.arcgis\.com\/.*[?&]token=/.test(u)) && !okUrls.some(u => /maps\.eox\.at|nationalmap\.gov/.test(u)),
+    JSON.stringify({ darkLight, stack: ok.stack, styleReqs: okUrls.filter(u => /basemapstyles-api/.test(u)).length, tiles: okUrls.filter(u => /ibasemaps/.test(u)).length }));
+  check('No page errors (Esri imagery)', !t.errors.length, t.errors.join(' | '));
+  await t.page.close();
+  // Esri refuses the style (bad key)
+  t = await run({ style: 401, tiles: 200 });
+  await t.sat();
+  const refused = await t.state();
+  await t.page.evaluate(() => window.owmTest.state.set({ basemap: 'dark' })); await t.page.waitForTimeout(500); await t.sat();
+  check('Esri style refused: the keyless stack (GIBS, EOX, USGS) is shown and the style is asked for only once per visit',
+    refused.stack.join() === 'sat-gibs,sat-eox,sat-usgs,sat-naip' && refused.esriDown && t.urls.filter(u => /basemapstyles-api/.test(u)).length === 1 && /EOxCloudless/.test(refused.credits) && !/Powered by Esri/.test(refused.credits),
+    JSON.stringify({ stack: refused.stack, styleReqs: t.urls.filter(u => /basemapstyles-api/.test(u)).length }));
+  await t.page.close();
+  // Esri refuses tiles (free quota used up): after a few, the keyless stack takes over for the visit
+  t = await run({ style: 200, tiles: 403 });
+  await t.sat(); await t.page.waitForTimeout(1500);
+  const quota = await t.state(), n0 = t.urls.filter(u => /ibasemaps/.test(u)).length;
+  await t.page.evaluate(() => window.owmMap.jumpTo({ center: [117.75, 39.05], zoom: 13 })); await t.page.waitForTimeout(2500);
+  const n1 = t.urls.filter(u => /ibasemaps/.test(u)).length;
+  check('Esri tiles refused: the keyless stack takes over, Esri is not asked again after a map move, and no log line carries the key',
+    quota.stack.join() === 'sat-gibs,sat-eox,sat-usgs,sat-naip' && quota.esriDown && n1 === n0 && /EOxCloudless/.test(quota.credits) && !t.logs.some(l => /owmTestKey/.test(l)),
+    JSON.stringify({ stack: quota.stack, errors: quota.esriErrors, tileReqs: n0, afterMove: n1 - n0, keyInLogs: t.logs.some(l => /owmTestKey/.test(l)) }));
+  await t.page.close();
 }
 
 // ---- Phase 4: street photos (Mapillary) ---------------------------------------------------
