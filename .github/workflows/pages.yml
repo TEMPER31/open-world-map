@@ -247,7 +247,8 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     needs: data
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # ~15 min of screenshots and checks, plus up to 45 for the satellite probe when it runs
+    timeout-minutes: 70
     env:
       RAW: ci-out
       LABEL: ${{ github.head_ref }}
@@ -303,10 +304,12 @@ jobs:
       - name: Sources probe (events and street-photo hosts; report committed with the others)
         continue-on-error: true
         run: node scripts/data/sources-probe.mjs "$RAW/sources-probe.md" > /dev/null
-      # The satellite probe (Phase 2 diagnostics) takes ~45 minutes: run it only when the
-      # satellite code or the probe itself differs from main.
+      # The satellite probe (Phase 2 diagnostics) takes 30-45 minutes: run it only when the
+      # satellite code or the probe itself differs from main, and stop it at 45 minutes so the
+      # job still ends in time to upload the screenshots and reports.
       - name: Satellite imagery probe (only when satellite code changed)
         continue-on-error: true
+        timeout-minutes: 45
         run: |
           if git diff --quiet FETCH_HEAD HEAD -- site/js/basemaps.js site/js/config.js scripts/data/satellite-probe.mjs; then
             echo "Satellite code unchanged from main: probe skipped."
