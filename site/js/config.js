@@ -27,13 +27,13 @@ const yesterdayUTC = () => new Date(Date.now() - 864e5).toISOString().slice(0, 1
 export const SATELLITE = [
   {
     id: 'sat-gibs',
-    // NASA GIBS, VIIRS SNPP corrected-reflectance true colour, previous UTC day.
+    // NASA GIBS, VIIRS NOAA-20 true colour, previous UTC day (GIBS stopped adding Suomi NPP days after 2 Nov 2026).
     // GoogleMapsCompatible_Level9 => z0-9, 256 px tiles.
-    tiles: () => [`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_SNPP_CorrectedReflectance_TrueColor/default/${yesterdayUTC()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`],
+    tiles: () => [`https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/${yesterdayUTC()}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`],
     tileSize: 256, maxzoom: 9,
     layer: { maxzoom: 7 },
-    credit: 'Imagery: <a href="https://earthdata.nasa.gov/gibs">NASA GIBS</a> / ESDIS (VIIRS SNPP)',
-    fresh: () => `NASA GIBS VIIRS true colour · ${yesterdayUTC()} (daily, the previous UTC day) · tiles to zoom 9`
+    credit: 'Imagery: <a href="https://earthdata.nasa.gov/gibs">NASA GIBS</a> / ESDIS (VIIRS NOAA-20)',
+    fresh: () => `NASA GIBS VIIRS NOAA-20 true colour · ${yesterdayUTC()} (daily, the previous UTC day) · tiles to zoom 9`
   },
   {
     id: 'sat-eox',

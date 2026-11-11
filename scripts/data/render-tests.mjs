@@ -57,6 +57,8 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
   const hosts = {};
   const allHosts = new Set(); // every host the page asks for, from the first request
   page.on('request', r => allHosts.add(new URL(r.url()).host));
+  const status = {}; // HTTP status counts per host, from the first response
+  page.on('response', r => { const h = new URL(r.url()).host, c = (status[h] ||= {}); c[r.status()] = (c[r.status()] || 0) + 1; });
   page.on('request', r => { const h = new URL(r.url()).host; if (/usgs\.gov|nasa\.gov|gdacs\.org|weather\.noaa\.gov|nhc\.noaa\.gov|mapillary\.com/.test(h)) (hosts[h] ||= []).push(r.url()); });
   if (samples) await eventSamples(page, samples);
   if (photos) await routePhotos(fbcdn(page), photos);
@@ -77,7 +79,7 @@ async function open(prefs, hash = '2/35/-20', { samples, photos, logo, ...ctx } 
     await page.waitForFunction(() => window.owmMap.loaded(), null, { timeout: 60000 }).catch(() => {});
   }
   await page.waitForTimeout(1500);
-  return { page, errors, reqs, hosts, allHosts };
+  return { page, errors, reqs, hosts, allHosts, status };
 }
 
 // 1. Wind direction: uniform synthetic fields; particles must move with the wind (towards).
@@ -603,7 +605,7 @@ if (part()) {
   await page.evaluate(() => window.owmTest.state.set({ basemap: 'satellite' })); await page.waitForTimeout(800);
   const sat = await page.evaluate(() => [...document.querySelectorAll('.layers [data-satfresh]')].map(e => e.textContent)[0] || '');
   const yday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-  const satOk = sat.includes(`NASA GIBS VIIRS true colour · ${yday} (daily`) && /EOX Sentinel-2 cloudless · 2025 mosaic/.test(sat) && (sat.match(/tiles to zoom \d+/g) || []).length === 2;
+  const satOk = sat.includes(`NASA GIBS VIIRS NOAA-20 true colour · ${yday} (daily`) && /EOX Sentinel-2 cloudless · 2025 mosaic/.test(sat) && (sat.match(/tiles to zoom \d+/g) || []).length === 2;
   await page.evaluate(() => window.owmTest.state.set({ basemap: 'dark' })); await page.waitForTimeout(300);
   const satOff = await page.evaluate(() => document.querySelector('.layers [data-satfresh]').textContent);
   check('Freshness: each visible weather layer (field, overlays, particles) shows source, update time (or "generated, no update time") and grid; live wording with a synthetic manifest; satellite dates and tile levels',
@@ -1170,17 +1172,21 @@ if (!part()) { /* another part runs this */ } else if (process.env.MLY_CI === '1
 // violation. Part 1 also shows Satellite at regional and street zoom (all four imagery hosts).
 {
   if (!PART || PART === 1) {
-    const seen = new Set();
+    const seen = new Set(), answers = {};
     for (const hash of ['5/38/-95', '15/31.7001/-86.7404']) {
       // satellite is turned on inside open(), so its first tiles are requested before open() returns
-      const { page, errors, allHosts } = await open({ field: 'none', particles: false, basemap: 'satellite' }, hash);
+      const { page, errors, allHosts, status } = await open({ field: 'none', particles: false, basemap: 'satellite' }, hash);
       await page.evaluate(() => new Promise(r => { window.owmMap.once('idle', r); setTimeout(r, 4000); }));
       for (const h of allHosts) seen.add(h);
+      for (const [h, c] of Object.entries(status)) for (const [code, n] of Object.entries(c)) (answers[h] ||= {})[code] = ((answers[h] || {})[code] || 0) + n;
       if (errors.length) csp.push(`satellite ${hash}: page errors ${errors.join(' | ')}`);
       await page.close();
     }
     const imagery = ['gibs.earthdata.nasa.gov', 'tiles.maps.eox.at', 'basemap.nationalmap.gov', 'imagery.nationalmap.gov'];
     check('Satellite at regional and street zoom (US): requests to all four imagery hosts pass the CSP', imagery.every(h => seen.has(h) || blockedHosts.has(h)), imagery.map(h => `${h}: ${seen.has(h) || blockedHosts.has(h) ? 'requested' : 'not requested'}`).join(', '));
+    // a source that stops publishing (as Suomi NPP did on GIBS in November 2026) answers 404 for every tile
+    check(liveName('Satellite tiles come back: at least one HTTP 200 from each of the four imagery hosts'), OFFLINE || imagery.every(h => answers[h]?.[200]),
+      OFFLINE ? 'not checked: imagery hosts are not contacted offline' : imagery.map(h => `${h}: ${Object.entries(answers[h] || {}).map(([code, n]) => `${n}× ${code}`).join(' ') || 'no responses'}`).join(', '));
   }
   for (const p of PAGES) { const { page } = await openPage(p); await page.waitForTimeout(300); await page.close(); }
   check('No Content-Security-Policy violation on any page (every map page this part opened and every static page)', !csp.length, csp.length ? csp.slice(0, 6).join(' | ') : `${cspPages} pages watched, 0 violations`);

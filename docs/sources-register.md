@@ -17,7 +17,7 @@ a source.
 | Natural Earth 1:110m | Same-origin GeoJSON in `site/data/`, converted from `world-atlas@2.0.2` | Public domain. The world-atlas packaging is ISC. | Natural Earth | Land, coastlines and borders are registered in the map style on every visit. |
 | GeoNames cities5000 and admin1 region names | Same-origin JSON `site/data/places.json`, built once by `scripts/build_places.py` from the `download.geonames.org` files | CC BY 4.0 | Places: GeoNames (CC BY 4.0) | The place list loads from the site origin the first time the search box is focused or the map is clicked. Search and the nearest-place lookup run in the browser. |
 | IBM Plex Sans Condensed and IBM Plex Mono | Same-origin fonts in `site/fonts/` | SIL OFL 1.1. Licence files ship beside the fonts. | — | UI fonts on every visit. |
-| NASA GIBS VIIRS true colour | `gibs.earthdata.nasa.gov` | NASA imagery has no restrictions on use. GIBS requests acknowledgement. | Imagery: NASA GIBS / ESDIS (VIIRS SNPP) | Satellite at world and regional zoom, below configured map zoom 7. |
+| NASA GIBS VIIRS NOAA-20 true colour | `gibs.earthdata.nasa.gov` | NASA imagery has no restrictions on use. GIBS requests acknowledgement. | Imagery: NASA GIBS / ESDIS (VIIRS NOAA-20) | Satellite at world and regional zoom, below configured map zoom 7. |
 | EOX Sentinel-2 cloudless 2025 | `tiles.maps.eox.at` | CC BY-NC-SA 4.0 for the 2025 mosaic: non-commercial use only; anything made from the imagery is shared under the same licence | EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025), CC BY-NC-SA 4.0 | Satellite from configured map zoom 4.5 worldwide. |
 | USGS The National Map Imagery Only | `basemap.nationalmap.gov` | U.S. Government work, public domain | Imagery: USGS The National Map (USDA NAIP) | Satellite from map zoom 11 within the contiguous-US source bounds. |
 | USGS The National Map NAIP Plus | `imagery.nationalmap.gov` | U.S. Government work, public domain. Service credit is “USGS, USDA, The National Map: Orthoimagery.” | Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery) | Satellite from map zoom 15 within the same bounds. One image export per 512 px tile. |
@@ -25,6 +25,10 @@ a source.
 The three OpenFreeMap credit fragments appear together as “OpenFreeMap · © OpenMapTiles ·
 Data © OpenStreetMap contributors”. The style requests Noto Sans glyphs through OpenFreeMap.
 The licence of the served glyph bundle was not independently verified.
+
+The world-zoom layer moved from VIIRS on Suomi NPP to the same instrument on NOAA-20 on 11 November
+2026: GIBS's capabilities listed no Suomi NPP true colour after 2 November 2026, so every tile for
+the previous day returned 404. NOAA-20 was current to the previous day, with the same zoom levels.
 
 The owner switched from the EOX 2016 mosaic (CC BY 4.0) to the 2025 mosaic on 10 November 2026.
 The 2025 mosaic is CC BY-NC-SA 4.0 (licence and credit text from EOX's WMTS capabilities, checked
