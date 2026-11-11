@@ -3,8 +3,10 @@
 These settings are for the owner to review on GitHub and in the Mapillary developer
 dashboard. The audit's observations are from 5 November 2026. Check current settings in
 the relevant dashboard. Checked from the repository on 10 November 2026: K4 holds (Pages deploys
-from Actions succeed), T1 is set (the timer's rounds wait), and `main` has no branch protection
-yet (I8 not done). K1, K2, K3 and D5 can only be checked in the account and dashboards.
+from Actions succeed) and T1 is set (the timer's rounds wait). On 11 November 2026 GitHub reported
+`main` as protected (I8, the ruleset below), and the owner reported K2 and K3 done and D5 not
+needed. K1 (two-factor login) is still open. K1, K2, K3 and D5 can only be checked in the account
+and dashboards.
 
 | Audit | Setting and path | How to verify |
 |---|---|---|
