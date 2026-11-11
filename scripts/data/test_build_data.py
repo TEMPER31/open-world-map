@@ -140,5 +140,30 @@ class CityPointTests(unittest.TestCase):
         self.assertAlmostEqual(build_data.grid_city(fld, name)["wind_kmh"], round(want, 2), places=6)
 
 
+
+class GetTests(unittest.TestCase):
+    def _429(self, after):
+        import email.message, urllib.error
+        h = email.message.Message(); h["Retry-After"] = str(after)
+        return urllib.error.HTTPError("https://example.test/x", 429, "Too Many Requests", h, None)
+
+    def test_long_retry_after_gives_up_without_waiting_when_capped(self):
+        with patch.object(build_data.urllib.request, "urlopen", side_effect=self._429(1652)), \
+                patch.object(build_data.time, "sleep") as sleep:
+            with self.assertRaisesRegex(RuntimeError, "1652 s"):
+                build_data.get("https://example.test/x", retries=2, max_wait=30)
+        sleep.assert_not_called()
+
+    def test_short_retry_after_still_waits_and_retries(self):
+        class R:
+            status, headers = 200, {}
+            def read(self): return b"ok"
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+        with patch.object(build_data.urllib.request, "urlopen", side_effect=[self._429(5), R()]), \
+                patch.object(build_data.time, "sleep") as sleep:
+            self.assertEqual(build_data.get("https://example.test/x", retries=2, max_wait=30)[2], b"ok")
+        sleep.assert_called_once_with(5)
+
 if __name__ == "__main__":
     unittest.main()

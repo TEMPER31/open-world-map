@@ -103,8 +103,11 @@ def notice(title, msg):
 
 
 # ---- HTTP -------------------------------------------------------------------------
-def get(url, method="GET", headers=None, timeout=120, retries=4, ok404=False):
-    """Returns (status, headers, body). Retries with backoff on network errors / 5xx / 429."""
+def get(url, method="GET", headers=None, timeout=120, retries=4, ok404=False, max_wait=None):
+    """Returns (status, headers, body). Retries with backoff on network errors / 5xx / 429.
+    max_wait: give up rather than wait longer than this many seconds before a retry. The
+    informational checks use it, so a long Retry-After (Open-Meteo answered 1,652 s once) can't
+    hold up the build and its deploy."""
     h = {"User-Agent": UA, **(headers or {})}
     for attempt in range(retries + 1):
         req = urllib.request.Request(url, method=method, headers=h)
@@ -131,6 +134,8 @@ def get(url, method="GET", headers=None, timeout=120, retries=4, ok404=False):
                 raise RuntimeError(f"{url}: {e}") from e
         if attempt == retries:
             raise RuntimeError(f"{url}: giving up after {retries + 1} attempts")
+        if max_wait is not None and wait > max_wait:
+            raise RuntimeError(f"{url}: asked to wait {wait} s before retrying, more than {max_wait} s")
         time.sleep(wait)
 
 
@@ -697,7 +702,7 @@ def aq_range_probe(report):
          "hourly": "pm2_5,pm10,us_aqi", "domains": "cams_global", "timezone": "GMT", "timeformat": "unixtime",
          "past_days": 1, "forecast_days": 6}
     try:
-        _, _, body = get(f"{OPEN_METEO_AQ}?{urllib.parse.urlencode(q)}", retries=2)
+        _, _, body = get(f"{OPEN_METEO_AQ}?{urllib.parse.urlencode(q)}", retries=2, max_wait=30)
         STATS["aq_probe_locations"] = len(pts)
         res = json.loads(body)
         out = {}
@@ -727,7 +732,7 @@ def spot_check(report):
              "models": "ecmwf_ifs025", "timezone": "GMT", "timeformat": "unixtime", "past_days": 1, "forecast_days": 2,
              "wind_speed_unit": "kmh"}
         try:
-            _, _, body = get(f"{OPEN_METEO_FC}?{urllib.parse.urlencode(q)}", retries=2)
+            _, _, body = get(f"{OPEN_METEO_FC}?{urllib.parse.urlencode(q)}", retries=2, max_wait=30)
             STATS["spot_locations"] += 1
             h = json.loads(body)["hourly"]
             t = int(dt.datetime.strptime(run, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=dt.timezone.utc).timestamp())
