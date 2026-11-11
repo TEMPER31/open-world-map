@@ -380,6 +380,31 @@ with AQI values computed from Open-Meteo's own PM2.5 and found it matches the **
 applied to 24-hour means** (total absolute difference 23, against 120 for 2024 hourly and 59
 for the 2012 table on 24-hour means, over 8 points on 30 Oct 2026).
 
+## GFS build cache
+
+A complete GFS cycle never changes, and building one is about 1.1 GB of downloads and 9 to 10
+minutes. With `--gfs-cache DIR` the script keeps the finished `gfs/` frames there with a small
+`gfs.json`: the cycle, a fingerprint (SHA-256 of `build_data.py` and `build_wgrib2.sh`), the
+manifest entry and the parts of the run report that came from the GFS files (sizes, spot
+values, alignment points, city values, hour sources).
+
+* The next build finds the newest complete cycle as always. If the folder holds that cycle,
+  made by the same code, with every frame present, the frames are copied and nothing is
+  downloaded. Anything else (new cycle, changed script, missing file, unreadable `gfs.json`)
+  builds in full and replaces the folder.
+* Everything after the GFS step runs every time: the air-quality refresh rule, the spot check
+  against ECMWF, the range probe, the manifest and its history, the forecast history.
+* The PNGs keep the `generated_utc` of the build that made them; `manifest.json` carries the
+  time of this run, as it does when a run rebuilds a cycle. The run report gets
+  `gfs_reused.built_utc`, and the log says "GFS reused".
+* In `pages.yml` the folder is an Actions cache keyed `gfs-v1-<hash of the two scripts>-<cycle>`.
+  `--print-cycle` gives the cycle for the key before the build. Pull requests can read caches
+  saved on `main`; `main` cannot read caches saved by pull requests, so a deploy only reuses
+  frames built on `main`. Each cycle is about 96 MB; GitHub drops caches not used for 7 days
+  and keeps the repository under its 10 GB limit by removing the oldest.
+
+Measured times are in `docs/performance.md`.
+
 ## Failure handling
 
 * If NOMADS fails to download an hour after its usual retries, the job tries AWS for that

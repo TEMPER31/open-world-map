@@ -18,6 +18,7 @@ import argparse
 import array
 import datetime as dt
 import email.utils
+import hashlib
 import http.client
 import json
 import math
@@ -219,6 +220,46 @@ def find_cycle(source):
     raise RuntimeError(f"{source}: no complete GFS cycle in the last 36 h")
 
 
+# ---- GFS build cache ---------------------------------------------------------------------
+# A GFS cycle never changes once it is complete, and one build of it is about 1.1 GB of downloads
+# and 9-10 minutes. With --gfs-cache the finished frames are kept there with the cycle and a
+# fingerprint of this script, and a later build of the SAME cycle by the SAME code copies them
+# instead of downloading again (several pushes to a pull request, a code-only push to main).
+# A new cycle, or any change to this script or the wgrib2 build, misses and builds as before.
+def gfs_fingerprint():
+    h = hashlib.sha256()
+    for p in (Path(__file__), Path(__file__).with_name("build_wgrib2.sh")):
+        h.update(p.read_bytes() if p.exists() else b"")
+    return h.hexdigest()[:16]
+
+
+def gfs_cache_load(cache, run, out, report):
+    """Copy the cached frames of `run` into out/gfs. Returns the manifest entry, or None on a miss."""
+    try:
+        saved = json.loads((cache / "gfs.json").read_text())
+        entry = saved["entry"]
+        if saved["fingerprint"] != gfs_fingerprint() or entry["run"] != iso(run) or entry.get("stale"):
+            return None
+        names = [f"{k}/f{fr['f']:03d}.png" for fr in entry["frames"] for k in ("wind", "temp", "rain", "cloud", "pres")] + ["series.png"]
+        if len(entry["frames"]) != len(HOURS) or not all((cache / "gfs" / n).is_file() for n in names):
+            return None
+        shutil.copytree(cache / "gfs", out / "gfs", dirs_exist_ok=True)
+        report.update(saved["report"])
+        if "gfs_spot" in report:   # JSON turned the forecast-hour keys into text
+            report["gfs_spot"] = {int(k): v for k, v in report["gfs_spot"].items()}
+        report["gfs_reused"] = {"built_utc": saved["built_utc"]}
+        return entry
+    except (OSError, KeyError, TypeError, ValueError):
+        return None
+
+
+def gfs_cache_save(cache, out, entry, report_part, generated):
+    shutil.rmtree(cache, ignore_errors=True)
+    shutil.copytree(out / "gfs", cache / "gfs")
+    (cache / "gfs.json").write_text(json.dumps({"fingerprint": gfs_fingerprint(), "built_utc": iso(generated),
+                                                 "entry": entry, "report": report_part}, default=str))
+
+
 NOMADS_FILTER_SCRIPT = None
 
 
@@ -409,15 +450,26 @@ def build_gfs(args, out, generated, report):
     errors = []
     fetchers = {"nomads": fetch_nomads, "aws": fetch_aws}
     sources = ("aws", "nomads") if args.prefer_aws else ("nomads", "aws")
+    cache = getattr(args, "gfs_cache", None)
     for source, alternate in (sources, sources[::-1]):
         try:
             t0 = time.time()
+            before = set(report)
             run, pub = find_cycle(source)
             notice("GFS cycle", f"{source}: run {iso(run)}; f000 published {iso(pub['f000']) if pub['f000'] else '?'}, "
                    f"f168 {iso(pub['f168']) if pub['f168'] else '?'}"
                    + (f" (+{(pub['f168'] - run).total_seconds() / 60:.0f} min after cycle)" if pub["f168"] else ""))
             report["gfs_publish"] = {"source": source, "run": iso(run),
                                      **{k: iso(v) if v else None for k, v in pub.items()}}
+            if cache:
+                publish = report["gfs_publish"]
+                reused = gfs_cache_load(cache, run, out, report)
+                if reused:
+                    report["gfs_publish"] = publish
+                    report["gfs_seconds"] = round(time.time() - t0, 1)
+                    notice("GFS reused", f"run {iso(run)}: frames built {report['gfs_reused']['built_utc']} by the same code "
+                           f"copied from the build cache ({len(reused['frames'])} frames, nothing downloaded again)")
+                    return reused
             gdir = out / "gfs"
             for k in ("wind", "temp", "rain", "cloud", "pres"):
                 (gdir / k).mkdir(parents=True, exist_ok=True)
@@ -497,13 +549,20 @@ def build_gfs(args, out, generated, report):
             report["gfs_hour_sources"] = hour_sources
             notice("GFS hour sources", f"{iso(run)}: cycle from {source}; "
                    f"NOMADS {len(source_hours['nomads'])}, AWS {len(source_hours['aws'])} of {len(HOURS)} hours")
-            return {"run": iso(run), "source": source, "filter": NOMADS_FILTER_SCRIPT if source == "nomads" else None,
-                    "credit": GFS_CREDIT, "license": GFS_LICENSE, "stale": False, "frames": frames, "series": series_meta,
-                    **hour_sources,
-                    "grid": {"nx": NX, "ny": NY, "deg": DEG, "lon0": -180, "lat0": 90,
-                             "note": "0.5°: every second GFS 0.25° point (no interpolation)"},
-                    "wind_grid": {"nx": WNX, "ny": WNY, "deg": WDEG, "lon0": -180, "lat0": 90,
-                                  "note": "0.75°: every third GFS 0.25° point (no interpolation)"}}
+            entry = {"run": iso(run), "source": source, "filter": NOMADS_FILTER_SCRIPT if source == "nomads" else None,
+                     "credit": GFS_CREDIT, "license": GFS_LICENSE, "stale": False, "frames": frames, "series": series_meta,
+                     **hour_sources,
+                     "grid": {"nx": NX, "ny": NY, "deg": DEG, "lon0": -180, "lat0": 90,
+                              "note": "0.5°: every second GFS 0.25° point (no interpolation)"},
+                     "wind_grid": {"nx": WNX, "ny": WNY, "deg": WDEG, "lon0": -180, "lat0": 90,
+                                   "note": "0.75°: every third GFS 0.25° point (no interpolation)"}}
+            if cache:
+                try:
+                    gfs_cache_save(cache, out, entry, {k: v for k, v in report.items() if k not in before}, generated)
+                    report["gfs_cache_saved"] = True
+                except OSError as e:
+                    notice("GFS build cache not saved", str(e)[:200])
+            return entry
         except Exception as e:  # noqa: BLE001 - fall through to the next source
             errors.append(f"{source}: {e}")
             notice("GFS source failed", f"{source}: {e}")
@@ -773,15 +832,28 @@ def load_previous(prev_url, out, part):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", required=True, type=Path)
+    ap.add_argument("--out", type=Path)
     ap.add_argument("--previous", default="", help="URL of the currently deployed data/live folder")
     ap.add_argument("--prefer-aws", action="store_true", help="try the AWS mirror before NOMADS")
     ap.add_argument("--force-aq", action="store_true")
     ap.add_argument("--skip-aq", action="store_true")
     ap.add_argument("--aq-cache", type=Path, help="directory that keeps the last air-quality build between runs")
+    ap.add_argument("--gfs-cache", type=Path, help="directory that keeps the last GFS build; reused when the cycle and this script are unchanged")
+    ap.add_argument("--print-cycle", action="store_true", help="print the newest complete GFS cycle (YYYYMMDDHH) and exit")
     ap.add_argument("--report", type=Path)
     args = ap.parse_args()
+    if args.print_cycle:
+        # For the workflow's cache key. Printing nothing is fine: the build then finds the cycle itself.
+        for source in (("aws", "nomads") if args.prefer_aws else ("nomads", "aws")):
+            try:
+                print(find_cycle(source)[0].strftime("%Y%m%d%H"))
+                return
+            except Exception as e:  # noqa: BLE001
+                print(f"{source}: {e}", file=sys.stderr)
+        return
     out = args.out
+    if not out:
+        ap.error("--out is required")
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
@@ -864,6 +936,10 @@ def main():
     if os.environ.get("GITHUB_ACTIONS"):
         for title, msg in NOTICES[:14]:
             print(f"::notice title={title}::{msg}")
+    # For the workflow: the cycle that was built, and whether the build cache holds a new copy to save.
+    if os.environ.get("GITHUB_OUTPUT") and not gfs["stale"]:
+        with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+            fh.write(f"gfs_cycle={gfs_run.strftime('%Y%m%d%H')}\ngfs_cache_saved={'true' if report.get('gfs_cache_saved') else 'false'}\n")
 
 
 if __name__ == "__main__":

@@ -507,7 +507,8 @@ const qv = page => page.evaluate(() => {
   return { open: !d.hidden, quick: !!q, stats: !!d.querySelector('.stats'), chart: !!d.querySelector('[data-chart-t]'), btn: b?.textContent, pressed: b?.getAttribute('aria-pressed'),
     temp: d.querySelector('.qv-temp')?.textContent, sky: d.querySelector('[data-sky]')?.textContent, nowKick: sec('now')?.querySelector('.kick span')?.textContent,
     cells: d.querySelectorAll('.qv-h').length, onCell: d.querySelector('.qv-h.on')?.dataset.qt ?? null, firstCell: d.querySelector('.qv-h')?.textContent.replace(/\s+/g, ' ').trim(), days: d.querySelectorAll('.qv-day').length, day1: d.querySelector('.qv-day')?.textContent.replace(/\s+/g, ' ').trim(),
-    srcs: ['now', 'hours', 'days', 'sun'].map(k => sec(k)?.querySelector('.src')?.textContent || ''), note: [...d.querySelectorAll('.d-body > .d-sec')].pop()?.innerHTML,
+    srcs: ['now', 'hours', 'days', 'sun'].map(k => d.querySelector(`[data-qv-src="${k}"]`)?.textContent || ''), note: [...d.querySelectorAll('.d-body > .d-sec')].pop()?.innerHTML,
+    line: d.querySelector('[data-qv-line]')?.textContent || '', about: d.querySelector('[data-qv-about]')?.textContent || '', aboutOpen: d.querySelector('[data-qv-about]')?.open, alert: d.querySelector('.alert')?.textContent || '', paras: d.querySelectorAll('[data-quick-view] > .d-sec:not(.qv-foot) .src').length,
     rise: d.querySelector('[data-sunrise]')?.dataset.sunrise, set: d.querySelector('[data-sunset]')?.dataset.sunset, sunText: sec('sun')?.innerText.replace(/\s+/g, ' '), panelT: d.querySelector('[data-panel-t]')?.dataset.panelT };
 });
 if (part()) {
@@ -530,9 +531,10 @@ if (part()) {
     JSON.stringify({ d0: { stats: d0.stats, btn: d0.btn }, q1: { temp: q1.temp, sky: q1.sky, cells: q1.cells, first: q1.firstCell, days: q1.days, day1: q1.day1 } }));
   check('Quick view: sky words follow the stated thresholds (cloud < 25 % Clear, < 70 % Partly cloudy, else Cloudy; rain from 0.1 mm, light < 1, heavy >= 4; "or snow" at <= 1 °C)',
     sky === 'Clear | Clear | Partly cloudy | Partly cloudy | Cloudy | Cloudy | Light rain | Rain | Heavy rain | Light rain or snow | —', sky);
-  check('Quick view: every section names its source and grid (summary-file grid read from the data), and the panel keeps the detailed view\'s grid / sample note',
-    q1.srcs.every(x => x.length > 20) && /° grid/.test(q1.srcs[0]) && /summary file on a \d+(\.\d+)?° grid \(about \d+ km\)/.test(q1.srcs[1]) && /summary file on a/.test(q1.srcs[2]) && /NOAA's solar formulas/.test(q1.srcs[3]) && q1.note === detailNote && /~50 km grid|Sample data/.test(q1.note),
-    JSON.stringify(q1.srcs));
+  check('Quick view: one source line stays in view (source, both grids); "Sources and method" starts closed and names every section\'s source and grid (summary-file grid read from the data) with the detailed view\'s grid note; sample data keeps its warning in view',
+    q1.srcs.every(x => x.length > 20) && /° grid/.test(q1.srcs[0]) && /summary file on a \d+(\.\d+)?° grid \(about \d+ km\)/.test(q1.srcs[1]) && /summary file on a/.test(q1.srcs[2]) && /NOAA's solar formulas/.test(q1.srcs[3])
+    && /° grid, outlook on a \d+(\.\d+)?° grid/.test(q1.line) && q1.aboutOpen === false && q1.paras === 0 && /~50 km grid|Sample data/.test(detailNote) && (/~50 km grid/.test(q1.about) || /Sample data/.test(q1.alert)),
+    JSON.stringify({ line: q1.line, open: q1.aboutOpen, srcs: q1.srcs }));
   // units: change at once
   await page.evaluate(() => window.owmTest.state.set({ tempUnit: 'F', speedUnit: 'kn' }));
   await page.waitForTimeout(300);

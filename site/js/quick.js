@@ -1,7 +1,8 @@
 // Quick view of the place panel: the same forecast in plain words and large numbers. Now (the
 // hour on the timeline), the next 48 hours, the next 7 days, sunrise and sunset. It reads the
 // values the detailed panel already loads; only the 48-hour row's rain needs more, and it comes
-// from this site's own rain frames.
+// from this site's own rain frames. The numbers come first; where each one comes from (source,
+// run, grid, method) is one line at the foot and a "Sources and method" list that opens on demand.
 
 import { meta, getPoint } from './data.js';
 import { conv, label } from './units.js';
@@ -76,20 +77,29 @@ function days(series) {
 }
 
 // The place's own calendar day at the timeline hour (from its longitude, 15° per hour).
+const SUN_SRC = 'Worked out in your browser with NOAA\'s solar formulas for this point (centre of the sun 0.833° below a flat horizon). Not a forecast value.';
 function sunHTML(lat, lon, t, first) {
   const at = validOf(t) + lon / 15 * H, day0 = at - ((at % DAY) + DAY) % DAY;
   const r = sunTimes(lat, lon, day0);
   const date = new Date(day0).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' }).replace(',', '');
+  // first clock large, the other one small beside it
+  const clock = (ms, k) => { const [a, b] = fmtBoth(ms, first, { date: false }).split(' · '); return `<b class="mono" data-sun${k}="${new Date(ms).toISOString()}">${a}</b><small class="mono"><i> · </i>${b}</small>`; };
   const body = r.polar === 'night' ? '<p class="qv-msg">The sun does not rise on this day.</p>'
     : r.polar === 'day' ? '<p class="qv-msg">The sun does not set on this day.</p>'
-    : `<div class="qv-sun">${[['Sunrise', r.rise, 'rise'], ['Sunset', r.set, 'set']].map(([n, ms, k]) => `<span>${n}</span>${ms == null ? `<b data-sun${k}="none">None: the sun stays up</b>` : `<b class="mono" data-sun${k}="${new Date(ms).toISOString()}">${fmtBoth(ms, first, { date: false })}</b>`}`).join('')}</div>`;
-  return `<div class="d-sec" data-qv="sun"><div class="kick"><span>Sun</span><span>${date} at this spot</span></div>${body}
-    <div class="src">Worked out in your browser with NOAA's solar formulas for this point (centre of the sun 0.833° below a flat horizon). Not a forecast value.</div></div>`;
+    : `<div class="qv-sun">${[['Sunrise', r.rise, 'rise'], ['Sunset', r.set, 'set']].map(([n, ms, k]) => `<div><span>${n}</span>${ms == null ? `<b data-sun${k}="none">None: the sun stays up</b>` : clock(ms, k)}</div>`).join('')}</div>`;
+  return `<div class="d-sec" data-qv="sun"><div class="kick"><span>Sun</span><span>${date} at this spot</span></div>${body}</div>`;
+}
+
+// "Sources and method" stays open or closed as the reader left it while the panel redraws.
+let aboutOpen = false;
+export function bindQuick(el) {
+  el.addEventListener('toggle', e => { if (e.target.matches?.('[data-qv-about]')) aboutOpen = e.target.open; }, true);
 }
 
 // s: page state; vals: the detailed panel's values at the timeline hour ({field: {v, u, w}});
-// series: [{t, temp, wind}] from the summary file; dirFrom(u, v): compass point the wind comes from.
-export function quickHTML(s, vals, series, dirFrom) {
+// series: [{t, temp, wind}] from the summary file; dirFrom(u, v): compass point the wind comes
+// from; about: extra rows [[name, html]] for the "Sources and method" list (the panel's own note).
+export function quickHTML(s, vals, series, dirFrom, about = []) {
   const { lon, lat } = s.selection, t = s.t, v = k => vals?.[k] ? vals[k].v : vals && k in vals ? null : undefined;
   const w = vals?.wind, src = meta.live ? `NOAA GFS run ${runLabel(meta.run)}` : 'Sample data (generated)';
   const fine = meta.live ? `${meta.gfs?.grid?.deg ?? 0.5}° grid (~50 km); wind ${meta.gfs?.wind_grid?.deg ?? 0.75}°; clouds and rain are area averages` : `${SAMPLE_GRID_DEG}° grid`;
@@ -97,9 +107,8 @@ export function quickHTML(s, vals, series, dirFrom) {
   const windNow = w === undefined ? '…' : w && w.v === w.v ? `${wind(w.v)} from ${dirFrom(w.u, w.w)}` : '—';
   const rainNow = v('rain') === undefined ? '…' : v('rain') == null || v('rain') !== v('rain') ? '—' : v('rain') < 0.1 ? 'Dry' : `${v('rain').toFixed(1)} mm/h`;
   const now = `<div class="d-sec" data-qv="now"><div class="kick"><span>${t ? `At ${relT(t)}` : 'Now'}</span><span>follows the timeline</span></div>
-    <div class="qv-now"><b class="qv-temp mono">${v('temp') === undefined ? '…' : temp(v('temp')).replace('°', '')}<small>${unitOf('temp')}</small></b>
-      <div><div class="qv-sky" data-sky>${sky}</div><div class="qv-line">Wind <b class="mono">${windNow}</b></div><div class="qv-line">Rain, ${meta.rainHours(t) >= 3 ? 'past 3 h' : 'past hour'} <b class="mono">${rainNow}</b></div></div></div>
-    <div class="src">${src} · ${fine}</div></div>`;
+    <div class="qv-now"><b class="qv-temp mono">${v('temp') === undefined ? '…' : temp(v('temp')).replace('°', '')}<small>${unitOf('temp')}</small></b><div class="qv-sky" data-sky>${sky}</div></div>
+    <div class="qv-facts"><div><span>Wind</span><b class="mono">${windNow}</b></div><div><span>Rain, ${meta.rainHours(t) >= 3 ? 'past 3 h' : 'past hour'}</span><b class="mono">${rainNow}</b></div></div></div>`;
 
   const pts = rowPoints(series), first = s.timeFirst, deg = seriesDeg();
   const on = pts.reduce((a, p) => p.t <= t ? p.t : a, null);
@@ -109,18 +118,28 @@ export function quickHTML(s, vals, series, dirFrom) {
     const day = utc ? d.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' }) : d.toLocaleDateString('en-GB', { weekday: 'short' });
     const hh = `${pad(utc ? d.getUTCHours() : d.getHours())}:${pad(utc ? d.getUTCMinutes() : d.getMinutes())}`;
     const showDay = day !== lastDay; lastDay = day;
-    return `<div class="qv-h${p.t === on && t <= 48 ? ' on' : ''}" data-qt="${p.t}"><span class="qv-t">${showDay ? day : '&nbsp;'}<br>${hh}</span><b class="mono">${temp(p.temp)}</b><span class="mono">${rainText(rain.v[p.t])}</span><span class="mono">${wind(p.wind)}</span></div>`;
+    const r = rain.v[p.t];
+    return `<div class="qv-h${p.t === on && t <= 48 ? ' on' : ''}${showDay ? ' day' : ''}" data-qt="${p.t}"><span class="qv-t">${showDay ? day : '&nbsp;'}<br>${hh}</span><b class="mono">${temp(p.temp)}</b><span class="mono${r >= 0.1 ? ' wet' : ''}">${rainText(r)}</span><span class="mono">${wind(p.wind)}</span></div>`;
   }).join('');
   const hours = `<div class="d-sec" data-qv="hours"><div class="kick"><span>Next 48 hours</span><span>${first === 'utc' ? 'UTC' : 'local time'}</span></div>
-    ${pts.length ? `<div class="qv-hours" tabindex="0" role="group" aria-label="Next 48 hours: time, temperature, rain, wind">${cells}</div>` : '<p class="qv-msg">Loading…</p>'}
-    <div class="src">Temperature (${unitOf('temp')}) and wind (${label('speed')}): ${src}, summary file on a ${gridText(deg)}, ${stepText(pts)}. Rain: mm in the hour before each time, ${fine.split(';')[0]}, area average.</div></div>`;
+    ${pts.length ? `<div class="qv-hours" tabindex="0" role="group" aria-label="Next 48 hours: time, temperature, rain, wind">${cells}</div>` : '<p class="qv-msg">Loading…</p>'}</div>`;
 
+  // each day's low-to-high bar sits on the week's own range, so warm and cold days line up
   const ds = days(series), today = new Date(validOf(0)).toDateString();
-  const rows = ds.map(d => `<div class="qv-day"><span>${d.key === today ? 'Today' : d.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}${d.last - d.first < 12 ? ' <small>part</small>' : ''}</span><b class="mono">${temp(d.hi)} <small>/ ${temp(d.lo)}</small></b><span class="mono">${wind(d.wind)}</span></div>`).join('');
-  const week = `<div class="d-sec" data-qv="days"><div class="kick"><span>Next 7 days</span><span>high / low · wind</span></div>
-    ${ds.length ? `<div class="qv-days">${rows}</div>` : '<p class="qv-msg">Loading…</p>'}
-    <p class="qv-msg">Rain by day is not in the summary file.</p>
-    <div class="src">${src}, summary file on a ${gridText(deg)}, ${stepText((series || []).filter(p => p.t >= 0))}; days in your local time; wind is the day's strongest value. “part”: the day is only partly in the forecast.</div></div>`;
+  const lo = Math.min(...ds.map(d => d.lo)), span = (Math.max(...ds.map(d => d.hi)) - lo) || 1;
+  const rows = ds.map(d => `<div class="qv-day"><span>${d.key === today ? 'Today' : d.date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}${d.last - d.first < 12 ? ' <small>part</small>' : ''}</span><small class="mono">${temp(d.lo)}</small><i class="qv-bar" aria-hidden="true"><i style="left:${((d.lo - lo) / span * 100).toFixed(1)}%;width:${Math.max(4, (d.hi - d.lo) / span * 100).toFixed(1)}%"></i></i><b class="mono">${temp(d.hi)}</b><span class="mono">${wind(d.wind)}</span></div>`).join('');
+  const week = `<div class="d-sec" data-qv="days"><div class="kick"><span>Next 7 days</span><span>low · high · wind</span></div>
+    ${ds.length ? `<div class="qv-days">${rows}</div>` : '<p class="qv-msg">Loading…</p>'}</div>`;
 
-  return now + hours + week + sunHTML(lat, lon, t, first);
+  // one line that is always shown, and the full account behind a disclosure
+  const list = [
+    ['Now', 'now', `${src} · ${fine}`],
+    ['Next 48 hours', 'hours', `Temperature (${unitOf('temp')}) and wind (${label('speed')}): ${src}, summary file on a ${gridText(deg)}, ${stepText(pts)}. Rain: mm in the hour before each time, ${fine.split(';')[0]}, area average.`],
+    ['Next 7 days', 'days', `${src}, summary file on a ${gridText(deg)}, ${stepText((series || []).filter(p => p.t >= 0))}; days in your local time; wind is the day's strongest value. “part”: the day is only partly in the forecast. Rain by day is not in the summary file.`],
+    ['Sun', 'sun', SUN_SRC]
+  ].map(([n, k, x]) => `<dt>${n}</dt><dd class="src" data-qv-src="${k}">${x}</dd>`).join('') + about.map(([n, x]) => `<dt>${n}</dt><dd class="src">${x}</dd>`).join('');
+  const foot = `<div class="d-sec qv-foot"><div class="src" data-qv-line>${src} · now on a ${fine.split(' (')[0].split(';')[0]}, outlook on a ${gridText(deg)}</div>
+    <details class="qv-about" data-qv-about${aboutOpen ? ' open' : ''}><summary>Sources and method</summary><dl>${list}</dl></details></div>`;
+
+  return now + hours + week + sunHTML(lat, lon, t, first) + foot;
 }

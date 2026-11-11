@@ -8,6 +8,7 @@ site/data/archive/
 node_modules/
 __pycache__/
 .aq-cache/
+.gfs-cache/
 site/js/secrets.js
 # secrets / credentials
 .env

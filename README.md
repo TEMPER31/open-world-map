@@ -69,8 +69,9 @@ phones):
   scale bar and measure tool. Data stays metric; only what you read is converted.
 - **Place panel** with every value, both clocks and a close button (Esc). A clicked point is named
   after the nearest town or city in the place list (within 100 km), with its distance. Its
-  **Quick view** button swaps in a plain summary: now (temperature, sky, wind), the next 48 hours,
-  the next 7 days, and sunrise and sunset worked out in the browser (NOAA solar formulas). The
+  **Quick view** button swaps in a plain summary: now (temperature, sky, wind, rain), the next 48 hours,
+  the next 7 days with a low-to-high bar, and sunrise and sunset worked out in the browser (NOAA
+  solar formulas). One source line stays in view; "Sources and method" opens the rest. The
   detailed view is what opens every time. On phones it is a
   bottom sheet (peek / half / full); the layers sheet opens to 40 % of the map.
 - **Layers rail**: only the selected field is expanded, with its legend and options.
@@ -165,6 +166,7 @@ scripts/              build_coastlines.py, build_places.py (one-off), check_site
 scripts/data/         build_data.py, build_wgrib2.sh, archive_day.py (forecast history), screenshots.mjs
 data/archive/         daily run summaries, 29 Oct to 4 Nov 2026: the seed for the forecast history (never added to)
 docs/data-pipeline.md sources, formats, schedule, sizes, failure handling
+docs/performance.md   where the time goes (page, workflows), how to measure it, what was changed
 .github/workflows/    check, build data, deploy to GitHub Pages (4x daily + on push)
 ```
 
@@ -180,8 +182,10 @@ environment (**Settings → Environments → New environment** `refresh-timer` �
 60, deployment branches: `main` only); without one it stops on its first round. Start it
 from **Actions → Data refresh timer → Run workflow**; a push to `main` also restarts it.
 On `main`, `pages.yml` also deploys `site/` with the data to GitHub Pages. On pull requests it also takes screenshots, runs the accuracy
-check and the rendering tests: all output (screenshots, probe images and text
-reports) goes to the run's **ci-screenshots** and **render-tests-*** artifacts.
+check and the rendering tests: all output goes to the run's artifacts, **ci-screenshots**
+(screenshots, probe images), **ci-reports** (accuracy, performance, bandwidth, sources) and
+**render-tests-***. A run on a GFS cycle that an earlier run already built copies those frames
+from the Actions cache instead of downloading them again (`docs/performance.md`).
 GitHub pauses scheduled workflows after 60 days without
 repository activity; re-enable it from the Actions tab if that happens. To turn it on, set **Settings → Pages → Source:
 GitHub Actions**. Publishing Pages from a private repository needs a paid GitHub plan;

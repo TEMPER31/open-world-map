@@ -59,8 +59,8 @@ class BuildGfsTests(unittest.TestCase):
         (gdir / "series.png").write_bytes(b"fixture")
         return {"file": "series.png"}
 
-    def build(self, *, prefer_aws=False):
-        return build_data.build_gfs(SimpleNamespace(prefer_aws=prefer_aws), self.out, RUN, self.report)
+    def build(self, *, prefer_aws=False, gfs_cache=None):
+        return build_data.build_gfs(SimpleNamespace(prefer_aws=prefer_aws, gfs_cache=gfs_cache), self.out, RUN, self.report)
 
     def test_all_nomads(self):
         gfs = self.build()
@@ -119,6 +119,82 @@ class BuildGfsTests(unittest.TestCase):
             self.build()
         self.assertEqual(self.find_cycle.call_args_list, [call("nomads"), call("aws")])
         self.assertNotIn("gfs_hour_sources", self.report)
+
+
+class GfsCacheTests(BuildGfsTests):
+    """--gfs-cache: the same cycle built by the same code is copied, anything else is built afresh."""
+
+    @staticmethod
+    def write_frame(gdir, hour, fields, run, valid, generated, sizes, rain_hours):
+        for kind, size in sizes.items():
+            (gdir / kind / f"f{hour:03d}.png").write_bytes(f"{kind} {hour}".encode())
+            size.append(1)
+        return {"f": hour, "rain_hours": rain_hours}
+
+    def setUp(self):
+        super().setUp()
+        self.mocks["write_gfs_frame"].side_effect = self.write_frame
+        self.cache = Path(self.enterContext(tempfile.TemporaryDirectory())) / "gfs-cache"
+
+    def rebuild(self):
+        """A second build into a fresh output folder, with fresh download counters."""
+        self.out = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        self.report = {}
+        self.nomads.reset_mock()
+        self.aws.reset_mock()
+        return self.build(gfs_cache=self.cache)
+
+    def test_first_build_downloads_and_fills_the_cache(self):
+        first = self.build(gfs_cache=self.cache)
+        self.assertEqual(self.nomads.call_count, len(HOURS))
+        self.assertTrue(self.report["gfs_cache_saved"])
+        self.assertNotIn("gfs_reused", self.report)
+        self.assertTrue((self.cache / "gfs" / "wind" / "f000.png").is_file())
+        self.assertEqual(first["run"], build_data.iso(RUN))
+
+    def test_same_cycle_is_copied_without_downloading(self):
+        first = self.build(gfs_cache=self.cache)
+        first_report = dict(self.report)
+        again = self.rebuild()
+        self.nomads.assert_not_called()
+        self.aws.assert_not_called()
+        self.assertEqual(again, first)
+        self.assertEqual((self.out / "gfs" / "temp" / "f002.png").read_bytes(), b"temp 2")
+        self.assertTrue((self.out / "gfs" / "series.png").is_file())
+        for key in ("gfs_sizes", "gfs_spot", "align_points", "city_raw", "gfs_hour_sources", "series_kb"):
+            self.assertEqual(self.report[key], first_report[key])
+        self.assertEqual(self.report["gfs_reused"], {"built_utc": build_data.iso(RUN)})
+        self.assertNotIn("gfs_cache_saved", self.report)
+        self.assertEqual(self.report["gfs_publish"]["run"], build_data.iso(RUN))
+
+    def test_new_cycle_misses_and_replaces_the_cache(self):
+        self.build(gfs_cache=self.cache)
+        newer = RUN + dt.timedelta(hours=6)
+        self.find_cycle.return_value = (newer, {"f000": None, "f168": None})
+        again = self.rebuild()
+        self.assertEqual(self.nomads.call_args_list, [call(newer, hour) for hour in HOURS])
+        self.assertEqual(again["run"], build_data.iso(newer))
+        self.assertTrue(self.report["gfs_cache_saved"])
+
+    def test_changed_build_code_misses(self):
+        self.build(gfs_cache=self.cache)
+        with patch.object(build_data, "gfs_fingerprint", return_value="other code"):
+            self.rebuild()
+        self.assertEqual(self.nomads.call_count, len(HOURS))
+
+    def test_incomplete_or_unreadable_cache_misses(self):
+        self.build(gfs_cache=self.cache)
+        (self.cache / "gfs" / "rain" / "f001.png").unlink()
+        self.rebuild()
+        self.assertEqual(self.nomads.call_count, len(HOURS))
+        (self.cache / "gfs.json").write_text("not json")
+        self.rebuild()
+        self.assertEqual(self.nomads.call_count, len(HOURS))
+
+    def test_without_a_cache_folder_nothing_is_kept(self):
+        self.build()
+        self.assertNotIn("gfs_cache_saved", self.report)
+        self.assertFalse(self.cache.exists())
 
 
 class CityPointTests(unittest.TestCase):

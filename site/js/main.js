@@ -18,7 +18,7 @@ import { OVERLAYS, overlaysHTML, toggle as toggleOverlay, renderOverlayUI, initO
 import { initEvents, TYPES as EV_TYPES, status as evStatus, credits as evCredits, hit as evHit, select as evSelect, panelHTML as evPanel, sourceTimes as evSourceTimes, eventsTest } from './events.js';
 import { fieldFresh, placeFresh } from './fresh.js';
 import { initSearch, focusSearch, placeNameHTML } from './search.js';
-import { quickHTML, loadRain } from './quick.js';
+import { quickHTML, loadRain, bindQuick } from './quick.js';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -398,7 +398,12 @@ function renderDetail(s) {
     : `<div class="d-sec"><div class="alert"><b>Sample data</b><span>Generated to test the layout. Not an observation or a forecast.</span></div></div>`;
   if (quick) {
     loadRain(s.selection, detailSeries, redrawDetail);
-    body.innerHTML = `${head}<div class="qv" data-quick-view>${quickHTML(s, detailVals, detailSeries, dirFrom)}</div>${note}`;
+    // Live data: the panel's source note moves into the quick view's "Sources and method" list
+    // (one short line stays in view). The sample-data warning is always shown in full.
+    const about = meta.live ? [['Data', `<span data-fresh="place">${placeFresh(meta)}</span>`], ['Limits', 'Model values on a ~50 km grid; mountains and coasts can differ from local conditions. Forecasts become less certain beyond about 3 days.']] : [];
+    const row = $('.qv-hours', body), left = row ? row.scrollLeft : 0; // keep the 48-hour row where it was scrolled to
+    body.innerHTML = `${head}<div class="qv" data-quick-view>${quickHTML(s, detailVals, detailSeries, dirFrom, about)}</div>${meta.live ? '' : note}`;
+    if (left) $('.qv-hours', body).scrollLeft = left;
     el.hidden = false;
     stamp('panel', all ? t : -1); stamp('chart', null);
     return;
@@ -516,6 +521,11 @@ async function boot() {
   });
   map.touchZoomRotate.disableRotation();
   map.keyboard.disableRotation();
+  // The weather layers go in as soon as the style is ready, not after every basemap tile has
+  // arrived ('load'): the first field then draws while the tiles are still coming in. Wind
+  // particles and the prefetch of the next frames still wait for 'load', so they don't take
+  // bandwidth or frames from the basemap while it loads.
+  const styleReady = new Promise(r => map.once('style.load', r));
   const mapLoaded = new Promise(r => map.once('load', r));
   await dataReady;
   window.owmMap = map; // handy for debugging in the console and used by the test scripts
@@ -549,11 +559,11 @@ async function boot() {
   bindProbe(map);
 
   const field = new FieldGL();
-  const wind = new WindGL({ count: particleCount() });
+  const startCount = particleCount(), wind = new WindGL({ count: startCount });
   function particleCount() { return Math.round((mobile.matches ? 12000 : 36000) * S.get('density')); }
   const light = () => S.get('basemap') === 'light';
 
-  await mapLoaded;
+  await styleReady;
   field.addTo(map);
   map.addLayer(wind, 'omt-road-minor'); // above the field and overlays, below roads, borders and labels
   window.owmWind = wind;
@@ -590,7 +600,7 @@ async function boot() {
     if (!firstPaint) { firstPaint = true; map.once('render', () => performance.mark('owm:first-field')); }
     $('#legend').classList.toggle('unavailable', !!tex.missing);
     // prefetch the next 2 frames
-    for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getFieldTexture(n, k).catch(() => {});
+    mapLoaded.then(() => { for (const n of [stepTime(t, 1), stepTime(stepTime(t, 1), 1)]) if (n > t) getFieldTexture(n, k).catch(() => {}); });
   });
   let firstPaint = false;
   // Pressure H/L labels (main field or the isobars overlay) follow without holding up the colours.
@@ -620,10 +630,13 @@ async function boot() {
   S.on(['t', 'field', 'overlays', 'basemap'], updateHL);
   S.on(['field', 'basemap'], s => { if (FIELDS[s.field]) field.setLut(s.field, light()); windColour(); });
   S.on(['basemap'], () => updateField(), { now: false }); // isobar ink follows the theme
-  S.on(['t', 'particles'], updateWind);
   S.on(['opacity', 'basemap'], s => field.setOpacity(s.opacity * (s.basemap === 'satellite' ? 0.6 : 1)));
-  S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
-  S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
+  mapLoaded.then(() => {
+    S.on(['t', 'particles'], updateWind);
+    S.on(['particles'], s => s.particles ? wind.start() : wind.stop());
+    if (particleCount() !== startCount) wind.setCount(particleCount()); // density changed while the map loaded
+    S.on(['density'], () => { wind.setCount(particleCount()); wind.kick(); }, { now: false });
+  });
   S.on(['selection', 't'], s => { loadDetail(s); renderDetail(s); });
   S.on(['field', 'overlays', 'tempUnit', 'speedUnit', 'distUnit', 'timeFirst'], s => { if (s.selection) renderDetail(s); }, { now: false });
   S.on(['distUnit'], () => renderScale(map), { now: false });
@@ -646,6 +659,7 @@ async function boot() {
     const el = document.createElement('div'); el.className = 'pin';
     pin = new maplibregl.Marker({ element: el }).setLngLat([s.selection.lon, s.selection.lat]).addTo(map);
   });
+  bindQuick($('#detail'));
   $('#detail').addEventListener('click', e => {
     if (e.target.closest('[data-deselect]')) S.set({ selection: null });
     else if (e.target.closest('.d-hd') && !e.target.closest('button') && placeSheet.get() === 'peek') placeSheet.set('half');
