@@ -134,16 +134,27 @@ function buildTrack(el, base, mini, zone, coarseFrom, uncertainFrom) {
   el.setAttribute('aria-valuemax', String(HOURS));
 }
 
+// While dragging, the playhead follows the pointer every frame and the hour (which redraws every
+// layer) changes at most once per frame, then snaps to its frame when let go.
 function bindTrack(el) {
-  const at = e => {
-    const r = el.getBoundingClientRect();
-    return step(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * HOURS, 0);
-  };
+  const frac = e => { const r = el.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
   el.addEventListener('pointerdown', e => {
     el.setPointerCapture(e.pointerId);
-    S.set({ playing: false, t: at(e) });
-    const move = ev => S.set({ t: at(ev) });
-    const up = () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); };
+    el.classList.add('dragging');
+    const heads = document.querySelectorAll('.tl-head');
+    let f = frac(e), raf = 0;
+    const show = () => { raf = 0; S.set({ t: step(f * HOURS, 0) }); heads.forEach(h => h.style.left = (f * 100).toFixed(3) + '%'); };
+    S.set({ playing: false });
+    show();
+    const move = ev => { if (ev.pointerId !== e.pointerId) return; f = frac(ev); raf ||= requestAnimationFrame(show); };
+    const up = ev => {
+      if (ev.pointerId !== e.pointerId) return;
+      cancelAnimationFrame(raf); raf = 0;
+      el.classList.remove('dragging');
+      S.set({ t: step(f * HOURS, 0) });
+      heads.forEach(h => h.style.left = pct(S.get('t')));
+      el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up);
+    };
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);

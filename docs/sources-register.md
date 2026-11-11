@@ -18,13 +18,29 @@ a source.
 | GeoNames cities5000 and admin1 region names | Same-origin JSON `site/data/places.json`, built once by `scripts/build_places.py` from the `download.geonames.org` files | CC BY 4.0 | Places: GeoNames (CC BY 4.0) | The place list loads from the site origin the first time the search box is focused or the map is clicked. Search and the nearest-place lookup run in the browser. |
 | IBM Plex Sans Condensed and IBM Plex Mono | Same-origin fonts in `site/fonts/` | SIL OFL 1.1. Licence files ship beside the fonts. | — | UI fonts on every visit. |
 | NASA GIBS VIIRS NOAA-20 true colour | `gibs.earthdata.nasa.gov` | NASA imagery has no restrictions on use. GIBS requests acknowledgement. | Imagery: NASA GIBS / ESDIS (VIIRS NOAA-20) | Satellite at world and regional zoom, below configured map zoom 7. |
-| EOX Sentinel-2 cloudless 2025 | `tiles.maps.eox.at` | CC BY-NC-SA 4.0 for the 2025 mosaic: non-commercial use only; anything made from the imagery is shared under the same licence | EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025), CC BY-NC-SA 4.0 | Satellite from configured map zoom 4.5 worldwide. |
-| USGS The National Map Imagery Only | `basemap.nationalmap.gov` | U.S. Government work, public domain | Imagery: USGS The National Map (USDA NAIP) | Satellite from map zoom 11 within the contiguous-US source bounds. |
-| USGS The National Map NAIP Plus | `imagery.nationalmap.gov` | U.S. Government work, public domain. Service credit is “USGS, USDA, The National Map: Orthoimagery.” | Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery) | Satellite from map zoom 15 within the same bounds. One image export per 512 px tile. |
+| Esri World Imagery (ArcGIS Imagery Standard basemap style) | `basemapstyles-api.arcgis.com` (style) and `ibasemaps-api.arcgis.com` (tiles) | ArcGIS Location Platform terms, free tier, tile-based usage. The account has pay-as-you-go off and no payment method: once the 2,000,000 free basemap tiles of a month are used, Esri refuses requests until the next month. | Imagery: Powered by Esri · Esri, Vantor, Earthstar Geographics, and the GIS User Community (or the attribution the style supplies) | Satellite from map zoom 6.5 worldwide when the site's ArcGIS browser API key is configured. One style request per visit, then tiles. |
+| EOX Sentinel-2 cloudless 2025 | `tiles.maps.eox.at` | CC BY-NC-SA 4.0 for the 2025 mosaic: non-commercial use only; anything made from the imagery is shared under the same licence | EOxCloudless by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2025), CC BY-NC-SA 4.0 | Satellite from configured map zoom 4.5 worldwide, when Esri imagery is not in use. |
+| USGS The National Map Imagery Only | `basemap.nationalmap.gov` | U.S. Government work, public domain | Imagery: USGS The National Map (USDA NAIP) | Satellite from map zoom 11 within the contiguous-US source bounds, when Esri imagery is not in use. |
+| USGS The National Map NAIP Plus | `imagery.nationalmap.gov` | U.S. Government work, public domain. Service credit is “USGS, USDA, The National Map: Orthoimagery.” | Imagery: USGS The National Map NAIP Plus (USDA NAIP, state orthoimagery) | Satellite from map zoom 15 within the same bounds, when Esri imagery is not in use. One image export per 512 px tile. |
 
 The three OpenFreeMap credit fragments appear together as “OpenFreeMap · © OpenMapTiles ·
 Data © OpenStreetMap contributors”. The style requests Noto Sans glyphs through OpenFreeMap.
 The licence of the served glyph bundle was not independently verified.
+
+Esri World Imagery became the main satellite imagery on 11 November 2026 (owner decision), for
+sharper street-level detail worldwide. The deploy job writes the browser API key from the
+`ARCGIS_API_KEY` Actions secret into the ignored `js/secrets.js`, as it does for the Mapillary
+token; builds and pull request tests get an empty key. Nothing is requested from Esri until
+Satellite is chosen. The style is requested once per visit and its raster source supplies the
+tile URLs, tile size, zoom range and imagery attribution; a style that points to any other host is
+not used. NASA GIBS stays underneath at world zoom (to map zoom 7) and Esri fades in between
+zoom 6.5 and 7. Without a key, when the style request fails, or after four failed Esri tiles in one
+visit (a refused key or a used-up free quota), the map uses the EOX and USGS layers for the rest
+of the visit and does not ask Esri again. The required “Powered by Esri” text and the imagery
+providers are shown in the credits strip while Esri imagery is on screen. Esri's attribution page
+could not be read when this was added, so the exact wording, logo and placement rules still need
+checking by the owner. The key should be limited to the site's address in the ArcGIS developer
+dashboard (allowed referrer `https://temper31.github.io`: the page sends only its origin).
 
 The world-zoom layer moved from VIIRS on Suomi NPP to the same instrument on NOAA-20 on 11 November
 2026: GIBS's capabilities listed no Suomi NPP true colour after 2 November 2026, so every tile for
@@ -87,5 +103,5 @@ to verify (D5).
 
 ## Deferred sources
 
-Esri World Imagery, MapTiler, Mapbox, Google Maps, Bing, CARTO, the OpenStreetMap tile
-service, NASA FIRMS and a direct JTWC feed are outside this build.
+MapTiler, Mapbox, Google Maps, Bing, CARTO, the OpenStreetMap tile service, NASA FIRMS, a
+direct JTWC feed and Esri's unauthenticated `arcgisonline.com` services are outside this build.

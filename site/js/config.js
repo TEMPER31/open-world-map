@@ -77,6 +77,25 @@ export const SATELLITE = [
   }
 ];
 
+// Esri World Imagery through the ArcGIS Imagery Standard basemap style (ArcGIS Location Platform,
+// free tier, tile-based usage: no session is started). The primary Satellite imagery above
+// world zoom when the deploy provides a browser API key (ARCGIS_API_KEY Actions secret ->
+// js/secrets.js, never committed). NASA GIBS stays below it at world zoom. Without a key, or when
+// Esri refuses the style or its tiles, the EOX and USGS layers above are used instead.
+export const ESRI = {
+  id: 'sat-esri',
+  style: 'https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery/standard',
+  // origins the style's imagery may come from; a style pointing anywhere else is not used
+  origins: ['https://ibasemaps-api.arcgis.com', 'https://basemapstyles-api.arcgis.com'],
+  // tile size, zoom range and attribution come from the style; these are only used if it has none
+  tileSize: 256, maxzoom: 19,
+  data: 'Esri, Vantor, Earthstar Geographics, and the GIS User Community',
+  // takes over from GIBS between map zoom 6.5 and 7 (GIBS stops at 7), so the two overlap only there
+  layer: { minzoom: 6.5, fadeIn: [6.5, 7] },
+  // tile errors from Esri (refused key, free quota used up) before it is dropped for this visit
+  maxErrors: 4
+};
+
 // Mapillary's terms ask for its logo, linked to its homepage. The logo is shown only from the
 // official file the owner adds at site/img/mapillary-logo.svg: then set this to
 // 'img/mapillary-logo.svg' (scripts/check_site.py fails while the file and this setting disagree).

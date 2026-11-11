@@ -2,7 +2,7 @@
 // docs/design/field-scales.json). This module turns them into legend markup and
 // colour lookup tables for the field renderer.
 
-import { conv, label, units } from './units.js';
+import { conv, label, units, rainTick } from './units.js';
 
 export let FIELDS = {};
 export let ORDER = [];
@@ -15,12 +15,16 @@ export function loadScales(json) {
   return loaded;
 }
 
-// Display units (units.js): data, colour scales and the GPU field stay metric (°C, km/h); only
-// labels and numbers shown to people are converted.
+// Display units (units.js): data, colour scales and the GPU field stay metric (°C, km/h, mm/h);
+// only labels and numbers shown to people are converted.
 export const toTemp = c => conv('temp', c);
 const KIND = { temp: 'temp', wind: 'speed' };
-export const unitOf = k => KIND[k] ? label(KIND[k]) : FIELDS[k].unit;
-const tick = (k, x) => KIND[k] ? Math.round(conv(KIND[k], parseFloat(x))) + String(x).replace(/^[-\d.]+/, '') : x; // '150+' keeps its '+'
+export const unitOf = k => k === 'rain' ? `${label('rain')}/h` : KIND[k] ? label(KIND[k]) : FIELDS[k].unit;
+const tick = (k, x) => {
+  const rest = String(x).replace(/^[-\d.]+/, ''); // '150+' keeps its '+'
+  if (k === 'rain') return units().rain === 'in' ? rainTick(parseFloat(x)) + rest : x;
+  return KIND[k] ? Math.round(conv(KIND[k], parseFloat(x))) + rest : x;
+};
 
 // "light" = the Light basemap: use stopsLight where provided (design README).
 const stopsFor = (f, light) => (light && f.stopsLight) || f.stops;

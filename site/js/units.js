@@ -1,22 +1,37 @@
-// Display units and distances. Data stays metric everywhere (°C, km/h, km); only what people
+// Display units and distances. Data stays metric everywhere (°C, km/h, km, mm); only what people
 // read is converted. No DOM: also imported by scripts/data/unit-tests.mjs.
 
-const MI = 1.609344, NM = 1.852;
+const MI = 1.609344, NM = 1.852, IN = 25.4;
 export const UNITS = {
   temp: { C: ['°C', c => c], F: ['°F', c => c * 9 / 5 + 32] },
   speed: { kmh: ['km/h', k => k], mph: ['mph', k => k / MI], ms: ['m/s', k => k / 3.6], kn: ['kn', k => k / NM] },
-  dist: { km: ['km', k => k], mi: ['mi', k => k / MI] }
+  dist: { km: ['km', k => k], mi: ['mi', k => k / MI] },
+  rain: { mm: ['mm', m => m], in: ['in', m => m / IN] }
 };
 export const PRESETS = { metric: { temp: 'C', speed: 'kmh', dist: 'km' }, us: { temp: 'F', speed: 'mph', dist: 'mi' } };
 // First visit: US units for an en-US browser, metric everywhere else.
 export const defaultPreset = lang => /^en-US$/i.test(lang || '') ? 'us' : 'metric';
 export const presetOf = u => Object.keys(PRESETS).find(p => ['temp', 'speed', 'dist'].every(k => PRESETS[p][k] === u[k])) || 'custom';
 
-let cur = { ...PRESETS.metric };
-export const setUnits = u => { for (const k in UNITS) if (UNITS[k][u[k]]) cur[k] = u[k]; };
+let cur = { ...PRESETS.metric, rain: 'mm' };
+export const setUnits = u => {
+  for (const k in UNITS) if (UNITS[k][u[k]]) cur[k] = u[k];
+  // Rain has no setting of its own: inches go with miles (the US preset), mm with km.
+  if (u.dist && !u.rain) cur.rain = u.dist === 'mi' ? 'in' : 'mm';
+};
 export const units = () => ({ ...cur });
 export const conv = (kind, v) => UNITS[kind][cur[kind]][1](v);
 export const label = kind => UNITS[kind][cur[kind]][0];
+
+// Rain amount or rate given in mm, as a number in the display unit: "2.4" (mm), "0.09" (in).
+// The 0.1 mm "Dry" cut stays with the caller; what is left under 0.01 in reads "<0.01".
+export function rainNum(mm) {
+  if (cur.rain !== 'in') return mm.toFixed(1);
+  const x = mm / IN;
+  return x < 0.01 ? '<0.01' : x.toFixed(2);
+}
+// Legend ticks in inches, short: ".004", ".16", "2.5".
+export const rainTick = mm => { const x = mm / IN; return (x >= 1 ? x.toFixed(1) : x >= 0.01 ? x.toFixed(2) : x.toFixed(3)).replace(/^0\./, '.'); };
 
 // "5,570 km", "3,461 mi"; short distances in m / ft.
 export function fmtDist(km) {

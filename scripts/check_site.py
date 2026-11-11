@@ -53,7 +53,9 @@ SECRET_PATTERNS = [
     (r"(?i)\b(api[_-]?key|access[_-]?token|client[_-]?secret)\b\s*[:=]\s*['\"][^'\"]{8,}['\"]", "hard-coded credential"),
 ]
 
-# Keyed or unclear-terms providers deferred by policy (docs/sources-register.md).
+# Keyed or unclear-terms providers deferred by policy (docs/sources-register.md). Esri imagery is
+# used only through the authenticated ArcGIS Location Platform hosts, never the legacy
+# arcgisonline.com services.
 FORBIDDEN_HOSTS = ["arcgisonline.com", "server.arcgisonline", "maptiler.com", "api.mapbox.com",
                    "tiles.mapbox.com", "googleapis.com/maps", "tile.thunderforest.com", "stadiamaps.com"]
 

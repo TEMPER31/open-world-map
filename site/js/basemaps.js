@@ -1,7 +1,8 @@
 // Basemaps: Dark, Light (one keyless vector source, two palettes) and Satellite
-// (keyless raster stack, added on demand). The UI stays dark for all three.
+// (raster stack, added on demand: Esri World Imagery when configured, else keyless sources).
+// The UI stays dark for all three.
 
-import { OPENFREEMAP, SATELLITE } from './config.js';
+import { OPENFREEMAP, SATELLITE, ESRI } from './config.js';
 
 const NAME = ['coalesce', ['get', 'name_en'], ['get', 'name:latin'], ['get', 'name']];
 const FONT = ['Noto Sans Regular'], FONT_B = ['Noto Sans Bold'];
@@ -109,50 +110,128 @@ export function buildStyle(variant) {
   };
 }
 
-// Switch palettes in place (no style reload) and add/remove the satellite stack.
-export function applyBasemap(map, variant) {
+// Switch palettes in place (no style reload) and add/remove the satellite stack. changed() is
+// called when the stack changes later on its own (Esri ready, or Esri dropped for the fallback).
+export function applyBasemap(map, variant, changed = () => {}) {
   const p = PALETTE[variant];
   for (const [id, prop, key] of BINDINGS) {
     if (!map.getLayer(id)) continue;
     map.setLayoutProperty(id, 'visibility', p[key] ? 'visible' : 'none');
     if (p[key]) map.setPaintProperty(id, prop, p[key]);
   }
+  onStack = changed;
   if (variant === 'satellite') addSatellite(map); else removeSatellite(map);
 }
 
-function addSatellite(map) {
-  for (const s of SATELLITE) {
-    if (map.getSource(s.id)) continue;
-    const src = { type: 'raster', tiles: s.tiles(), tileSize: s.tileSize, maxzoom: s.maxzoom };
-    if (s.bounds) src.bounds = s.bounds;
-    map.addSource(s.id, src);
-    const L = s.layer;
-    map.addLayer({
-      id: s.id, type: 'raster', source: s.id,
-      ...(L.minzoom != null && { minzoom: L.minzoom }),
-      ...(L.maxzoom != null && { maxzoom: L.maxzoom }),
-      paint: { 'raster-opacity': L.fadeIn ? z(L.fadeIn[0], 0, L.fadeIn[1], 1) : 1, 'raster-fade-duration': 250 }
-    }, map.getLayer(SAT_BEFORE) ? SAT_BEFORE : FIELD_BEFORE);
-  }
+// ---- Satellite stack -------------------------------------------------------------------------
+// NASA GIBS at world zoom, then Esri World Imagery when a key is configured and Esri answers;
+// otherwise (or once Esri fails) EOX and USGS as before. Nothing is fetched until Satellite is
+// chosen, and nothing from Esri while Dark or Light is shown.
+const GIBS = SATELLITE[0], FALLBACK = SATELLITE.slice(1);
+let stack = [], onStack = () => {}, gen = 0;
+let esri = null;        // promise of the Esri layer entry, or of null (no key, refused, unusable)
+let esriDown = false;   // Esri failed during this visit: never asked again until the page reloads
+let esriErrors = 0;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => `&#${c.charCodeAt(0)};`);
+const plain = s => String(s || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+
+// The Imagery Standard style, once per visit: its raster source gives the tile URLs (the key is
+// echoed into them), tile size, zoom range and the imagery providers' attribution.
+function loadEsri() {
+  esri ||= (async () => {
+    const key = await import('./secrets.js').then(m => String(m.ARCGIS_API_KEY || '').trim(), () => '');
+    if (!key) return null;
+    const r = await fetch(`${ESRI.style}?token=${encodeURIComponent(key)}`, { signal: AbortSignal.timeout(15000) });
+    if (!r.ok) throw new Error(`style answered HTTP ${r.status}`);
+    const style = await r.json();
+    if (style.error) throw new Error(`style answered error ${style.error.code ?? ''}`.trim());
+    const src = Object.values(style.sources || {}).find(s => s && s.type === 'raster');
+    if (!src) throw new Error('style has no raster source');
+    const urls = src.tiles || (src.url ? [src.url] : []);
+    if (!urls.length || !urls.every(u => ESRI.origins.includes(new URL(u).origin))) throw new Error('style points to an unexpected host');
+    const withKey = u => /[?&]token=/.test(u) ? u : `${u}${u.includes('?') ? '&' : '?'}token=${encodeURIComponent(key)}`;
+    const source = { type: 'raster', ...(src.tiles ? { tiles: src.tiles.map(withKey) } : { url: withKey(src.url) }), tileSize: src.tileSize || ESRI.tileSize,
+      ...(src.minzoom != null && { minzoom: src.minzoom }), maxzoom: src.maxzoom ?? ESRI.maxzoom, ...(src.bounds && { bounds: src.bounds }) };
+    const data = esc(plain(src.attribution) || ESRI.data);
+    return { id: ESRI.id, source, layer: ESRI.layer,
+      credit: `Imagery: <a href="https://www.esri.com">Powered by Esri</a> · ${data}`,
+      fresh: () => `Esri World Imagery (ArcGIS Imagery Standard) · capture dates vary by area · ${source.tileSize} px tiles to zoom ${source.maxzoom}` };
+  })().catch(e => { console.warn(`Esri imagery not used: ${e.message}`); esriDown = true; return null; });
+  return esri;
+}
+
+function addLayer(map, s) {
+  if (map.getSource(s.id)) return;
+  const src = s.source || { type: 'raster', tiles: s.tiles(), tileSize: s.tileSize, maxzoom: s.maxzoom, ...(s.bounds && { bounds: s.bounds }) };
+  map.addSource(s.id, src);
+  const L = s.layer;
+  map.addLayer({
+    id: s.id, type: 'raster', source: s.id,
+    ...(L.minzoom != null && { minzoom: L.minzoom }),
+    ...(L.maxzoom != null && { maxzoom: L.maxzoom }),
+    paint: { 'raster-opacity': L.fadeIn ? z(L.fadeIn[0], 0, L.fadeIn[1], 1) : 1, 'raster-fade-duration': 250 }
+  }, map.getLayer(SAT_BEFORE) ? SAT_BEFORE : FIELD_BEFORE);
+  stack.push(s);
+}
+
+// Layers that stay keep their tiles; new ones go on top (GIBS stays at the bottom).
+function setStack(map, layers) {
+  for (const s of stack) if (!layers.includes(s)) dropLayer(map, s);
+  stack = stack.filter(s => layers.includes(s));
+  for (const s of layers) addLayer(map, s);
+}
+function dropLayer(map, s) {
+  if (map.getLayer(s.id)) map.removeLayer(s.id);
+  if (map.getSource(s.id)) map.removeSource(s.id);
+}
+
+async function addSatellite(map) {
+  if (stack.length) return;
+  const my = ++gen;
+  addLayer(map, GIBS); // world zoom shows at once; the rest follows when the key is known
+  map.on('error', onMapError);
+  const e = esriDown ? null : await loadEsri();
+  if (my !== gen) return; // left Satellite (or came back) meanwhile
+  setStack(map, e && !esriDown ? [GIBS, e] : [GIBS, ...FALLBACK]);
+  onStack();
 }
 
 // Removing the layers and sources drops their tile caches, so imagery is released.
 function removeSatellite(map) {
-  for (const s of SATELLITE) {
-    if (map.getLayer(s.id)) map.removeLayer(s.id);
-    if (map.getSource(s.id)) map.removeSource(s.id);
-  }
+  gen++;
+  map.off('error', onMapError);
+  for (const s of stack) dropLayer(map, s);
+  stack = [];
 }
+
+// Esri tile failures (refused key, free quota used up, blocked host): after a few, drop Esri for
+// the rest of the visit and show the fallback stack instead of asking again. The message leaves
+// out the tile URL, which carries the key. Other errors are logged as MapLibre would, unless the
+// street-photo layer's own listener already does that.
+function onMapError(e) {
+  if (e.sourceId !== ESRI.id) { if (!e.target?.getSource?.('mly')) console.error(e.error || e); return; }
+  console.warn(`Esri imagery tile failed${e.error?.status ? ` (HTTP ${e.error.status})` : ''}`);
+  if (esriDown || ++esriErrors < ESRI.maxErrors) return;
+  esriDown = true;
+  const map = e.target;
+  setStack(map, [GIBS, ...FALLBACK]);
+  onStack();
+}
+
+// For the test scripts: which imagery is in use and why.
+export const satelliteTest = () => ({ stack: stack.map(s => s.id), esriDown, esriErrors });
 
 // Which satellite sources contribute at the current view (for the credits strip).
 export function activeSatellite(map) {
   const zm = map.getZoom(), b = map.getBounds();
-  return SATELLITE.filter(s => {
+  return stack.filter(s => {
     const L = s.layer;
     if (L.minzoom != null && zm < L.minzoom) return false;
     if (L.maxzoom != null && zm >= L.maxzoom) return false;
-    if (s.bounds) {
-      const [w, so, e, n] = s.bounds;
+    const bounds = s.bounds || s.source?.bounds;
+    if (bounds) {
+      const [w, so, e, n] = bounds;
       if (b.getEast() < w || b.getWest() > e || b.getNorth() < so || b.getSouth() > n) return false;
     }
     return true;

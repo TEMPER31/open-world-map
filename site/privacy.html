@@ -47,9 +47,11 @@
     <thead><tr><th scope="col">Service</th><th scope="col">When your browser contacts it</th><th scope="col">What it receives, besides the basics above</th></tr></thead>
     <tbody>
       <tr data-host="gibs.earthdata.nasa.gov"><td><b>NASA GIBS</b><br><code>gibs.earthdata.nasa.gov</code></td><td>Satellite basemap on, at world and regional zoom</td><td>Tile coordinates and the previous day's UTC date.</td></tr>
-      <tr data-host="tiles.maps.eox.at"><td><b>EOX</b><br><code>tiles.maps.eox.at</code></td><td>Satellite basemap on, from regional zoom</td><td>Tile coordinates.</td></tr>
-      <tr data-host="basemap.nationalmap.gov"><td><b>USGS Imagery Only</b><br><code>basemap.nationalmap.gov</code></td><td>Satellite basemap on, at city and street zoom in the contiguous US</td><td>Tile coordinates.</td></tr>
-      <tr data-host="imagery.nationalmap.gov"><td><b>USGS NAIP Plus</b><br><code>imagery.nationalmap.gov</code></td><td>Satellite basemap on, at street zoom in the contiguous US</td><td>The map area of each tile (a bounding box) and image size.</td></tr>
+      <tr data-host="basemapstyles-api.arcgis.com"><td><b>Esri basemap style</b><br><code>basemapstyles-api.arcgis.com</code></td><td>Satellite basemap on, once per visit</td><td>The site's public ArcGIS key.</td></tr>
+      <tr data-host="ibasemaps-api.arcgis.com"><td><b>Esri World Imagery</b><br><code>ibasemaps-api.arcgis.com</code></td><td>Satellite basemap on, above world zoom</td><td>Tile coordinates and the site's public ArcGIS key.</td></tr>
+      <tr data-host="tiles.maps.eox.at"><td><b>EOX</b><br><code>tiles.maps.eox.at</code></td><td>Satellite basemap on, from regional zoom, only if Esri imagery is unavailable</td><td>Tile coordinates.</td></tr>
+      <tr data-host="basemap.nationalmap.gov"><td><b>USGS Imagery Only</b><br><code>basemap.nationalmap.gov</code></td><td>Satellite basemap on, at city and street zoom in the contiguous US, only if Esri imagery is unavailable</td><td>Tile coordinates.</td></tr>
+      <tr data-host="imagery.nationalmap.gov"><td><b>USGS NAIP Plus</b><br><code>imagery.nationalmap.gov</code></td><td>Satellite basemap on, at street zoom in the contiguous US, only if Esri imagery is unavailable</td><td>The map area of each tile (a bounding box) and image size.</td></tr>
       <tr data-host="earthquake.usgs.gov"><td><b>USGS earthquakes</b><br><code>earthquake.usgs.gov</code></td><td>Earthquakes on (also when you click its credit)</td><td>A fixed request for the past week's M2.5+ earthquakes.</td></tr>
       <tr data-host="eonet.gsfc.nasa.gov"><td><b>NASA EONET</b><br><code>eonet.gsfc.nasa.gov</code></td><td>Wildfires &amp; volcanoes or Storms on (also when you click its credit)</td><td>A fixed request for open events of the past 7 days.</td></tr>
       <tr data-host="www.gdacs.org"><td><b>GDACS</b><br><code>www.gdacs.org</code></td><td>Disaster alerts on (also when you click its credit or an alert's report link)</td><td>A date range (the past 7 days) and alert levels.</td></tr>
@@ -68,6 +70,7 @@
       <tr data-host="github.com"><td><b>GitHub</b><br><code>github.com</code></td><td>You open a GitHub, source code or licence link</td><td>The link address and normal request details</td></tr>
       <tr data-host="earthdata.nasa.gov"><td><b>NASA Earthdata</b><br><code>earthdata.nasa.gov</code></td><td>You click the NASA GIBS credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="cloudless.eox.at"><td><b>EOX Sentinel-2 cloudless</b><br><code>cloudless.eox.at</code></td><td>You click the EOX imagery credit</td><td>The link address and normal request details</td></tr>
+      <tr data-host="www.esri.com"><td><b>Esri</b><br><code>www.esri.com</code></td><td>You click the “Powered by Esri” credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="www.usgs.gov"><td><b>USGS</b><br><code>www.usgs.gov</code></td><td>You click a USGS imagery credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="openfreemap.org"><td><b>OpenFreeMap</b><br><code>openfreemap.org</code></td><td>You click the OpenFreeMap credit</td><td>The link address and normal request details</td></tr>
       <tr data-host="openmaptiles.org"><td><b>OpenMapTiles</b><br><code>openmaptiles.org</code></td><td>You click the OpenMapTiles credit</td><td>The link address and normal request details</td></tr>
