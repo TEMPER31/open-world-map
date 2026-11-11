@@ -18,10 +18,6 @@ Rules checked in CI (`scripts/check_site.py`; settings in `docs/repo-security.md
 - No hourly data committed: `site/data/live/` and `site/data/archive/` are deploy output.
 - CDN files are pinned by version with SRI hashes (`site/index.html`).
 
-Owner's rules that no check enforces: no new library, library version or data source without
-the owner's yes (`docs/sources-register.md` lists every source and its licence), and only the
-owner merges into `main`.
-
 ## Map of the code
 
 | Path | What it is |
